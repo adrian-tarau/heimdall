@@ -51,6 +51,7 @@
 
     <modules>
         <module>core</module>
+        <module>protocols</module>
         <module>web</module>
     </modules>
 
@@ -65,6 +66,7 @@
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.app.profiles>local,dev</spring.app.profiles>
+        <spring.boot.version>3.1.0</spring.boot.version>
         <bootstrap.version>1.0.0-SNAPSHOT</bootstrap.version>
     </properties>
 
@@ -87,6 +89,30 @@
             <dependency>
                 <groupId>net.microfalx.resource</groupId>
                 <artifactId>bootstrap-core</artifactId>
+                <version>${bootstrap.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>net.microfalx.resource</groupId>
+                <artifactId>bootstrap-jdbc</artifactId>
+                <version>${bootstrap.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>net.microfalx.resource</groupId>
+                <artifactId>bootstrap-search</artifactId>
+                <version>${bootstrap.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>net.microfalx.resource</groupId>
+                <artifactId>bootstrap-search</artifactId>
+                <version>${bootstrap.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>net.microfalx.resource</groupId>
+                <artifactId>bootstrap-web</artifactId>
                 <version>${bootstrap.version}</version>
             </dependency>
 
@@ -122,7 +148,33 @@
     </dependencies>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.github.spotbugs</groupId>
+                    <artifactId>spotbugs-maven-plugin</artifactId>
+                    <version>4.7.3.3</version>
+                    <configuration>
+                        <failOnError>false</failOnError>
+                        <onlyAnalyze>edu.rutgers.cs.focusmate.-</onlyAnalyze>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
+            <!-- Apache Maven -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.12.1</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>3.4.2</version>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -143,9 +195,44 @@
                 </configuration>
             </plugin>
 
+            <!-- Spring Boot -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring.boot.version}</version>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                    <profiles>${spring.app.profiles}</profiles>
+                </configuration>
+            </plugin>
+
+            <!-- Other -->
+
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+            </plugin>
         </plugins>
 
     </build>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </reporting>
 
     <profiles>
         <profile>
