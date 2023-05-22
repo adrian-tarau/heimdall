@@ -37,7 +37,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>net.microfalx.resource</groupId>
+            <groupId>net.microfalx.bootstrap</groupId>
             <artifactId>bootstrap-core</artifactId>
         </dependency>
     </dependencies>

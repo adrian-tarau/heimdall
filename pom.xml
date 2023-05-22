@@ -87,31 +87,31 @@
             <!-- Runtime -->
 
             <dependency>
-                <groupId>net.microfalx.resource</groupId>
+                <groupId>net.microfalx.bootstrap</groupId>
                 <artifactId>bootstrap-core</artifactId>
                 <version>${bootstrap.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>net.microfalx.resource</groupId>
+                <groupId>net.microfalx.bootstrap</groupId>
                 <artifactId>bootstrap-jdbc</artifactId>
                 <version>${bootstrap.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>net.microfalx.resource</groupId>
+                <groupId>net.microfalx.bootstrap</groupId>
                 <artifactId>bootstrap-search</artifactId>
                 <version>${bootstrap.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>net.microfalx.resource</groupId>
+                <groupId>net.microfalx.bootstrap</groupId>
                 <artifactId>bootstrap-search</artifactId>
                 <version>${bootstrap.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>net.microfalx.resource</groupId>
+                <groupId>net.microfalx.bootstrap</groupId>
                 <artifactId>bootstrap-web</artifactId>
                 <version>${bootstrap.version}</version>
             </dependency>

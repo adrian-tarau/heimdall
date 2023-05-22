@@ -38,12 +38,12 @@
     <dependencies>
 
         <dependency>
-            <groupId>net.microfalx.resource</groupId>
+            <groupId>net.microfalx.bootstrap</groupId>
             <artifactId>bootstrap-jdbc</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>net.microfalx.resource</groupId>
+            <groupId>net.microfalx.bootstrap</groupId>
             <artifactId>bootstrap-search</artifactId>
         </dependency>
     </dependencies>
