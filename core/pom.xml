@@ -36,9 +36,15 @@
     <name>Heimdall - Core</name>
 
     <dependencies>
+
         <dependency>
             <groupId>net.microfalx.bootstrap</groupId>
             <artifactId>bootstrap-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.microfalx.bootstrap</groupId>
+            <artifactId>bootstrap-jdbc</artifactId>
         </dependency>
     </dependencies>
 
