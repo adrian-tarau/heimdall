@@ -51,6 +51,15 @@
             <groupId>com.github.davidmoten</groupId>
             <artifactId>subethasmtp</artifactId>
         </dependency>
+
+        <!-- Testing -->
+
+        <dependency>
+            <groupId>net.microfalx.bootstrap</groupId>
+            <artifactId>bootstrap-test</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>

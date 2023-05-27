@@ -11,6 +11,7 @@ public abstract class AbstractPart implements Part {
 
     private AbstractEvent event;
     private String id = UUID.randomUUID().toString();
+    private String name;
     private Type type;
     private String contentType = "application/octet-stream";
     private String fileName;
@@ -20,6 +21,7 @@ public abstract class AbstractPart implements Part {
         requireNonNull(event);
         requireNonNull(type);
         this.event = event;
+        this.name = event.getName();
         this.type = type;
     }
 
@@ -36,6 +38,16 @@ public abstract class AbstractPart implements Part {
     protected void setId(String id) {
         requireNonNull(event);
         this.id = id;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    protected void setName(String name) {
+        requireNonNull(name);
+        this.name = name;
     }
 
     @Override

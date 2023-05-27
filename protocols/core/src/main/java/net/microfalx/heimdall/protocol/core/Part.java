@@ -15,6 +15,15 @@ public interface Part {
     String getId();
 
     /**
+     * Returns the name of the part.
+     * <p>
+     * The name could be a label, a subject, a file name, etc.
+     *
+     * @return a non-null instance
+     */
+    String getName();
+
+    /**
      * Return the event.
      *
      * @return a non-null instance

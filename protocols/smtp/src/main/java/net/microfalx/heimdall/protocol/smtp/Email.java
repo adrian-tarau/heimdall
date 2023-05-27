@@ -11,4 +11,7 @@ public class Email extends AbstractEvent {
         super(Type.SMTP);
     }
 
+    public Email(String id) {
+        super(Type.SMTP, id);
+    }
 }

@@ -14,7 +14,7 @@ create table smtp_attachments
 (
     id            integer not null auto_increment primary key,
     smtp_id       integer not null,
-    attachment_id integer not null,
+    part_id integer not null,
     constraint fk$smtp_attachments$smtp foreign key (smtp_id) references smtps (id),
-    constraint fk$smtp_attachments$attachment foreign key (attachment_id) references parts (id)
+    constraint fk$smtp_attachments$attachment foreign key (part_id) references parts (id)
 ) ENGINE = InnoDB;

@@ -17,6 +17,9 @@ public class SmtpConfiguration {
     @Value("10000000")
     private int maxMessageSize;
 
+    @Value("5000")
+    private int connectionTimeout;
+
     @Value("20")
     private int maxConnections;
 
@@ -29,6 +32,10 @@ public class SmtpConfiguration {
 
     public boolean isRequireTLS() {
         return requireTLS;
+    }
+
+    public int getConnectionTimeout() {
+        return connectionTimeout;
     }
 
     public int getMaxMessageSize() {

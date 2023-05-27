@@ -8,7 +8,7 @@ import net.microfalx.heimdall.protocol.core.AbstractPart;
  */
 public class Attachment extends AbstractPart {
 
-    public Attachment(AbstractEvent event, Type type) {
-        super(event, type);
+    public Attachment(AbstractEvent event) {
+        super(event, Type.ATTACHMENT);
     }
 }

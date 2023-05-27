@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.protocol.core;
 
+import java.time.ZonedDateTime;
 import java.util.Collection;
 
 /**
@@ -27,6 +28,41 @@ public interface Event {
      * @return a non-null instance
      */
     Type getType();
+
+    /**
+     * Returns the source address of the event.
+     *
+     * @return a non-null instance
+     */
+    Address getSource();
+
+    /**
+     * Returns one or more target addresses for an event.
+     *
+     * @return a non-null instance
+     */
+    Collection<Address> getTargets();
+
+    /**
+     * Returns the time when the event was recevied.
+     *
+     * @return a non-null instance, null if not available
+     */
+    ZonedDateTime getReceivedAt();
+
+    /**
+     * Returns the time when the event was creates.
+     *
+     * @return a non-null instance, null if not available
+     */
+    ZonedDateTime getCreatedAt();
+
+    /**
+     * Returns the time when the event was sent.
+     *
+     * @return a non-null instance, null if not available
+     */
+    ZonedDateTime getSentAt();
 
     /**
      * Returns the body of the event (the message).

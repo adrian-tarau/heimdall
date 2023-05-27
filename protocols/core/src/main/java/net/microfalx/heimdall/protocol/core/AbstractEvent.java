@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.protocol.core;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -11,13 +12,25 @@ public abstract class AbstractEvent implements Event {
 
     private String id = UUID.randomUUID().toString();
     private String name;
+    private Address source;
+    private Collection<Address> targets = new ArrayList<>();
     private final Type type;
     private Body body;
+    private ZonedDateTime receivedAt;
+    private ZonedDateTime createdAt;
+    private ZonedDateTime sentAt;
 
     private Collection<Part> parts = new ArrayList<>();
 
     public AbstractEvent(Type type) {
         requireNonNull(type);
+        this.type = type;
+    }
+
+    public AbstractEvent(Type type, String id) {
+        requireNonNull(type);
+        requireNonNull(id);
+        this.id = id;
         this.type = type;
     }
 
@@ -35,7 +48,7 @@ public abstract class AbstractEvent implements Event {
         return name;
     }
 
-    protected void setName(String name) {
+    public void setName(String name) {
         requireNonNull(name);
         this.name = name;
     }
@@ -43,6 +56,41 @@ public abstract class AbstractEvent implements Event {
     @Override
     public Type getType() {
         return type;
+    }
+
+    @Override
+    public Address getSource() {
+        return source;
+    }
+
+    /**
+     * Changes the source of the event.
+     *
+     * @param source the source
+     */
+    public void setSource(Address source) {
+        requireNonNull(source);
+        this.source = source;
+    }
+
+    /**
+     * Returns one or more target addresses for an event.
+     *
+     * @return a non-null instance
+     */
+    @Override
+    public Collection<Address> getTargets() {
+        return Collections.unmodifiableCollection(targets);
+    }
+
+    /**
+     * Adds a target to this event.
+     *
+     * @param address the address
+     */
+    public void addTarget(Address address) {
+        requireNonNull(address);
+        targets.add(address);
     }
 
     @Override
@@ -56,9 +104,37 @@ public abstract class AbstractEvent implements Event {
     }
 
     @Override
+    public ZonedDateTime getReceivedAt() {
+        return receivedAt;
+    }
+
+    public void setReceivedAt(ZonedDateTime receivedAt) {
+        this.receivedAt = receivedAt;
+    }
+
+    @Override
+    public ZonedDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(ZonedDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @Override
+    public ZonedDateTime getSentAt() {
+        return sentAt;
+    }
+
+    public void setSentAt(ZonedDateTime sentAt) {
+        this.sentAt = sentAt;
+    }
+
+    @Override
     public Collection<Part> getParts() {
         return Collections.unmodifiableCollection(parts);
     }
+
 
     /**
      * Adds a part to the event.

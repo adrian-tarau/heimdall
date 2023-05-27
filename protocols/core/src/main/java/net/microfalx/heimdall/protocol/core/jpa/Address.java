@@ -10,7 +10,7 @@ import java.util.Objects;
 public class Address extends NamedTimestampAware {
 
     @Id
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
