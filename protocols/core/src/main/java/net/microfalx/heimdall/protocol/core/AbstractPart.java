@@ -5,7 +5,7 @@ import net.microfalx.resource.Resource;
 
 import java.util.UUID;
 
-import static net.microfalx.resource.ResourceUtils.requireNonNull;
+import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
 public abstract class AbstractPart implements Part {
 

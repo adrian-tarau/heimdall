@@ -1,6 +1,6 @@
 package net.microfalx.heimdall.protocol.core;
 
-import static net.microfalx.resource.ResourceUtils.requireNonNull;
+import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
 public class DefaultAddress implements Address {
 

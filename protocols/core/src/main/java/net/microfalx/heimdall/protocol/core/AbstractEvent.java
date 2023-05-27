@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
 
-import static net.microfalx.resource.ResourceUtils.requireNonNull;
+import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
 public abstract class AbstractEvent implements Event {
 
