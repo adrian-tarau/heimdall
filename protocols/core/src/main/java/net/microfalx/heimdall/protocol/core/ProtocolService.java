@@ -74,6 +74,18 @@ public abstract class ProtocolService<E extends Event> {
      */
     @Async
     public Future<Document> index(E event) {
+        Document document = Document.create(event.getId(), event.getName());
+        indexService.index(document);
         return CompletableFuture.completedFuture(new Document());
+    }
+
+    /**
+     * Extracts additional attributes from an event.
+     *
+     * @param event    the event
+     * @param document the document
+     */
+    protected void updateDocument(E event, Document document) {
+
     }
 }

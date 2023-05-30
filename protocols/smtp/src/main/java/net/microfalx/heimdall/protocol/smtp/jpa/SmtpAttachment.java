@@ -2,7 +2,6 @@ package net.microfalx.heimdall.protocol.smtp.jpa;
 
 import jakarta.persistence.*;
 import net.microfalx.heimdall.protocol.core.jpa.Part;
-import net.microfalx.heimdall.protocol.smtp.Attachment;
 
 @Entity
 @Table(name = "smtp_attachments")
@@ -17,7 +16,7 @@ public class SmtpAttachment {
     @JoinColumn(name = "smtp_id", nullable = false)
     private Smtp smtp;
 
-    @OneToMany
+    @OneToOne
     @JoinColumn(name = "part_id", nullable = false)
     private Part part;
 

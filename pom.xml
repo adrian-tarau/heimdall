@@ -69,6 +69,7 @@
         <spring.boot.version>3.1.0</spring.boot.version>
         <bootstrap.version>1.0.0-SNAPSHOT</bootstrap.version>
         <subethasmtp.version>6.0.5</subethasmtp.version>
+        <commons-email>1.5</commons-email>
         <mysql.version>8.0.33</mysql.version>
     </properties>
 
@@ -136,6 +137,12 @@
                 <groupId>com.github.davidmoten</groupId>
                 <artifactId>subethasmtp</artifactId>
                 <version>${subethasmtp.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-email</artifactId>
+                <version>${commons-email}</version>
             </dependency>
 
             <!-- Tests -->
