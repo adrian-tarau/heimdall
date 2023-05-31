@@ -6,7 +6,7 @@ import net.microfalx.heimdall.protocol.core.jpa.Part;
 import java.util.Objects;
 
 @Entity
-@Table(name = "smtp_attachments")
+@Table(name = "protocol_smtp_attachments")
 public class SmtpAttachment {
 
     @Id
@@ -15,8 +15,8 @@ public class SmtpAttachment {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "smtp_id", nullable = false)
-    private Smtp smtp;
+    @JoinColumn(name = "smtp_event_id", nullable = false)
+    private SmtpEvent smtpEvent;
 
     @OneToOne
     @JoinColumn(name = "part_id", nullable = false)
@@ -30,12 +30,12 @@ public class SmtpAttachment {
         this.id = id;
     }
 
-    public Smtp getSmtp() {
-        return smtp;
+    public SmtpEvent getSmtp() {
+        return smtpEvent;
     }
 
-    public void setSmtp(Smtp smtp) {
-        this.smtp = smtp;
+    public void setSmtp(SmtpEvent smtpEvent) {
+        this.smtpEvent = smtpEvent;
     }
 
     public Part getPart() {
@@ -63,7 +63,7 @@ public class SmtpAttachment {
     public String toString() {
         return "SmtpAttachment{" +
                 "id=" + id +
-                ", smtp=" + smtp +
+                ", smtp=" + smtpEvent +
                 ", part=" + part +
                 '}';
     }

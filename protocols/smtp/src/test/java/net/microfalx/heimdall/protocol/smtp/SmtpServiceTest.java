@@ -2,7 +2,7 @@ package net.microfalx.heimdall.protocol.smtp;
 
 import net.microfalx.heimdall.protocol.core.Address;
 import net.microfalx.heimdall.protocol.core.Body;
-import net.microfalx.heimdall.protocol.smtp.jpa.Smtp;
+import net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,17 +45,17 @@ class SmtpServiceTest {
 
     @Test
     void handle() throws IOException {
-        ArgumentCaptor<Smtp> smtpCapture = ArgumentCaptor.forClass(Smtp.class);
+        ArgumentCaptor<SmtpEvent> smtpCapture = ArgumentCaptor.forClass(SmtpEvent.class);
         smtpService.handle(email);
         verify(repository).save(smtpCapture.capture());
-        Smtp smtp = smtpCapture.getValue();
-        assertEquals(email.getName(), smtp.getSubject());
-        assertEquals(email.getSentAt().toLocalDateTime(), smtp.getSentAt());
-        assertEquals(email.getReceivedAt().toLocalDateTime(), smtp.getReceivedAt());
-        assertEquals(email.getSource().getName(), smtp.getFrom().getName());
-        assertEquals(email.getSource().getValue(), smtp.getFrom().getValue());
-        assertEquals(email.getTargets().iterator().next().getName(), smtp.getTo().getName());
-        assertEquals(email.getTargets().iterator().next().getValue(), smtp.getTo().getValue());
+        SmtpEvent smtpEvent = smtpCapture.getValue();
+        assertEquals(email.getName(), smtpEvent.getSubject());
+        assertEquals(email.getSentAt().toLocalDateTime(), smtpEvent.getSentAt());
+        assertEquals(email.getReceivedAt().toLocalDateTime(), smtpEvent.getReceivedAt());
+        assertEquals(email.getSource().getName(), smtpEvent.getFrom().getName());
+        assertEquals(email.getSource().getValue(), smtpEvent.getFrom().getValue());
+        assertEquals(email.getTargets().iterator().next().getName(), smtpEvent.getTo().getName());
+        assertEquals(email.getTargets().iterator().next().getValue(), smtpEvent.getTo().getValue());
         assertEquals(email.getBody().getResource().loadAsString(), "Hello");
     }
 }

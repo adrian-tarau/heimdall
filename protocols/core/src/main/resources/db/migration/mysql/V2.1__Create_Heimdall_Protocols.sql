@@ -1,4 +1,4 @@
-create table addresses
+create table protocol_addresses
 (
     id          integer                    not null auto_increment primary key,
     name        varchar(100)               not null,
@@ -9,7 +9,7 @@ create table addresses
     description varchar(1000)
 ) ENGINE = InnoDB;
 
-create table parts
+create table protocol_parts
 (
     id         integer                     not null auto_increment primary key,
     name       varchar(100)                not null,

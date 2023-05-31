@@ -6,7 +6,7 @@ import net.microfalx.bootstrap.jdbc.entity.NamedTimestampAware;
 import java.util.Objects;
 
 @Entity
-@Table(name = "addresses")
+@Table(name = "protocol_addresses")
 public class Address extends NamedTimestampAware {
 
     @Id

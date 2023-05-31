@@ -1,4 +1,4 @@
-create table snmps
+create table protocol_snmp_events
 (
     id               integer       not null auto_increment primary key,
     agent_address_id integer       not null,
@@ -9,6 +9,6 @@ create table snmps
     trap_type        integer,
     sent_at          datetime      not null,
     received_at      datetime      not null,
-    constraint fk$snmps$agent foreign key (agent_address_id) references addresses (id),
-    constraint fk$snmps$bindings foreign key (bindings_id) references parts (id)
+    constraint fk$snmps$agent foreign key (agent_address_id) references protocol_addresses (id),
+    constraint fk$snmps$bindings foreign key (bindings_id) references protocol_parts (id)
 ) ENGINE = InnoDB;

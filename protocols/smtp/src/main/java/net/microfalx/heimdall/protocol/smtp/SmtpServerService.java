@@ -100,8 +100,7 @@ public class SmtpServerService implements BasicMessageListener {
         Body body = new Body(email);
         if (message.getContent() instanceof String) {
             body.setResource(MemoryResource.create((String) message.getContent()));
-        } else if (message.getContent() instanceof Multipart) {
-            Multipart multipart = (Multipart) message.getContent();
+        } else if (message.getContent() instanceof Multipart multipart) {
             for (int i = 0; i < multipart.getCount(); i++) {
                 BodyPart bodyPart = multipart.getBodyPart(i);
                 if (bodyPart.getContent() instanceof String) {
@@ -114,8 +113,7 @@ public class SmtpServerService implements BasicMessageListener {
     }
 
     private Collection<Part> extractParts(Email email, MimeMessage message) throws MessagingException, IOException {
-        if (!(message.getContent() instanceof Multipart)) return Collections.emptyList();
-        Multipart multipart = (Multipart) message.getContent();
+        if (!(message.getContent() instanceof Multipart multipart)) return Collections.emptyList();
         Collection<Part> parts = new ArrayList<>();
         for (int i = 0; i < multipart.getCount(); i++) {
             BodyPart bodyPart = multipart.getBodyPart(i);

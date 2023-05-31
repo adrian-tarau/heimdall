@@ -11,8 +11,8 @@ import java.util.Objects;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
 @Entity
-@Table(name = "smtps")
-public class Smtp extends TimestampAware {
+@Table(name = "protocol_smtp_event")
+public class SmtpEvent extends TimestampAware {
 
     @Id
     @Column(name = "id")
@@ -31,7 +31,7 @@ public class Smtp extends TimestampAware {
     private Address to;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "smtp_id")
+    @JoinColumn(name = "smtp_event_id")
     private Collection<SmtpAttachment> attachments = new ArrayList<>();
 
     public Long getId() {
@@ -86,9 +86,9 @@ public class Smtp extends TimestampAware {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Smtp smtp)) return false;
+        if (!(o instanceof SmtpEvent smtpEvent)) return false;
 
-        return Objects.equals(id, smtp.id);
+        return Objects.equals(id, smtpEvent.id);
     }
 
     @Override

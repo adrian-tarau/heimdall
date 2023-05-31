@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
-@Table(name = "parts")
+@Table(name = "protocol_parts")
 public class Part {
 
     @Id
