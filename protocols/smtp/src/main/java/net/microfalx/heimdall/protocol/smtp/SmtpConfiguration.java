@@ -11,7 +11,7 @@ public class SmtpConfiguration {
     @Value("2525")
     private int port;
 
-    @Value("true")
+    @Value("false")
     private boolean requireTLS;
 
     @Value("10000000")

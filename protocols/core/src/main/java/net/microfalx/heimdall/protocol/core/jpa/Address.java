@@ -15,7 +15,11 @@ public class Address extends NamedTimestampAware {
     private Integer id;
 
     @Column(name = "type", nullable = false)
+    @Enumerated(EnumType.STRING)
     private Type type;
+
+    @Column(name = "name")
+    private String name;
 
     @Column(name = "value")
     private String value;
@@ -34,6 +38,16 @@ public class Address extends NamedTimestampAware {
 
     public void setType(Type type) {
         this.type = type;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getValue() {

@@ -1,5 +1,7 @@
 package net.microfalx.heimdall.protocol.core;
 
+import net.microfalx.lang.StringUtils;
+
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
 public class DefaultAddress implements Address {
@@ -8,9 +10,8 @@ public class DefaultAddress implements Address {
     private String value;
 
     DefaultAddress(String name, String value) {
-        requireNonNull(name);
         requireNonNull(value);
-        this.name = name;
+        this.name = StringUtils.defaultIfEmpty(name, value);
         this.value = value;
     }
 

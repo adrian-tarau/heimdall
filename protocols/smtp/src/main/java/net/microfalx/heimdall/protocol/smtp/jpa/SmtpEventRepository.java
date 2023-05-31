@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @Transactional
-public interface SmtpRepository extends JpaRepository<SmtpEvent, Integer> {
+public interface SmtpEventRepository extends JpaRepository<SmtpEvent, Integer> {
 }

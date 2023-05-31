@@ -22,6 +22,7 @@ public class Part {
 
     @Column(name = "type", nullable = false)
     @NotBlank
+    @Enumerated(EnumType.STRING)
     private net.microfalx.heimdall.protocol.core.Part.Type type;
 
     @Column(name = "resource", nullable = false)

@@ -51,7 +51,7 @@ public class SmtpServerService implements BasicMessageListener {
             MimeMessage message = new MimeMessage(session, new ByteArrayInputStream(data));
             Email email = new Email(message.getMessageID());
             email.setName(message.getSubject());
-            email.setSource(extractAddress(message.getSender()));
+            email.setSource(extractAddress(Arrays.asList(message.getFrom()).iterator().next()));
             Arrays.stream(message.getAllRecipients()).map(this::extractAddress).forEach(email::addTarget);
             email.setSentAt(message.getSentDate().toInstant().atZone(ZoneId.systemDefault()));
             email.setCreatedAt(email.getSentAt());
@@ -78,6 +78,7 @@ public class SmtpServerService implements BasicMessageListener {
                 .maxMessageSize(configuration.getMaxMessageSize())
                 .maxConnections(configuration.getMaxConnections())
                 .maxRecipients(configuration.getMaxRecipients())
+                .requireAuth(false)
                 .messageHandler(this)
                 .build();
         server.start();

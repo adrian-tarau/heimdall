@@ -2,6 +2,8 @@ package net.microfalx.heimdall.protocol.core;
 
 /**
  * Represents an address (email, host, etc).
+ *
+ * The name of an address represents the friendly name and it could be a person
  */
 public interface Address {
 

@@ -3,7 +3,7 @@ package net.microfalx.heimdall.protocol.smtp;
 import net.microfalx.heimdall.protocol.core.Address;
 import net.microfalx.heimdall.protocol.core.Body;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent;
-import net.microfalx.heimdall.protocol.smtp.jpa.SmtpRepository;
+import net.microfalx.heimdall.protocol.smtp.jpa.SmtpEventRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +25,7 @@ class SmtpServiceTest {
     private SmtpConfiguration configuration;
 
     @Mock
-    private SmtpRepository repository;
+    private SmtpEventRepository repository;
 
     @InjectMocks
     private SmtpService smtpService;

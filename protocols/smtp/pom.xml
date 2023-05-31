@@ -36,6 +36,7 @@
     <name>Heimdall - Protocols - SMTP</name>
 
     <dependencies>
+
         <dependency>
             <groupId>net.microfalx.heimdall</groupId>
             <artifactId>heimdall-protocol-core</artifactId>
@@ -50,15 +51,14 @@
         <dependency>
             <groupId>com.github.davidmoten</groupId>
             <artifactId>subethasmtp</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.sun.mail</groupId>
+                    <artifactId>jakarta.mail</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
-        <!-- Testing -->
-
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-email</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
 </project>

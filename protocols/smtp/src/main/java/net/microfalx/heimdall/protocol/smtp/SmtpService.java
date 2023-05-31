@@ -4,7 +4,7 @@ import net.microfalx.heimdall.protocol.core.ProtocolService;
 import net.microfalx.heimdall.protocol.core.jpa.Address;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpAttachment;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent;
-import net.microfalx.heimdall.protocol.smtp.jpa.SmtpRepository;
+import net.microfalx.heimdall.protocol.smtp.jpa.SmtpEventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +19,7 @@ public class SmtpService extends ProtocolService<Email> {
     private SmtpConfiguration configuration;
 
     @Autowired
-    private SmtpRepository repository;
+    private SmtpEventRepository repository;
 
     /**
      * Handle one SMTP message (email).
@@ -50,6 +50,7 @@ public class SmtpService extends ProtocolService<Email> {
         List<SmtpAttachment> attachments = email.getParts().stream().map(part -> {
             net.microfalx.heimdall.protocol.core.jpa.Part jpaPart = new net.microfalx.heimdall.protocol.core.jpa.Part();
             jpaPart.setName(part.getName());
+            jpaPart.setType(part.getType());
             jpaPart.setCreatedAt(part.getEvent().getCreatedAt().toLocalDateTime());
             jpaPart.setResource(part.getResource().toURI().toASCIIString());
             SmtpAttachment attachment = new SmtpAttachment();
