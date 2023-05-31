@@ -15,7 +15,6 @@ public abstract class AbstractEvent implements Event {
     private Address source;
     private Collection<Address> targets = new ArrayList<>();
     private final Type type;
-    private Body body;
     private ZonedDateTime receivedAt;
     private ZonedDateTime createdAt;
     private ZonedDateTime sentAt;
@@ -95,12 +94,25 @@ public abstract class AbstractEvent implements Event {
 
     @Override
     public Body getBody() {
-        return body;
+        for (Part part : parts) {
+            if (part.getType() == Part.Type.BODY) {
+                return (Body) part;
+            }
+        }
+        return null;
     }
 
     public void setBody(Body body) {
         requireNonNull(type);
-        this.body = body;
+        Body prevBody = null;
+        for (Part part : parts) {
+            if (part.getType() == Part.Type.BODY) {
+                prevBody = (Body) part;
+                break;
+            }
+        }
+        if (prevBody != null) this.parts.remove(prevBody);
+        this.addPart(body);
     }
 
     @Override
@@ -135,6 +147,20 @@ public abstract class AbstractEvent implements Event {
         return Collections.unmodifiableCollection(parts);
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", source=" + source +
+                ", targets=" + targets +
+                ", type=" + type +
+                ", receivedAt=" + receivedAt +
+                ", createdAt=" + createdAt +
+                ", sentAt=" + sentAt +
+                ", parts=" + parts +
+                '}';
+    }
 
     /**
      * Adds a part to the event.

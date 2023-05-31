@@ -148,7 +148,7 @@
             <!-- Tests -->
 
             <dependency>
-                <groupId>net.microfalx.resource</groupId>
+                <groupId>net.microfalx.bootstrap</groupId>
                 <artifactId>bootstrap-test</artifactId>
                 <version>${bootstrap.version}</version>
             </dependency>
@@ -161,17 +161,15 @@
         <!-- Runtime -->
 
         <dependency>
-            <groupId>net.microfalx.resource</groupId>
+            <groupId>net.microfalx.bootstrap</groupId>
             <artifactId>bootstrap-core</artifactId>
-            <version>${bootstrap.version}</version>
         </dependency>
 
         <!-- Tests -->
 
         <dependency>
-            <groupId>net.microfalx.resource</groupId>
+            <groupId>net.microfalx.bootstrap</groupId>
             <artifactId>bootstrap-test</artifactId>
-            <version>${bootstrap.version}</version>
         </dependency>
 
     </dependencies>

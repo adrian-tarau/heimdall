@@ -3,6 +3,8 @@ package net.microfalx.heimdall.protocol.smtp.jpa;
 import jakarta.persistence.*;
 import net.microfalx.heimdall.protocol.core.jpa.Part;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "smtp_attachments")
 public class SmtpAttachment {
@@ -42,5 +44,27 @@ public class SmtpAttachment {
 
     public void setPart(Part part) {
         this.part = part;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SmtpAttachment that)) return false;
+
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return "SmtpAttachment{" +
+                "id=" + id +
+                ", smtp=" + smtp +
+                ", part=" + part +
+                '}';
     }
 }

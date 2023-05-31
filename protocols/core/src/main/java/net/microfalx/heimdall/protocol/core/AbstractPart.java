@@ -83,4 +83,8 @@ public abstract class AbstractPart implements Part {
         requireNonNull(resource);
         this.resource = resource;
     }
+
+
+
+
 }
