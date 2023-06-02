@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.protocol.smtp;
 
+import net.microfalx.heimdall.protocol.smtp.jpa.SmtpAttachmentRepository;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpEventRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,7 @@ import org.springframework.mail.MailMessage;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.test.context.jdbc.Sql;
 
 import java.util.Properties;
 
@@ -31,6 +33,8 @@ public class SmtpServiceIntegrationTest {
     private SmtpService smtpService;
     @Autowired
     private SmtpEventRepository smtpEventRepository;
+    @Autowired
+    private SmtpAttachmentRepository smtpAttachmentRepository;
 
     private JavaMailSender sender;
 
@@ -40,11 +44,13 @@ public class SmtpServiceIntegrationTest {
     }
 
     @Test
+    @Sql(statements = {"delete from protocol_smtp_attachments", "delete from protocol_smtp_events"})
     void sendTextEmail() {
         SimpleMailMessage message = (SimpleMailMessage) updateEmail(new SimpleMailMessage());
         message.setText("Body has a text");
         sender.send(message);
         assertEquals(1, smtpEventRepository.count());
+        assertEquals(1, smtpAttachmentRepository.count());
     }
 
     /*

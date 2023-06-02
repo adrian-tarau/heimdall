@@ -12,6 +12,8 @@ import net.microfalx.heimdall.protocol.core.Body;
 import net.microfalx.heimdall.protocol.core.Part;
 import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.StreamResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.subethamail.smtp.MessageContext;
@@ -37,6 +39,8 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 @Service
 public class SmtpServerService implements BasicMessageListener {
 
+    private static final Logger logger = LoggerFactory.getLogger(SmtpServerService.class);
+
     @Autowired
     private SmtpConfiguration configuration;
 
@@ -60,7 +64,9 @@ public class SmtpServerService implements BasicMessageListener {
             email.setBody(extractBody(email, message));
             smtpService.handle(email);
         } catch (Exception e) {
-            throw new RejectException("Failed to process email from '" + from + "' to '" + to + ", root cause: " + e.getMessage());
+            String message = "Failed to process email from '" + from + "' to '" + to + "'";
+            logger.warn(message, e);
+            throw new RejectException(message + ", root cause: " + e.getMessage());
         }
     }
 

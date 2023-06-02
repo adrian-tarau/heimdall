@@ -21,7 +21,6 @@ public class Part {
     private String name;
 
     @Column(name = "type", nullable = false)
-    @NotBlank
     @Enumerated(EnumType.STRING)
     private net.microfalx.heimdall.protocol.core.Part.Type type;
 

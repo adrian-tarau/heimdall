@@ -11,7 +11,7 @@ import java.util.Objects;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
 @Entity
-@Table(name = "protocol_smtp_event")
+@Table(name = "protocol_smtp_events")
 public class SmtpEvent extends TimestampAware {
 
     @Id

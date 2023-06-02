@@ -6,6 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @Transactional
-public interface SmtpEventRepository extends JpaRepository<SmtpEvent, Integer> {
-
+public interface SmtpAttachmentRepository extends JpaRepository<SmtpAttachment, Long> {
 }

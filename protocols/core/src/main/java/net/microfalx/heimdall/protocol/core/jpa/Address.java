@@ -18,9 +18,6 @@ public class Address extends NamedTimestampAware {
     @Enumerated(EnumType.STRING)
     private Type type;
 
-    @Column(name = "name")
-    private String name;
-
     @Column(name = "value")
     private String value;
 
@@ -40,15 +37,6 @@ public class Address extends NamedTimestampAware {
         this.type = type;
     }
 
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public String getValue() {
         return value;
