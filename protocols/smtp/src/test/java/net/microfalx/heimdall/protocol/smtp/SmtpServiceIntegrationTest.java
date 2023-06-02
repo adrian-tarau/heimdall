@@ -1,5 +1,9 @@
 package net.microfalx.heimdall.protocol.smtp;
 
+import jakarta.mail.Message;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpAttachmentRepository;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpEventRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,12 +13,16 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.MailMessage;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.test.context.jdbc.Sql;
 
+import java.io.IOException;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -23,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootConfiguration
 @EnableAutoConfiguration()
 @ComponentScan({"net.microfalx.bootstrap", "net.microfalx.heimdall"})
+@Sql(statements = {"delete from protocol_smtp_attachments", "delete from protocol_smtp_events"})
 public class SmtpServiceIntegrationTest {
 
     @Autowired
@@ -44,7 +53,6 @@ public class SmtpServiceIntegrationTest {
     }
 
     @Test
-    @Sql(statements = {"delete from protocol_smtp_attachments", "delete from protocol_smtp_events"})
     void sendTextEmail() {
         SimpleMailMessage message = (SimpleMailMessage) updateEmail(new SimpleMailMessage());
         message.setText("Body has a text");
@@ -53,29 +61,31 @@ public class SmtpServiceIntegrationTest {
         assertEquals(1, smtpAttachmentRepository.count());
     }
 
-    /*
     @Test
-    void sendHtmlEmail() throws EmailException {
-        HtmlEmail email = (HtmlEmail) updateEmail(new HtmlEmail());
-        email.setTextMsg("Body has a text");
-        email.setHtmlMsg("Body has a HTML");
-        email.send();
-        assertEquals(1, smtpRepository.count());
+    void sendHtmlEmail() throws MessagingException {
+        sender.send(new EmailPreparator(true, false));
+        assertEquals(1, smtpEventRepository.count());
+        assertEquals(1, smtpAttachmentRepository.count());
     }
 
     @Test
-    void sendAttachmentsEmail() throws EmailException {
-        MultiPartEmail email = (MultiPartEmail) updateEmail(new MultiPartEmail());
-        email.setMsg("Body has a text");
-        email.send();
-        assertEquals(1, smtpRepository.count());
+    void sendAttachmentsEmail() throws MessagingException, IOException {
+        sender.send(new EmailPreparator(true, true));
+        assertEquals(1, smtpEventRepository.count());
+        assertEquals(2, smtpAttachmentRepository.count());
     }
 
-     */
 
     private MailMessage updateEmail(MailMessage message) {
         message.setFrom("john@company.com");
         message.setTo("michael@company.com");
+        message.setSubject("Test Mail");
+        return message;
+    }
+
+    private MimeMessage updateEmail(MimeMessage message) throws MessagingException {
+        message.setFrom("john@company.com");
+        message.setRecipient(Message.RecipientType.TO, new InternetAddress("michael@company.com"));
         message.setSubject("Test Mail");
         return message;
     }
@@ -95,5 +105,27 @@ public class SmtpServiceIntegrationTest {
         props.put("mail.debug", "true");
 
         sender = mailSender;
+    }
+
+    private class EmailPreparator implements MimeMessagePreparator {
+
+        private boolean withHtml;
+        private boolean withAttachment;
+
+        public EmailPreparator(boolean withHtml, boolean withAttachment) {
+            this.withHtml = withHtml;
+            this.withAttachment = withAttachment;
+        }
+
+        public void prepare(MimeMessage mimeMessage) throws Exception {
+            updateEmail(mimeMessage);
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+            if (withHtml) {
+                helper.setText("<b>Hey guys</b>,<br><i>Welcome to my new home</i>", true);
+            }
+            if (withAttachment) {
+                helper.addAttachment("application.properties", new ClassPathResource("application.properties"));
+            }
+        }
     }
 }

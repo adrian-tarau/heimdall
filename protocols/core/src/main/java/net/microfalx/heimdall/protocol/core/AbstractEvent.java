@@ -103,7 +103,7 @@ public abstract class AbstractEvent implements Event {
     }
 
     public void setBody(Body body) {
-        requireNonNull(type);
+        requireNonNull(body);
         Body prevBody = null;
         for (Part part : parts) {
             if (part.getType() == Part.Type.BODY) {

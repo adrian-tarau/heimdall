@@ -28,6 +28,7 @@ import java.time.ZonedDateTime;
 import java.util.*;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static net.microfalx.lang.StringUtils.isNotEmpty;
 
 /**
  * A service which acts as an SMTP server.
@@ -60,8 +61,9 @@ public class SmtpServerService implements BasicMessageListener {
             email.setSentAt(message.getSentDate().toInstant().atZone(ZoneId.systemDefault()));
             email.setCreatedAt(email.getSentAt());
             email.setReceivedAt(ZonedDateTime.now());
+            Body body = extractBody(email, message);
+            if (body != null) email.setBody(body);
             extractParts(email, message).forEach(email::addPart);
-            email.setBody(extractBody(email, message));
             smtpService.handle(email);
         } catch (Exception e) {
             String message = "Failed to process email from '" + from + "' to '" + to + "'";
@@ -104,19 +106,13 @@ public class SmtpServerService implements BasicMessageListener {
     }
 
     private Body extractBody(Email email, MimeMessage message) throws MessagingException, IOException {
-        Body body = new Body(email);
         if (message.getContent() instanceof String) {
+            Body body = new Body(email);
             body.setResource(MemoryResource.create((String) message.getContent()));
-        } else if (message.getContent() instanceof Multipart multipart) {
-            for (int i = 0; i < multipart.getCount(); i++) {
-                BodyPart bodyPart = multipart.getBodyPart(i);
-                if (bodyPart.getContent() instanceof String) {
-                    body.setResource(MemoryResource.create((String) message.getContent()));
-                    break;
-                }
-            }
+            return body;
+        } else {
+            return null;
         }
-        return body;
     }
 
     private Collection<Part> extractParts(Email email, MimeMessage message) throws MessagingException, IOException {
@@ -128,10 +124,14 @@ public class SmtpServerService implements BasicMessageListener {
                 Body body = new Body(email);
                 body.setResource(MemoryResource.create((String) message.getContent()));
                 parts.add(body);
-            } else {
+            } else if (isNotEmpty(bodyPart.getFileName())) {
                 Attachment attachment = new Attachment(email);
                 attachment.setResource(StreamResource.create(bodyPart.getInputStream()));
                 parts.add(attachment);
+            } else {
+                Body body = new Body(email);
+                body.setResource(StreamResource.create(bodyPart.getInputStream()));
+                parts.add(body);
             }
         }
         return parts;
