@@ -5,7 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties("bootstrap.resource")
+@ConfigurationProperties("heimdall.smtp")
 public class SmtpConfiguration {
 
     @Value("2525")
