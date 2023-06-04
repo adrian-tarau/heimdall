@@ -4,20 +4,23 @@ import com.cloudbees.syslog.Facility;
 import com.cloudbees.syslog.MessageFormat;
 import com.cloudbees.syslog.Severity;
 import com.cloudbees.syslog.SyslogMessage;
+import com.cloudbees.syslog.sender.AbstractSyslogMessageSender;
 import com.cloudbees.syslog.sender.SyslogMessageSender;
+import com.cloudbees.syslog.sender.TcpSyslogMessageSender;
 import com.cloudbees.syslog.sender.UdpSyslogMessageSender;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static net.microfalx.lang.ThreadUtils.sleepSeconds;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -27,7 +30,7 @@ class SyslogServerServiceTest {
     private static final AtomicInteger IDENTIFIER = new AtomicInteger(1);
 
     @Mock
-    private SyslogService smtpService;
+    private SyslogService syslogService;
 
     @Spy
     private SyslogConfiguration configuration = new SyslogConfiguration();
@@ -39,6 +42,12 @@ class SyslogServerServiceTest {
     void setup() {
         configuration.setTcpPort(2601);
         configuration.setUdpPort(2514);
+        serverService.initialize();
+    }
+
+    @AfterEach
+    void destroy() {
+        serverService.destroy();
     }
 
     @Test
@@ -54,12 +63,25 @@ class SyslogServerServiceTest {
     void sendTcp() throws IOException {
         SyslogMessageSender client = createSyslogSender("tcp");
         sendLogs(client);
+        sleepSeconds(1);
+        assertEvents();
     }
 
     @Test
     void sendUdp() throws IOException {
         SyslogMessageSender client = createSyslogSender("udp");
         sendLogs(client);
+        sleepSeconds(2);
+        assertEvents();
+    }
+
+    private void assertEvents() {
+        ArgumentCaptor<net.microfalx.heimdall.protocol.syslog.SyslogMessage> syslogCapture = ArgumentCaptor.forClass(net.microfalx.heimdall.protocol.syslog.SyslogMessage.class);
+        // TODO change to hande method, to capture the message
+        Mockito.verify(syslogService, Mockito.times(5)).index(syslogCapture.capture());
+        Iterator<net.microfalx.heimdall.protocol.syslog.SyslogMessage> iterator = syslogCapture.getAllValues().iterator();
+        net.microfalx.heimdall.protocol.syslog.SyslogMessage message = iterator.next();
+        assertEquals("", message.getName());
     }
 
     private void sendLogs(SyslogMessageSender client) throws IOException {
@@ -82,20 +104,24 @@ class SyslogServerServiceTest {
         syslogMessage.setSeverity(severity);
         syslogMessage.setHostname("localhost");
         syslogMessage.setProcId("test");
-        syslogMessage.setMsgId(Integer.toString(IDENTIFIER.getAndIncrement()));
+        //syslogMessage.setMsgId(Integer.toString(IDENTIFIER.getAndIncrement()));
         syslogMessage.withMsg(message);
         syslogMessage.setTimestamp(new Date());
         return syslogMessage;
     }
 
     private SyslogMessageSender createSyslogSender(String protocol) {
-        UdpSyslogMessageSender messageSender = new UdpSyslogMessageSender();
-        messageSender.setSyslogServerHostname("localhost");
+        AbstractSyslogMessageSender messageSender;
         if ("udp".equalsIgnoreCase(protocol)) {
-            messageSender.setSyslogServerPort(configuration.getUdpPort());
+            UdpSyslogMessageSender udpMessageSender = new UdpSyslogMessageSender();
+            udpMessageSender.setSyslogServerPort(configuration.getUdpPort());
+            messageSender = udpMessageSender;
         } else {
-            messageSender.setSyslogServerPort(configuration.getTcpPort());
+            TcpSyslogMessageSender tcpMessageSender = new TcpSyslogMessageSender();
+            tcpMessageSender.setSyslogServerPort(configuration.getTcpPort());
+            messageSender = tcpMessageSender;
         }
+        messageSender.setSyslogServerHostname("localhost");
         messageSender.setDefaultMessageHostname("localhost");
         messageSender.setMessageFormat(MessageFormat.RFC_5424);
         return messageSender;

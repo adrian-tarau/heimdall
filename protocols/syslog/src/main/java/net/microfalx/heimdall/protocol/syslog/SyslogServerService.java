@@ -1,6 +1,7 @@
 package net.microfalx.heimdall.protocol.syslog;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import org.graylog2.syslog4j.server.SyslogServerEventIF;
 import org.graylog2.syslog4j.server.SyslogServerIF;
 import org.graylog2.syslog4j.server.SyslogServerSessionEventHandlerIF;
@@ -42,10 +43,17 @@ public class SyslogServerService {
         initializeUdpServer();
     }
 
+    @PreDestroy
+    protected void destroy() {
+        if (tcpServer != null) tcpServer.shutdown();
+        if (udpServer != null) udpServer.shutdown();
+    }
+
     private void initializeTcpServer() {
         TCPNetSyslogServerConfig config = new TCPNetSyslogServerConfig(configuration.getTcpPort());
         config.addEventHandler(listener);
         config.setUseDaemonThread(true);
+        config.setUseStructuredData(true);
         tcpServer = new TCPNetSyslogServer();
         tcpServer.initialize("TCP", config);
         executor.execute(tcpServer);
@@ -55,6 +63,7 @@ public class SyslogServerService {
         UDPNetSyslogServerConfig config = new UDPNetSyslogServerConfig(configuration.getUdpPort());
         config.addEventHandler(listener);
         config.setUseDaemonThread(true);
+        config.setUseStructuredData(true);
         udpServer = new UDPNetSyslogServer();
         udpServer.initialize("UDP", config);
         executor.execute(udpServer);
@@ -77,7 +86,7 @@ public class SyslogServerService {
 
         @Override
         public Object sessionOpened(SyslogServerIF syslogServer, SocketAddress socketAddress) {
-            return null;
+            return new SyslogSession(socketAddress);
         }
 
         @Override
