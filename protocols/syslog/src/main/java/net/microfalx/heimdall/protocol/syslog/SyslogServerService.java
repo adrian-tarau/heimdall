@@ -1,7 +1,11 @@
 package net.microfalx.heimdall.protocol.syslog;
 
+import com.cloudbees.syslog.Facility;
+import com.cloudbees.syslog.Severity;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import net.microfalx.heimdall.protocol.core.Address;
+import net.microfalx.heimdall.protocol.core.Body;
 import org.graylog2.syslog4j.server.SyslogServerEventIF;
 import org.graylog2.syslog4j.server.SyslogServerIF;
 import org.graylog2.syslog4j.server.SyslogServerSessionEventHandlerIF;
@@ -13,7 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 /**
  * Service for all Syslog servers, TPC and UDP protocols.
@@ -47,6 +54,7 @@ public class SyslogServerService {
     protected void destroy() {
         if (tcpServer != null) tcpServer.shutdown();
         if (udpServer != null) udpServer.shutdown();
+        if (executor != null) executor.destroy();
     }
 
     private void initializeTcpServer() {
@@ -70,7 +78,19 @@ public class SyslogServerService {
     }
 
     private void event(SyslogServerIF syslogServer, SocketAddress socketAddress, SyslogServerEventIF event) {
-        // TODO handle the syslog even here
+        SyslogMessage message = new SyslogMessage();
+        message.setFacility(Facility.fromNumericalCode(event.getFacility()));
+        message.setSeverity(Severity.fromNumericalCode(event.getLevel()));
+        InetSocketAddress inetSocketAddress = (InetSocketAddress) socketAddress;
+        message.setSource(Address.create(inetSocketAddress.getAddress().getHostName(),
+                inetSocketAddress.getAddress().getHostAddress()));
+        message.addTarget(Address.create(event.getHost()));
+        message.setName("Syslog");
+        message.setBody(Body.create(message, message.getName()));
+        message.setCreatedAt(event.getDate().toInstant().atZone(ZoneId.systemDefault()));
+        message.setSentAt(message.getCreatedAt());
+        message.setReceivedAt(ZonedDateTime.now());
+        syslogService.handle(message);
     }
 
     private void initThreadPool() {
@@ -79,6 +99,8 @@ public class SyslogServerService {
         executor.setMaxPoolSize(10);
         executor.setQueueCapacity(500);
         executor.setThreadNamePrefix("heimdall-syslog");
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(5);
         executor.initialize();
     }
 

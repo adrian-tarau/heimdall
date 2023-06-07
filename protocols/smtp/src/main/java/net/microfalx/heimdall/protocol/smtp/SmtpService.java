@@ -1,8 +1,6 @@
 package net.microfalx.heimdall.protocol.smtp;
 
 import net.microfalx.heimdall.protocol.core.ProtocolService;
-import net.microfalx.heimdall.protocol.core.jpa.Address;
-import net.microfalx.heimdall.protocol.core.jpa.AddressRepository;
 import net.microfalx.heimdall.protocol.core.jpa.PartRepository;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpAttachment;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpAttachmentRepository;
@@ -22,8 +20,7 @@ public class SmtpService extends ProtocolService<Email> {
     private SmtpConfiguration configuration;
     @Autowired
     private SmtpEventRepository repository;
-    @Autowired
-    private AddressRepository addressRepository;
+
     @Autowired
     private SmtpAttachmentRepository attachmentRepository;
     @Autowired
@@ -73,20 +70,8 @@ public class SmtpService extends ProtocolService<Email> {
     }
 
     private void updateAddresses(Email email, SmtpEvent smtpEvent) {
-        smtpEvent.setFrom(getJpaAddress(email.getSource()));
-        smtpEvent.setTo(getJpaAddress(email.getTargets().iterator().next()));
-    }
-
-    private Address getJpaAddress(net.microfalx.heimdall.protocol.core.Address address) {
-        Address addressJpa = addressRepository.findByValue(address.getValue());
-        if (addressJpa == null) {
-            Address fromAddress = new Address();
-            fromAddress.setType(Address.Type.EMAIL);
-            fromAddress.setName(address.getName());
-            fromAddress.setValue(address.getValue());
-            addressRepository.save(fromAddress);
-        }
-        return addressJpa;
+        smtpEvent.setFrom(lookupAddress(email.getSource()));
+        smtpEvent.setTo(lookupAddress(email.getTargets().iterator().next()));
     }
 
     /**

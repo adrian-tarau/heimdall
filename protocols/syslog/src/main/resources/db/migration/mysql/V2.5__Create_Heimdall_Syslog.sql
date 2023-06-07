@@ -4,7 +4,7 @@ create table protocol_syslog_events
     address_id  integer     not null,
     message_id  integer     not null,
     severity    tinyint     not null,
-    facility    varchar(50) not null,
+    facility    tinyint     not null,
     sent_at     datetime    not null,
     received_at datetime    not null,
     constraint fk$syslogs$address foreign key (address_id) references protocol_addresses (id),
