@@ -63,6 +63,8 @@ public class GelfServerService implements ProtocolServerHandler {
     @Override
     public void handle(ProtocolServer server, InetAddress address, InputStream inputStream, OutputStream outputStream) throws IOException {
         System.out.println("Address:" + address);
+        JsonNode jsonNode = readJson(inputStream);
+        System.out.println("JSON:" + jsonNode.toPrettyString());
         // in here look at GELF docs: TCP has the JSON in input stream, UDP will have a fragment of the message
         // the server tells you which protocol was used to receive the message
     }
