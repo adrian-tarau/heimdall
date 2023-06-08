@@ -80,7 +80,7 @@ public class SyslogServerService {
     private void event(SyslogServerIF syslogServer, SocketAddress socketAddress, SyslogServerEventIF event) {
         SyslogMessage message = new SyslogMessage();
         message.setFacility(Facility.fromNumericalCode(event.getFacility()));
-        message.setSeverity(Severity.fromNumericalCode(event.getLevel()));
+        message.setSyslogSeverity(Severity.fromNumericalCode(event.getLevel()));
         InetSocketAddress inetSocketAddress = (InetSocketAddress) socketAddress;
         message.setSource(Address.create(inetSocketAddress.getAddress().getHostName(),
                 inetSocketAddress.getAddress().getHostAddress()));

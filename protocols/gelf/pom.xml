@@ -41,6 +41,11 @@
             <artifactId>heimdall-protocol-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>biz.paluch.logging</groupId>
+            <artifactId>logstash-gelf</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

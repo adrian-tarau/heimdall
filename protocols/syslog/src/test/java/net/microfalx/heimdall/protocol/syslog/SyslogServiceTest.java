@@ -50,7 +50,7 @@ class SyslogServiceTest {
                 InetAddress.getLocalHost().getHostAddress());
         message.setSource(address);
         message.setBody(Body.create(message, "Body has a text"));
-        message.setSeverity(Severity.ALERT);
+        message.setSyslogSeverity(Severity.ALERT);
         message.setReceivedAt(ZonedDateTime.now());
         message.setCreatedAt(ZonedDateTime.now());
         message.setName("");
@@ -68,7 +68,7 @@ class SyslogServiceTest {
         assertEquals(message.getSource().getName(), syslogEvent.getAddress().getName());
         assertEquals(message.getSource().getValue(), syslogEvent.getAddress().getValue());
         assertEquals(message.getFacility().numericalCode(), syslogEvent.getFacility());
-        assertEquals(message.getSeverity().numericalCode(), syslogEvent.getSeverity());
+        assertEquals(message.getSyslogSeverity().numericalCode(), syslogEvent.getSeverity());
         assertEquals(message.getSentAt().toLocalDateTime(), syslogEvent.getSentAt());
         assertEquals(message.getReceivedAt().toLocalDateTime(), syslogEvent.getReceivedAt());
         assertEquals(message.getBody().getResource().loadAsString(), "Body has a text");

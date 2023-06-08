@@ -15,6 +15,7 @@ public abstract class AbstractEvent implements Event {
     private Address source;
     private Collection<Address> targets = new ArrayList<>();
     private final Type type;
+    private Severity severity = Severity.INFO;
     private ZonedDateTime receivedAt;
     private ZonedDateTime createdAt;
     private ZonedDateTime sentAt;
@@ -43,7 +44,7 @@ public abstract class AbstractEvent implements Event {
     }
 
     @Override
-    public String getName() {
+    public final String getName() {
         return name;
     }
 
@@ -53,8 +54,18 @@ public abstract class AbstractEvent implements Event {
     }
 
     @Override
-    public Type getType() {
+    public final Type getType() {
         return type;
+    }
+
+    @Override
+    public Severity getSeverity() {
+        return severity;
+    }
+
+    protected void setSeverity(Severity severity) {
+        requireNonNull(severity);
+        this.severity = severity;
     }
 
     @Override

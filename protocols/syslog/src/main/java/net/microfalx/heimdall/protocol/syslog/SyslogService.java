@@ -22,10 +22,15 @@ public class SyslogService extends ProtocolService<SyslogMessage> {
     @Autowired
     private PartRepository partRepository;
 
+    /**
+     * Handles a Syslog message received by the server.
+     *
+     * @param message the message
+     */
     public void handle(SyslogMessage message) {
         SyslogEvent syslogEvent = new SyslogEvent();
         syslogEvent.setFacility(message.getFacility().numericalCode());
-        syslogEvent.setSeverity(message.getSeverity().numericalCode());
+        syslogEvent.setSeverity(message.getSyslogSeverity().numericalCode());
         syslogEvent.setAddress(lookupAddress(message.getSource()));
         syslogEvent.setReceivedAt(message.getReceivedAt().toLocalDateTime());
         syslogEvent.setSentAt(message.getSentAt().toLocalDateTime());

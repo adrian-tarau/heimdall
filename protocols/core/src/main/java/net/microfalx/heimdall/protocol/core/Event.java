@@ -30,6 +30,12 @@ public interface Event {
     Type getType();
 
     /**
+     * Returns the severity of the event.
+     * @return a non-null instance
+     */
+    Severity getSeverity();
+
+    /**
      * Returns the source address of the event.
      *
      * @return a non-null instance

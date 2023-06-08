@@ -17,7 +17,6 @@ import java.util.concurrent.Future;
  * Base class for all protocol services.
  */
 public abstract class ProtocolService<E extends Event> {
-
     @Autowired
     private ResourceService resourceService;
 
