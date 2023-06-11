@@ -1,5 +1,7 @@
 package net.microfalx.heimdall.protocol.core;
 
+import java.io.IOException;
+
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
 
@@ -33,10 +35,21 @@ public abstract class ProtocolClient<E extends Event> {
         return this;
     }
 
+    /**
+     * Returns the transport protocol used by this client.
+     *
+     * @return a non-null instance
+     */
     public Transport getTransport() {
         return transport;
     }
 
+    /**
+     * Changes the transport protocol used by this client.
+     *
+     * @param transport the transport
+     * @return self
+     */
     public ProtocolClient<E> setTransport(Transport transport) {
         requireNonNull(hostName);
         this.transport = transport;
@@ -49,7 +62,7 @@ public abstract class ProtocolClient<E extends Event> {
      *
      * @param event the event
      */
-    public void send(E event) {
+    public void send(E event) throws IOException {
         requireNonNull(event);
         doSend(event);
     }
@@ -67,8 +80,9 @@ public abstract class ProtocolClient<E extends Event> {
      * Subclasses will implement this method to send an event.
      *
      * @param event the event
+     * @throws IOException if an I/O error occurs
      */
-    protected abstract void doSend(E event);
+    protected abstract void doSend(E event) throws IOException;
 
     /**
      * Invoked when the configuration of the client changed.

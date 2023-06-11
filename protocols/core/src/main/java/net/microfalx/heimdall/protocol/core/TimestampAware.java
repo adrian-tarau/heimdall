@@ -18,7 +18,7 @@ public abstract class TimestampAware {
     @NotNull
     private LocalDateTime sentAt;
 
-    @Column(name = "received_at")
+    @Column(name = "received_at", nullable = false)
     private LocalDateTime receivedAt;
 
     public LocalDateTime getSentAt() {

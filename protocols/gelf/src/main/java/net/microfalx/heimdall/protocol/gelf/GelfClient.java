@@ -8,6 +8,8 @@ import net.microfalx.heimdall.protocol.core.ProtocolClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.net.InetAddress;
 import java.util.Collections;
 import java.util.Set;
 
@@ -41,7 +43,7 @@ public class GelfClient extends ProtocolClient<GelfMessage> implements ErrorRepo
     }
 
     @Override
-    protected void doSend(GelfMessage event) {
+    protected void doSend(GelfMessage event) throws IOException {
         GelfSender sender = createGelfSender();
         biz.paluch.logging.gelf.intern.GelfMessage gelfMessage = assembler.createGelfMessage(new LogEventImpl());
         sender.sendMessage(gelfMessage);
@@ -58,19 +60,20 @@ public class GelfClient extends ProtocolClient<GelfMessage> implements ErrorRepo
         assembler.addField(new StaticMessageField("Server", "Self"));
     }
 
-    private void createMessageAssembler() {
+    private void createMessageAssembler() throws IOException {
         if (assembler != null) return;
         assembler = new MdcGelfMessageAssembler();
         addAdditionalFields(assembler);
         assembler.setHost(getTransport().name().toLowerCase() + ":" + getHostName());
         assembler.setPort(getPort());
-        assembler.setFacility("heimdall-gelf");
+        assembler.setFacility("LOCAL1");
         assembler.setFilterStackTrace(true);
         assembler.setIncludeLocation(true);
+        assembler.setOriginHost(InetAddress.getLocalHost().getHostAddress());
         assembler.setTimestampPattern("yyyy-MM-dd HH:mm:ss,SSS");
     }
 
-    protected GelfSender createGelfSender() {
+    protected GelfSender createGelfSender() throws IOException {
         createMessageAssembler();
         return GelfSenderFactory.createSender(assembler, new ErrorReporterImpl(), Collections.<String, Object>emptyMap());
     }

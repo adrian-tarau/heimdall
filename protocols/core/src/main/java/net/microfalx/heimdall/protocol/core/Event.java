@@ -2,6 +2,7 @@ package net.microfalx.heimdall.protocol.core;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Holds an event.
@@ -31,6 +32,7 @@ public interface Event {
 
     /**
      * Returns the severity of the event.
+     *
      * @return a non-null instance
      */
     Severity getSeverity();
@@ -85,6 +87,13 @@ public interface Event {
      * @return a non-null instance
      */
     Collection<Part> getParts();
+
+    /**
+     * Returns a collection of attributes
+     *
+     * @return a non-null instance
+     */
+    Map<String, Object> getAttributes();
 
     /**
      * En enum for the type of event.

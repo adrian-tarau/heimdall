@@ -1,6 +1,5 @@
 package net.microfalx.heimdall.protocol.gelf;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -8,11 +7,9 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("heimdall.gelf")
 public class GelfConfiguration {
 
-    @Value("12201")
-    private int udpPort;
+    private int udpPort = 12201;
 
-    @Value("12200")
-    private int tcpPort;
+    private int tcpPort = 12200;
 
     public int getUdpPort() {
         return udpPort;

@@ -2,7 +2,6 @@ package net.microfalx.heimdall.protocol.syslog;
 
 import net.microfalx.heimdall.protocol.core.Body;
 import net.microfalx.heimdall.protocol.core.ProtocolService;
-import net.microfalx.heimdall.protocol.core.jpa.AddressRepository;
 import net.microfalx.heimdall.protocol.core.jpa.Part;
 import net.microfalx.heimdall.protocol.core.jpa.PartRepository;
 import net.microfalx.heimdall.protocol.jpa.SyslogEvent;
@@ -15,9 +14,6 @@ public class SyslogService extends ProtocolService<SyslogMessage> {
 
     @Autowired
     private SyslogEventRepository syslogEventRepository;
-
-    @Autowired
-    private AddressRepository addressRepository;
 
     @Autowired
     private PartRepository partRepository;

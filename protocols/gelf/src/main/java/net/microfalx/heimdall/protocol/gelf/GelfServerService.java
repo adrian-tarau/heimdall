@@ -1,11 +1,12 @@
 package net.microfalx.heimdall.protocol.gelf;
 
+import com.cloudbees.syslog.Facility;
+import com.cloudbees.syslog.Severity;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import net.microfalx.heimdall.protocol.core.*;
-import net.microfalx.heimdall.protocol.core.jpa.AddressRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 @Service
 public class GelfServerService implements ProtocolServerHandler {
@@ -27,8 +31,6 @@ public class GelfServerService implements ProtocolServerHandler {
     private ThreadPoolTaskExecutor executor;
     private TcpProtocolServer tcpServer;
     private UdpProtocolServer udpServer;
-    @Autowired
-    private AddressRepository addressRepository;
 
     @PostConstruct
     protected void initialize() {
@@ -63,12 +65,52 @@ public class GelfServerService implements ProtocolServerHandler {
     @Override
     public void handle(ProtocolServer server, InetAddress address, InputStream inputStream, OutputStream outputStream) throws IOException {
         System.out.println("Address:" + address);
+        // TODO for UDP, the event will come in chunks, you have to accumulate chunks and reassmable the event when las one comes
         JsonNode jsonNode = readJson(inputStream);
+        GelfMessage message = new GelfMessage();
         System.out.println("JSON:" + jsonNode.toPrettyString());
         // in here look at GELF docs: TCP has the JSON in input stream, UDP will have a fragment of the message
         // the server tells you which protocol was used to receive the message
+        message.setFacility(Facility.fromLabel(getRequiredField(jsonNode, "facility")));
+        message.setName("Gelf Message");
+        message.setReceivedAt(ZonedDateTime.now());
+        message.setSource(Address.create(address.getHostName(), address.getHostAddress()));
+        message.setBody(Body.create(message, getRequiredField(jsonNode, "short_message")));
+        message.setBody(Body.create(message, getRequiredField(jsonNode, "full_message")));
+        message.setCreatedAt(createTimeStamp(jsonNode));
+        message.setSentAt(createTimeStamp(jsonNode));
+        message.setGelfMessageSeverity(Severity.fromLabel(getRequiredField(jsonNode, "level")));
+        addAllJsonFields(message, jsonNode);
     }
 
+    private void addAllJsonFields(GelfMessage gelfMessage, JsonNode jsonNode) {
+        // TODO add ann nodes which start with "_" as attributes (remove "_")
+    }
+
+    private ZonedDateTime createTimeStamp(JsonNode jsonNode) {
+        long seconds = getRequiredLongField(jsonNode, "timestamp");
+        Instant instant = Instant.ofEpochSecond(seconds);
+        return ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
+    }
+
+
+    private String getRequiredField(JsonNode jsonNode, String field) {
+        JsonNode fieldNode = jsonNode.findValue(field);
+        if (fieldNode == null) throw new ProtocolException("A required field (" + field + ") does not exist");
+        return fieldNode.asText();
+    }
+
+    private long getRequiredLongField(JsonNode jsonNode, String field) {
+        JsonNode fieldNode = jsonNode.findValue(field);
+        if (fieldNode == null) throw new ProtocolException("A required field (" + field + ") does not exist");
+        return fieldNode.asLong();
+    }
+
+    private long getRequiredIntField(JsonNode jsonNode, String field) {
+        JsonNode fieldNode = jsonNode.findValue(field);
+        if (fieldNode == null) throw new ProtocolException("A required field (" + field + ") does not exist");
+        return fieldNode.asInt();
+    }
 
     private void initThreadPool() {
         executor = new ThreadPoolTaskExecutor();

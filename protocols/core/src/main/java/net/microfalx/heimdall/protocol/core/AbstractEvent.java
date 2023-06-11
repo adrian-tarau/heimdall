@@ -1,10 +1,7 @@
 package net.microfalx.heimdall.protocol.core;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.UUID;
+import java.util.*;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
@@ -19,6 +16,7 @@ public abstract class AbstractEvent implements Event {
     private ZonedDateTime receivedAt;
     private ZonedDateTime createdAt;
     private ZonedDateTime sentAt;
+    private Map<String,Object> attributes;
 
     private Collection<Part> parts = new ArrayList<>();
 
@@ -181,5 +179,21 @@ public abstract class AbstractEvent implements Event {
     public void addPart(Part part) {
         requireNonNull(part);
         parts.add(part);
+    }
+
+    /**
+     * Returns a collection of attributes
+     *
+     * @return a non-null instance
+     */
+    @Override
+    public Map<String, Object> getAttributes() {
+        return Collections.unmodifiableMap(attributes);
+    }
+
+    public void addAttribute(String key,Object value){
+        requireNonNull(key);
+        requireNonNull(value);
+        attributes.put(key, value);
     }
 }

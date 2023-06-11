@@ -6,7 +6,7 @@ create table protocol_gelf_events
     long_attachment_id  integer,
     version             varchar(50)   not null,
     level               tinyint       not null,
-    facility            varchar(50)   not null,
+    facility            tinyint     not null,
     fields              varchar(4000) not null,
     sent_at             datetime      not null,
     received_at         datetime      not null,

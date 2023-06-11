@@ -23,6 +23,11 @@ public abstract class ProtocolServer {
     private ProtocolServerHandler handler;
     private SchedulingTaskExecutor executor;
 
+    /**
+     * Returns the transport protocol used by this server.
+     *
+     * @return a non-null instance
+     */
     public Transport getTransport() {
         return transport;
     }
