@@ -41,27 +41,30 @@ public class GelfService extends ProtocolService<GelfMessage> {
         gelfEvent.setReceivedAt(message.getReceivedAt().toLocalDateTime());
         gelfEvent.setSentAt(message.getSentAt().toLocalDateTime());
         gelfEvent.setFields(encodeFields(message));
-        Part shortMessage = new Part();
-        List<net.microfalx.heimdall.protocol.core.Part> parts = message.getParts().stream().toList();
-        addMessage(parts, 0, shortMessage);
-        addMessage(parts, 1, shortMessage);
+        Part shortAttachmentId = addMessage(message, 0);
+        gelfEvent.setShort_attachment_id(shortAttachmentId);
+        Part longAttachmentId = addMessage(message, 1);
+        gelfEvent.setLong_attachment_id(longAttachmentId);
         gelfEventRepository.save(gelfEvent);
+        partRepository.save(shortAttachmentId);
+        partRepository.save(longAttachmentId);
     }
 
-    private void addMessage(List<net.microfalx.heimdall.protocol.core.Part> parts, int index, Part message) throws IOException {
-        net.microfalx.heimdall.protocol.core.Part part = parts.get(index);
-        message.setType(part.getType());
-        message.setResource(part.getResource().loadAsString());
-        message.setName(part.getName());
-        message.setCreatedAt(part.getEvent().getCreatedAt().toLocalDateTime());
-        partRepository.save(message);
+    private Part addMessage(GelfMessage message, int position) throws IOException {
+        List<net.microfalx.heimdall.protocol.core.Part> parts = message.getParts().stream().toList();
+        Part part = new Part();
+        part.setType(parts.get(position).getType());
+        part.setName(parts.get(position).getName());
+        part.setResource(parts.get(position).getResource().loadAsString());
+        part.setCreatedAt(parts.get(position).getEvent().getCreatedAt().toLocalDateTime());
+        return part;
     }
 
     private String encodeFields(GelfMessage gelfMessage) {
         ObjectMapper objectMapper = new ObjectMapper();
         StringWriter writer = new StringWriter();
         try {
-            objectMapper.writeValue(writer, gelfMessage.getAttributes().keySet());
+            objectMapper.writeValue(writer, gelfMessage.getAttributes());
         } catch (IOException e) {
             // It will never happen
         }

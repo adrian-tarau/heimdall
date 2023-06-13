@@ -103,11 +103,11 @@ public abstract class ProtocolService<E extends Event> {
     protected final net.microfalx.heimdall.protocol.core.jpa.Address lookupAddress(Address address) {
         net.microfalx.heimdall.protocol.core.jpa.Address addressJpa = addressRepository.findByValue(address.getValue());
         if (addressJpa == null) {
-            net.microfalx.heimdall.protocol.core.jpa.Address fromAddress = new net.microfalx.heimdall.protocol.core.jpa.Address();
-            fromAddress.setType(net.microfalx.heimdall.protocol.core.jpa.Address.Type.EMAIL);
-            fromAddress.setName(address.getName());
-            fromAddress.setValue(address.getValue());
-            addressRepository.save(fromAddress);
+            addressJpa = new net.microfalx.heimdall.protocol.core.jpa.Address();
+            addressJpa.setType(net.microfalx.heimdall.protocol.core.jpa.Address.Type.EMAIL);
+            addressJpa.setName(address.getName());
+            addressJpa.setValue(address.getValue());
+            addressRepository.save(addressJpa);
         }
         return addressJpa;
     }

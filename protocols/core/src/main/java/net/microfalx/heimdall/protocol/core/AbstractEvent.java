@@ -16,7 +16,7 @@ public abstract class AbstractEvent implements Event {
     private ZonedDateTime receivedAt;
     private ZonedDateTime createdAt;
     private ZonedDateTime sentAt;
-    private Map<String,Object> attributes;
+    private Map<String,Object> attributes= new HashMap<>();
 
     private Collection<Part> parts = new ArrayList<>();
 

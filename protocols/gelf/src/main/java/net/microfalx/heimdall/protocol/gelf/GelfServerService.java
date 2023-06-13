@@ -18,6 +18,8 @@ import java.net.InetAddress;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Iterator;
+import java.util.Map;
 
 @Service
 public class GelfServerService implements ProtocolServerHandler {
@@ -75,16 +77,23 @@ public class GelfServerService implements ProtocolServerHandler {
         message.setName("Gelf Message");
         message.setReceivedAt(ZonedDateTime.now());
         message.setSource(Address.create(address.getHostName(), address.getHostAddress()));
-        message.setBody(Body.create(message, getRequiredField(jsonNode, "short_message")));
-        message.setBody(Body.create(message, getRequiredField(jsonNode, "full_message")));
+        message.addPart(Body.create(message, "shortMessage"));
+        message.addPart(Body.create(message, "fullMessage"));
         message.setCreatedAt(createTimeStamp(jsonNode));
         message.setSentAt(createTimeStamp(jsonNode));
         message.setGelfMessageSeverity(Severity.fromLabel(getRequiredField(jsonNode, "level")));
         addAllJsonFields(message, jsonNode);
     }
 
+
     private void addAllJsonFields(GelfMessage gelfMessage, JsonNode jsonNode) {
-        // TODO add ann nodes which start with "_" as attributes (remove "_")
+        Iterator<Map.Entry<String, JsonNode>> fields = jsonNode.fields();
+        while (fields.hasNext()) {
+            Map.Entry<String, JsonNode> field = fields.next();
+            if (field.getKey().startsWith("_")) {
+                gelfMessage.addAttribute(field.getKey().substring(1), field.getValue());
+            }
+        }
     }
 
     private ZonedDateTime createTimeStamp(JsonNode jsonNode) {
