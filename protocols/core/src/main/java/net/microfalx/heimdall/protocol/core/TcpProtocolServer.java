@@ -43,7 +43,7 @@ public class TcpProtocolServer extends ProtocolServer {
             try {
                 Socket clientSocket = serverSocket.accept();
                 getExecutor().submit(new ClientWorker(clientSocket));
-            }catch (SocketException e) {
+            } catch (SocketException e) {
                 if (!serverSocket.isClosed()) {
                     LOGGER.error("Failed to process client connection", e);
                 }
@@ -57,7 +57,7 @@ public class TcpProtocolServer extends ProtocolServer {
 
         private final Socket accept;
 
-         ClientWorker(Socket accept) {
+        ClientWorker(Socket accept) {
             this.accept = accept;
         }
 
@@ -65,8 +65,12 @@ public class TcpProtocolServer extends ProtocolServer {
         public void run() {
             try {
                 getHandler().handle(TcpProtocolServer.this, accept.getInetAddress(), accept.getInputStream(), accept.getOutputStream());
+            } catch (SocketException e) {
+                LOGGER.error("Socket failure while handling request from " + accept.getInetAddress(), e);
             } catch (IOException e) {
-                LOGGER.error("Failed to handle request from " + accept.getInetAddress(), e);
+                LOGGER.error("I/O failure while handling request from " + accept.getInetAddress(), e);
+            } catch (Throwable e) {
+                LOGGER.error("Internal error while handling request from " + accept.getInetAddress(), e);
             }
             try {
                 accept.close();

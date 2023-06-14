@@ -81,7 +81,7 @@ public class GelfServerService implements ProtocolServerHandler {
         message.addPart(Body.create(message, "fullMessage"));
         message.setCreatedAt(createTimeStamp(jsonNode));
         message.setSentAt(createTimeStamp(jsonNode));
-        message.setGelfMessageSeverity(Severity.fromLabel(getRequiredField(jsonNode, "level")));
+        message.setGelfMessageSeverity(Severity.fromNumericalCode(getRequiredIntField(jsonNode, "level")));
         addAllJsonFields(message, jsonNode);
         gelfService.handle(message);
     }
@@ -116,7 +116,7 @@ public class GelfServerService implements ProtocolServerHandler {
         return fieldNode.asLong();
     }
 
-    private long getRequiredIntField(JsonNode jsonNode, String field) {
+    private int getRequiredIntField(JsonNode jsonNode, String field) {
         JsonNode fieldNode = jsonNode.findValue(field);
         if (fieldNode == null) throw new ProtocolException("A required field (" + field + ") does not exist");
         return fieldNode.asInt();
@@ -124,9 +124,9 @@ public class GelfServerService implements ProtocolServerHandler {
 
     private void initThreadPool() {
         executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(2);
+        executor.setCorePoolSize(5);
         executor.setMaxPoolSize(10);
-        executor.setQueueCapacity(500);
+        executor.setQueueCapacity(50);
         executor.setThreadNamePrefix("heimdall-gelf");
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(5);

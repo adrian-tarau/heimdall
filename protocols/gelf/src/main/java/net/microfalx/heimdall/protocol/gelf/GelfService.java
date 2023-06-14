@@ -2,7 +2,6 @@ package net.microfalx.heimdall.protocol.gelf;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.microfalx.heimdall.protocol.core.ProtocolService;
-import net.microfalx.heimdall.protocol.core.jpa.AddressRepository;
 import net.microfalx.heimdall.protocol.core.jpa.Part;
 import net.microfalx.heimdall.protocol.core.jpa.PartRepository;
 import net.microfalx.heimdall.protocol.jpa.GelfEvent;
@@ -17,15 +16,11 @@ import java.util.List;
 @Service
 public class GelfService extends ProtocolService<GelfMessage> {
 
-
     @Autowired
     private PartRepository partRepository;
 
     @Autowired
     private GelfEventRepository gelfEventRepository;
-
-    @Autowired
-    private AddressRepository addressRepository;
 
     /**
      * Handle one GELF message.

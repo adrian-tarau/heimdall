@@ -95,9 +95,9 @@ public class SyslogServerService {
 
     private void initThreadPool() {
         executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(2);
+        executor.setCorePoolSize(5);
         executor.setMaxPoolSize(10);
-        executor.setQueueCapacity(500);
+        executor.setQueueCapacity(50);
         executor.setThreadNamePrefix("heimdall-syslog");
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(5);
