@@ -83,6 +83,7 @@ public class GelfServerService implements ProtocolServerHandler {
         message.setSentAt(createTimeStamp(jsonNode));
         message.setGelfMessageSeverity(Severity.fromLabel(getRequiredField(jsonNode, "level")));
         addAllJsonFields(message, jsonNode);
+        gelfService.handle(message);
     }
 
 

@@ -180,6 +180,7 @@
                 <groupId>net.microfalx.bootstrap</groupId>
                 <artifactId>bootstrap-test</artifactId>
                 <version>${bootstrap.version}</version>
+                <scope>test</scope>
             </dependency>
 
         </dependencies>
