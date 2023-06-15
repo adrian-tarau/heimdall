@@ -5,7 +5,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
@@ -16,6 +18,8 @@ import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
 public abstract class ProtocolServer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolServer.class);
+
+    public static final int BUFFER_SIZE = 4 * 1024;
 
     private Transport transport = Transport.TCP;
     private String hostname;
@@ -159,6 +163,16 @@ public abstract class ProtocolServer {
      * Subclasses will stop the server.
      */
     protected abstract void doShutdown() throws IOException;
+
+    /**
+     * Creates a buffered input stream from a network stream.
+     *
+     * @param inputStream the network stream
+     * @return a non-null instance
+     */
+    protected final InputStream createBufferedInputStream(InputStream inputStream) {
+        return new BufferedInputStream(inputStream, BUFFER_SIZE);
+    }
 
     private void initExecutor() {
         if (this.executor != null) return;

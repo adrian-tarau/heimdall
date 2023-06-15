@@ -77,8 +77,12 @@ public class UdpProtocolServer extends ProtocolServer {
                     byte[] response = outputStream.toByteArray();
                     serverSocket.send(new DatagramPacket(response, response.length));
                 }
+            } catch (SocketException e) {
+                LOGGER.error("Socket failure while handling request from " + packet.getAddress(), e);
             } catch (IOException e) {
-                LOGGER.error("Failed to handle request from " + packet.getAddress(), e);
+                LOGGER.error("I/O failure while handling request from " + packet.getAddress(), e);
+            } catch (Throwable e) {
+                LOGGER.error("Internal error while handling request from " + packet.getAddress(), e);
             }
         }
     }

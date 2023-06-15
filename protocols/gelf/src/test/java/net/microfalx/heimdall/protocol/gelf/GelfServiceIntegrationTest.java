@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootConfiguration
 @EnableAutoConfiguration()
 @ComponentScan({"net.microfalx.bootstrap", "net.microfalx.heimdall"})
-@Sql(statements = {"delete from protocol_gelf_events"})
+@Sql(statements = {"delete from protocol_gelf_events", "delete from protocol_parts"})
 public class GelfServiceIntegrationTest {
 
     @Autowired
@@ -53,7 +53,27 @@ public class GelfServiceIntegrationTest {
     @Test
     void sendTCP() throws IOException {
         helper.setTransport(ProtocolClient.Transport.TCP);
-        helper.sendLogs();
+        helper.sendLogs(false);
+        await().atMost(ofSeconds(50)).until(() -> gelfEventRepository.count() > 0);
+        assertEquals(1, gelfEventRepository.count());
+        assertEquals(2, partRepository.count());
+        assertEquals(1, addressRepository.count());
+    }
+
+    @Test
+    void sendUDPSmall() throws IOException {
+        helper.setTransport(ProtocolClient.Transport.UDP);
+        helper.sendLogs(false);
+        await().atMost(ofSeconds(5)).until(() -> gelfEventRepository.count() > 0);
+        assertEquals(1, gelfEventRepository.count());
+        assertEquals(2, partRepository.count());
+        assertEquals(1, addressRepository.count());
+    }
+
+    @Test
+    void sendUDPLarge() throws IOException {
+        helper.setTransport(ProtocolClient.Transport.UDP);
+        helper.sendLogs(true);
         await().atMost(ofSeconds(5)).until(() -> gelfEventRepository.count() > 0);
         assertEquals(1, gelfEventRepository.count());
         assertEquals(2, partRepository.count());

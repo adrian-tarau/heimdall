@@ -50,7 +50,7 @@ public class GelfService extends ProtocolService<GelfMessage> {
         Part part = new Part();
         part.setType(parts.get(position).getType());
         part.setName(parts.get(position).getName());
-        part.setResource(parts.get(position).getResource().loadAsString());
+        part.setResource(parts.get(position).getResource().toURI().toASCIIString());
         part.setCreatedAt(parts.get(position).getEvent().getCreatedAt().toLocalDateTime());
         return part;
     }

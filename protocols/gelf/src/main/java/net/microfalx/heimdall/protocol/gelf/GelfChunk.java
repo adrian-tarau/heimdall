@@ -28,15 +28,28 @@ class GelfChunk implements Comparable<GelfChunk> {
     }
 
     @Override
+    public int compareTo(GelfChunk o) {
+        return Integer.compare(getIndex(), o.getIndex());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof GelfChunk gelfChunk)) return false;
+
+        return index == gelfChunk.index;
+    }
+
+    @Override
+    public int hashCode() {
+        return index;
+    }
+
+    @Override
     public String toString() {
         return "GelfChunk{" +
                 "index=" + index +
                 ", resource=" + resource +
                 '}';
-    }
-
-    @Override
-    public int compareTo(GelfChunk o) {
-        return Integer.compare(getIndex(),o.getIndex());
     }
 }

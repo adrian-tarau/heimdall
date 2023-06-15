@@ -50,14 +50,14 @@ public class GelfServiceTest {
         gelfMessage.setReceivedAt(ZonedDateTime.now());
         gelfMessage.setSentAt(ZonedDateTime.now());
         gelfMessage.setName("Gelf Message");
-        gelfMessage.setGelfMessageSeverity(Severity.INFORMATIONAL);
+        gelfMessage.setGelfSeverity(Severity.INFORMATIONAL);
         gelfMessage.addPart(Body.create(gelfMessage, "shortMessage"));
         gelfMessage.addPart(Body.create(gelfMessage, "fullMessage"));
         gelfMessage.setSource(Address.create(InetAddress.getLocalHost().getHostName(),
                 InetAddress.getLoopbackAddress().getHostAddress()));
         gelfMessage.addAttribute("a1", 1);
         gelfMessage.addAttribute("a2", "2");
-        gelfMessage.setGelfMessageSeverity(Severity.INFORMATIONAL);
+        gelfMessage.setGelfSeverity(Severity.INFORMATIONAL);
     }
 
     @Test

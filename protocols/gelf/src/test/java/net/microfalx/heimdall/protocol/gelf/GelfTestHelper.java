@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.protocol.gelf;
 
+import net.datafaker.Faker;
 import net.microfalx.heimdall.protocol.core.ProtocolClient;
 
 import java.io.IOException;
@@ -28,13 +29,16 @@ public class GelfTestHelper {
         return START_PORT + ThreadLocalRandom.current().nextInt(PORT_RANGE);
     }
 
-    void sendLogs() throws IOException {
+    void sendLogs(boolean large) throws IOException {
         GelfClient client = new GelfClient();
         client.setTransport(transport);
         client.setPort(transport == ProtocolClient.Transport.TCP ? configuration.getTcpPort() : configuration.getUdpPort());
-        client.setMessage("Test message");
+        if (large) {
+            client.setMessage(new Faker().text().text(16000, 16000));
+        } else {
+            client.setMessage("Test message");
+        }
         client.setThrowable(new IOException("Something bad happened"));
-        GelfMessage message = new GelfMessage();
         client.send(new GelfMessage());
     }
 }

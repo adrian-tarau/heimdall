@@ -10,6 +10,8 @@ import net.microfalx.heimdall.protocol.core.*;
 import net.microfalx.lang.IOUtils;
 import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.Resource;
+import org.apache.commons.compress.compressors.CompressorException;
+import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import static net.microfalx.lang.IOUtils.appendStream;
 
@@ -37,7 +40,7 @@ public class GelfServerService implements ProtocolServerHandler {
     private TcpProtocolServer tcpServer;
     private UdpProtocolServer udpServer;
 
-    private Map<Long, Set<GelfChunk>> chunks = new ConcurrentHashMap<>();
+    private Map<Long, SortedSet<GelfChunk>> chunks = new ConcurrentHashMap<>();
 
     @PostConstruct
     protected void initialize() {
@@ -79,51 +82,68 @@ public class GelfServerService implements ProtocolServerHandler {
     }
 
     private void handleUdp(InetAddress address, InputStream inputStream) throws IOException {
+        inputStream = decompress(inputStream);
+        inputStream.mark(20);
         DataInput input = new DataInputStream(inputStream);
-        checkMagicNumber(input);
+        short chunkMarker = input.readShort();
+        if (chunkMarker != GelfChunk.MARKER) {
+            inputStream.reset();
+            doHandle(address, inputStream);
+        } else {
+            handleUdpChunk(address, inputStream);
+        }
+    }
+
+    private void handleUdpChunk(InetAddress address, InputStream inputStream) throws IOException {
+        DataInput input = new DataInputStream(inputStream);
         long messageID = input.readLong();
-        Set<GelfChunk> messageChunks = chunks.computeIfAbsent(messageID, key -> new TreeSet<>());
-        Resource chunkResource = MemoryResource.create(IOUtils.getInputStreamAsBytes(inputStream));
+        SortedSet<GelfChunk> messageChunks = chunks.computeIfAbsent(messageID, key -> new ConcurrentSkipListSet<>());
         byte index = input.readByte();
         byte count = input.readByte();
+        Resource chunkResource = MemoryResource.create(IOUtils.getInputStreamAsBytes(inputStream));
         GelfChunk chunk = new GelfChunk(index, chunkResource);
         messageChunks.add(chunk);
-        if (index == (count - 1)) {
+        if (messageChunks.size() == count) {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             Set<GelfChunk> chunksForMessage = chunks.get(messageID);
             chunks.remove(messageID);
             Collection<Resource> resourceStream = chunksForMessage.stream().map(GelfChunk::getResource).toList();
             for (Resource resource : resourceStream) {
-                appendStream(outputStream, resource.getInputStream());
+                appendStream(outputStream, resource.getInputStream(true));
             }
-            doHandle(address, new ByteArrayInputStream(outputStream.toByteArray()));
+            doHandle(address, decompress(new ByteArrayInputStream(outputStream.toByteArray())));
         }
     }
 
-    private void checkMagicNumber(DataInput input) throws IOException {
-        if (input.readShort() != GelfChunk.MARKER) throw new java.net.ProtocolException("This is not a Gelf Message");
+
+    private InputStream decompress(InputStream inputStream) {
+        try {
+            String detect = CompressorStreamFactory.detect(inputStream);
+            inputStream = new CompressorStreamFactory().createCompressorInputStream(detect, inputStream);
+            return new BufferedInputStream(inputStream, ProtocolServer.BUFFER_SIZE);
+        } catch (CompressorException e) {
+            return inputStream;
+        }
     }
 
     private void doHandle(InetAddress address, InputStream inputStream) throws IOException {
-        System.out.println("Address:" + address);
-        // TODO for UDP, the event will come in chunks, you have to accumulate chunks and reassmable the event when las one comes
+        // String payload = IOUtils.getInputStreamAsString(inputStream);
+        //System.out.println("Payload:\n" + payload);
         JsonNode jsonNode = readJson(inputStream);
-        GelfMessage message = new GelfMessage();
         System.out.println("JSON:" + jsonNode.toPrettyString());
-
+        GelfMessage message = new GelfMessage();
         message.setFacility(Facility.fromLabel(getRequiredField(jsonNode, "facility")));
         message.setName("Gelf Message");
         message.setReceivedAt(ZonedDateTime.now());
         message.setSource(Address.create(address.getHostName(), address.getHostAddress()));
-        message.addPart(Body.create(message, "shortMessage"));
-        message.addPart(Body.create(message, "fullMessage"));
+        message.addPart(Body.create(message, getRequiredField(jsonNode,"short_message")));
+        message.addPart(Body.create(message, getRequiredField(jsonNode,"full_message")));
         message.setCreatedAt(createTimeStamp(jsonNode));
         message.setSentAt(createTimeStamp(jsonNode));
-        message.setGelfMessageSeverity(Severity.fromNumericalCode(getRequiredIntField(jsonNode, "level")));
+        message.setGelfSeverity(Severity.fromNumericalCode(getRequiredIntField(jsonNode, "level")));
         addAllJsonFields(message, jsonNode);
         gelfService.handle(message);
     }
-
 
     private void addAllJsonFields(GelfMessage gelfMessage, JsonNode jsonNode) {
         Iterator<Map.Entry<String, JsonNode>> fields = jsonNode.fields();

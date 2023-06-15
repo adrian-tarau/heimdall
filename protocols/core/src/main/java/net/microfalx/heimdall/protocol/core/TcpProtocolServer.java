@@ -64,7 +64,8 @@ public class TcpProtocolServer extends ProtocolServer {
         @Override
         public void run() {
             try {
-                getHandler().handle(TcpProtocolServer.this, accept.getInetAddress(), accept.getInputStream(), accept.getOutputStream());
+                getHandler().handle(TcpProtocolServer.this, accept.getInetAddress(),
+                        createBufferedInputStream(accept.getInputStream()), accept.getOutputStream());
             } catch (SocketException e) {
                 LOGGER.error("Socket failure while handling request from " + accept.getInetAddress(), e);
             } catch (IOException e) {

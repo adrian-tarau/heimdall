@@ -13,7 +13,8 @@ import java.net.InetAddress;
 import java.util.Collections;
 import java.util.Set;
 
-public class GelfClient extends ProtocolClient<GelfMessage> implements ErrorReporter {
+public class
+GelfClient extends ProtocolClient<GelfMessage> implements ErrorReporter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GelfClient.class);
 

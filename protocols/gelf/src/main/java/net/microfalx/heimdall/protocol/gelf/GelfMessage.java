@@ -7,7 +7,7 @@ import net.microfalx.heimdall.protocol.core.Severity;
 public class GelfMessage extends AbstractEvent {
 
     private Facility facility;
-    private com.cloudbees.syslog.Severity severity;
+    private com.cloudbees.syslog.Severity gelfSeverity;
     private final String version = "1.1";
 
     public GelfMessage() {
@@ -27,8 +27,12 @@ public class GelfMessage extends AbstractEvent {
         return version;
     }
 
-    public GelfMessage setGelfMessageSeverity(com.cloudbees.syslog.Severity severity) {
-        this.severity = severity;
+    public com.cloudbees.syslog.Severity getGelfSeverity() {
+        return gelfSeverity;
+    }
+
+    public GelfMessage setGelfSeverity(com.cloudbees.syslog.Severity severity) {
+        this.gelfSeverity = severity;
         switch (severity) {
             case DEBUG -> setSeverity(Severity.DEBUG);
             case INFORMATIONAL -> setSeverity(Severity.INFO);
