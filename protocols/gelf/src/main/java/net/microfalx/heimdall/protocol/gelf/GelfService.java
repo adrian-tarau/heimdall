@@ -40,9 +40,9 @@ public class GelfService extends ProtocolService<GelfMessage> {
         gelfEvent.setShort_attachment_id(shortAttachmentId);
         Part longAttachmentId = addMessage(message, 1);
         gelfEvent.setLong_attachment_id(longAttachmentId);
-        gelfEventRepository.save(gelfEvent);
         partRepository.save(shortAttachmentId);
         partRepository.save(longAttachmentId);
+        gelfEventRepository.save(gelfEvent);
     }
 
     private Part addMessage(GelfMessage message, int position) throws IOException {

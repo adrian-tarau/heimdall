@@ -7,19 +7,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import net.microfalx.heimdall.protocol.core.*;
+import net.microfalx.lang.IOUtils;
+import net.microfalx.resource.MemoryResource;
+import net.microfalx.resource.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.InetAddress;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static net.microfalx.lang.IOUtils.appendStream;
 
 @Service
 public class GelfServerService implements ProtocolServerHandler {
@@ -33,6 +36,8 @@ public class GelfServerService implements ProtocolServerHandler {
     private ThreadPoolTaskExecutor executor;
     private TcpProtocolServer tcpServer;
     private UdpProtocolServer udpServer;
+
+    private Map<Long, Set<GelfChunk>> chunks = new ConcurrentHashMap<>();
 
     @PostConstruct
     protected void initialize() {
@@ -66,13 +71,46 @@ public class GelfServerService implements ProtocolServerHandler {
 
     @Override
     public void handle(ProtocolServer server, InetAddress address, InputStream inputStream, OutputStream outputStream) throws IOException {
+        if (server.getTransport() == ProtocolServer.Transport.UDP) {
+            handleUdp(address, inputStream);
+        } else {
+            doHandle(address, inputStream);
+        }
+    }
+
+    private void handleUdp(InetAddress address, InputStream inputStream) throws IOException {
+        DataInput input = new DataInputStream(inputStream);
+        checkMagicNumber(input);
+        long messageID = input.readLong();
+        Set<GelfChunk> messageChunks = chunks.computeIfAbsent(messageID, key -> new TreeSet<>());
+        Resource chunkResource = MemoryResource.create(IOUtils.getInputStreamAsBytes(inputStream));
+        byte index = input.readByte();
+        byte count = input.readByte();
+        GelfChunk chunk = new GelfChunk(index, chunkResource);
+        messageChunks.add(chunk);
+        if (index == (count - 1)) {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            Set<GelfChunk> chunksForMessage = chunks.get(messageID);
+            chunks.remove(messageID);
+            Collection<Resource> resourceStream = chunksForMessage.stream().map(GelfChunk::getResource).toList();
+            for (Resource resource : resourceStream) {
+                appendStream(outputStream, resource.getInputStream());
+            }
+            doHandle(address, new ByteArrayInputStream(outputStream.toByteArray()));
+        }
+    }
+
+    private void checkMagicNumber(DataInput input) throws IOException {
+        if (input.readShort() != GelfChunk.MARKER) throw new java.net.ProtocolException("This is not a Gelf Message");
+    }
+
+    private void doHandle(InetAddress address, InputStream inputStream) throws IOException {
         System.out.println("Address:" + address);
         // TODO for UDP, the event will come in chunks, you have to accumulate chunks and reassmable the event when las one comes
         JsonNode jsonNode = readJson(inputStream);
         GelfMessage message = new GelfMessage();
         System.out.println("JSON:" + jsonNode.toPrettyString());
-        // in here look at GELF docs: TCP has the JSON in input stream, UDP will have a fragment of the message
-        // the server tells you which protocol was used to receive the message
+
         message.setFacility(Facility.fromLabel(getRequiredField(jsonNode, "facility")));
         message.setName("Gelf Message");
         message.setReceivedAt(ZonedDateTime.now());
