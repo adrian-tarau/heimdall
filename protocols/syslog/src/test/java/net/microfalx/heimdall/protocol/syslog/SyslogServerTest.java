@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(MockitoExtension.class)
-class SyslogServerServiceTest {
+class SyslogServerTest {
 
     @Mock
     private SyslogService syslogService;
@@ -26,7 +26,7 @@ class SyslogServerServiceTest {
     private SyslogTestHelper helper;
 
     @InjectMocks
-    private SyslogServerService serverService;
+    private SyslogServer serverService;
 
     @BeforeEach
     void setup() {

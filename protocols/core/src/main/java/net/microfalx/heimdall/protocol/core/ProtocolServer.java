@@ -134,7 +134,7 @@ public abstract class ProtocolServer {
     public void listen() {
         if (handler == null) throw new ProtocolException("A handler is required to start the server");
         initExecutor();
-        LOGGER.info("Listen on {} ({})", port, describeHostname());
+        LOGGER.info("Listen on {}:{}", describeHostname(), port);
         try {
             doListen();
         } catch (IOException e) {
@@ -191,7 +191,7 @@ public abstract class ProtocolServer {
     }
 
     private String describeHostname() {
-        return hostname == null ? "<any>" : hostname;
+        return hostname == null ? "*" : hostname;
     }
 
     public enum Transport {

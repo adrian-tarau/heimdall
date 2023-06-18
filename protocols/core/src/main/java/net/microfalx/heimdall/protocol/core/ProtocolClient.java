@@ -1,6 +1,10 @@
 package net.microfalx.heimdall.protocol.core;
 
+import net.microfalx.lang.ExceptionUtils;
+
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
@@ -12,10 +16,18 @@ public abstract class ProtocolClient<E extends Event> {
 
     private String hostName = "localhost";
     private int port = 0;
-    private Transport transport = Transport.TCP;
+    private Transport transport = Transport.UDP;
 
-    public String getHostName() {
+    public final String getHostName() {
         return hostName;
+    }
+
+    public final InetAddress getAddress() {
+        try {
+            return InetAddress.getByName(hostName);
+        } catch (UnknownHostException e) {
+            return ExceptionUtils.throwException(e);
+        }
     }
 
     public ProtocolClient<E> setHostName(String hostName) {

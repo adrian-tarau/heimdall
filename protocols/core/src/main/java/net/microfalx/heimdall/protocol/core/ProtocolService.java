@@ -7,8 +7,13 @@ import net.microfalx.bootstrap.search.SearchService;
 import net.microfalx.heimdall.protocol.core.jpa.AddressRepository;
 import net.microfalx.resource.NullResource;
 import net.microfalx.resource.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.scheduling.support.PeriodicTrigger;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
@@ -16,7 +21,10 @@ import java.util.concurrent.Future;
 /**
  * Base class for all protocol services.
  */
-public abstract class ProtocolService<E extends Event> {
+public abstract class ProtocolService<E extends Event> implements InitializingBean {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolService.class);
+
     @Autowired
     private ResourceService resourceService;
 
@@ -28,6 +36,13 @@ public abstract class ProtocolService<E extends Event> {
 
     @Autowired
     private AddressRepository addressRepository;
+
+    @Autowired
+    private ProtocolSimulatorProperties simulatorProperties;
+
+    @Autowired
+    @Qualifier("protocol-executor")
+    private ThreadPoolTaskScheduler taskExecutor;
 
     /**
      * Returns the resource service.
@@ -70,12 +85,20 @@ public abstract class ProtocolService<E extends Event> {
     }
 
     /**
+     * Returns the shared executor.
+     *
+     * @return a non-null instance
+     */
+    public final ThreadPoolTaskScheduler getTaskScheduler() {
+        return taskExecutor;
+    }
+
+    /**
      * Indexes an event.
      *
      * @param event the event to index
      * @return the document after it is indexed
      */
-    @Async
     public final Future<Document> index(E event) {
         Document document = Document.create(event.getId(), event.getName());
         indexService.index(document);
@@ -90,6 +113,15 @@ public abstract class ProtocolService<E extends Event> {
      */
     protected void updateDocument(E event, Document document) {
 
+    }
+
+    /**
+     * Returns the simulator.
+     *
+     * @return the simulator, null if not supported
+     */
+    protected <C extends ProtocolClient<E>> ProtocolSimulator<E, C> getSimulator() {
+        return null;
     }
 
     /**
@@ -110,5 +142,27 @@ public abstract class ProtocolService<E extends Event> {
             addressRepository.save(addressJpa);
         }
         return addressJpa;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        initializeSimulator();
+    }
+
+    private void initializeSimulator() {
+        if (!simulatorProperties.isEnabled()) return;
+        LOGGER.info("Simulator is enabled, interval " + simulatorProperties.getInterval());
+        getTaskScheduler().schedule(new SimulatorWorker(), new PeriodicTrigger(simulatorProperties.getInterval()));
+    }
+
+    class SimulatorWorker implements Runnable {
+
+        @Override
+        public void run() {
+            ProtocolSimulator<E, ?> simulator = getSimulator();
+            if (simulator != null) {
+                simulator.simulate();
+            }
+        }
     }
 }

@@ -4,7 +4,6 @@ import com.cloudbees.syslog.Facility;
 import com.cloudbees.syslog.Severity;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import net.microfalx.heimdall.protocol.core.*;
 import net.microfalx.lang.IOUtils;
@@ -12,9 +11,10 @@ import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.Resource;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -27,8 +27,8 @@ import java.util.concurrent.ConcurrentSkipListSet;
 
 import static net.microfalx.lang.IOUtils.appendStream;
 
-@Service
-public class GelfServerService implements ProtocolServerHandler {
+@Component
+public class GelfServer implements InitializingBean, ProtocolServerHandler {
 
     @Autowired
     private GelfConfiguration configuration;
@@ -40,10 +40,14 @@ public class GelfServerService implements ProtocolServerHandler {
     private TcpProtocolServer tcpServer;
     private UdpProtocolServer udpServer;
 
-    private Map<Long, SortedSet<GelfChunk>> chunks = new ConcurrentHashMap<>();
+    private final Map<Long, SortedSet<GelfChunk>> chunks = new ConcurrentHashMap<>();
 
-    @PostConstruct
-    protected void initialize() {
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        initialize();
+    }
+
+    public void initialize() {
         initThreadPool();
         initializeTcpServer();
         initializeUdpServer();
@@ -136,8 +140,8 @@ public class GelfServerService implements ProtocolServerHandler {
         message.setName("Gelf Message");
         message.setReceivedAt(ZonedDateTime.now());
         message.setSource(Address.create(address.getHostName(), address.getHostAddress()));
-        message.addPart(Body.create(message, getRequiredField(jsonNode,"short_message")));
-        message.addPart(Body.create(message, getRequiredField(jsonNode,"full_message")));
+        message.addPart(Body.create(message, getRequiredField(jsonNode, "short_message")));
+        message.addPart(Body.create(message, getRequiredField(jsonNode, "full_message")));
         message.setCreatedAt(createTimeStamp(jsonNode));
         message.setSentAt(createTimeStamp(jsonNode));
         message.setGelfSeverity(Severity.fromNumericalCode(getRequiredIntField(jsonNode, "level")));

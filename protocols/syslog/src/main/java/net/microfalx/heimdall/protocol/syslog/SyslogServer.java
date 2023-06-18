@@ -2,7 +2,6 @@ package net.microfalx.heimdall.protocol.syslog;
 
 import com.cloudbees.syslog.Facility;
 import com.cloudbees.syslog.Severity;
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import net.microfalx.heimdall.protocol.core.Address;
 import net.microfalx.heimdall.protocol.core.Body;
@@ -13,9 +12,10 @@ import org.graylog2.syslog4j.server.impl.net.tcp.TCPNetSyslogServer;
 import org.graylog2.syslog4j.server.impl.net.tcp.TCPNetSyslogServerConfig;
 import org.graylog2.syslog4j.server.impl.net.udp.UDPNetSyslogServer;
 import org.graylog2.syslog4j.server.impl.net.udp.UDPNetSyslogServerConfig;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -25,8 +25,8 @@ import java.time.ZonedDateTime;
 /**
  * Service for all Syslog servers, TPC and UDP protocols.
  */
-@Service
-public class SyslogServerService {
+@Component
+public class SyslogServer implements InitializingBean {
 
     @Autowired
     private SyslogConfiguration configuration;
@@ -43,8 +43,12 @@ public class SyslogServerService {
         return configuration;
     }
 
-    @PostConstruct
-    protected void initialize() {
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        initialize();
+    }
+
+    public void initialize() {
         initThreadPool();
         initializeTcpServer();
         initializeUdpServer();
@@ -113,7 +117,7 @@ public class SyslogServerService {
 
         @Override
         public void event(Object session, SyslogServerIF syslogServer, SocketAddress socketAddress, SyslogServerEventIF event) {
-            SyslogServerService.this.event(syslogServer, socketAddress, event);
+            SyslogServer.this.event(syslogServer, socketAddress, event);
         }
 
         @Override

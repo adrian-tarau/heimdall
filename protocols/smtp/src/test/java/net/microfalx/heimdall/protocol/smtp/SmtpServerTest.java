@@ -12,7 +12,7 @@ import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
-class SmtpServerServiceTest {
+class SmtpServerTest {
 
     @Mock
     private SmtpService smtpService;
@@ -21,7 +21,7 @@ class SmtpServerServiceTest {
     private SmtpConfiguration configuration;
 
     @InjectMocks
-    private SmtpServerService serverService;
+    private SmtpServer serverService;
 
     @BeforeEach
     void setup() {

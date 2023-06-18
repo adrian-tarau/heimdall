@@ -37,7 +37,7 @@ public class SmtpServiceIntegrationTest {
     @Autowired
     private SmtpConfiguration smtpConfiguration;
     @Autowired
-    private SmtpServerService smtpServerService;
+    private SmtpServer smtpServer;
     @Autowired
     private SmtpService smtpService;
     @Autowired

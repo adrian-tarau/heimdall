@@ -36,11 +36,18 @@
     <name>Heimdall - Protocols - SNMP</name>
 
     <dependencies>
+
         <dependency>
             <groupId>net.microfalx.heimdall</groupId>
             <artifactId>heimdall-protocol-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.snmp4j</groupId>
+            <artifactId>snmp4j</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>

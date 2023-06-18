@@ -16,7 +16,7 @@ import static net.microfalx.lang.ThreadUtils.sleepSeconds;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-class GelfServerServiceTest {
+class GelfServerTest {
 
     @Mock
     private GelfService syslogService;
@@ -27,7 +27,7 @@ class GelfServerServiceTest {
     private GelfTestHelper helper;
 
     @InjectMocks
-    private GelfServerService serverService;
+    private GelfServer serverService;
 
     @BeforeEach
     void setup() {

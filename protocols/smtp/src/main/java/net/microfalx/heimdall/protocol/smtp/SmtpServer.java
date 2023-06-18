@@ -1,6 +1,5 @@
 package net.microfalx.heimdall.protocol.smtp;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.mail.BodyPart;
 import jakarta.mail.MessagingException;
 import jakarta.mail.Multipart;
@@ -14,8 +13,9 @@ import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.StreamResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.subethamail.smtp.MessageContext;
 import org.subethamail.smtp.RejectException;
 import org.subethamail.smtp.helper.BasicMessageListener;
@@ -37,10 +37,10 @@ import static net.microfalx.lang.StringUtils.isNotEmpty;
  * <p>
  * The service uses <a href="https://github.com/davidmoten/subethasmtp">SubEtha SMTP</a> as an SMTP server.
  */
-@Service
-public class SmtpServerService implements BasicMessageListener {
+@Component
+public class SmtpServer implements InitializingBean, BasicMessageListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(SmtpServerService.class);
+    private static final Logger logger = LoggerFactory.getLogger(SmtpServer.class);
 
     @Autowired
     private SmtpConfiguration configuration;
@@ -72,8 +72,12 @@ public class SmtpServerService implements BasicMessageListener {
         }
     }
 
-    @PostConstruct
-    protected void initialize() {
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        initialize();
+    }
+
+    public void initialize() {
         initializeServer();
         initializeSession();
     }
