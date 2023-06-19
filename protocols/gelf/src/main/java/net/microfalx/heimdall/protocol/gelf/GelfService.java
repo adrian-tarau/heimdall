@@ -2,8 +2,6 @@ package net.microfalx.heimdall.protocol.gelf;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.microfalx.heimdall.protocol.core.ProtocolService;
-import net.microfalx.heimdall.protocol.core.jpa.Part;
-import net.microfalx.heimdall.protocol.core.jpa.PartRepository;
 import net.microfalx.heimdall.protocol.jpa.GelfEvent;
 import net.microfalx.heimdall.protocol.jpa.GelfEventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,16 +9,16 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.List;
+import java.util.Iterator;
 
 @Service
 public class GelfService extends ProtocolService<GelfMessage> {
 
     @Autowired
-    private PartRepository partRepository;
+    private GelfEventRepository gelfEventRepository;
 
     @Autowired
-    private GelfEventRepository gelfEventRepository;
+    private GelfSimulator gelfSimulator;
 
     /**
      * Handle one GELF message.
@@ -36,23 +34,17 @@ public class GelfService extends ProtocolService<GelfMessage> {
         gelfEvent.setReceivedAt(message.getReceivedAt().toLocalDateTime());
         gelfEvent.setSentAt(message.getSentAt().toLocalDateTime());
         gelfEvent.setFields(encodeFields(message));
-        Part shortAttachmentId = addMessage(message, 0);
-        gelfEvent.setShort_attachment_id(shortAttachmentId);
-        Part longAttachmentId = addMessage(message, 1);
-        gelfEvent.setLong_attachment_id(longAttachmentId);
-        partRepository.save(shortAttachmentId);
-        partRepository.save(longAttachmentId);
+        Iterator<net.microfalx.heimdall.protocol.core.Part> parts = message.getParts().iterator();
+        gelfEvent.setShortMessage(persistPart(parts.next()));
+        if (parts.hasNext()) {
+            gelfEvent.setLongMessage(persistPart(parts.next()));
+        }
         gelfEventRepository.save(gelfEvent);
     }
 
-    private Part addMessage(GelfMessage message, int position) throws IOException {
-        List<net.microfalx.heimdall.protocol.core.Part> parts = message.getParts().stream().toList();
-        Part part = new Part();
-        part.setType(parts.get(position).getType());
-        part.setName(parts.get(position).getName());
-        part.setResource(parts.get(position).getResource().toURI().toASCIIString());
-        part.setCreatedAt(parts.get(position).getEvent().getCreatedAt().toLocalDateTime());
-        return part;
+    @Override
+    protected GelfSimulator getSimulator() {
+        return gelfSimulator;
     }
 
     private String encodeFields(GelfMessage gelfMessage) {

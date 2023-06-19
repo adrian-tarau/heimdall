@@ -42,7 +42,7 @@ public interface Part {
      *
      * @return a non-null instance
      */
-    String getContentType();
+    String getMimeType();
 
     /**
      * Returns the file name associated with the part.
@@ -57,6 +57,13 @@ public interface Part {
      * @return a non-null instance
      */
     Resource getResource();
+
+    /**
+     * Loads the part as a string
+     *
+     * @return the part as a string
+     */
+    String loadAsString();
 
     /**
      * A type for a part

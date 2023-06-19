@@ -1,9 +1,6 @@
 package net.microfalx.heimdall.protocol.syslog;
 
-import net.microfalx.heimdall.protocol.core.Body;
 import net.microfalx.heimdall.protocol.core.ProtocolService;
-import net.microfalx.heimdall.protocol.core.jpa.Part;
-import net.microfalx.heimdall.protocol.core.jpa.PartRepository;
 import net.microfalx.heimdall.protocol.jpa.SyslogEvent;
 import net.microfalx.heimdall.protocol.jpa.SyslogEventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +11,6 @@ public class SyslogService extends ProtocolService<SyslogMessage> {
 
     @Autowired
     private SyslogEventRepository syslogEventRepository;
-
-    @Autowired
-    private PartRepository partRepository;
 
     /**
      * Handles a Syslog message received by the server.
@@ -30,20 +24,8 @@ public class SyslogService extends ProtocolService<SyslogMessage> {
         syslogEvent.setAddress(lookupAddress(message.getSource()));
         syslogEvent.setReceivedAt(message.getReceivedAt().toLocalDateTime());
         syslogEvent.setSentAt(message.getSentAt().toLocalDateTime());
-        syslogEvent.setPart(saveMessage(message));
+        syslogEvent.setMessage(persistPart(message.getBody()));
         syslogEventRepository.save(syslogEvent);
     }
-
-    private Part saveMessage(SyslogMessage message) {
-        Body body = message.getBody();
-        Part part = new Part();
-        part.setType(body.getType());
-        part.setResource(body.getResource().toURI().toASCIIString());
-        part.setCreatedAt(message.getCreatedAt().toLocalDateTime());
-        part.setName(message.getName());
-        partRepository.save(part);
-        return part;
-    }
-
 
 }

@@ -11,6 +11,9 @@ import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.Resource;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -29,6 +32,8 @@ import static net.microfalx.lang.IOUtils.appendStream;
 
 @Component
 public class GelfServer implements InitializingBean, ProtocolServerHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolService.class);
 
     @Autowired
     private GelfConfiguration configuration;
@@ -131,17 +136,18 @@ public class GelfServer implements InitializingBean, ProtocolServerHandler {
     }
 
     private void doHandle(InetAddress address, InputStream inputStream) throws IOException {
-        // String payload = IOUtils.getInputStreamAsString(inputStream);
-        //System.out.println("Payload:\n" + payload);
         JsonNode jsonNode = readJson(inputStream);
-        System.out.println("JSON:" + jsonNode.toPrettyString());
+        if (LOGGER.isDebugEnabled()) LOGGER.debug("Received GELF event:\n" + jsonNode.toPrettyString());
+        String shortMessage = getField(jsonNode, "short_message");
+        String fullMessage = getRequiredField(jsonNode, "full_message");
+        String host = net.microfalx.lang.StringUtils.defaultIfNull(getRequiredField(jsonNode, "host"), "0.0.0.0");
         GelfMessage message = new GelfMessage();
         message.setFacility(Facility.fromLabel(getRequiredField(jsonNode, "facility")));
-        message.setName("Gelf Message");
+        message.setName(StringUtils.abbreviate(shortMessage, 80));
         message.setReceivedAt(ZonedDateTime.now());
-        message.setSource(Address.create(address.getHostName(), address.getHostAddress()));
-        message.addPart(Body.create(message, getRequiredField(jsonNode, "short_message")));
-        message.addPart(Body.create(message, getRequiredField(jsonNode, "full_message")));
+        message.setSource(Address.create(Address.Type.HOSTNAME, host));
+        message.addPart(Body.create(message, shortMessage));
+        message.addPart(Body.create(message, fullMessage));
         message.setCreatedAt(createTimeStamp(jsonNode));
         message.setSentAt(createTimeStamp(jsonNode));
         message.setGelfSeverity(Severity.fromNumericalCode(getRequiredIntField(jsonNode, "level")));
@@ -165,6 +171,11 @@ public class GelfServer implements InitializingBean, ProtocolServerHandler {
         return ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
     }
 
+    private String getField(JsonNode jsonNode, String field) {
+        JsonNode fieldNode = jsonNode.findValue(field);
+        if (fieldNode == null) throw new ProtocolException("A required field (" + field + ") does not exist");
+        return fieldNode != null ? fieldNode.asText() : null;
+    }
 
     private String getRequiredField(JsonNode jsonNode, String field) {
         JsonNode fieldNode = jsonNode.findValue(field);

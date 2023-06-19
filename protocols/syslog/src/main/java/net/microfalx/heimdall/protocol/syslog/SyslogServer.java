@@ -86,9 +86,9 @@ public class SyslogServer implements InitializingBean {
         message.setFacility(Facility.fromNumericalCode(event.getFacility()));
         message.setSyslogSeverity(Severity.fromNumericalCode(event.getLevel()));
         InetSocketAddress inetSocketAddress = (InetSocketAddress) socketAddress;
-        message.setSource(Address.create(inetSocketAddress.getAddress().getHostName(),
+        message.setSource(Address.create(Address.Type.HOSTNAME, inetSocketAddress.getAddress().getHostName(),
                 inetSocketAddress.getAddress().getHostAddress()));
-        message.addTarget(Address.create(event.getHost()));
+        message.addTarget(Address.create(Address.Type.HOSTNAME, event.getHost()));
         message.setName("Syslog");
         message.setBody(Body.create(message, message.getName()));
         message.setCreatedAt(event.getDate().toInstant().atZone(ZoneId.systemDefault()));

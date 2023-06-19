@@ -2,17 +2,27 @@ package net.microfalx.heimdall.protocol.core;
 
 import net.microfalx.lang.StringUtils;
 
+import java.util.Objects;
+
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
 public class DefaultAddress implements Address {
 
-    private String name;
-    private String value;
+    private final Type type;
+    private final String name;
+    private final String value;
 
-    DefaultAddress(String name, String value) {
+    DefaultAddress(Type type, String name, String value) {
+        requireNonNull(type);
         requireNonNull(value);
+        this.type = type;
         this.name = StringUtils.defaultIfEmpty(name, value);
         this.value = value;
+    }
+
+    @Override
+    public Type getType() {
+        return type;
     }
 
     @Override
@@ -28,23 +38,21 @@ public class DefaultAddress implements Address {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof DefaultAddress that)) return false;
-
-        if (!name.equals(that.name)) return false;
-        return value.equals(that.value);
+        if (o == null || getClass() != o.getClass()) return false;
+        DefaultAddress that = (DefaultAddress) o;
+        return type == that.type && Objects.equals(value, that.value);
     }
 
     @Override
     public int hashCode() {
-        int result = name.hashCode();
-        result = 31 * result + value.hashCode();
-        return result;
+        return Objects.hash(type, value);
     }
 
     @Override
     public String toString() {
         return "DefaultAddress{" +
-                "name='" + name + '\'' +
+                "type=" + type +
+                ", name='" + name + '\'' +
                 ", value='" + value + '\'' +
                 '}';
     }

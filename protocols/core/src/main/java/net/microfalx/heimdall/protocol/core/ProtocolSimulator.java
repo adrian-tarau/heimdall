@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
@@ -21,6 +22,7 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
 
     private final ProtocolSimulatorProperties properties;
 
+    protected final Random random = ThreadLocalRandom.current();
     private final List<Address> addresses = new ArrayList<>();
     private final List<ProtocolClient<E>> clients = new ArrayList<>();
 
@@ -101,6 +103,17 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
         return clients.get(ThreadLocalRandom.current().nextInt(clients.size()));
     }
 
+    /**
+     * Returns an random enum.
+     *
+     * @param enumClass the enum class
+     * @param <ENUM>    the enum type
+     * @return the enum value
+     */
+    @SuppressWarnings("unchecked")
+    protected final <ENUM extends Enum<ENUM>> ENUM getNextEnum(Class<ENUM> enumClass) {
+        return (ENUM) enumClass.getEnumConstants()[random.nextInt(enumClass.getEnumConstants().length)];
+    }
 
     private void initializeAddresses() {
         int addressCount = properties.getMinimumAddressCount() + ThreadLocalRandom.current().nextInt(properties.getMaximumAddressCount());

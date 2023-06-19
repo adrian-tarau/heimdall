@@ -2,7 +2,9 @@ package net.microfalx.heimdall.protocol.core;
 
 import net.microfalx.resource.NullResource;
 import net.microfalx.resource.Resource;
+import org.apache.tika.Tika;
 
+import java.io.IOException;
 import java.util.UUID;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
@@ -13,7 +15,7 @@ public abstract class AbstractPart implements Part {
     private String id = UUID.randomUUID().toString();
     private String name;
     private Type type;
-    private String contentType = "application/octet-stream";
+    private String mimeType = MimeType.APPLICATION_OCTET_STREAM.getValue();
     private String fileName;
     private Resource resource = NullResource.createNull();
 
@@ -56,13 +58,13 @@ public abstract class AbstractPart implements Part {
     }
 
     @Override
-    public String getContentType() {
-        return contentType;
+    public String getMimeType() {
+        return mimeType;
     }
 
-    public void setContentType(String contentType) {
-        requireNonNull(contentType);
-        this.contentType = contentType;
+    public void setMimeType(String mimeType) {
+        requireNonNull(mimeType);
+        this.mimeType = mimeType;
     }
 
     @Override
@@ -79,12 +81,25 @@ public abstract class AbstractPart implements Part {
         return resource;
     }
 
+    @Override
+    public String loadAsString() {
+        try {
+            return getResource().loadAsString();
+        } catch (IOException e) {
+            throw new ProtocolException("Body cannot be extracted for " + event.toString(), e);
+        }
+    }
+
     public void setResource(Resource resource) {
         requireNonNull(resource);
         this.resource = resource;
+        Tika tika = new Tika();
+        try {
+            setMimeType(tika.detect(resource.getInputStream()));
+        } catch (IOException e) {
+            // if we cannot detect, just assume is binary
+        }
     }
-
-
 
 
 }

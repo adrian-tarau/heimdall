@@ -53,7 +53,7 @@ public class GelfServiceTest {
         gelfMessage.setGelfSeverity(Severity.INFORMATIONAL);
         gelfMessage.addPart(Body.create(gelfMessage, "shortMessage"));
         gelfMessage.addPart(Body.create(gelfMessage, "fullMessage"));
-        gelfMessage.setSource(Address.create(InetAddress.getLocalHost().getHostName(),
+        gelfMessage.setSource(Address.create(Address.Type.HOSTNAME, InetAddress.getLocalHost().getHostName(),
                 InetAddress.getLoopbackAddress().getHostAddress()));
         gelfMessage.addAttribute("a1", 1);
         gelfMessage.addAttribute("a2", "2");
@@ -74,9 +74,9 @@ public class GelfServiceTest {
         assertEquals(gelfMessage.getSeverity().getLevel(), gelfEvent.getLevel());
         assertEquals(gelfEvent.getVersion(),"1.1");
         assertEquals(gelfMessage.getParts().stream().toList().get(0).getResource().loadAsString(),
-                gelfEvent.getShort_attachment_id().getResource());
+                gelfEvent.getShortMessage().getResource());
         assertEquals(gelfMessage.getParts().stream().toList().get(1).getResource().loadAsString(),
-                gelfEvent.getLong_attachment_id().getResource());
+                gelfEvent.getShortMessage().getResource());
         assertEquals(gelfMessage.getReceivedAt().toLocalDateTime(),gelfEvent.getReceivedAt());
         assertEquals(gelfMessage.getSentAt().toLocalDateTime(),gelfEvent.getSentAt());
         assertEquals(gelfMessage.getFacility().numericalCode(),gelfEvent.getFacility());

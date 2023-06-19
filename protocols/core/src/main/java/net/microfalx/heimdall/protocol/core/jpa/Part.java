@@ -3,6 +3,7 @@ package net.microfalx.heimdall.protocol.core.jpa;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import net.microfalx.heimdall.protocol.core.MimeType;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -23,6 +24,13 @@ public class Part {
     @Column(name = "type", nullable = false)
     @Enumerated(EnumType.STRING)
     private net.microfalx.heimdall.protocol.core.Part.Type type;
+
+    @Column(name = "length", nullable = false)
+    private int length;
+
+    @Column(name = "mime_type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private MimeType mimeType = MimeType.APPLICATION_OCTET_STREAM;
 
     @Column(name = "resource", nullable = false)
     @NotBlank
@@ -54,6 +62,22 @@ public class Part {
 
     public void setType(net.microfalx.heimdall.protocol.core.Part.Type type) {
         this.type = type;
+    }
+
+    public int getLength() {
+        return length;
+    }
+
+    public void setLength(int length) {
+        this.length = length;
+    }
+
+    public MimeType getMimeType() {
+        return mimeType;
+    }
+
+    public void setMimeType(MimeType mimeType) {
+        this.mimeType = mimeType;
     }
 
     public String getResource() {

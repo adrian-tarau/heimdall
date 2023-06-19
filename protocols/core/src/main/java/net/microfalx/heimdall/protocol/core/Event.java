@@ -82,6 +82,12 @@ public interface Event {
     Body getBody();
 
     /**
+     * Returns the body as string.
+     * @return the body, null if there is no body
+     */
+    String getBodyAsString();
+
+    /**
      * Returns a collection with parts associated with the event.
      *
      * @return a non-null instance

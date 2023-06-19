@@ -1,18 +1,20 @@
 package net.microfalx.heimdall.protocol.gelf;
 
+import com.cloudbees.syslog.Facility;
+import com.cloudbees.syslog.Severity;
 import net.datafaker.Faker;
+import net.microfalx.heimdall.protocol.core.Body;
 import net.microfalx.heimdall.protocol.core.ProtocolClient;
 
 import java.io.IOException;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class GelfTestHelper {
 
     private static final int START_PORT = 40000;
     private static final int PORT_RANGE = 10000;
 
-    private static final AtomicInteger IDENTIFIER = new AtomicInteger(1);
+
 
     private ProtocolClient.Transport transport = ProtocolClient.Transport.TCP;
     private final GelfConfiguration configuration;
@@ -31,14 +33,18 @@ public class GelfTestHelper {
 
     void sendLogs(boolean large) throws IOException {
         GelfClient client = new GelfClient();
-        client.setTransport(transport);
         client.setPort(transport == ProtocolClient.Transport.TCP ? configuration.getTcpPort() : configuration.getUdpPort());
+        client.setTransport(transport);
+
+        GelfMessage message = new GelfMessage();
+        message.setFacility(Facility.LOCAL1);
+        message.setGelfSeverity(Severity.EMERGENCY);
         if (large) {
-            client.setMessage(new Faker().text().text(16000, 16000));
+            message.setBody(Body.create(message, new Faker().text().text(16000, 16000)));
         } else {
-            client.setMessage("Test message");
+            message.setBody(Body.create(message, "Test message"));
         }
-        client.setThrowable(new IOException("Something bad happened"));
+        message.setThrowable(new IOException("Something bad happened"));
         client.send(new GelfMessage());
     }
 }

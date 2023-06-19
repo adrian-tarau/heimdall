@@ -8,7 +8,8 @@ public class GelfMessage extends AbstractEvent {
 
     private Facility facility;
     private com.cloudbees.syslog.Severity gelfSeverity;
-    private final String version = "1.1";
+    private String version = "1.1";
+    private Throwable throwable;
 
     public GelfMessage() {
         super(Type.GELF);
@@ -22,9 +23,12 @@ public class GelfMessage extends AbstractEvent {
         this.facility = facility;
     }
 
-
     public String getVersion() {
         return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     public com.cloudbees.syslog.Severity getGelfSeverity() {
@@ -43,5 +47,11 @@ public class GelfMessage extends AbstractEvent {
         return this;
     }
 
+    public Throwable getThrowable() {
+        return throwable;
+    }
 
+    public void setThrowable(Throwable throwable) {
+        this.throwable = throwable;
+    }
 }

@@ -5,48 +5,39 @@ import biz.paluch.logging.gelf.intern.ErrorReporter;
 import biz.paluch.logging.gelf.intern.GelfSender;
 import biz.paluch.logging.gelf.intern.GelfSenderFactory;
 import net.microfalx.heimdall.protocol.core.ProtocolClient;
+import net.microfalx.lang.ExceptionUtils;
+import net.microfalx.lang.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
-public class
-GelfClient extends ProtocolClient<GelfMessage> implements ErrorReporter {
+import static net.microfalx.lang.ExceptionUtils.getStackTrace;
+import static net.microfalx.lang.TextUtils.insertSpaces;
+
+public class GelfClient extends ProtocolClient<GelfMessage> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GelfClient.class);
 
     private MdcGelfMessageAssembler assembler;
-    private String message;
-    private Throwable throwable;
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public Throwable getThrowable() {
-        return throwable;
-    }
-
-    public void setThrowable(Throwable throwable) {
-        this.throwable = throwable;
-    }
-
-    @Override
-    public void reportError(String message, Exception e) {
-        LOGGER.error(message, e);
-    }
 
     @Override
     protected void doSend(GelfMessage event) throws IOException {
         GelfSender sender = createGelfSender();
-        biz.paluch.logging.gelf.intern.GelfMessage gelfMessage = assembler.createGelfMessage(new LogEventImpl());
+        assembler.setFacility(event.getFacility().label());
+        biz.paluch.logging.gelf.intern.GelfMessage gelfMessage = assembler.createGelfMessage(new LogEventImpl(event));
+        if (event.getThrowable() != null) {
+            gelfMessage.setFullMessage(event.getBodyAsString() + ", stacktrace:\n"
+                    + insertSpaces(getStackTrace(event.getThrowable()), 2, false, false, true));
+        }
+        for (Map.Entry<String, Object> attribute : event.getAttributes().entrySet()) {
+            gelfMessage.addField(attribute.getKey(), ObjectUtils.toString(attribute));
+        }
         sender.sendMessage(gelfMessage);
         sender.close();
     }
@@ -57,8 +48,12 @@ GelfClient extends ProtocolClient<GelfMessage> implements ErrorReporter {
     }
 
     private void addAdditionalFields(MdcGelfMessageAssembler assembler) {
-        assembler.addField(new StaticMessageField("Process", "Heimdall Test"));
-        assembler.addField(new StaticMessageField("Server", "Self"));
+        assembler.addField(new StaticMessageField("Application", "Heimdall"));
+        try {
+            assembler.addField(new StaticMessageField("Server", InetAddress.getLocalHost().getHostAddress()));
+        } catch (UnknownHostException e) {
+            // ignore this
+        }
     }
 
     private void createMessageAssembler() throws IOException {
@@ -79,11 +74,21 @@ GelfClient extends ProtocolClient<GelfMessage> implements ErrorReporter {
         return GelfSenderFactory.createSender(assembler, new ErrorReporterImpl(), Collections.<String, Object>emptyMap());
     }
 
-    private class LogEventImpl implements LogEvent {
+    private static class LogEventImpl implements LogEvent {
+
+        private final GelfMessage message;
+
+        public LogEventImpl(GelfMessage message) {
+            this.message = message;
+        }
 
         @Override
         public String getMessage() {
-            return message;
+            try {
+                return message.getBody().getResource().loadAsString();
+            } catch (IOException e) {
+                return ExceptionUtils.throwException(e);
+            }
         }
 
         @Override
@@ -93,7 +98,7 @@ GelfClient extends ProtocolClient<GelfMessage> implements ErrorReporter {
 
         @Override
         public Throwable getThrowable() {
-            return throwable;
+            return message.getThrowable();
         }
 
         @Override
@@ -103,7 +108,7 @@ GelfClient extends ProtocolClient<GelfMessage> implements ErrorReporter {
 
         @Override
         public String getSyslogLevel() {
-            return "2";
+            return Integer.toString(message.getGelfSeverity().numericalCode());
         }
 
         @Override
@@ -122,10 +127,11 @@ GelfClient extends ProtocolClient<GelfMessage> implements ErrorReporter {
         }
     }
 
-    private class ErrorReporterImpl implements ErrorReporter {
+    private static class ErrorReporterImpl implements ErrorReporter {
+
         @Override
         public void reportError(String message, Exception e) {
-
+            LOGGER.error(message, e);
         }
     }
 }

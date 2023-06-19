@@ -1,7 +1,6 @@
 package net.microfalx.heimdall.protocol.smtp;
 
 import net.microfalx.heimdall.protocol.core.ProtocolService;
-import net.microfalx.heimdall.protocol.core.jpa.PartRepository;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpAttachment;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpAttachmentRepository;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent;
@@ -23,8 +22,6 @@ public class SmtpService extends ProtocolService<Email> {
 
     @Autowired
     private SmtpAttachmentRepository attachmentRepository;
-    @Autowired
-    private PartRepository partRepository;
 
     /**
      * Handle one SMTP message (email).
@@ -53,15 +50,9 @@ public class SmtpService extends ProtocolService<Email> {
         smtpEvent.setSubject(email.getName());
         updateAddresses(email, smtpEvent);
         List<SmtpAttachment> attachments = email.getParts().stream().map(part -> {
-            net.microfalx.heimdall.protocol.core.jpa.Part jpaPart = new net.microfalx.heimdall.protocol.core.jpa.Part();
-            jpaPart.setName(part.getName());
-            jpaPart.setType(part.getType());
-            jpaPart.setCreatedAt(part.getEvent().getCreatedAt().toLocalDateTime());
-            jpaPart.setResource(part.getResource().toURI().toASCIIString());
-            partRepository.save(jpaPart);
             SmtpAttachment attachment = new SmtpAttachment();
             attachment.setSmtp(smtpEvent);
-            attachment.setPart(jpaPart);
+            attachment.setPart(persistPart(part));
             return attachment;
         }).toList();
         repository.save(smtpEvent);

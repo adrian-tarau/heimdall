@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.protocol.core;
 
+import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.*;
 
@@ -16,7 +17,7 @@ public abstract class AbstractEvent implements Event {
     private ZonedDateTime receivedAt;
     private ZonedDateTime createdAt;
     private ZonedDateTime sentAt;
-    private Map<String,Object> attributes= new HashMap<>();
+    private Map<String, Object> attributes = new HashMap<>();
 
     private Collection<Part> parts = new ArrayList<>();
 
@@ -125,6 +126,16 @@ public abstract class AbstractEvent implements Event {
     }
 
     @Override
+    public String getBodyAsString() {
+        Body body = getBody();
+        try {
+            return body != null ? body.getResource().loadAsString() : null;
+        } catch (IOException e) {
+            throw new ProtocolException("Body cannot be extracted for " + toString(), e);
+        }
+    }
+
+    @Override
     public ZonedDateTime getReceivedAt() {
         return receivedAt;
     }
@@ -191,7 +202,7 @@ public abstract class AbstractEvent implements Event {
         return Collections.unmodifiableMap(attributes);
     }
 
-    public void addAttribute(String key,Object value){
+    public void addAttribute(String key, Object value) {
         requireNonNull(key);
         requireNonNull(value);
         attributes.put(key, value);

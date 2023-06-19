@@ -5,6 +5,8 @@ import net.microfalx.bootstrap.search.Document;
 import net.microfalx.bootstrap.search.IndexService;
 import net.microfalx.bootstrap.search.SearchService;
 import net.microfalx.heimdall.protocol.core.jpa.AddressRepository;
+import net.microfalx.heimdall.protocol.core.jpa.PartRepository;
+import net.microfalx.lang.IOUtils;
 import net.microfalx.resource.NullResource;
 import net.microfalx.resource.Resource;
 import org.slf4j.Logger;
@@ -15,8 +17,15 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.PeriodicTrigger;
 
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Base class for all protocol services.
@@ -24,6 +33,10 @@ import java.util.concurrent.Future;
 public abstract class ProtocolService<E extends Event> implements InitializingBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolService.class);
+
+    private static final DateTimeFormatter DIRECTORY_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
+    private static final String FILE_NAME_FORMAT = "%09d";
+    private static final AtomicInteger RESOURCE_INDEX = new AtomicInteger();
 
     @Autowired
     private ResourceService resourceService;
@@ -38,11 +51,16 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
     private AddressRepository addressRepository;
 
     @Autowired
+    private PartRepository partRepository;
+
+    @Autowired
     private ProtocolSimulatorProperties simulatorProperties;
 
     @Autowired
     @Qualifier("protocol-executor")
     private ThreadPoolTaskScheduler taskExecutor;
+
+    private Map<LocalDate, AtomicInteger> resourceSequences = new ConcurrentHashMap<>();
 
     /**
      * Returns the resource service.
@@ -136,12 +154,35 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
         net.microfalx.heimdall.protocol.core.jpa.Address addressJpa = addressRepository.findByValue(address.getValue());
         if (addressJpa == null) {
             addressJpa = new net.microfalx.heimdall.protocol.core.jpa.Address();
-            addressJpa.setType(net.microfalx.heimdall.protocol.core.jpa.Address.Type.EMAIL);
+            addressJpa.setType(address.getType());
             addressJpa.setName(address.getName());
             addressJpa.setValue(address.getValue());
             addressRepository.save(addressJpa);
         }
         return addressJpa;
+    }
+
+    /**
+     * Persists the event part in the database.
+     *
+     * @param part the part
+     * @return the JPA part
+     */
+    protected final net.microfalx.heimdall.protocol.core.jpa.Part persistPart(Part part) {
+        Resource resource = persitResource(part.getResource());
+        net.microfalx.heimdall.protocol.core.jpa.Part partJpa = new net.microfalx.heimdall.protocol.core.jpa.Part();
+        partJpa.setType(part.getType());
+        partJpa.setName(part.getName());
+        try {
+            partJpa.setLength((int) part.getResource().length());
+        } catch (IOException e) {
+            partJpa.setLength(-1);
+        }
+        partJpa.setMimeType(MimeType.get(part.getMimeType()));
+        partJpa.setResource(resource.toURI().toASCIIString());
+        partJpa.setCreatedAt(part.getEvent().getCreatedAt().toLocalDateTime());
+        partRepository.save(partJpa);
+        return partJpa;
     }
 
     @Override
@@ -153,6 +194,22 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
         if (!simulatorProperties.isEnabled()) return;
         LOGGER.info("Simulator is enabled, interval " + simulatorProperties.getInterval());
         getTaskScheduler().schedule(new SimulatorWorker(), new PeriodicTrigger(simulatorProperties.getInterval()));
+    }
+
+    private Resource persitResource(Resource resource) {
+        Resource directory = resourceService.getShared(DIRECTORY_DATE_FORMATTER.format(LocalDateTime.now()));
+        Resource target = directory.resolve(String.format(FILE_NAME_FORMAT, getNextSequence()));
+        try {
+            if (!directory.exists()) directory.create();
+            IOUtils.appendStream(target.getOutputStream(), resource.getInputStream());
+        } catch (Exception e) {
+            LOGGER.error("Failed to copy resource part to storage: " + target.toURI() + ", retry later", e);
+        }
+        return target;
+    }
+
+    private int getNextSequence() {
+        return resourceSequences.computeIfAbsent(LocalDate.now(), localDate -> new AtomicInteger(1)).getAndIncrement();
     }
 
     class SimulatorWorker implements Runnable {

@@ -16,7 +16,7 @@ public class Address extends NamedTimestampAware {
 
     @Column(name = "type", nullable = false)
     @Enumerated(EnumType.STRING)
-    private Type type;
+    private net.microfalx.heimdall.protocol.core.Address.Type type;
 
     @Column(name = "value")
     private String value;
@@ -29,14 +29,13 @@ public class Address extends NamedTimestampAware {
         this.id = id;
     }
 
-    public Type getType() {
+    public net.microfalx.heimdall.protocol.core.Address.Type getType() {
         return type;
     }
 
-    public void setType(Type type) {
+    public void setType(net.microfalx.heimdall.protocol.core.Address.Type type) {
         this.type = type;
     }
-
 
     public String getValue() {
         return value;
@@ -66,11 +65,6 @@ public class Address extends NamedTimestampAware {
                 ", type=" + type +
                 ", value='" + value + '\'' +
                 "} " + super.toString();
-    }
-
-    public enum Type {
-        EMAIL,
-        HOSTNAME
     }
 
 }

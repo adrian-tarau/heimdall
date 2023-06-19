@@ -35,8 +35,8 @@ class SmtpServiceTest {
     @BeforeEach
     void setup() {
         email.setName("Email from Alex");
-        email.setSource(Address.create("Alex Tarau", "alex@tarau.net"));
-        email.addTarget(Address.create("Adrian Tarau", "adrian@tarau.net"));
+        email.setSource(Address.create(Address.Type.EMAIL, "Alex Tarau", "alex@tarau.net"));
+        email.addTarget(Address.create(Address.Type.EMAIL, "Adrian Tarau", "adrian@tarau.net"));
         email.setCreatedAt(ZonedDateTime.now());
         email.setSentAt(ZonedDateTime.now().plusSeconds(2));
         email.setReceivedAt(email.getSentAt().plusSeconds(5));

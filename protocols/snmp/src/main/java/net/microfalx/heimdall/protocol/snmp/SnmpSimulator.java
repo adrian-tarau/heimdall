@@ -22,7 +22,7 @@ public class SnmpSimulator extends ProtocolSimulator<SnmpTrap, SnmpClient> {
 
     @Override
     protected Address createAddress() {
-        return Address.create("10.0.0." + SOURCE_INDEX_GENERATOR.getAndIncrement());
+        return Address.create(Address.Type.HOSTNAME, "192.168.2." + SOURCE_INDEX_GENERATOR.getAndIncrement());
     }
 
     @Override
@@ -35,7 +35,7 @@ public class SnmpSimulator extends ProtocolSimulator<SnmpTrap, SnmpClient> {
     @Override
     protected void simulate(ProtocolClient<SnmpTrap> client, Address address, int index) throws IOException {
         SnmpTrap trap = new SnmpTrap();
-        trap.setSource(Address.create("Client", "localhost"));
+        trap.setSource(Address.create(Address.Type.HOSTNAME, "localhost"));
         trap.setBody(Body.create(trap, "Test Message"));
         client.send(trap);
     }

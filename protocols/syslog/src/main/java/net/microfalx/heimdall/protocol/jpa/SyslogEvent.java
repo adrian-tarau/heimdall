@@ -21,7 +21,7 @@ public class SyslogEvent extends TimestampAware {
 
     @OneToOne
     @JoinColumn(name = "message_id", nullable = false)
-    private Part part;
+    private Part message;
 
     @Column(name = "severity", nullable = false)
     private Integer severity;
@@ -45,12 +45,12 @@ public class SyslogEvent extends TimestampAware {
         this.address = address;
     }
 
-    public Part getPart() {
-        return part;
+    public Part getMessage() {
+        return message;
     }
 
-    public void setPart(Part part) {
-        this.part = part;
+    public void setMessage(Part message) {
+        this.message = message;
     }
 
     public Integer getFacility() {

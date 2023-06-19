@@ -22,13 +22,13 @@ public class GelfEvent extends TimestampAware {
     @NotNull
     private Address address;
 
-    @JoinColumn(name = "short_attachment_id")
+    @JoinColumn(name = "short_message_id")
     @OneToOne
-    private Part short_attachment_id;
+    private Part shortMessage;
 
-    @JoinColumn(name = "long_attachment_id")
+    @JoinColumn(name = "long_message_id")
     @OneToOne
-    private Part long_attachment_id;
+    private Part longMessage;
 
     @Column(name = "version", length = 50, nullable = false)
     @NotBlank
@@ -59,20 +59,20 @@ public class GelfEvent extends TimestampAware {
         this.address = address;
     }
 
-    public Part getShort_attachment_id() {
-        return short_attachment_id;
+    public Part getShortMessage() {
+        return shortMessage;
     }
 
-    public void setShort_attachment_id(Part short_attachment_id) {
-        this.short_attachment_id = short_attachment_id;
+    public void setShortMessage(Part shortMessage) {
+        this.shortMessage = shortMessage;
     }
 
-    public Part getLong_attachment_id() {
-        return long_attachment_id;
+    public Part getLongMessage() {
+        return longMessage;
     }
 
-    public void setLong_attachment_id(Part long_attachment_id) {
-        this.long_attachment_id = long_attachment_id;
+    public void setLongMessage(Part longMessage) {
+        this.longMessage = longMessage;
     }
 
     public String getVersion() {

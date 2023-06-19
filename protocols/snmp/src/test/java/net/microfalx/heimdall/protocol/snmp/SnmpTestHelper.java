@@ -35,7 +35,7 @@ class SnmpTestHelper {
         SnmpClient client = new SnmpClient();
         client.setTransport(transport);
         SnmpTrap trap = new SnmpTrap();
-        trap.setSource(Address.create("Client","localhost"));
+        trap.setSource(Address.create(Address.Type.HOSTNAME, "localhost"));
         trap.setBody(Body.create(trap, "Test Message"));
         client.setPort(transport == ProtocolClient.Transport.TCP ? configuration.getTcpPort() : configuration.getUdpPort());
         if (large) {

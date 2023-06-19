@@ -46,7 +46,7 @@ class SyslogServiceTest {
     @BeforeEach
     void setMessage() throws UnknownHostException {
         message.setFacility(Facility.ALERT);
-        Address address = Address.create(InetAddress.getLocalHost().getHostName(),
+        Address address = Address.create(Address.Type.HOSTNAME, InetAddress.getLocalHost().getHostName(),
                 InetAddress.getLocalHost().getHostAddress());
         message.setSource(address);
         message.setBody(Body.create(message, "Body has a text"));
