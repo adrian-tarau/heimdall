@@ -13,9 +13,7 @@ import org.snmp4j.mp.MPv3;
 import org.snmp4j.security.SecurityModels;
 import org.snmp4j.security.SecurityProtocols;
 import org.snmp4j.security.USM;
-import org.snmp4j.smi.Address;
-import org.snmp4j.smi.OctetString;
-import org.snmp4j.smi.UdpAddress;
+import org.snmp4j.smi.*;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
 import org.snmp4j.util.MultiThreadedMessageDispatcher;
 import org.snmp4j.util.WorkerPool;
@@ -25,6 +23,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 @Component
 public class SnmpServer implements CommandResponder {
@@ -46,8 +48,14 @@ public class SnmpServer implements CommandResponder {
     public <A extends Address> void processPdu(CommandResponderEvent<A> event) {
         event.setProcessed(true);
         PDU pdu = event.getPDU();
-        // TODO translate traps to our trap event, the PDU contains the info in bindings, and the event the rest of the ino
         LOGGER.info("Received trap from " + event.getPeerAddress() + ", PDU: " + pdu);
+        SnmpEvent snmpEvent = new SnmpEvent();
+        updateCommonAttributes(snmpEvent, pdu);
+        updateAddresses(snmpEvent, event);
+        for (VariableBinding variable : pdu.getVariableBindings()) {
+            updateBindings(snmpEvent, variable);
+        }
+        snmpService.handle(snmpEvent);
     }
 
     @PostConstruct
@@ -115,6 +123,33 @@ public class SnmpServer implements CommandResponder {
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(5);
         executor.initialize();
+    }
+
+    private void updateCommonAttributes(SnmpEvent event, PDU pdu) {
+        event.setEnterprise("dummy");
+        event.setCommunity("public");
+        event.setCreatedAt(ZonedDateTime.now());
+        event.setSentAt(ZonedDateTime.now());
+        event.setReceivedAt(ZonedDateTime.now());
+        event.setName("SNMP Trap");
+    }
+
+    private <A extends Address> void updateAddresses(SnmpEvent snmpEvent, CommandResponderEvent<A> event) {
+        InetSocketAddress address = (InetSocketAddress) event.getPeerAddress().getSocketAddress();
+        snmpEvent.setSource(net.microfalx.heimdall.protocol.core.Address.
+                create(net.microfalx.heimdall.protocol.core.Address.Type.HOSTNAME,
+                        address.getAddress().getHostAddress()));
+    }
+
+    private void updateBindings(SnmpEvent snmpEvent, VariableBinding variable) {
+        String attributeName = variable.getOid().format();
+        Variable attributeValue = variable.getVariable();
+        if (attributeValue instanceof Integer32) {
+            snmpEvent.addAttribute(attributeName, ((Integer32) attributeValue).getValue());
+        } else if (attributeValue instanceof TimeTicks) {
+            snmpEvent.setReceivedAt(ZonedDateTime.ofInstant(Instant.
+                    ofEpochSecond(((TimeTicks) attributeValue).getValue()), ZoneId.systemDefault()));
+        }
     }
 
     static class WorkerPoolImpl implements WorkerPool {
