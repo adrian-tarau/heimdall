@@ -71,6 +71,7 @@
         <bootstrap.version>1.0.0-SNAPSHOT</bootstrap.version>
         <apache.tika.version>2.8.0</apache.tika.version>
         <subethasmtp.version>6.0.5</subethasmtp.version>
+        <datafaker.version>1.9.0</datafaker.version>
         <syslog4j.version>0.9.61</syslog4j.version>
         <logstash-gelf.version>1.15.0</logstash-gelf.version>
         <snmp4j.version>3.7.7</snmp4j.version>
@@ -181,6 +182,12 @@
                 <version>${apache.tika.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>net.datafaker</groupId>
+                <artifactId>datafaker</artifactId>
+                <version>${datafaker.version}</version>
             </dependency>
 
             <!-- Tests -->

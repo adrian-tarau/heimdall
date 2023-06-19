@@ -17,24 +17,17 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import static net.microfalx.lang.ExceptionUtils.getStackTrace;
-import static net.microfalx.lang.TextUtils.insertSpaces;
-
-public class GelfClient extends ProtocolClient<GelfMessage> {
+public class GelfClient extends ProtocolClient<GelfEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GelfClient.class);
 
     private MdcGelfMessageAssembler assembler;
 
     @Override
-    protected void doSend(GelfMessage event) throws IOException {
+    protected void doSend(GelfEvent event) throws IOException {
+        createMessageAssembler(event);
         GelfSender sender = createGelfSender();
-        assembler.setFacility(event.getFacility().label());
         biz.paluch.logging.gelf.intern.GelfMessage gelfMessage = assembler.createGelfMessage(new LogEventImpl(event));
-        if (event.getThrowable() != null) {
-            gelfMessage.setFullMessage(event.getBodyAsString() + ", stacktrace:\n"
-                    + insertSpaces(getStackTrace(event.getThrowable()), 2, false, false, true));
-        }
         for (Map.Entry<String, Object> attribute : event.getAttributes().entrySet()) {
             gelfMessage.addField(attribute.getKey(), ObjectUtils.toString(attribute));
         }
@@ -56,29 +49,28 @@ public class GelfClient extends ProtocolClient<GelfMessage> {
         }
     }
 
-    private void createMessageAssembler() throws IOException {
-        if (assembler != null) return;
+    private void createMessageAssembler(GelfEvent event) throws IOException {
         assembler = new MdcGelfMessageAssembler();
-        addAdditionalFields(assembler);
+        assembler.setFacility(event.getFacility().label());
         assembler.setHost(getTransport().name().toLowerCase() + ":" + getHostName());
         assembler.setPort(getPort());
-        assembler.setFacility("LOCAL1");
+        assembler.setOriginHost(event.getSource().getName());
+        assembler.setExtractStackTrace(true);
         assembler.setFilterStackTrace(true);
         assembler.setIncludeLocation(true);
-        assembler.setOriginHost(InetAddress.getLocalHost().getHostAddress());
         assembler.setTimestampPattern("yyyy-MM-dd HH:mm:ss,SSS");
+        addAdditionalFields(assembler);
     }
 
     protected GelfSender createGelfSender() throws IOException {
-        createMessageAssembler();
         return GelfSenderFactory.createSender(assembler, new ErrorReporterImpl(), Collections.<String, Object>emptyMap());
     }
 
     private static class LogEventImpl implements LogEvent {
 
-        private final GelfMessage message;
+        private final GelfEvent message;
 
-        public LogEventImpl(GelfMessage message) {
+        public LogEventImpl(GelfEvent message) {
             this.message = message;
         }
 

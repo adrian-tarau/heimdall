@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
-public class SnmpSimulator extends ProtocolSimulator<SnmpTrap, SnmpClient> {
+public class SnmpSimulator extends ProtocolSimulator<SnmpEvent, SnmpClient> {
 
     private static final AtomicInteger SOURCE_INDEX_GENERATOR = new AtomicInteger(1);
 
@@ -26,17 +26,18 @@ public class SnmpSimulator extends ProtocolSimulator<SnmpTrap, SnmpClient> {
     }
 
     @Override
-    protected Collection<ProtocolClient<SnmpTrap>> createClients() {
+    protected Collection<ProtocolClient<SnmpEvent>> createClients() {
         SnmpClient udpClient = new SnmpClient();
         udpClient.setPort(configuration.getUdpPort());
         return Arrays.asList(udpClient);
     }
 
     @Override
-    protected void simulate(ProtocolClient<SnmpTrap> client, Address address, int index) throws IOException {
-        SnmpTrap trap = new SnmpTrap();
+    protected void simulate(ProtocolClient<SnmpEvent> client, Address address, int index) throws IOException {
+        SnmpEvent trap = new SnmpEvent();
         trap.setSource(Address.create(Address.Type.HOSTNAME, "localhost"));
-        trap.setBody(Body.create(trap, "Test Message"));
+        trap.addTarget(Address.create(Address.Type.HOSTNAME, client.getHostName()));
+        trap.setBody(Body.create(getNextBody()));
         client.send(trap);
     }
 }

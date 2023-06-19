@@ -44,9 +44,9 @@ public class SmtpService extends ProtocolService<Email> {
      */
     private void handleDatabase(Email email) {
         SmtpEvent smtpEvent = new SmtpEvent();
+        smtpEvent.setCreatedAt(email.getCreatedAt().toLocalDateTime());
         smtpEvent.setSentAt(email.getSentAt().toLocalDateTime());
         smtpEvent.setReceivedAt(email.getReceivedAt().toLocalDateTime());
-        //smtp.setCreatedAt(email.getCreatedAt().toLocalDateTime());
         smtpEvent.setSubject(email.getName());
         updateAddresses(email, smtpEvent);
         List<SmtpAttachment> attachments = email.getParts().stream().map(part -> {

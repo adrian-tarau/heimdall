@@ -17,9 +17,11 @@ public class Part {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "name", nullable = false)
-    @NotBlank
+    @Column(name = "name")
     private String name;
+
+    @Column(name = "file_name")
+    private String fileName;
 
     @Column(name = "type", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -54,6 +56,14 @@ public class Part {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public net.microfalx.heimdall.protocol.core.Part.Type getType() {

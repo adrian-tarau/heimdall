@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.protocol.core;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.microfalx.bootstrap.resource.ResourceService;
 import net.microfalx.bootstrap.search.Document;
 import net.microfalx.bootstrap.search.IndexService;
@@ -18,6 +19,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.PeriodicTrigger;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -26,6 +28,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static net.microfalx.lang.StringUtils.NA_STRING;
 
 /**
  * Base class for all protocol services.
@@ -36,7 +40,6 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
 
     private static final DateTimeFormatter DIRECTORY_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
     private static final String FILE_NAME_FORMAT = "%09d";
-    private static final AtomicInteger RESOURCE_INDEX = new AtomicInteger();
 
     @Autowired
     private ResourceService resourceService;
@@ -163,6 +166,23 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
     }
 
     /**
+     * Encodes the attributes into a JSON.
+     *
+     * @param event the event
+     * @return the JSON
+     */
+    protected final String encodeAttributes(E event) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        StringWriter writer = new StringWriter();
+        try {
+            objectMapper.writeValue(writer, event.getAttributes());
+        } catch (IOException e) {
+            // It will never happen
+        }
+        return writer.toString();
+    }
+
+    /**
      * Persists the event part in the database.
      *
      * @param part the part
@@ -172,7 +192,8 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
         Resource resource = persitResource(part.getResource());
         net.microfalx.heimdall.protocol.core.jpa.Part partJpa = new net.microfalx.heimdall.protocol.core.jpa.Part();
         partJpa.setType(part.getType());
-        partJpa.setName(part.getName());
+        if (!NA_STRING.equals(part.getName())) partJpa.setName(part.getName());
+        partJpa.setFileName(part.getFileName());
         try {
             partJpa.setLength((int) part.getResource().length());
         } catch (IOException e) {

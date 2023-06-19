@@ -4,6 +4,7 @@ create table protocol_smtp_events
     subject     varchar(500),
     from_id     integer  not null,
     to_id       integer  not null,
+    created_at  datetime not null,
     sent_at     datetime not null,
     received_at datetime not null,
     constraint fk$smtps$from foreign key (from_id) references protocol_addresses (id),

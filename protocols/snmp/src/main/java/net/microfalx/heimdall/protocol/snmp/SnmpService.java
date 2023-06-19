@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class SnmpService extends ProtocolService<SnmpTrap> {
+public class SnmpService extends ProtocolService<SnmpEvent> {
 
     @Autowired
     private SnmpSimulator simulator;
@@ -18,7 +18,7 @@ public class SnmpService extends ProtocolService<SnmpTrap> {
         return simulator;
     }
 
-    public void handle(SnmpTrap trap) {
+    public void handle(SnmpEvent trap) {
 
     }
 

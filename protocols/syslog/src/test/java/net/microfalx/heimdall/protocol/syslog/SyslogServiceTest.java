@@ -49,7 +49,7 @@ class SyslogServiceTest {
         Address address = Address.create(Address.Type.HOSTNAME, InetAddress.getLocalHost().getHostName(),
                 InetAddress.getLocalHost().getHostAddress());
         message.setSource(address);
-        message.setBody(Body.create(message, "Body has a text"));
+        message.setBody(Body.create("Body has a text"));
         message.setSyslogSeverity(Severity.ALERT);
         message.setReceivedAt(ZonedDateTime.now());
         message.setCreatedAt(ZonedDateTime.now());

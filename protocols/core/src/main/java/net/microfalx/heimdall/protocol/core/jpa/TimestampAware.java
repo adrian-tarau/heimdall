@@ -1,4 +1,4 @@
-package net.microfalx.heimdall.protocol.core;
+package net.microfalx.heimdall.protocol.core.jpa;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
@@ -14,12 +14,24 @@ import java.time.LocalDateTime;
 @MappedSuperclass
 public abstract class TimestampAware {
 
+    @Column(name = "created_at", nullable = false)
+    @NotNull
+    private LocalDateTime createdAt;
+
     @Column(name = "sent_at", nullable = false)
     @NotNull
     private LocalDateTime sentAt;
 
     @Column(name = "received_at", nullable = false)
     private LocalDateTime receivedAt;
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 
     public LocalDateTime getSentAt() {
         return sentAt;

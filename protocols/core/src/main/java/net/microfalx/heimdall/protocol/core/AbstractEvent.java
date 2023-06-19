@@ -190,6 +190,7 @@ public abstract class AbstractEvent implements Event {
     public void addPart(Part part) {
         requireNonNull(part);
         parts.add(part);
+        if (part instanceof AbstractPart apart) apart.setEvent(this);
     }
 
     /**

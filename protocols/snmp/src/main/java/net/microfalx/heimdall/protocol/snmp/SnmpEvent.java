@@ -2,9 +2,9 @@ package net.microfalx.heimdall.protocol.snmp;
 
 import net.microfalx.heimdall.protocol.core.AbstractEvent;
 
-public class SnmpTrap extends AbstractEvent {
+public class SnmpEvent extends AbstractEvent {
 
-    public SnmpTrap() {
+    public SnmpEvent() {
         super(Type.SNMP);
     }
 }

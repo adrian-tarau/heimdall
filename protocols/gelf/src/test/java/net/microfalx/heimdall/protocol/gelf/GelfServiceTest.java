@@ -6,7 +6,6 @@ import net.microfalx.heimdall.protocol.core.Address;
 import net.microfalx.heimdall.protocol.core.Body;
 import net.microfalx.heimdall.protocol.core.jpa.AddressRepository;
 import net.microfalx.heimdall.protocol.core.jpa.PartRepository;
-import net.microfalx.heimdall.protocol.jpa.GelfEvent;
 import net.microfalx.heimdall.protocol.jpa.GelfEventRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,23 +40,23 @@ public class GelfServiceTest {
     @Spy
     private GelfConfiguration configuration;
 
-    private GelfMessage gelfMessage = new GelfMessage();
+    private GelfEvent gelfEvent = new GelfEvent();
 
     @BeforeEach
     void setUp() throws UnknownHostException {
-        gelfMessage.setFacility(Facility.LOCAL1);
-        gelfMessage.setCreatedAt(ZonedDateTime.now());
-        gelfMessage.setReceivedAt(ZonedDateTime.now());
-        gelfMessage.setSentAt(ZonedDateTime.now());
-        gelfMessage.setName("Gelf Message");
-        gelfMessage.setGelfSeverity(Severity.INFORMATIONAL);
-        gelfMessage.addPart(Body.create(gelfMessage, "shortMessage"));
-        gelfMessage.addPart(Body.create(gelfMessage, "fullMessage"));
-        gelfMessage.setSource(Address.create(Address.Type.HOSTNAME, InetAddress.getLocalHost().getHostName(),
+        gelfEvent.setFacility(Facility.LOCAL1);
+        gelfEvent.setCreatedAt(ZonedDateTime.now());
+        gelfEvent.setReceivedAt(ZonedDateTime.now());
+        gelfEvent.setSentAt(ZonedDateTime.now());
+        gelfEvent.setName("Gelf Message");
+        gelfEvent.setGelfSeverity(Severity.INFORMATIONAL);
+        gelfEvent.addPart(Body.create("shortMessage"));
+        gelfEvent.addPart(Body.create("fullMessage"));
+        gelfEvent.setSource(Address.create(Address.Type.HOSTNAME, InetAddress.getLocalHost().getHostName(),
                 InetAddress.getLoopbackAddress().getHostAddress()));
-        gelfMessage.addAttribute("a1", 1);
-        gelfMessage.addAttribute("a2", "2");
-        gelfMessage.setGelfSeverity(Severity.INFORMATIONAL);
+        gelfEvent.addAttribute("a1", 1);
+        gelfEvent.addAttribute("a2", "2");
+        gelfEvent.setGelfSeverity(Severity.INFORMATIONAL);
     }
 
     @Test
@@ -67,20 +66,20 @@ public class GelfServiceTest {
 
     @Test
     void sendTcp() throws IOException {
-        ArgumentCaptor<GelfEvent> smtpCapture = ArgumentCaptor.forClass(GelfEvent.class);
-        gelfService.handle(gelfMessage);
+        ArgumentCaptor<net.microfalx.heimdall.protocol.jpa.GelfEvent> smtpCapture = ArgumentCaptor.forClass(net.microfalx.heimdall.protocol.jpa.GelfEvent.class);
+        gelfService.handle(gelfEvent);
         Mockito.verify(gelfEventRepository).save(smtpCapture.capture());
-        GelfEvent gelfEvent = smtpCapture.getValue();
-        assertEquals(gelfMessage.getSeverity().getLevel(), gelfEvent.getLevel());
-        assertEquals(gelfEvent.getVersion(),"1.1");
-        assertEquals(gelfMessage.getParts().stream().toList().get(0).getResource().loadAsString(),
+        net.microfalx.heimdall.protocol.jpa.GelfEvent gelfEvent = smtpCapture.getValue();
+        assertEquals(this.gelfEvent.getSeverity().getLevel(), gelfEvent.getLevel());
+        assertEquals(this.gelfEvent.getVersion(), "1.1");
+        assertEquals(this.gelfEvent.getParts().stream().toList().get(0).getResource().loadAsString(),
                 gelfEvent.getShortMessage().getResource());
-        assertEquals(gelfMessage.getParts().stream().toList().get(1).getResource().loadAsString(),
+        assertEquals(this.gelfEvent.getParts().stream().toList().get(1).getResource().loadAsString(),
                 gelfEvent.getShortMessage().getResource());
-        assertEquals(gelfMessage.getReceivedAt().toLocalDateTime(),gelfEvent.getReceivedAt());
-        assertEquals(gelfMessage.getSentAt().toLocalDateTime(),gelfEvent.getSentAt());
-        assertEquals(gelfMessage.getFacility().numericalCode(),gelfEvent.getFacility());
-        assertEquals("{\"a1\":1,\"a2\":\"2\"}",gelfEvent.getFields());
+        assertEquals(this.gelfEvent.getReceivedAt().toLocalDateTime(), gelfEvent.getReceivedAt());
+        assertEquals(this.gelfEvent.getSentAt().toLocalDateTime(), gelfEvent.getSentAt());
+        assertEquals(this.gelfEvent.getFacility().numericalCode(), gelfEvent.getFacility());
+        assertEquals("{\"a1\":1,\"a2\":\"2\"}", gelfEvent.getFields());
     }
 
 }

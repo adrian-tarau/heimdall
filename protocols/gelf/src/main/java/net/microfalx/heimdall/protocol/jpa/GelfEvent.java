@@ -3,17 +3,18 @@ package net.microfalx.heimdall.protocol.jpa;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import net.microfalx.heimdall.protocol.core.TimestampAware;
 import net.microfalx.heimdall.protocol.core.jpa.Address;
+import net.microfalx.heimdall.protocol.core.jpa.Event;
 import net.microfalx.heimdall.protocol.core.jpa.Part;
 
 import java.util.Objects;
 
 @Entity
 @Table(name = "protocol_gelf_events")
-public class GelfEvent extends TimestampAware {
+public class GelfEvent extends Event {
 
     @Id
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -30,18 +31,19 @@ public class GelfEvent extends TimestampAware {
     @OneToOne
     private Part longMessage;
 
+    @JoinColumn(name = "fields_id")
+    @OneToOne
+    private Part fields;
+
     @Column(name = "version", length = 50, nullable = false)
     @NotBlank
     private String version;
 
     @Column(name = "level", nullable = false)
-    private Integer level;
+    private int level;
 
     @Column(name = "facility", nullable = false)
-    private Integer facility;
-
-    @Column(name = "fields", nullable = false, length = 4000)
-    private String fields;
+    private int facility;
 
     public Long getId() {
         return id;
@@ -75,6 +77,14 @@ public class GelfEvent extends TimestampAware {
         this.longMessage = longMessage;
     }
 
+    public Part getFields() {
+        return fields;
+    }
+
+    public void setFields(Part fields) {
+        this.fields = fields;
+    }
+
     public String getVersion() {
         return version;
     }
@@ -83,28 +93,20 @@ public class GelfEvent extends TimestampAware {
         this.version = version;
     }
 
-    public Integer getLevel() {
+    public int getLevel() {
         return level;
     }
 
-    public void setLevel(Integer level) {
+    public void setLevel(int level) {
         this.level = level;
     }
 
-    public Integer getFacility() {
+    public int getFacility() {
         return facility;
     }
 
-    public void setFacility(Integer facility) {
+    public void setFacility(int facility) {
         this.facility = facility;
-    }
-
-    public String getFields() {
-        return fields;
-    }
-
-    public void setFields(String fields) {
-        this.fields = fields;
     }
 
     @Override

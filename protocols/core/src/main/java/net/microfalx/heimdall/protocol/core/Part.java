@@ -1,18 +1,13 @@
 package net.microfalx.heimdall.protocol.core;
 
+import net.microfalx.lang.Descriptable;
+import net.microfalx.lang.Nameable;
 import net.microfalx.resource.Resource;
 
 /**
  * Holds a part of the event.
  */
-public interface Part {
-
-    /**
-     * Returns a unique identifier for a part.
-     *
-     * @return a non-null instance
-     */
-    String getId();
+public interface Part extends Nameable, Descriptable {
 
     /**
      * Returns the name of the part.

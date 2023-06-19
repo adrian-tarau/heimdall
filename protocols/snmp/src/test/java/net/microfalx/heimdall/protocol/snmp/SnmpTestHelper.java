@@ -34,14 +34,14 @@ class SnmpTestHelper {
     void sendTrap(boolean large) throws IOException {
         SnmpClient client = new SnmpClient();
         client.setTransport(transport);
-        SnmpTrap trap = new SnmpTrap();
+        SnmpEvent trap = new SnmpEvent();
         trap.setSource(Address.create(Address.Type.HOSTNAME, "localhost"));
-        trap.setBody(Body.create(trap, "Test Message"));
+        trap.setBody(Body.create("Test Message"));
         client.setPort(transport == ProtocolClient.Transport.TCP ? configuration.getTcpPort() : configuration.getUdpPort());
         if (large) {
-            trap.setBody(Body.create(trap, new Faker().text().text(16000, 16000)));
+            trap.setBody(Body.create(new Faker().text().text(16000, 16000)));
         } else {
-            trap.setBody(Body.create(trap, "Test Message"));
+            trap.setBody(Body.create("Test Message"));
         }
         client.send(trap);
     }

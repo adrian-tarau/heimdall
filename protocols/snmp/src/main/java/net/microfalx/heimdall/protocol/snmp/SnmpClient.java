@@ -13,7 +13,7 @@ import java.net.ProtocolException;
 
 import static org.snmp4j.mp.SnmpConstants.SNMP_ERROR_SUCCESS;
 
-public class SnmpClient extends ProtocolClient<SnmpTrap> {
+public class SnmpClient extends ProtocolClient<SnmpEvent> {
 
     private static final long startTime = System.currentTimeMillis();
     private int version = SnmpConstants.version2c;
@@ -46,7 +46,7 @@ public class SnmpClient extends ProtocolClient<SnmpTrap> {
     }
 
     @Override
-    protected void doSend(SnmpTrap event) throws IOException {
+    protected void doSend(SnmpEvent event) throws IOException {
         PDU pdu;
         if (version == SnmpConstants.version3) {
             ScopedPDU scopedPDU = new ScopedPDU();

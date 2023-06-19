@@ -1,18 +1,16 @@
 package net.microfalx.heimdall.protocol.gelf;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import net.microfalx.heimdall.protocol.core.Attachment;
 import net.microfalx.heimdall.protocol.core.ProtocolService;
-import net.microfalx.heimdall.protocol.jpa.GelfEvent;
 import net.microfalx.heimdall.protocol.jpa.GelfEventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.Iterator;
 
 @Service
-public class GelfService extends ProtocolService<GelfMessage> {
+public class GelfService extends ProtocolService<GelfEvent> {
 
     @Autowired
     private GelfEventRepository gelfEventRepository;
@@ -25,20 +23,21 @@ public class GelfService extends ProtocolService<GelfMessage> {
      *
      * @param message the GELF message
      */
-    public void handle(GelfMessage message) throws IOException {
-        GelfEvent gelfEvent = new GelfEvent();
+    public void handle(GelfEvent message) throws IOException {
+        net.microfalx.heimdall.protocol.jpa.GelfEvent gelfEvent = new net.microfalx.heimdall.protocol.jpa.GelfEvent();
         gelfEvent.setFacility(message.getFacility().numericalCode());
         gelfEvent.setLevel(message.getSeverity().getLevel());
         gelfEvent.setVersion(message.getVersion());
         gelfEvent.setAddress(lookupAddress(message.getSource()));
+        gelfEvent.setCreatedAt(message.getCreatedAt().toLocalDateTime());
         gelfEvent.setReceivedAt(message.getReceivedAt().toLocalDateTime());
         gelfEvent.setSentAt(message.getSentAt().toLocalDateTime());
-        gelfEvent.setFields(encodeFields(message));
         Iterator<net.microfalx.heimdall.protocol.core.Part> parts = message.getParts().iterator();
         gelfEvent.setShortMessage(persistPart(parts.next()));
-        if (parts.hasNext()) {
-            gelfEvent.setLongMessage(persistPart(parts.next()));
-        }
+        if (parts.hasNext()) gelfEvent.setLongMessage(persistPart(parts.next()));
+        Attachment fields = Attachment.create(encodeAttributes(message));
+        message.addPart(fields);
+        gelfEvent.setFields(persistPart(fields));
         gelfEventRepository.save(gelfEvent);
     }
 
@@ -46,17 +45,5 @@ public class GelfService extends ProtocolService<GelfMessage> {
     protected GelfSimulator getSimulator() {
         return gelfSimulator;
     }
-
-    private String encodeFields(GelfMessage gelfMessage) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        StringWriter writer = new StringWriter();
-        try {
-            objectMapper.writeValue(writer, gelfMessage.getAttributes());
-        } catch (IOException e) {
-            // It will never happen
-        }
-        return writer.toString();
-    }
-
 
 }

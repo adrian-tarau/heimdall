@@ -41,7 +41,7 @@ public class GelfServiceIntegrationTest {
     @Autowired
     private GelfConfiguration gelfConfiguration;
 
-    private GelfMessage gelfMessage = new GelfMessage();
+    private GelfEvent gelfEvent = new GelfEvent();
 
     private GelfTestHelper helper;
 

@@ -140,14 +140,14 @@ public class GelfServer implements InitializingBean, ProtocolServerHandler {
         if (LOGGER.isDebugEnabled()) LOGGER.debug("Received GELF event:\n" + jsonNode.toPrettyString());
         String shortMessage = getField(jsonNode, "short_message");
         String fullMessage = getRequiredField(jsonNode, "full_message");
-        String host = net.microfalx.lang.StringUtils.defaultIfNull(getRequiredField(jsonNode, "host"), "0.0.0.0");
-        GelfMessage message = new GelfMessage();
+        String host = net.microfalx.lang.StringUtils.defaultIfNull(getField(jsonNode, "host"), "0.0.0.0");
+        GelfEvent message = new GelfEvent();
         message.setFacility(Facility.fromLabel(getRequiredField(jsonNode, "facility")));
         message.setName(StringUtils.abbreviate(shortMessage, 80));
         message.setReceivedAt(ZonedDateTime.now());
         message.setSource(Address.create(Address.Type.HOSTNAME, host));
-        message.addPart(Body.create(message, shortMessage));
-        message.addPart(Body.create(message, fullMessage));
+        message.addPart(Body.create(shortMessage));
+        message.addPart(Body.create(fullMessage));
         message.setCreatedAt(createTimeStamp(jsonNode));
         message.setSentAt(createTimeStamp(jsonNode));
         message.setGelfSeverity(Severity.fromNumericalCode(getRequiredIntField(jsonNode, "level")));
@@ -155,12 +155,12 @@ public class GelfServer implements InitializingBean, ProtocolServerHandler {
         gelfService.handle(message);
     }
 
-    private void addAllJsonFields(GelfMessage gelfMessage, JsonNode jsonNode) {
+    private void addAllJsonFields(GelfEvent gelfEvent, JsonNode jsonNode) {
         Iterator<Map.Entry<String, JsonNode>> fields = jsonNode.fields();
         while (fields.hasNext()) {
             Map.Entry<String, JsonNode> field = fields.next();
             if (field.getKey().startsWith("_")) {
-                gelfMessage.addAttribute(field.getKey().substring(1), field.getValue());
+                gelfEvent.addAttribute(field.getKey().substring(1), field.getValue());
             }
         }
     }

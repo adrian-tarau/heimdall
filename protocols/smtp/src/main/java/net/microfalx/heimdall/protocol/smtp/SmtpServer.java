@@ -7,9 +7,9 @@ import jakarta.mail.Session;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import net.microfalx.heimdall.protocol.core.Address;
+import net.microfalx.heimdall.protocol.core.Attachment;
 import net.microfalx.heimdall.protocol.core.Body;
 import net.microfalx.heimdall.protocol.core.Part;
-import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.StreamResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,9 +111,7 @@ public class SmtpServer implements InitializingBean, BasicMessageListener {
 
     private Body extractBody(Email email, MimeMessage message) throws MessagingException, IOException {
         if (message.getContent() instanceof String) {
-            Body body = new Body(email);
-            body.setResource(MemoryResource.create((String) message.getContent()));
-            return body;
+            return Body.create((String) message.getContent());
         } else {
             return null;
         }
@@ -125,17 +123,11 @@ public class SmtpServer implements InitializingBean, BasicMessageListener {
         for (int i = 0; i < multipart.getCount(); i++) {
             BodyPart bodyPart = multipart.getBodyPart(i);
             if (bodyPart.getContent() instanceof String) {
-                Body body = new Body(email);
-                body.setResource(MemoryResource.create((String) message.getContent()));
-                parts.add(body);
+                parts.add(Body.create((String) message.getContent()));
             } else if (isNotEmpty(bodyPart.getFileName())) {
-                Attachment attachment = new Attachment(email);
-                attachment.setResource(StreamResource.create(bodyPart.getInputStream()));
-                parts.add(attachment);
+                parts.add(Attachment.create(StreamResource.create(bodyPart.getInputStream())));
             } else {
-                Body body = new Body(email);
-                body.setResource(StreamResource.create(bodyPart.getInputStream()));
-                parts.add(body);
+                parts.add(Body.create(StreamResource.create(bodyPart.getInputStream())));
             }
         }
         return parts;

@@ -1,8 +1,8 @@
 package net.microfalx.heimdall.protocol.smtp.jpa;
 
 import jakarta.persistence.*;
-import net.microfalx.heimdall.protocol.core.TimestampAware;
 import net.microfalx.heimdall.protocol.core.jpa.Address;
+import net.microfalx.heimdall.protocol.core.jpa.Event;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,7 +12,7 @@ import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
 @Entity
 @Table(name = "protocol_smtp_events")
-public class SmtpEvent extends TimestampAware {
+public class SmtpEvent extends Event {
 
     @Id
     @Column(name = "id")

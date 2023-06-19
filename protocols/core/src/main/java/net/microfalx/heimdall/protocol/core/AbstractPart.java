@@ -5,84 +5,82 @@ import net.microfalx.resource.Resource;
 import org.apache.tika.Tika;
 
 import java.io.IOException;
-import java.util.UUID;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.StringUtils.NA_STRING;
+import static net.microfalx.lang.StringUtils.defaultIfEmpty;
 
 public abstract class AbstractPart implements Part {
 
     private AbstractEvent event;
-    private String id = UUID.randomUUID().toString();
     private String name;
     private Type type;
     private String mimeType = MimeType.APPLICATION_OCTET_STREAM.getValue();
     private String fileName;
     private Resource resource = NullResource.createNull();
 
-    public AbstractPart(AbstractEvent event, Type type) {
-        requireNonNull(event);
+    public AbstractPart(Type type) {
         requireNonNull(type);
-        this.event = event;
-        this.name = event.getName();
         this.type = type;
     }
 
     @Override
     public final Event getEvent() {
+        if (event == null) throw new ProtocolException("Part not attached to event " + getDescription());
         return event;
     }
 
-    @Override
-    public String getId() {
-        return id;
-    }
-
-    protected void setId(String id) {
+    final void setEvent(AbstractEvent event) {
         requireNonNull(event);
-        this.id = id;
+        this.event = event;
     }
 
     @Override
-    public String getName() {
-        return name;
+    public final String getName() {
+        return defaultIfEmpty(name, defaultIfEmpty(fileName, NA_STRING));
     }
 
-    protected void setName(String name) {
+    protected final void setName(String name) {
         requireNonNull(name);
         this.name = name;
     }
 
     @Override
-    public Type getType() {
+    public String getDescription() {
+        return getName() + ", type " + type + ", resource " + resource.toURI();
+    }
+
+    @Override
+    public final Type getType() {
         return type;
     }
 
     @Override
-    public String getMimeType() {
+    public final String getMimeType() {
         return mimeType;
     }
 
-    public void setMimeType(String mimeType) {
+    public final void setMimeType(String mimeType) {
         requireNonNull(mimeType);
         this.mimeType = mimeType;
     }
 
     @Override
-    public String getFileName() {
+    public final String getFileName() {
         return fileName;
     }
 
-    public void setFileName(String fileName) {
+    public final void setFileName(String fileName) {
         this.fileName = fileName;
     }
 
     @Override
-    public Resource getResource() {
+    public final Resource getResource() {
         return resource;
     }
 
     @Override
-    public String loadAsString() {
+    public final String loadAsString() {
         try {
             return getResource().loadAsString();
         } catch (IOException e) {
@@ -90,7 +88,7 @@ public abstract class AbstractPart implements Part {
         }
     }
 
-    public void setResource(Resource resource) {
+    public final void setResource(Resource resource) {
         requireNonNull(resource);
         this.resource = resource;
         Tika tika = new Tika();
@@ -101,5 +99,15 @@ public abstract class AbstractPart implements Part {
         }
     }
 
-
+    @Override
+    public String toString() {
+        return "AbstractPart{" +
+                "name='" + name + '\'' +
+                ", type=" + type +
+                ", mimeType='" + mimeType + '\'' +
+                ", fileName='" + fileName + '\'' +
+                ", resource=" + resource +
+                ", event=" + (event != null ? event.getName() : null) +
+                '}';
+    }
 }

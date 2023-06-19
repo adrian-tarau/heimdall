@@ -72,11 +72,11 @@ class GelfServerTest {
     }
 
     void assertEvents(boolean large) throws IOException {
-        ArgumentCaptor<net.microfalx.heimdall.protocol.gelf.GelfMessage> gelfCapture =
-                ArgumentCaptor.forClass(net.microfalx.heimdall.protocol.gelf.GelfMessage.class);
+        ArgumentCaptor<GelfEvent> gelfCapture =
+                ArgumentCaptor.forClass(GelfEvent.class);
         Mockito.verify(syslogService, Mockito.times(1)).handle(gelfCapture.capture());
-        Iterator<net.microfalx.heimdall.protocol.gelf.GelfMessage> iterator = gelfCapture.getAllValues().iterator();
-        net.microfalx.heimdall.protocol.gelf.GelfMessage message = iterator.next();
+        Iterator<GelfEvent> iterator = gelfCapture.getAllValues().iterator();
+        GelfEvent message = iterator.next();
         assertEquals("Gelf Message", message.getName());
         if (!large) {
             assertEquals("Test message", message.getParts().stream().findFirst().

@@ -1,17 +1,18 @@
 package net.microfalx.heimdall.protocol.jpa;
 
 import jakarta.persistence.*;
-import net.microfalx.heimdall.protocol.core.TimestampAware;
 import net.microfalx.heimdall.protocol.core.jpa.Address;
+import net.microfalx.heimdall.protocol.core.jpa.Event;
 import net.microfalx.heimdall.protocol.core.jpa.Part;
 
 import java.util.Objects;
 
 @Entity
 @Table(name = "protocol_syslog_events")
-public class SyslogEvent extends TimestampAware {
+public class SyslogEvent extends Event {
 
     @Id
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

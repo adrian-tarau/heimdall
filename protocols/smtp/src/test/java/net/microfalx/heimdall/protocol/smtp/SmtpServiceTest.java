@@ -40,7 +40,7 @@ class SmtpServiceTest {
         email.setCreatedAt(ZonedDateTime.now());
         email.setSentAt(ZonedDateTime.now().plusSeconds(2));
         email.setReceivedAt(email.getSentAt().plusSeconds(5));
-        email.setBody(Body.create(email, "Hello"));
+        email.setBody(Body.create("Hello"));
     }
 
     @Test

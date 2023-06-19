@@ -15,7 +15,6 @@ public class GelfTestHelper {
     private static final int PORT_RANGE = 10000;
 
 
-
     private ProtocolClient.Transport transport = ProtocolClient.Transport.TCP;
     private final GelfConfiguration configuration;
 
@@ -36,15 +35,15 @@ public class GelfTestHelper {
         client.setPort(transport == ProtocolClient.Transport.TCP ? configuration.getTcpPort() : configuration.getUdpPort());
         client.setTransport(transport);
 
-        GelfMessage message = new GelfMessage();
+        GelfEvent message = new GelfEvent();
         message.setFacility(Facility.LOCAL1);
         message.setGelfSeverity(Severity.EMERGENCY);
         if (large) {
-            message.setBody(Body.create(message, new Faker().text().text(16000, 16000)));
+            message.setBody(Body.create(new Faker().text().text(16000, 16000)));
         } else {
-            message.setBody(Body.create(message, "Test message"));
+            message.setBody(Body.create("Test message"));
         }
         message.setThrowable(new IOException("Something bad happened"));
-        client.send(new GelfMessage());
+        client.send(new GelfEvent());
     }
 }

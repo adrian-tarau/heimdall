@@ -1,6 +1,7 @@
 package net.microfalx.heimdall.protocol.core;
 
 import net.microfalx.resource.MemoryResource;
+import net.microfalx.resource.Resource;
 
 /**
  * Holds the body of the event.
@@ -10,18 +11,28 @@ public class Body extends AbstractPart {
     /**
      * Creates a body from a text.
      *
-     * @param event the event
-     * @param text  the text
-     * @param <E>   the event type
+     * @param text the text
      * @return a non-null instance
      */
-    public static <E extends AbstractEvent> Body create(E event, String text) {
-        Body body = new Body(event);
+    public static Body create(String text) {
+        Body body = new Body();
         body.setResource(MemoryResource.create(text));
         return body;
     }
 
-    public Body(AbstractEvent event) {
-        super(event, Type.BODY);
+    /**
+     * Creates a body from a resource.
+     *
+     * @param resource the resource
+     * @return a non-null instance
+     */
+    public static Body create(Resource resource) {
+        Body body = new Body();
+        body.setResource(resource);
+        return body;
+    }
+
+    public Body() {
+        super(Type.BODY);
     }
 }

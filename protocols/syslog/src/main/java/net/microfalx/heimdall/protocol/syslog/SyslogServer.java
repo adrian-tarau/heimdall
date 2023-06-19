@@ -90,7 +90,7 @@ public class SyslogServer implements InitializingBean {
                 inetSocketAddress.getAddress().getHostAddress()));
         message.addTarget(Address.create(Address.Type.HOSTNAME, event.getHost()));
         message.setName("Syslog");
-        message.setBody(Body.create(message, message.getName()));
+        message.setBody(Body.create(message.getName()));
         message.setCreatedAt(event.getDate().toInstant().atZone(ZoneId.systemDefault()));
         message.setSentAt(message.getCreatedAt());
         message.setReceivedAt(ZonedDateTime.now());

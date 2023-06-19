@@ -1,5 +1,7 @@
 package net.microfalx.heimdall.protocol.core;
 
+import net.datafaker.Faker;
+import net.datafaker.providers.base.Shakespeare;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -112,7 +114,49 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
      */
     @SuppressWarnings("unchecked")
     protected final <ENUM extends Enum<ENUM>> ENUM getNextEnum(Class<ENUM> enumClass) {
-        return (ENUM) enumClass.getEnumConstants()[random.nextInt(enumClass.getEnumConstants().length)];
+        return enumClass.getEnumConstants()[random.nextInt(enumClass.getEnumConstants().length)];
+    }
+
+    protected final String getNextName() {
+        return getNextSentence();
+    }
+
+    protected final String getNextBody() {
+        StringBuilder builder = new StringBuilder();
+        int paragraphCount = 3 + random.nextInt(20);
+        for (int i = 0; i < paragraphCount; i++) {
+            int sentenceCount = 1 + random.nextInt(5);
+            for (int j = 0; j < sentenceCount; j++) {
+                builder.append(getNextSentence());
+            }
+            if (i < (paragraphCount - 1)) builder.append("\n");
+        }
+        return builder.toString();
+    }
+
+    private String getNextSentence() {
+        Faker faker = new Faker();
+        Shakespeare shakespeare = faker.shakespeare();
+        float value = random.nextFloat();
+        if (value > 0.9) {
+            return faker.greekPhilosopher().quote();
+        } else if (value > 0.8) {
+            return faker.gameOfThrones().quote();
+        } else if (value > 0.7) {
+            return faker.freshPrinceOfBelAir().quotes();
+        } else if (value > 0.6) {
+            return shakespeare.asYouLikeItQuote();
+        } else if (value > 0.5) {
+            return shakespeare.hamletQuote();
+        } else if (value > 0.4) {
+            return shakespeare.kingRichardIIIQuote();
+        } else if (value > 0.3) {
+            return shakespeare.kingRichardIIIQuote();
+        } else if (value > 0.2) {
+            return faker.heyArnold().quotes();
+        } else {
+            return faker.futurama().quote();
+        }
     }
 
     private void initializeAddresses() {
