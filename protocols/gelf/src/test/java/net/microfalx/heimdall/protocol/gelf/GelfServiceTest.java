@@ -2,16 +2,21 @@ package net.microfalx.heimdall.protocol.gelf;
 
 import com.cloudbees.syslog.Facility;
 import com.cloudbees.syslog.Severity;
+import net.microfalx.bootstrap.test.AbstractBootstrapServiceTestCase;
 import net.microfalx.heimdall.protocol.core.Address;
 import net.microfalx.heimdall.protocol.core.Body;
+import net.microfalx.heimdall.protocol.core.ProtocolConfiguration;
+import net.microfalx.heimdall.protocol.core.ProtocolSimulatorProperties;
 import net.microfalx.heimdall.protocol.core.jpa.AddressRepository;
 import net.microfalx.heimdall.protocol.core.jpa.PartRepository;
 import net.microfalx.heimdall.protocol.jpa.GelfEventRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -21,24 +26,23 @@ import java.time.ZonedDateTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@ExtendWith(MockitoExtension.class)
+@ContextConfiguration(classes = {ProtocolConfiguration.class, ProtocolSimulatorProperties.class, GelfService.class, GelfConfiguration.class})
+public class GelfServiceTest extends AbstractBootstrapServiceTestCase {
 
-public class GelfServiceTest {
-
-    @Mock
+    @MockBean
     private PartRepository partRepository;
 
-    @Mock
+    @MockBean
     private GelfEventRepository gelfEventRepository;
 
-    @Mock
+    @MockBean
+    private GelfSimulator gelfSimulator;
+
+    @MockBean
     private AddressRepository addressRepository;
 
-    @InjectMocks
+    @Autowired
     private GelfService gelfService;
-
-    @Spy
-    private GelfConfiguration configuration;
 
     private GelfEvent gelfEvent = new GelfEvent();
 
