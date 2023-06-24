@@ -72,9 +72,8 @@ class GelfServerTest {
     }
 
     void assertEvents(boolean large) throws IOException {
-        ArgumentCaptor<GelfEvent> gelfCapture =
-                ArgumentCaptor.forClass(GelfEvent.class);
-        Mockito.verify(syslogService, Mockito.times(1)).handle(gelfCapture.capture());
+        ArgumentCaptor<GelfEvent> gelfCapture = ArgumentCaptor.forClass(GelfEvent.class);
+        Mockito.verify(syslogService, Mockito.times(1)).accept(gelfCapture.capture());
         Iterator<GelfEvent> iterator = gelfCapture.getAllValues().iterator();
         GelfEvent message = iterator.next();
         assertEquals("Gelf Message", message.getName());
@@ -84,7 +83,8 @@ class GelfServerTest {
             assertEquals("Test message", message.getParts().stream().toList().
                     get(1).getResource().loadAsString());
         } else {
-            assertTrue(message.getParts().stream().findFirst().get().getResource().loadAsString().length() > 5000);
+            assertTrue(message.getParts().stream().findFirst()
+                    .get().getResource().loadAsString().length() > 5000);
         }
         assertNotNull(message.getSource().getValue());
         assertNotNull(message.getCreatedAt());

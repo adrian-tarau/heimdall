@@ -65,7 +65,7 @@ public class SnmpServiceTest extends AbstractBootstrapServiceTestCase {
     void handle() throws IOException {
         ArgumentCaptor<net.microfalx.heimdall.protocol.snmp.jpa.SnmpEvent> snmpEventArgumentCaptor =
                 ArgumentCaptor.forClass(net.microfalx.heimdall.protocol.snmp.jpa.SnmpEvent.class);
-        snmpService.handle(snmpEvent);
+        snmpService.accept(snmpEvent);
         Mockito.verify(snmpEventRepository).save(snmpEventArgumentCaptor.capture());
         assertEquals(snmpEvent.getSource().getValue(), snmpEventArgumentCaptor.getValue().getAgentAddress().getValue());
         assertEquals(snmpEvent.getSource().getName(), snmpEventArgumentCaptor.getValue().getAgentAddress().getName());

@@ -3,6 +3,7 @@ package net.microfalx.heimdall.protocol.gelf;
 import com.cloudbees.syslog.Facility;
 import com.cloudbees.syslog.Severity;
 import net.datafaker.Faker;
+import net.microfalx.heimdall.protocol.core.Address;
 import net.microfalx.heimdall.protocol.core.Body;
 import net.microfalx.heimdall.protocol.core.ProtocolClient;
 
@@ -13,7 +14,6 @@ public class GelfTestHelper {
 
     private static final int START_PORT = 40000;
     private static final int PORT_RANGE = 10000;
-
 
     private ProtocolClient.Transport transport = ProtocolClient.Transport.TCP;
     private final GelfConfiguration configuration;
@@ -36,6 +36,8 @@ public class GelfTestHelper {
         client.setTransport(transport);
 
         GelfEvent message = new GelfEvent();
+        message.setSource(Address.local());
+        message.addTarget(Address.local());
         message.setFacility(Facility.LOCAL1);
         message.setGelfSeverity(Severity.EMERGENCY);
         if (large) {
@@ -44,6 +46,6 @@ public class GelfTestHelper {
             message.setBody(Body.create("Test message"));
         }
         message.setThrowable(new IOException("Something bad happened"));
-        client.send(new GelfEvent());
+        client.send(message);
     }
 }

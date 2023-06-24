@@ -53,7 +53,7 @@ public class SnmpServer implements CommandResponder {
         for (VariableBinding variable : pdu.getVariableBindings()) {
             updateBindings(snmpEvent, variable);
         }
-        snmpService.handle(snmpEvent);
+        snmpService.accept(snmpEvent);
     }
 
     @PostConstruct

@@ -152,7 +152,7 @@ public class GelfServer implements InitializingBean, ProtocolServerHandler {
         message.setSentAt(createTimeStamp(jsonNode));
         message.setGelfSeverity(Severity.fromNumericalCode(getRequiredIntField(jsonNode, "level")));
         addAllJsonFields(message, jsonNode);
-        gelfService.handle(message);
+        gelfService.accept(message);
     }
 
     private void addAllJsonFields(GelfEvent gelfEvent, JsonNode jsonNode) {

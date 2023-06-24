@@ -17,7 +17,7 @@ public class SyslogService extends ProtocolService<SyslogMessage> {
      *
      * @param message the message
      */
-    public void handle(SyslogMessage message) {
+    public void accept(SyslogMessage message) {
         SyslogEvent syslogEvent = new SyslogEvent();
         syslogEvent.setFacility(message.getFacility().numericalCode());
         syslogEvent.setSeverity(message.getSyslogSeverity().numericalCode());

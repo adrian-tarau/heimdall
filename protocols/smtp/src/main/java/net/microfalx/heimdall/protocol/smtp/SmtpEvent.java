@@ -5,13 +5,13 @@ import net.microfalx.heimdall.protocol.core.AbstractEvent;
 /**
  * The email message.
  */
-public class Email extends AbstractEvent {
+public class SmtpEvent extends AbstractEvent {
 
-    public Email() {
+    public SmtpEvent() {
         super(Type.SMTP);
     }
 
-    public Email(String id) {
+    public SmtpEvent(String id) {
         super(Type.SMTP, id);
     }
 }

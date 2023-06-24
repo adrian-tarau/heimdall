@@ -127,6 +127,13 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
     }
 
     /**
+     * Accepts a protocol event, process it and stores it in the available data stores.
+     *
+     * @param event the event
+     */
+    public abstract void accept(E event);
+
+    /**
      * Extracts additional attributes from an event.
      *
      * @param event    the event

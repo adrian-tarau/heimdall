@@ -64,7 +64,7 @@ class SyslogServerTest {
 
     private void assertEvents() {
         ArgumentCaptor<net.microfalx.heimdall.protocol.syslog.SyslogMessage> syslogCapture = ArgumentCaptor.forClass(net.microfalx.heimdall.protocol.syslog.SyslogMessage.class);
-        Mockito.verify(syslogService, Mockito.times(1)).handle(syslogCapture.capture());
+        Mockito.verify(syslogService, Mockito.times(1)).accept(syslogCapture.capture());
         Iterator<net.microfalx.heimdall.protocol.syslog.SyslogMessage> iterator = syslogCapture.getAllValues().iterator();
         net.microfalx.heimdall.protocol.syslog.SyslogMessage message = iterator.next();
         assertEquals("", message.getName());

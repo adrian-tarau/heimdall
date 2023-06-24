@@ -71,7 +71,7 @@ public class GelfServiceTest extends AbstractBootstrapServiceTestCase {
     @Test
     void sendTcp() throws IOException {
         ArgumentCaptor<net.microfalx.heimdall.protocol.jpa.GelfEvent> smtpCapture = ArgumentCaptor.forClass(net.microfalx.heimdall.protocol.jpa.GelfEvent.class);
-        gelfService.handle(gelfEvent);
+        gelfService.accept(gelfEvent);
         Mockito.verify(gelfEventRepository).save(smtpCapture.capture());
         net.microfalx.heimdall.protocol.jpa.GelfEvent gelfEvent = smtpCapture.getValue();
         assertEquals(this.gelfEvent.getSeverity().getLevel(), gelfEvent.getLevel());

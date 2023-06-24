@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
- * Holds an event.
+ * Holds an event received over the wire.
  */
 public interface Event {
 
@@ -83,6 +83,7 @@ public interface Event {
 
     /**
      * Returns the body as string.
+     *
      * @return the body, null if there is no body
      */
     String getBodyAsString();

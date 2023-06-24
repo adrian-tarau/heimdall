@@ -6,6 +6,7 @@ import org.snmp4j.event.ResponseEvent;
 import org.snmp4j.mp.SnmpConstants;
 import org.snmp4j.security.SecurityLevel;
 import org.snmp4j.smi.*;
+import org.snmp4j.transport.DefaultTcpTransportMapping;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
 
 import java.io.IOException;
@@ -78,7 +79,7 @@ public class SnmpClient extends ProtocolClient<SnmpEvent> {
             target = communityTarget;
         }
 
-        Snmp snmp = new Snmp(new DefaultUdpTransportMapping());
+        Snmp snmp = new Snmp(getTransport() == Transport.UDP ? new DefaultUdpTransportMapping() : new DefaultTcpTransportMapping());
         ResponseEvent<IpAddress> response = snmp.send(pdu, target);
         if (response != null && response.getResponse() == null && response.getResponse().getErrorStatus() != SNMP_ERROR_SUCCESS) {
             throw new ProtocolException("Failed to send SNMP trap to " + getHostName() + ", reason: " + response.getResponse().getErrorStatusText());

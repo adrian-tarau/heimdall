@@ -6,7 +6,6 @@ import net.microfalx.heimdall.protocol.jpa.GelfEventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.Iterator;
 
 @Service
@@ -23,7 +22,7 @@ public class GelfService extends ProtocolService<GelfEvent> {
      *
      * @param message the GELF message
      */
-    public void handle(GelfEvent message) throws IOException {
+    public void accept(GelfEvent message) {
         net.microfalx.heimdall.protocol.jpa.GelfEvent gelfEvent = new net.microfalx.heimdall.protocol.jpa.GelfEvent();
         gelfEvent.setFacility(message.getFacility().numericalCode());
         gelfEvent.setLevel(message.getSeverity().getLevel());

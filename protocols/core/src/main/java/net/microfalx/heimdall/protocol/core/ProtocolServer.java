@@ -146,7 +146,7 @@ public abstract class ProtocolServer {
      * Stops the server and releases all resources.
      */
     public void shutdown() {
-        LOGGER.info("Stops the server on {} ({})", port, describeHostname());
+        LOGGER.info("Shutdown at {}:{}", describeHostname(), port);
         try {
             doShutdown();
         } catch (IOException e) {

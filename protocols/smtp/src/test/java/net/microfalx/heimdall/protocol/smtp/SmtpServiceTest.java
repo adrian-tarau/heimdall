@@ -2,7 +2,6 @@ package net.microfalx.heimdall.protocol.smtp;
 
 import net.microfalx.heimdall.protocol.core.Address;
 import net.microfalx.heimdall.protocol.core.Body;
-import net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpEventRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,32 +29,32 @@ class SmtpServiceTest {
     @InjectMocks
     private SmtpService smtpService;
 
-    private Email email = new Email();
+    private SmtpEvent smtpEvent = new SmtpEvent();
 
     @BeforeEach
     void setup() {
-        email.setName("Email from Alex");
-        email.setSource(Address.create(Address.Type.EMAIL, "Alex Tarau", "alex@tarau.net"));
-        email.addTarget(Address.create(Address.Type.EMAIL, "Adrian Tarau", "adrian@tarau.net"));
-        email.setCreatedAt(ZonedDateTime.now());
-        email.setSentAt(ZonedDateTime.now().plusSeconds(2));
-        email.setReceivedAt(email.getSentAt().plusSeconds(5));
-        email.setBody(Body.create("Hello"));
+        smtpEvent.setName("Email from Alex");
+        smtpEvent.setSource(Address.create(Address.Type.EMAIL, "Alex Tarau", "alex@tarau.net"));
+        smtpEvent.addTarget(Address.create(Address.Type.EMAIL, "Adrian Tarau", "adrian@tarau.net"));
+        smtpEvent.setCreatedAt(ZonedDateTime.now());
+        smtpEvent.setSentAt(ZonedDateTime.now().plusSeconds(2));
+        smtpEvent.setReceivedAt(smtpEvent.getSentAt().plusSeconds(5));
+        smtpEvent.setBody(Body.create("Hello"));
     }
 
     @Test
     void handle() throws IOException {
-        ArgumentCaptor<SmtpEvent> smtpCapture = ArgumentCaptor.forClass(SmtpEvent.class);
-        smtpService.handle(email);
+        ArgumentCaptor<net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent> smtpCapture = ArgumentCaptor.forClass(net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent.class);
+        smtpService.accept(smtpEvent);
         verify(repository).save(smtpCapture.capture());
-        SmtpEvent smtpEvent = smtpCapture.getValue();
-        assertEquals(email.getName(), smtpEvent.getSubject());
-        assertEquals(email.getSentAt().toLocalDateTime(), smtpEvent.getSentAt());
-        assertEquals(email.getReceivedAt().toLocalDateTime(), smtpEvent.getReceivedAt());
-        assertEquals(email.getSource().getName(), smtpEvent.getFrom().getName());
-        assertEquals(email.getSource().getValue(), smtpEvent.getFrom().getValue());
-        assertEquals(email.getTargets().iterator().next().getName(), smtpEvent.getTo().getName());
-        assertEquals(email.getTargets().iterator().next().getValue(), smtpEvent.getTo().getValue());
-        assertEquals(email.getBody().getResource().loadAsString(), "Hello");
+        net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent jpaSmtpEvent = smtpCapture.getValue();
+        assertEquals(smtpEvent.getName(), jpaSmtpEvent.getSubject());
+        assertEquals(smtpEvent.getSentAt().toLocalDateTime(), jpaSmtpEvent.getSentAt());
+        assertEquals(smtpEvent.getReceivedAt().toLocalDateTime(), jpaSmtpEvent.getReceivedAt());
+        assertEquals(smtpEvent.getSource().getName(), jpaSmtpEvent.getFrom().getName());
+        assertEquals(smtpEvent.getSource().getValue(), jpaSmtpEvent.getFrom().getValue());
+        assertEquals(smtpEvent.getTargets().iterator().next().getName(), jpaSmtpEvent.getTo().getName());
+        assertEquals(smtpEvent.getTargets().iterator().next().getValue(), jpaSmtpEvent.getTo().getValue());
+        assertEquals(smtpEvent.getBody().getResource().loadAsString(), "Hello");
     }
 }

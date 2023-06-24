@@ -4,6 +4,7 @@ import net.microfalx.lang.ExceptionUtils;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.ProtocolException;
 import java.net.UnknownHostException;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
@@ -76,6 +77,9 @@ public abstract class ProtocolClient<E extends Event> {
      */
     public void send(E event) throws IOException {
         requireNonNull(event);
+        if (event.getSource() == null) throw new ProtocolException("A source address is required");
+        if (event.getTargets().isEmpty()) throw new ProtocolException("At least one target address is required");
+        if (event.getParts().isEmpty()) throw new ProtocolException("At least one part is required");
         doSend(event);
     }
 

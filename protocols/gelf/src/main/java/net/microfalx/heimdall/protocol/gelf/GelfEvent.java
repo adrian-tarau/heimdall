@@ -6,8 +6,8 @@ import net.microfalx.heimdall.protocol.core.Severity;
 
 public class GelfEvent extends AbstractEvent {
 
-    private Facility facility;
-    private com.cloudbees.syslog.Severity gelfSeverity;
+    private Facility facility = Facility.LOCAL1;
+    private com.cloudbees.syslog.Severity gelfSeverity = com.cloudbees.syslog.Severity.INFORMATIONAL;
     private String version = "1.1";
     private Throwable throwable;
 

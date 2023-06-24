@@ -62,7 +62,7 @@ class SyslogServiceTest {
     void handle() throws IOException {
         ArgumentCaptor<SyslogEvent> smtpCapture = ArgumentCaptor.forClass(SyslogEvent.class);
         Assertions.assertNotNull(syslogService);
-        syslogService.handle(message);
+        syslogService.accept(message);
         verify(repository).save(smtpCapture.capture());
         SyslogEvent syslogEvent = smtpCapture.getValue();
         assertEquals(message.getSource().getName(), syslogEvent.getAddress().getName());

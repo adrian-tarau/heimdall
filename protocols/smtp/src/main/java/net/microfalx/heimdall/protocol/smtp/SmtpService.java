@@ -3,7 +3,6 @@ package net.microfalx.heimdall.protocol.smtp;
 import net.microfalx.heimdall.protocol.core.ProtocolService;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpAttachment;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpAttachmentRepository;
-import net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpEventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,7 +12,7 @@ import java.util.List;
 import static java.util.Objects.requireNonNull;
 
 @Service
-public class SmtpService extends ProtocolService<Email> {
+public class SmtpService extends ProtocolService<SmtpEvent> {
 
     @Autowired
     private SmtpConfiguration configuration;
@@ -29,27 +28,27 @@ public class SmtpService extends ProtocolService<Email> {
      * The method stores the email in the database, along with attachments. The email body and/or attachments are
      * stored in the shared data store and referenced as a {@link net.microfalx.resource.Resource}.
      *
-     * @param email the STMP message
+     * @param smtpEvent the STMP message
      */
-    public void handle(Email email) {
-        requireNonNull(email);
-        handleDatabase(email);
-        index(email);
+    public void accept(SmtpEvent smtpEvent) {
+        requireNonNull(smtpEvent);
+        handleDatabase(smtpEvent);
+        index(smtpEvent);
     }
 
     /**
      * Stores the email into the database.
      *
-     * @param email the email
+     * @param smptEvent the email
      */
-    private void handleDatabase(Email email) {
-        SmtpEvent smtpEvent = new SmtpEvent();
-        smtpEvent.setCreatedAt(email.getCreatedAt().toLocalDateTime());
-        smtpEvent.setSentAt(email.getSentAt().toLocalDateTime());
-        smtpEvent.setReceivedAt(email.getReceivedAt().toLocalDateTime());
-        smtpEvent.setSubject(email.getName());
-        updateAddresses(email, smtpEvent);
-        List<SmtpAttachment> attachments = email.getParts().stream().map(part -> {
+    private void handleDatabase(SmtpEvent smptEvent) {
+        net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent smtpEvent = new net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent();
+        smtpEvent.setCreatedAt(smptEvent.getCreatedAt().toLocalDateTime());
+        smtpEvent.setSentAt(smptEvent.getSentAt().toLocalDateTime());
+        smtpEvent.setReceivedAt(smptEvent.getReceivedAt().toLocalDateTime());
+        smtpEvent.setSubject(smptEvent.getName());
+        updateAddresses(smptEvent, smtpEvent);
+        List<SmtpAttachment> attachments = smptEvent.getParts().stream().map(part -> {
             SmtpAttachment attachment = new SmtpAttachment();
             attachment.setSmtp(smtpEvent);
             attachment.setPart(persistPart(part));
@@ -60,17 +59,17 @@ public class SmtpService extends ProtocolService<Email> {
         attachmentRepository.saveAll(attachments);
     }
 
-    private void updateAddresses(Email email, SmtpEvent smtpEvent) {
-        smtpEvent.setFrom(lookupAddress(email.getSource()));
-        smtpEvent.setTo(lookupAddress(email.getTargets().iterator().next()));
+    private void updateAddresses(SmtpEvent smptEvent, net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent smtpEvent) {
+        smtpEvent.setFrom(lookupAddress(smptEvent.getSource()));
+        smtpEvent.setTo(lookupAddress(smptEvent.getTargets().iterator().next()));
     }
 
     /**
      * Indexes an email.
      *
-     * @param email the email
+     * @param smtpEvent the email
      */
-    private void handleIndex(Email email) {
+    private void handleIndex(SmtpEvent smtpEvent) {
 
     }
 }

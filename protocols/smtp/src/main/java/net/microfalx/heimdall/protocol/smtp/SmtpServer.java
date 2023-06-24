@@ -54,17 +54,17 @@ public class SmtpServer implements InitializingBean, BasicMessageListener {
     public void messageArrived(MessageContext context, String from, String to, byte[] data) throws RejectException {
         try {
             MimeMessage message = new MimeMessage(session, new ByteArrayInputStream(data));
-            Email email = new Email(message.getMessageID());
-            email.setName(message.getSubject());
-            email.setSource(extractAddress(Arrays.asList(message.getFrom()).iterator().next()));
-            Arrays.stream(message.getAllRecipients()).map(this::extractAddress).forEach(email::addTarget);
-            email.setSentAt(message.getSentDate().toInstant().atZone(ZoneId.systemDefault()));
-            email.setCreatedAt(email.getSentAt());
-            email.setReceivedAt(ZonedDateTime.now());
-            Body body = extractBody(email, message);
-            if (body != null) email.setBody(body);
-            extractParts(email, message).forEach(email::addPart);
-            smtpService.handle(email);
+            SmtpEvent smtpEvent = new SmtpEvent(message.getMessageID());
+            smtpEvent.setName(message.getSubject());
+            smtpEvent.setSource(extractAddress(Arrays.asList(message.getFrom()).iterator().next()));
+            Arrays.stream(message.getAllRecipients()).map(this::extractAddress).forEach(smtpEvent::addTarget);
+            smtpEvent.setSentAt(message.getSentDate().toInstant().atZone(ZoneId.systemDefault()));
+            smtpEvent.setCreatedAt(smtpEvent.getSentAt());
+            smtpEvent.setReceivedAt(ZonedDateTime.now());
+            Body body = extractBody(smtpEvent, message);
+            if (body != null) smtpEvent.setBody(body);
+            extractParts(smtpEvent, message).forEach(smtpEvent::addPart);
+            smtpService.accept(smtpEvent);
         } catch (Exception e) {
             String message = "Failed to process email from '" + from + "' to '" + to + "'";
             logger.warn(message, e);
@@ -109,7 +109,7 @@ public class SmtpServer implements InitializingBean, BasicMessageListener {
         }
     }
 
-    private Body extractBody(Email email, MimeMessage message) throws MessagingException, IOException {
+    private Body extractBody(SmtpEvent smtpEvent, MimeMessage message) throws MessagingException, IOException {
         if (message.getContent() instanceof String) {
             return Body.create((String) message.getContent());
         } else {
@@ -117,7 +117,7 @@ public class SmtpServer implements InitializingBean, BasicMessageListener {
         }
     }
 
-    private Collection<Part> extractParts(Email email, MimeMessage message) throws MessagingException, IOException {
+    private Collection<Part> extractParts(SmtpEvent smtpEvent, MimeMessage message) throws MessagingException, IOException {
         if (!(message.getContent() instanceof Multipart multipart)) return Collections.emptyList();
         Collection<Part> parts = new ArrayList<>();
         for (int i = 0; i < multipart.getCount(); i++) {

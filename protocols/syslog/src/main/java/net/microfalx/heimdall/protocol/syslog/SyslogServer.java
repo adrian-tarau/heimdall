@@ -94,7 +94,7 @@ public class SyslogServer implements InitializingBean {
         message.setCreatedAt(event.getDate().toInstant().atZone(ZoneId.systemDefault()));
         message.setSentAt(message.getCreatedAt());
         message.setReceivedAt(ZonedDateTime.now());
-        syslogService.handle(message);
+        syslogService.accept(message);
     }
 
     private void initThreadPool() {
