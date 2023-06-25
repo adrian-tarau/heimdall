@@ -46,10 +46,11 @@ public class SmtpServiceIntegrationTest {
     private SmtpAttachmentRepository smtpAttachmentRepository;
 
     private JavaMailSender sender;
+    private SmtpClient smtpClient = new SmtpClient();
 
     @BeforeEach
     void setup() {
-        initMailSender();
+        smtpClient.initializeMailSender();
     }
 
     @Test
