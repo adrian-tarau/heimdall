@@ -27,7 +27,7 @@ public class SnmpService extends ProtocolService<SnmpEvent> {
         return simulator;
     }
 
-    public void accept(SnmpEvent trap) {
+    protected void persist(SnmpEvent trap) {
         net.microfalx.heimdall.protocol.snmp.jpa.SnmpEvent snmpEvent = new net.
                 microfalx.heimdall.protocol.snmp.jpa.SnmpEvent();
         Address address = Address.create(trap.getSource().getType(),

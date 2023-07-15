@@ -1,5 +1,7 @@
 package net.microfalx.heimdall.protocol.core;
 
+import io.azam.ulidj.ULID;
+
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -8,7 +10,7 @@ import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
 public abstract class AbstractEvent implements Event {
 
-    private String id = UUID.randomUUID().toString();
+    private String id = ULID.random();
     private String name;
     private Address source;
     private Collection<Address> targets = new ArrayList<>();

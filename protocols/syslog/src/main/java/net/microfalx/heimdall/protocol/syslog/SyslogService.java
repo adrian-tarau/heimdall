@@ -12,12 +12,7 @@ public class SyslogService extends ProtocolService<SyslogMessage> {
     @Autowired
     private SyslogEventRepository syslogEventRepository;
 
-    /**
-     * Handles a Syslog message received by the server.
-     *
-     * @param message the message
-     */
-    public void accept(SyslogMessage message) {
+    protected void persist(SyslogMessage message) {
         SyslogEvent syslogEvent = new SyslogEvent();
         syslogEvent.setFacility(message.getFacility().numericalCode());
         syslogEvent.setSeverity(message.getSyslogSeverity().numericalCode());

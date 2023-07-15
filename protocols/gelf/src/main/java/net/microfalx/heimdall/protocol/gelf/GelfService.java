@@ -17,12 +17,7 @@ public class GelfService extends ProtocolService<GelfEvent> {
     @Autowired
     private GelfSimulator gelfSimulator;
 
-    /**
-     * Handle one GELF message.
-     *
-     * @param message the GELF message
-     */
-    public void accept(GelfEvent message) {
+    protected void persist(GelfEvent message) {
         net.microfalx.heimdall.protocol.jpa.GelfEvent gelfEvent = new net.microfalx.heimdall.protocol.jpa.GelfEvent();
         gelfEvent.setFacility(message.getFacility().numericalCode());
         gelfEvent.setLevel(message.getSeverity().getLevel());

@@ -122,8 +122,9 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
      */
     public final Future<Document> index(E event) {
         Document document = Document.create(event.getId(), event.getName());
+        updateDocument(event, document);
         indexService.index(document);
-        return CompletableFuture.completedFuture(new Document());
+        return CompletableFuture.completedFuture(document);
     }
 
     /**
@@ -131,16 +132,34 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
      *
      * @param event the event
      */
-    public abstract void accept(E event);
+    public final void accept(E event) {
+        try {
+            persist(event);
+        } catch (Exception e) {
+            LOGGER.error("Failed to persist event" + event, e);
+        }
+        try {
+            index(event);
+        } catch (Exception e) {
+            LOGGER.error("Failed to index event " + event, e);
+        }
+    }
 
     /**
-     * Extracts additional attributes from an event.
+     * Persists an event in the data store.
+     *
+     * @param event the event
+     */
+    protected abstract void persist(E event);
+
+    /**
+     * Extracts additional attributes from an event and updates the document (stored in the search engine).
      *
      * @param event    the event
      * @param document the document
      */
     protected void updateDocument(E event, Document document) {
-
+        // empty on purpose
     }
 
     /**
