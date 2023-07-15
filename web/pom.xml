@@ -75,12 +75,14 @@
 
         <dependency>
             <groupId>net.microfalx.bootstrap</groupId>
-            <artifactId>bootstrap-search</artifactId>
+            <artifactId>bootstrap-security</artifactId>
         </dependency>
 
+        <!-- Why in the hell it picks some 8.X version??? -->
         <dependency>
-            <groupId>net.microfalx.bootstrap</groupId>
-            <artifactId>bootstrap-security</artifactId>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-core</artifactId>
+            <version>9.7.0</version>
         </dependency>
 
     </dependencies>

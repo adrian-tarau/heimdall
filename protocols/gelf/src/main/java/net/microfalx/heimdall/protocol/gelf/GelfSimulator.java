@@ -9,20 +9,22 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class GelfSimulator extends ProtocolSimulator<GelfEvent, GelfClient> {
-
-    private static final AtomicInteger SOURCE_INDEX_GENERATOR = new AtomicInteger(1);
 
     public GelfSimulator(ProtocolSimulatorProperties properties) {
         super(properties);
     }
 
     @Override
-    protected Address createAddress() {
-        return Address.create(Address.Type.HOSTNAME, "192.168.1." + SOURCE_INDEX_GENERATOR.getAndIncrement());
+    protected Address createSourceAddress() {
+        return Address.create(Address.Type.HOSTNAME, "192.168." + getNextSubnet());
+    }
+
+    @Override
+    protected Address createTargetAddress() {
+        return Address.create(Address.Type.HOSTNAME, "192.168." + getNextSubnet());
     }
 
     @Override
@@ -30,6 +32,7 @@ public class GelfSimulator extends ProtocolSimulator<GelfEvent, GelfClient> {
         GelfClient client = new GelfClient();
         return Arrays.asList(client);
     }
+
 
     @Override
     protected void simulate(ProtocolClient<GelfEvent> client, Address address, int index) throws IOException {

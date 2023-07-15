@@ -40,7 +40,7 @@ import static net.microfalx.lang.StringUtils.isNotEmpty;
 @Component
 public class SmtpServer implements InitializingBean, BasicMessageListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(SmtpServer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SmtpServer.class);
 
     @Autowired
     private SmtpConfiguration configuration;
@@ -52,6 +52,7 @@ public class SmtpServer implements InitializingBean, BasicMessageListener {
 
     @Override
     public void messageArrived(MessageContext context, String from, String to, byte[] data) throws RejectException {
+        if (LOGGER.isDebugEnabled()) LOGGER.debug("Received email from {} for : {}", from, to);
         try {
             MimeMessage message = new MimeMessage(session, new ByteArrayInputStream(data));
             SmtpEvent smtpEvent = new SmtpEvent(message.getMessageID());
@@ -67,7 +68,7 @@ public class SmtpServer implements InitializingBean, BasicMessageListener {
             smtpService.accept(smtpEvent);
         } catch (Exception e) {
             String message = "Failed to process email from '" + from + "' to '" + to + "'";
-            logger.warn(message, e);
+            LOGGER.warn(message, e);
             throw new RejectException(message + ", root cause: " + e.getMessage());
         }
     }

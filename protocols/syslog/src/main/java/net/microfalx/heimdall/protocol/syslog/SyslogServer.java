@@ -12,6 +12,8 @@ import org.graylog2.syslog4j.server.impl.net.tcp.TCPNetSyslogServer;
 import org.graylog2.syslog4j.server.impl.net.tcp.TCPNetSyslogServerConfig;
 import org.graylog2.syslog4j.server.impl.net.udp.UDPNetSyslogServer;
 import org.graylog2.syslog4j.server.impl.net.udp.UDPNetSyslogServerConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -27,6 +29,8 @@ import java.time.ZonedDateTime;
  */
 @Component
 public class SyslogServer implements InitializingBean {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SyslogServer.class);
 
     @Autowired
     private SyslogConfiguration configuration;
@@ -82,12 +86,13 @@ public class SyslogServer implements InitializingBean {
     }
 
     private void event(SyslogServerIF syslogServer, SocketAddress socketAddress, SyslogServerEventIF event) {
+        InetSocketAddress address = (InetSocketAddress) socketAddress;
+        if (LOGGER.isDebugEnabled()) LOGGER.debug("Received syslog even from {}", address.getHostName());
         SyslogMessage message = new SyslogMessage();
         message.setFacility(Facility.fromNumericalCode(event.getFacility()));
         message.setSyslogSeverity(Severity.fromNumericalCode(event.getLevel()));
-        InetSocketAddress inetSocketAddress = (InetSocketAddress) socketAddress;
-        message.setSource(Address.create(Address.Type.HOSTNAME, inetSocketAddress.getAddress().getHostName(),
-                inetSocketAddress.getAddress().getHostAddress()));
+
+        message.setSource(Address.create(Address.Type.HOSTNAME, address.getHostName(), address.getAddress().getHostAddress()));
         message.addTarget(Address.create(Address.Type.HOSTNAME, event.getHost()));
         message.setName("Syslog");
         message.setBody(Body.create(message.getName()));

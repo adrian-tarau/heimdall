@@ -6,12 +6,9 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class SnmpSimulator extends ProtocolSimulator<SnmpEvent, SnmpClient> {
-
-    private static final AtomicInteger SOURCE_INDEX_GENERATOR = new AtomicInteger(1);
 
     private SnmpProperties configuration;
 
@@ -21,8 +18,13 @@ public class SnmpSimulator extends ProtocolSimulator<SnmpEvent, SnmpClient> {
     }
 
     @Override
-    protected Address createAddress() {
-        return Address.create(Address.Type.HOSTNAME, "192.168.2." + SOURCE_INDEX_GENERATOR.getAndIncrement());
+    protected Address createSourceAddress() {
+        return Address.create(Address.Type.HOSTNAME, "192.168." + getNextSubnet());
+    }
+
+    @Override
+    protected Address createTargetAddress() {
+        return Address.create(Address.Type.HOSTNAME, "192.168." + getNextSubnet());
     }
 
     @Override

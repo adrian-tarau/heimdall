@@ -40,8 +40,8 @@
         <module>core</module>
         <module>snmp</module>
         <module>smtp</module>
-        <module>syslog</module>
         <module>gelf</module>
+        <module>syslog</module>
     </modules>
 
 </project>

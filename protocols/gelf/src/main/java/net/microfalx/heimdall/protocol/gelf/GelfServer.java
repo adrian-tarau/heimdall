@@ -137,7 +137,7 @@ public class GelfServer implements InitializingBean, ProtocolServerHandler {
 
     private void doHandle(InetAddress address, InputStream inputStream) throws IOException {
         JsonNode jsonNode = readJson(inputStream);
-        if (LOGGER.isDebugEnabled()) LOGGER.debug("Received GELF event:\n" + jsonNode.toPrettyString());
+        if (LOGGER.isDebugEnabled()) LOGGER.debug("Received GELF event:\n{}",jsonNode.toPrettyString());
         String shortMessage = getField(jsonNode, "short_message");
         String fullMessage = getRequiredField(jsonNode, "full_message");
         String host = net.microfalx.lang.StringUtils.defaultIfNull(getField(jsonNode, "host"), "0.0.0.0");

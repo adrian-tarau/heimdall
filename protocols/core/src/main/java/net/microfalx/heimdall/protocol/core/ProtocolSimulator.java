@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
@@ -25,7 +26,10 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
     private final ProtocolSimulatorProperties properties;
 
     protected final Random random = ThreadLocalRandom.current();
-    private final List<Address> addresses = new ArrayList<>();
+    private final AtomicInteger SUBNET_INDEX1_GENERATOR = new AtomicInteger(1);
+    private final AtomicInteger SUBNET_INDEX2_GENERATOR = new AtomicInteger(1);
+    private final List<Address> sourceAddresses = new ArrayList<>();
+    private final List<Address> targetAddresses = new ArrayList<>();
     private final List<ProtocolClient<E>> clients = new ArrayList<>();
 
     public ProtocolSimulator(ProtocolSimulatorProperties properties) {
@@ -43,7 +47,7 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
     public void simulate() {
         int eventCount = properties.getMinimumEventCount() + ThreadLocalRandom.current().nextInt(properties.getMaximumEventCount());
         for (int i = 0; i < eventCount; i++) {
-            Address address = getNextAddress();
+            Address address = getNextTargetAddress();
             ProtocolClient<E> client = getNextClient();
             try {
                 simulate(client, address, i + 1);
@@ -64,11 +68,18 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
     }
 
     /**
-     * Invoked to create a list of addresses
+     * Invoked to create a list of target addresses.
      *
      * @return an address
      */
-    protected abstract Address createAddress();
+    protected abstract Address createSourceAddress();
+
+    /**
+     * Invoked to create a list of source addresses.
+     *
+     * @return an address
+     */
+    protected abstract Address createTargetAddress();
 
     /**
      * Invoked to create the client.
@@ -92,8 +103,17 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
      *
      * @return a non-null instance
      */
-    protected final Address getNextAddress() {
-        return addresses.get(ThreadLocalRandom.current().nextInt(addresses.size()));
+    protected final Address getNextTargetAddress() {
+        return targetAddresses.get(ThreadLocalRandom.current().nextInt(targetAddresses.size()));
+    }
+
+    /**
+     * Returns the next source address to simulate an event.
+     *
+     * @return a non-null instance
+     */
+    protected final Address getNextSourceAddress() {
+        return sourceAddresses.get(ThreadLocalRandom.current().nextInt(sourceAddresses.size()));
     }
 
     /**
@@ -117,10 +137,33 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
         return enumClass.getEnumConstants()[random.nextInt(enumClass.getEnumConstants().length)];
     }
 
+    /**
+     * Returns the next subnet.
+     *
+     * @return a non-null instance
+     */
+    protected final String getNextSubnet() {
+        if (SUBNET_INDEX1_GENERATOR.get() >= 255) {
+            SUBNET_INDEX1_GENERATOR.set(1);
+            SUBNET_INDEX2_GENERATOR.incrementAndGet();
+        }
+        return SUBNET_INDEX2_GENERATOR.get() + "." + SUBNET_INDEX1_GENERATOR.getAndIncrement();
+    }
+
+    /**
+     * Returns the next event name/title/caption.
+     *
+     * @return a non-null instance
+     */
     protected final String getNextName() {
         return getNextSentence();
     }
 
+    /**
+     * Returns the next body of text.
+     *
+     * @return a non-null instance
+     */
     protected final String getNextBody() {
         StringBuilder builder = new StringBuilder();
         int paragraphCount = 3 + random.nextInt(20);
@@ -162,7 +205,11 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
     private void initializeAddresses() {
         int addressCount = properties.getMinimumAddressCount() + ThreadLocalRandom.current().nextInt(properties.getMaximumAddressCount());
         for (int i = 0; i < addressCount; i++) {
-            this.addresses.add(createAddress());
+            this.targetAddresses.add(createTargetAddress());
+        }
+        addressCount = properties.getMinimumAddressCount() + ThreadLocalRandom.current().nextInt(properties.getMaximumAddressCount());
+        for (int i = 0; i < addressCount; i++) {
+            this.sourceAddresses.add(createSourceAddress());
         }
     }
 

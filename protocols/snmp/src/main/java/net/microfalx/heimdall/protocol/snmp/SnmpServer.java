@@ -46,7 +46,7 @@ public class SnmpServer implements CommandResponder {
     public <A extends Address> void processPdu(CommandResponderEvent<A> event) {
         event.setProcessed(true);
         PDU pdu = event.getPDU();
-        LOGGER.info("Received trap from " + event.getPeerAddress() + ", PDU: " + pdu);
+        if (LOGGER.isDebugEnabled()) LOGGER.debug("Received trap from {}, PDU: {}", event.getPeerAddress(), pdu);
         SnmpEvent snmpEvent = new SnmpEvent();
         updateCommonAttributes(snmpEvent, pdu);
         updateAddresses(snmpEvent, event);
@@ -145,19 +145,19 @@ public class SnmpServer implements CommandResponder {
         if (attributeValue instanceof Integer32) {
             snmpEvent.addAttribute(attributeName, ((Integer32) attributeValue).getValue());
         } else if (attributeValue instanceof TimeTicks) {
-           snmpEvent.addAttribute(attributeName,attributeValue.toLong());
+            snmpEvent.addAttribute(attributeName, attributeValue.toLong());
         } else if (attributeValue instanceof Null) {
-            snmpEvent.addAttribute(attributeName,null);
+            snmpEvent.addAttribute(attributeName, null);
         } else if (attributeValue instanceof OctetString) {
-            snmpEvent.addAttribute(attributeName,attributeValue.toString());
+            snmpEvent.addAttribute(attributeName, attributeValue.toString());
         } else if (attributeValue instanceof Counter64) {
-            snmpEvent.addAttribute(attributeName,attributeValue.toLong());
+            snmpEvent.addAttribute(attributeName, attributeValue.toLong());
         } else if (attributeValue instanceof UnsignedInteger32) {
-            snmpEvent.addAttribute(attributeName,attributeValue.toInt());
+            snmpEvent.addAttribute(attributeName, attributeValue.toInt());
         } else if (attributeValue instanceof OID) {
-            snmpEvent.addAttribute(attributeName,((OID) attributeValue).toDottedString());
+            snmpEvent.addAttribute(attributeName, ((OID) attributeValue).toDottedString());
         } else if (attributeValue instanceof IpAddress) {
-            snmpEvent.addAttribute(attributeName,((IpAddress) attributeValue).getInetAddress().getHostAddress());
+            snmpEvent.addAttribute(attributeName, ((IpAddress) attributeValue).getInetAddress().getHostAddress());
         }
     }
 

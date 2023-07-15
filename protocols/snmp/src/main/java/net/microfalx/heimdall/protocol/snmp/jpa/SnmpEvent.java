@@ -18,12 +18,12 @@ public class SnmpEvent extends Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @ManyToOne
     @JoinColumn(name = "agent_address_id", nullable = false)
     @NotNull
     private Address agentAddress;
 
-    @Column
+    @ManyToOne
     @JoinColumn(name = "bindings_id", nullable = false)
     @NotNull
     private Part bindingPart;
