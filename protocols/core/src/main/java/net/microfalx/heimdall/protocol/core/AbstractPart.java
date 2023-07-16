@@ -17,7 +17,7 @@ public abstract class AbstractPart implements Part {
     private Type type;
     private String mimeType = MimeType.APPLICATION_OCTET_STREAM.getValue();
     private String fileName;
-    private Resource resource = NullResource.createNull();
+    Resource resource = NullResource.createNull();
 
     public AbstractPart(Type type) {
         requireNonNull(type);

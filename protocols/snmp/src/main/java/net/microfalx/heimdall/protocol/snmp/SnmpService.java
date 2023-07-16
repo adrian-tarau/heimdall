@@ -1,6 +1,7 @@
 package net.microfalx.heimdall.protocol.snmp;
 
 import net.microfalx.heimdall.protocol.core.Address;
+import net.microfalx.heimdall.protocol.core.Body;
 import net.microfalx.heimdall.protocol.core.ProtocolService;
 import net.microfalx.heimdall.protocol.snmp.jpa.SnmpEventRepository;
 import net.microfalx.lang.StringUtils;
@@ -28,6 +29,7 @@ public class SnmpService extends ProtocolService<SnmpEvent> {
     }
 
     protected void persist(SnmpEvent trap) {
+        trap.setBody(Body.create(encodeAttributes(trap)));
         net.microfalx.heimdall.protocol.snmp.jpa.SnmpEvent snmpEvent = new net.
                 microfalx.heimdall.protocol.snmp.jpa.SnmpEvent();
         Address address = Address.create(trap.getSource().getType(),
@@ -37,7 +39,7 @@ public class SnmpService extends ProtocolService<SnmpEvent> {
         snmpEvent.setSentAt(trap.getSentAt().toLocalDateTime());
         snmpEvent.setReceivedAt(trap.getReceivedAt().toLocalDateTime());
         snmpEvent.setVersion(String.valueOf(trap.getVersion()));
-        snmpEvent.setBindingPart(persistPart(trap.getParts().stream().findFirst().get()));
+        snmpEvent.setBindingPart(persistPart(trap.getBody()));
         snmpEvent.setCommunityString(StringUtils.defaultIfEmpty(trap.getCommunity(),
                 String.valueOf(new OctetString("public"))));
         snmpEvent.setVersion(StringUtils.

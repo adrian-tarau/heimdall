@@ -122,6 +122,12 @@ public interface Address {
     String getValue();
 
     /**
+     * Returns the address as a string suitable for display.
+     * @return a non-null instance
+     */
+    String toDisplay();
+
+    /**
      * An enum for the address type
      */
     enum Type {

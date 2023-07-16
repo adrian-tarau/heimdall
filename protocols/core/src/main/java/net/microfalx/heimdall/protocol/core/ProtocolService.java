@@ -2,13 +2,13 @@ package net.microfalx.heimdall.protocol.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.microfalx.bootstrap.resource.ResourceService;
+import net.microfalx.bootstrap.search.Attribute;
 import net.microfalx.bootstrap.search.Document;
 import net.microfalx.bootstrap.search.IndexService;
 import net.microfalx.bootstrap.search.SearchService;
 import net.microfalx.heimdall.protocol.core.jpa.AddressRepository;
 import net.microfalx.heimdall.protocol.core.jpa.PartRepository;
 import net.microfalx.lang.IOUtils;
-import net.microfalx.resource.NullResource;
 import net.microfalx.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,11 +24,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.StringUtils.NA_STRING;
 
 /**
@@ -93,16 +92,25 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
     }
 
     /**
-     * Uploads a part in the repository associated with the protocol.
+     * Uploads the resource associated with a part in the shared data repository.
      * <p>
-     * The method uploads the content to the repository and it will return a resource to access the content.
+     * The method uploads the content to the repository, and it will return a resource to access the content.
      * <p>
      * The client can use the {@link Resource#toURI() resource URI} to store a pointer to the resource.
      *
-     * @param part the part
+     * @param resource the resource
      */
-    public final Resource upload(Part part) {
-        return NullResource.createNull();
+    public final Resource upload(Resource resource) {
+        requireNonNull(resource);
+        Resource directory = resourceService.getShared(DIRECTORY_DATE_FORMATTER.format(LocalDateTime.now()));
+        Resource target = directory.resolve(String.format(FILE_NAME_FORMAT, getNextSequence()));
+        try {
+            if (!directory.exists()) directory.create();
+            IOUtils.appendStream(target.getOutputStream(), resource.getInputStream());
+        } catch (Exception e) {
+            LOGGER.error("Failed to copy resource part to storage: " + target.toURI() + ", retry later", e);
+        }
+        return target;
     }
 
     /**
@@ -118,13 +126,27 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
      * Indexes an event.
      *
      * @param event the event to index
-     * @return the document after it is indexed
      */
-    public final Future<Document> index(E event) {
+    public final void index(E event) {
+        if (event.getTargets().isEmpty()) {
+            index(event, null);
+        } else {
+            for (Address target : event.getTargets()) {
+                index(event, target);
+            }
+        }
+    }
+
+    private void index(E event, Address target) {
         Document document = Document.create(event.getId(), event.getName());
+        document.setType(event.getType().name().toLowerCase());
+        document.setCreatedTime(event.getCreatedAt().toInstant().toEpochMilli());
+        if (event.getBody() != null) document.setBody(event.getBody().getResource());
+        document.addAttribute(Attribute.create("source", event.getSource().toDisplay()).setTokenized(true));
+        if (target != null) document.addAttribute(Attribute.create("target", target.toDisplay()).setTokenized(true));
+        document.addAttribute(Attribute.create("severity", event.getSeverity().name()).setIndexed(true));
         updateDocument(event, document);
         indexService.index(document);
-        return CompletableFuture.completedFuture(document);
     }
 
     /**
@@ -133,6 +155,7 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
      * @param event the event
      */
     public final void accept(E event) {
+        uploadParts(event);
         try {
             persist(event);
         } catch (Exception e) {
@@ -215,7 +238,6 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
      * @return the JPA part
      */
     protected final net.microfalx.heimdall.protocol.core.jpa.Part persistPart(Part part) {
-        Resource resource = persitResource(part.getResource());
         net.microfalx.heimdall.protocol.core.jpa.Part partJpa = new net.microfalx.heimdall.protocol.core.jpa.Part();
         partJpa.setType(part.getType());
         if (!NA_STRING.equals(part.getName())) partJpa.setName(part.getName());
@@ -226,7 +248,7 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
             partJpa.setLength(-1);
         }
         partJpa.setMimeType(MimeType.get(part.getMimeType()));
-        partJpa.setResource(resource.toURI().toASCIIString());
+        partJpa.setResource(part.getResource().toURI().toASCIIString());
         partJpa.setCreatedAt(part.getEvent().getCreatedAt().toLocalDateTime());
         partRepository.save(partJpa);
         return partJpa;
@@ -243,16 +265,12 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
         getTaskScheduler().schedule(new SimulatorWorker(), new PeriodicTrigger(simulatorProperties.getInterval()));
     }
 
-    private Resource persitResource(Resource resource) {
-        Resource directory = resourceService.getShared(DIRECTORY_DATE_FORMATTER.format(LocalDateTime.now()));
-        Resource target = directory.resolve(String.format(FILE_NAME_FORMAT, getNextSequence()));
-        try {
-            if (!directory.exists()) directory.create();
-            IOUtils.appendStream(target.getOutputStream(), resource.getInputStream());
-        } catch (Exception e) {
-            LOGGER.error("Failed to copy resource part to storage: " + target.toURI() + ", retry later", e);
+    private void uploadParts(E event) {
+        for (Part part : event.getParts()) {
+            if (part instanceof AbstractPart apart) {
+                apart.resource = upload(apart.resource);
+            }
         }
-        return target;
     }
 
     private int getNextSequence() {
