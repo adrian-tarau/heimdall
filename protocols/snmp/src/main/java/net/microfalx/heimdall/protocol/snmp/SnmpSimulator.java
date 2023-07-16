@@ -19,12 +19,12 @@ public class SnmpSimulator extends ProtocolSimulator<SnmpEvent, SnmpClient> {
 
     @Override
     protected Address createSourceAddress() {
-        return Address.create(Address.Type.HOSTNAME, "192.168." + getNextSubnet());
+        return Address.create(Address.Type.HOSTNAME, "192.168." + getRandomSubnet());
     }
 
     @Override
     protected Address createTargetAddress() {
-        return Address.create(Address.Type.HOSTNAME, "192.168." + getNextSubnet());
+        return Address.create(Address.Type.HOSTNAME, "192.168." + getRandomSubnet());
     }
 
     @Override
@@ -35,11 +35,11 @@ public class SnmpSimulator extends ProtocolSimulator<SnmpEvent, SnmpClient> {
     }
 
     @Override
-    protected void simulate(ProtocolClient<SnmpEvent> client, Address address, int index) throws IOException {
+    protected void simulate(ProtocolClient<SnmpEvent> client, Address sourceAddress, Address targetAddress, int index) throws IOException {
         SnmpEvent trap = new SnmpEvent();
-        trap.setSource(Address.create(Address.Type.HOSTNAME, "localhost"));
-        trap.addTarget(Address.create(Address.Type.HOSTNAME, client.getHostName()));
-        trap.setBody(Body.create(getNextBody()));
+        trap.setSource(sourceAddress);
+        trap.addTarget(targetAddress);
+        trap.setBody(Body.create(getRandomText()));
         client.send(trap);
     }
 }

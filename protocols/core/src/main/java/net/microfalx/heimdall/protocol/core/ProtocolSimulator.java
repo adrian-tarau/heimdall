@@ -47,10 +47,11 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
     public void simulate() {
         int eventCount = properties.getMinimumEventCount() + ThreadLocalRandom.current().nextInt(properties.getMaximumEventCount());
         for (int i = 0; i < eventCount; i++) {
-            Address address = getNextTargetAddress();
-            ProtocolClient<E> client = getNextClient();
+            Address sourceAddress = getRandomSourceAddress();
+            Address targetAddress = getRandomTargetAddress();
+            ProtocolClient<E> client = getRandomClient();
             try {
-                simulate(client, address, i + 1);
+                simulate(client, sourceAddress, targetAddress, i + 1);
             } catch (IOException e) {
                 LOGGER.warn("Failed to send simulated event to " + client.getHostName() + ", root cause: " + e.getMessage());
             }
@@ -91,19 +92,20 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
     /**
      * Simulates an event.
      *
-     * @param client  the client
-     * @param address the target address
-     * @param index   the event index
+     * @param client        the client
+     * @param sourceAddress the source address
+     * @param targetAddress the target address
+     * @param index         the event index
      * @throws IOException if an I/O error occurs
      */
-    protected abstract void simulate(ProtocolClient<E> client, Address address, int index) throws IOException;
+    protected abstract void simulate(ProtocolClient<E> client, Address sourceAddress, Address targetAddress, int index) throws IOException;
 
     /**
      * Returns the next target address to simulate an event.
      *
      * @return a non-null instance
      */
-    protected final Address getNextTargetAddress() {
+    protected final Address getRandomTargetAddress() {
         return targetAddresses.get(ThreadLocalRandom.current().nextInt(targetAddresses.size()));
     }
 
@@ -112,7 +114,7 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
      *
      * @return a non-null instance
      */
-    protected final Address getNextSourceAddress() {
+    protected final Address getRandomSourceAddress() {
         return sourceAddresses.get(ThreadLocalRandom.current().nextInt(sourceAddresses.size()));
     }
 
@@ -121,7 +123,7 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
      *
      * @return a non-null instance
      */
-    protected final ProtocolClient<E> getNextClient() {
+    protected final ProtocolClient<E> getRandomClient() {
         return clients.get(ThreadLocalRandom.current().nextInt(clients.size()));
     }
 
@@ -133,7 +135,7 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
      * @return the enum value
      */
     @SuppressWarnings("unchecked")
-    protected final <ENUM extends Enum<ENUM>> ENUM getNextEnum(Class<ENUM> enumClass) {
+    protected final <ENUM extends Enum<ENUM>> ENUM getRandomEnum(Class<ENUM> enumClass) {
         return enumClass.getEnumConstants()[random.nextInt(enumClass.getEnumConstants().length)];
     }
 
@@ -142,7 +144,7 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
      *
      * @return a non-null instance
      */
-    protected final String getNextSubnet() {
+    protected final String getRandomSubnet() {
         if (SUBNET_INDEX1_GENERATOR.get() >= 255) {
             SUBNET_INDEX1_GENERATOR.set(1);
             SUBNET_INDEX2_GENERATOR.incrementAndGet();
@@ -155,7 +157,7 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
      *
      * @return a non-null instance
      */
-    protected final String getNextName() {
+    protected final String getRandomName() {
         return getNextSentence();
     }
 
@@ -164,7 +166,7 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
      *
      * @return a non-null instance
      */
-    protected final String getNextBody() {
+    protected final String getRandomText() {
         StringBuilder builder = new StringBuilder();
         int paragraphCount = 3 + random.nextInt(20);
         for (int i = 0; i < paragraphCount; i++) {

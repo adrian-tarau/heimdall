@@ -19,12 +19,12 @@ public class GelfSimulator extends ProtocolSimulator<GelfEvent, GelfClient> {
 
     @Override
     protected Address createSourceAddress() {
-        return Address.create(Address.Type.HOSTNAME, "192.168." + getNextSubnet());
+        return Address.create(Address.Type.HOSTNAME, "192.168." + getRandomSubnet());
     }
 
     @Override
     protected Address createTargetAddress() {
-        return Address.create(Address.Type.HOSTNAME, "192.168." + getNextSubnet());
+        return Address.create(Address.Type.HOSTNAME, "192.168." + getRandomSubnet());
     }
 
     @Override
@@ -35,13 +35,13 @@ public class GelfSimulator extends ProtocolSimulator<GelfEvent, GelfClient> {
 
 
     @Override
-    protected void simulate(ProtocolClient<GelfEvent> client, Address address, int index) throws IOException {
+    protected void simulate(ProtocolClient<GelfEvent> client, Address sourceAddress, Address targetAddress, int index) throws IOException {
         GelfEvent message = new GelfEvent();
-        message.setBody(Body.create(getNextBody()));
-        message.setGelfSeverity(getNextEnum(Severity.class));
-        message.setFacility(getNextEnum(Facility.class));
-        message.setSource(address);
-        message.addTarget(Address.create(Address.Type.HOSTNAME, client.getHostName()));
+        message.setBody(Body.create(getRandomText()));
+        message.setGelfSeverity(getRandomEnum(Severity.class));
+        message.setFacility(getRandomEnum(Facility.class));
+        message.setSource(sourceAddress);
+        message.addTarget(targetAddress);
         updateAttributes(message);
         if (random.nextFloat() > 0.8) message.setThrowable(new IOException("Something is wrong"));
         client.send(message);
