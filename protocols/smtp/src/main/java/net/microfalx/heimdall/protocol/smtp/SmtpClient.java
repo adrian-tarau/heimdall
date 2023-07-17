@@ -7,6 +7,7 @@ import jakarta.mail.internet.MimeMultipart;
 import net.microfalx.heimdall.protocol.core.Attachment;
 import net.microfalx.heimdall.protocol.core.ProtocolClient;
 import net.microfalx.heimdall.protocol.core.ProtocolException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -16,7 +17,8 @@ import java.util.Properties;
 
 public class SmtpClient extends ProtocolClient<SmtpEvent> {
 
-
+    @Autowired
+    private SmtpConfiguration smtpConfiguration;
     private JavaMailSender mailSender;
 
     /**
@@ -28,7 +30,7 @@ public class SmtpClient extends ProtocolClient<SmtpEvent> {
      */
     @Override
     protected int getDefaultPort() {
-        return 25;
+        return smtpConfiguration.getPort();
     }
 
     /**
@@ -64,7 +66,7 @@ public class SmtpClient extends ProtocolClient<SmtpEvent> {
 
     public void initializeMailSender() {
         JavaMailSenderImpl sender = new JavaMailSenderImpl();
-        sender.setHost("localhost");
+        sender.setHost(getHostName());
         sender.setPort(getPort());
         sender.setUsername("test");
         sender.setPassword("test123");

@@ -16,6 +16,8 @@ public class SmtpService extends ProtocolService<SmtpEvent> {
     private SmtpConfiguration configuration;
     @Autowired
     private SmtpEventRepository repository;
+    @Autowired
+    private SmtpSimulator smtpSimulator;
 
     @Autowired
     private SmtpAttachmentRepository attachmentRepository;
@@ -41,5 +43,15 @@ public class SmtpService extends ProtocolService<SmtpEvent> {
     private void updateAddresses(SmtpEvent smptEvent, net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent smtpEvent) {
         smtpEvent.setFrom(lookupAddress(smptEvent.getSource()));
         smtpEvent.setTo(lookupAddress(smptEvent.getTargets().iterator().next()));
+    }
+
+    /**
+     * Returns the simulator.
+     *
+     * @return the simulator, null if not supported
+     */
+    @Override
+    protected SmtpSimulator getSimulator() {
+        return smtpSimulator;
     }
 }

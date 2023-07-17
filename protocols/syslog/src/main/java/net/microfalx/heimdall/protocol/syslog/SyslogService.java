@@ -12,6 +12,12 @@ public class SyslogService extends ProtocolService<SyslogMessage> {
     @Autowired
     private SyslogEventRepository syslogEventRepository;
 
+    @Autowired
+    private SyslogSimulator syslogSimulator;
+
+    @Autowired
+    private SyslogConfiguration syslogConfiguration;
+
     protected void persist(SyslogMessage message) {
         SyslogEvent syslogEvent = new SyslogEvent();
         syslogEvent.setFacility(message.getFacility().numericalCode());
@@ -24,4 +30,13 @@ public class SyslogService extends ProtocolService<SyslogMessage> {
         syslogEventRepository.save(syslogEvent);
     }
 
+    /**
+     * Returns the simulator.
+     *
+     * @return the simulator, null if not supported
+     */
+    @Override
+    protected SyslogSimulator getSimulator() {
+        return syslogSimulator;
+    }
 }
