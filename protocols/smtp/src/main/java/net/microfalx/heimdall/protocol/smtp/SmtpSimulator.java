@@ -12,11 +12,11 @@ import java.util.Collection;
 @Component
 public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
 
-    private SmtpConfiguration smtpConfiguration;
+    private SmtpProperties smtpProperties;
 
-    public SmtpSimulator(ProtocolSimulatorProperties properties, SmtpConfiguration smtpConfiguration) {
+    public SmtpSimulator(ProtocolSimulatorProperties properties, SmtpProperties smtpProperties) {
         super(properties);
-        this.smtpConfiguration = smtpConfiguration;
+        this.smtpProperties = smtpProperties;
     }
 
     /**
@@ -47,7 +47,7 @@ public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
     @Override
     protected Collection<ProtocolClient<SmtpEvent>> createClients() {
         SmtpClient smtpClient = new SmtpClient();
-        smtpClient.setPort(smtpConfiguration.getPort());
+        smtpClient.setPort(smtpProperties.getPort());
         smtpClient.setTransport(ProtocolClient.Transport.UDP);
         return Arrays.asList(smtpClient);
     }
@@ -76,6 +76,6 @@ public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
 
     private String geRandomEmail() {
         Faker faker = new Faker();
-        return faker.name().firstName();
+        return faker.name().firstName() + "." + faker.name().lastName() + "@company.com";
     }
 }

@@ -13,7 +13,7 @@ import java.util.List;
 public class SmtpService extends ProtocolService<SmtpEvent> {
 
     @Autowired
-    private SmtpConfiguration configuration;
+    private SmtpProperties configuration;
     @Autowired
     private SmtpEventRepository repository;
     @Autowired

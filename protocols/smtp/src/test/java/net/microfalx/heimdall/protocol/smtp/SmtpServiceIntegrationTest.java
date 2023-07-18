@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SmtpServiceIntegrationTest {
 
     @Autowired
-    private SmtpConfiguration smtpConfiguration;
+    private SmtpProperties smtpProperties;
     @Autowired
     private SmtpServer smtpServer;
     @Autowired
@@ -94,7 +94,7 @@ public class SmtpServiceIntegrationTest {
     private void initMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         mailSender.setHost("localhost");
-        mailSender.setPort(smtpConfiguration.getPort());
+        mailSender.setPort(smtpProperties.getPort());
 
         mailSender.setUsername("test");
         mailSender.setPassword("test123");

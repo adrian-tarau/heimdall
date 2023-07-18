@@ -21,7 +21,7 @@ import static org.mockito.Mockito.verify;
 class SmtpServiceTest {
 
     @Mock
-    private SmtpConfiguration configuration;
+    private SmtpProperties configuration;
 
     @Mock
     private SmtpEventRepository repository;

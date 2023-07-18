@@ -6,11 +6,9 @@ import jakarta.mail.Multipart;
 import jakarta.mail.Session;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
-import net.microfalx.heimdall.protocol.core.Address;
-import net.microfalx.heimdall.protocol.core.Attachment;
-import net.microfalx.heimdall.protocol.core.Body;
-import net.microfalx.heimdall.protocol.core.Part;
-import net.microfalx.resource.StreamResource;
+import net.microfalx.heimdall.protocol.core.*;
+import net.microfalx.resource.MemoryResource;
+import net.microfalx.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -28,6 +26,7 @@ import java.time.ZonedDateTime;
 import java.util.*;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static net.microfalx.lang.IOUtils.getInputStreamAsBytes;
 import static net.microfalx.lang.StringUtils.isNotEmpty;
 
 /**
@@ -43,7 +42,7 @@ public class SmtpServer implements InitializingBean, BasicMessageListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(SmtpServer.class);
 
     @Autowired
-    private SmtpConfiguration configuration;
+    private SmtpProperties configuration;
 
     @Autowired
     private SmtpService smtpService;
@@ -62,9 +61,9 @@ public class SmtpServer implements InitializingBean, BasicMessageListener {
             smtpEvent.setSentAt(message.getSentDate().toInstant().atZone(ZoneId.systemDefault()));
             smtpEvent.setCreatedAt(smtpEvent.getSentAt());
             smtpEvent.setReceivedAt(ZonedDateTime.now());
-            Body body = extractBody(smtpEvent, message);
+            Body body = extractBody(message);
             if (body != null) smtpEvent.setBody(body);
-            extractParts(smtpEvent, message).forEach(smtpEvent::addPart);
+            extractParts(message).forEach(smtpEvent::addPart);
             smtpService.accept(smtpEvent);
         } catch (Exception e) {
             String message = "Failed to process email from '" + from + "' to '" + to + "'";
@@ -110,28 +109,32 @@ public class SmtpServer implements InitializingBean, BasicMessageListener {
         }
     }
 
-    private Body extractBody(SmtpEvent smtpEvent, MimeMessage message) throws MessagingException, IOException {
+    private Body extractBody(MimeMessage message) throws MessagingException, IOException {
         if (message.getContent() instanceof String) {
-            return Body.create((String) message.getContent());
+            return (Body) Body.create((String) message.getContent()).setMimeType(MimeType.TEXT_PLAIN);
         } else {
             return null;
         }
     }
 
-    private Collection<Part> extractParts(SmtpEvent smtpEvent, MimeMessage message) throws MessagingException, IOException {
+    private Collection<Part> extractParts(MimeMessage message) throws MessagingException, IOException {
         if (!(message.getContent() instanceof Multipart multipart)) return Collections.emptyList();
         Collection<Part> parts = new ArrayList<>();
         for (int i = 0; i < multipart.getCount(); i++) {
             BodyPart bodyPart = multipart.getBodyPart(i);
             if (bodyPart.getContent() instanceof String) {
-                parts.add(Body.create((String) message.getContent()));
+                parts.add(Body.create((String) bodyPart.getContent()).setMimeType(bodyPart.getContentType()));
             } else if (isNotEmpty(bodyPart.getFileName())) {
-                parts.add(Attachment.create(StreamResource.create(bodyPart.getInputStream())));
+                parts.add(Attachment.create(createResource(bodyPart)).setMimeType(bodyPart.getContentType()));
             } else {
-                parts.add(Body.create(StreamResource.create(bodyPart.getInputStream())));
+                parts.add(Body.create(createResource(bodyPart)).setMimeType(bodyPart.getContentType()));
             }
         }
         return parts;
+    }
+
+    private Resource createResource(BodyPart bodyPart) throws MessagingException, IOException {
+        return MemoryResource.create(getInputStreamAsBytes(bodyPart.getInputStream()));
     }
 
 }

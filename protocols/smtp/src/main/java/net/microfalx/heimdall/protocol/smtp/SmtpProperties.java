@@ -1,30 +1,18 @@
 package net.microfalx.heimdall.protocol.smtp;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties("heimdall.smtp")
-public class SmtpConfiguration {
+public class SmtpProperties {
 
-    @Value("2525")
-    private int port;
-
-    @Value("false")
+    private int port = 2525;
     private boolean requireTLS;
-
-    @Value("10000000")
-    private int maxMessageSize;
-
-    @Value("5000")
-    private int connectionTimeout;
-
-    @Value("20")
-    private int maxConnections;
-
-    @Value("20")
-    private int maxRecipients;
+    private int maxMessageSize = 10_000_000;
+    private int connectionTimeout = 5000;
+    private int maxConnections = 20;
+    private int maxRecipients = 20;
 
     public int getPort() {
         return port;
