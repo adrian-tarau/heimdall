@@ -19,10 +19,20 @@ public abstract class ProtocolClient<E extends Event> {
     private int port = 0;
     private Transport transport = Transport.UDP;
 
+    /**
+     * Returns the hostname used by the client.
+     *
+     * @return a non-null instance
+     */
     public final String getHostName() {
         return hostName;
     }
 
+    /**
+     * Returns the {@link InetAddress} used by the client.
+     *
+     * @return a non-null instance
+     */
     public final InetAddress getAddress() {
         try {
             return InetAddress.getByName(hostName);
@@ -31,6 +41,12 @@ public abstract class ProtocolClient<E extends Event> {
         }
     }
 
+    /**
+     * Changes the hostname used by the client.
+     *
+     * @param hostName the hostname
+     * @return self
+     */
     public ProtocolClient<E> setHostName(String hostName) {
         requireNotEmpty(hostName);
         this.hostName = hostName;
@@ -38,10 +54,21 @@ public abstract class ProtocolClient<E extends Event> {
         return this;
     }
 
+    /**
+     * Returns the port used by the client.
+     *
+     * @return a positive integer
+     */
     public int getPort() {
         return port > 0 ? port : getDefaultPort();
     }
 
+    /**
+     * Changes the port used by the client.
+     *
+     * @param port the port
+     * @return self
+     */
     public ProtocolClient<E> setPort(int port) {
         this.port = port;
         configurationChanged();
@@ -67,7 +94,7 @@ public abstract class ProtocolClient<E extends Event> {
         requireNonNull(hostName);
         this.transport = transport;
         configurationChanged();
-        return this;
+        return doSetTransport(transport, true);
     }
 
     /**
@@ -107,8 +134,26 @@ public abstract class ProtocolClient<E extends Event> {
         // empty by default
     }
 
+    protected final ProtocolClient<E> doSetTransport(Transport transport, boolean fireChange) {
+        requireNonNull(hostName);
+        this.transport = transport;
+        if (fireChange) configurationChanged();
+        return this;
+    }
+
+    /**
+     * An enum which decides which transport the client will use
+     */
     public enum Transport {
+
+        /**
+         * Uses UDP to communicate with the server
+         */
         UDP,
+
+        /**
+         * Uses TCP to communicate with the server
+         */
         TCP
     }
 

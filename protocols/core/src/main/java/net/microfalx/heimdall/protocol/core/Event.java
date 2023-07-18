@@ -89,11 +89,25 @@ public interface Event {
     String getBodyAsString();
 
     /**
+     * Returns whether the event has a body attached.
+     *
+     * @return {@code true} if it has a body, {@code false} otherwise
+     */
+    boolean hasBody();
+
+    /**
      * Returns a collection with parts associated with the event.
      *
      * @return a non-null instance
      */
     Collection<Part> getParts();
+
+    /**
+     * Returns whether the event has at least one attachment.
+     *
+     * @return {@code true} if it has at least one attachment, {@code false} otherwise
+     */
+    boolean hasAttachments();
 
     /**
      * Returns a collection of attributes

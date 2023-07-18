@@ -40,9 +40,10 @@ public abstract class AbstractPart implements Part {
         return defaultIfEmpty(name, defaultIfEmpty(fileName, NA_STRING));
     }
 
-    protected final void setName(String name) {
+    protected final Part setName(String name) {
         requireNonNull(name);
         this.name = name;
+        return this;
     }
 
     @Override
@@ -60,9 +61,16 @@ public abstract class AbstractPart implements Part {
         return mimeType;
     }
 
-    public final void setMimeType(String mimeType) {
+    public final Part setMimeType(String mimeType) {
         requireNonNull(mimeType);
         this.mimeType = mimeType;
+        return this;
+    }
+
+    public final Part setMimeType(MimeType mimeType) {
+        requireNonNull(mimeType);
+        this.mimeType = mimeType.getValue();
+        return this;
     }
 
     @Override
@@ -70,8 +78,9 @@ public abstract class AbstractPart implements Part {
         return fileName;
     }
 
-    public final void setFileName(String fileName) {
+    public final Part setFileName(String fileName) {
         this.fileName = fileName;
+        return this;
     }
 
     @Override

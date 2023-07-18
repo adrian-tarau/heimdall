@@ -17,7 +17,7 @@ public abstract class AbstractEvent implements Event {
     private final Type type;
     private Severity severity = Severity.INFO;
     private ZonedDateTime receivedAt;
-    private ZonedDateTime createdAt;
+    private ZonedDateTime createdAt = ZonedDateTime.now();
     private ZonedDateTime sentAt;
     private Map<String, Object> attributes = new HashMap<>();
 
@@ -135,6 +135,19 @@ public abstract class AbstractEvent implements Event {
         } catch (IOException e) {
             throw new ProtocolException("Body cannot be extracted for " + toString(), e);
         }
+    }
+
+    @Override
+    public boolean hasBody() {
+        return getBody() != null;
+    }
+
+    @Override
+    public boolean hasAttachments() {
+        for (Part part : parts) {
+            if (part instanceof Attachment) return true;
+        }
+        return false;
     }
 
     @Override

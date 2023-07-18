@@ -73,6 +73,11 @@ public interface Part extends Nameable, Descriptable {
         /**
          * The part is an attachment which follows the event
          */
-        ATTACHMENT
+        ATTACHMENT,
+
+        /**
+         * The part is an inline content attached to another part
+         */
+        INLINE
     }
 }

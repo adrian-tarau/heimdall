@@ -9,6 +9,26 @@ import net.microfalx.resource.Resource;
 public class Body extends AbstractPart {
 
     /**
+     * Creates a body from a plain text.
+     *
+     * @param text the text
+     * @return a non-null instance
+     */
+    public static Body plain(String text) {
+        return (Body) create(text).setMimeType(MimeType.TEXT_PLAIN);
+    }
+
+    /**
+     * Creates a body from an HTML text.
+     *
+     * @param text the text
+     * @return a non-null instance
+     */
+    public static Body html(String text) {
+        return (Body) create(text).setMimeType(MimeType.TEXT_HTML);
+    }
+
+    /**
      * Creates a body from a text.
      *
      * @param text the text
@@ -16,6 +36,7 @@ public class Body extends AbstractPart {
      */
     public static Body create(String text) {
         Body body = new Body();
+        body.setMimeType(MimeType.TEXT_PLAIN);
         body.setResource(MemoryResource.create(text));
         return body;
     }
