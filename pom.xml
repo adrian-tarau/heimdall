@@ -74,6 +74,7 @@
         <syslog4j.version>0.9.61</syslog4j.version>
         <logstash-gelf.version>1.15.0</logstash-gelf.version>
         <snmp4j.version>3.7.7</snmp4j.version>
+        <jsmiparser.version>0.14</jsmiparser.version>
         <syslog.version>1.1.7</syslog.version>
         <commons-email>1.5</commons-email>
         <mysql.version>8.0.33</mysql.version>
@@ -173,6 +174,12 @@
                 <groupId>org.snmp4j</groupId>
                 <artifactId>snmp4j</artifactId>
                 <version>${snmp4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jsmiparser</groupId>
+                <artifactId>jsmiparser-api</artifactId>
+                <version>${jsmiparser.version}</version>
             </dependency>
 
             <dependency>
