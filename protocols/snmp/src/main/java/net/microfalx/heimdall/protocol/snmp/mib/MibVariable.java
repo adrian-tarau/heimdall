@@ -3,7 +3,10 @@ package net.microfalx.heimdall.protocol.snmp.mib;
 import net.microfalx.lang.Descriptable;
 import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.Nameable;
+import org.jsmiparser.smi.SmiPrimitiveType;
 import org.jsmiparser.smi.SmiVariable;
+
+import java.util.Objects;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.StringUtils.toIdentifier;
@@ -53,6 +56,15 @@ public class MibVariable implements Identifiable<String>, Nameable, Descriptable
         return variable.getId();
     }
 
+    /**
+     * Returns a name which identifies the module and the variable.
+     *
+     * @return a non-null instance
+     */
+    public String getFullName() {
+        return module.getName() + "::" + getName();
+    }
+
     @Override
     public String getDescription() {
         return variable.getDescription();
@@ -76,10 +88,34 @@ public class MibVariable implements Identifiable<String>, Nameable, Descriptable
         return variable.getUnits();
     }
 
+    /**
+     * Returns the (primitive) type of the variable.
+     *
+     * @return a non-null instance
+     */
+    public SmiPrimitiveType getType() {
+        return variable.getType().getPrimitiveType();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MibVariable that = (MibVariable) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
     @Override
     public String toString() {
         return "MibVariable{" +
-                "variable=" + variable +
+                "id=" + getId() +
+                ", oid=" + variable.getOidStr() +
+                ", description=" + variable.getDescription() +
                 '}';
     }
 }

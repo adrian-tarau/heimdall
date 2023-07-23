@@ -26,4 +26,18 @@ public class MibUtils {
             return null;
         }
     }
+
+    /**
+     * Returns whether the value represents an OID.
+     *
+     * @param value the value to test
+     * @return {@code true} if it is an OID,  {@code false} otherwise
+     */
+    public static boolean isOid(String value) {
+        if (StringUtils.isEmpty(value)) return false;
+        for (char c : value.toCharArray()) {
+            if (!(Character.isDigit(c) || c == '.')) return false;
+        }
+        return true;
+    }
 }

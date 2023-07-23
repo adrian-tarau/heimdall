@@ -7,6 +7,7 @@ import org.jsmiparser.smi.SmiModule;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
+import java.util.Objects;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.StringUtils.toIdentifier;
@@ -41,7 +42,7 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
 
     @Override
     public String getName() {
-        return module.getCodeId();
+        return module.getId();
     }
 
     @Override
@@ -95,9 +96,24 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MibModule module = (MibModule) o;
+        return Objects.equals(id, module.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
     public String toString() {
         return "MibModule{" +
-                "module=" + module +
+                "id=" + getId() +
+                ", organization=" + module.getModuleIdentity().getOrganization() +
+                ", description=" + module.getModuleIdentity().getDescription() +
                 '}';
     }
 }

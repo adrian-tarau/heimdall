@@ -19,6 +19,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.util.Collections.unmodifiableCollection;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.StringUtils.toIdentifier;
 
@@ -35,7 +36,7 @@ public class MibService implements InitializingBean {
      * @return a non-null instance
      */
     public Collection<MibModule> getModules() {
-        return Collections.unmodifiableCollection(holder.modules.values());
+        return unmodifiableCollection(holder.modules);
     }
 
     /**
@@ -46,7 +47,7 @@ public class MibService implements InitializingBean {
      */
     public MibModule findModule(String id) {
         requireNonNull(id);
-        return holder.modules.get(toIdentifier(id));
+        return holder.modulesById.get(toIdentifier(id));
     }
 
     /**
@@ -55,7 +56,7 @@ public class MibService implements InitializingBean {
      * @return a non-null instance
      */
     public Collection<MibVariable> getVariables() {
-        return Collections.unmodifiableCollection(holder.variables.values());
+        return unmodifiableCollection(holder.variables);
     }
 
     /**
@@ -66,7 +67,7 @@ public class MibService implements InitializingBean {
      */
     public MibVariable findVariable(String id) {
         requireNonNull(id);
-        return holder.variables.get(toIdentifier(id));
+        return holder.variablesById.get(toIdentifier(id));
     }
 
     @Override
@@ -101,18 +102,23 @@ public class MibService implements InitializingBean {
     }
 
     private void extractModules(SmiMib mib) {
-        Map<String, MibModule> newModules = new HashMap<>();
-        Map<String, MibVariable> newVariables = new HashMap<>();
+        Collection<MibModule> newModules = new ArrayList<>();
+        Collection<MibVariable> newVariables = new ArrayList<>();
+        Map<String, MibModule> newModulesById = new HashMap<>();
+        Map<String, MibVariable> newVariablesById = new HashMap<>();
         for (SmiModule smiModule : mib.getModules()) {
+            if (smiModule.getModuleIdentity() == null) continue;
             MibModule module = new MibModule(smiModule);
-            newModules.put(module.getId(), module);
-            newModules.put(module.getOid(), module);
+            newModules.add(module);
+            newModulesById.put(module.getId(), module);
+            newModulesById.put(toIdentifier(module.getOid()), module);
             for (MibVariable variable : module.getVariables()) {
-                newVariables.putIfAbsent(variable.getId(), variable);
-                newVariables.putIfAbsent(variable.getOid(), variable);
+                newVariables.add(variable);
+                newVariablesById.putIfAbsent(variable.getId(), variable);
+                newVariablesById.putIfAbsent(toIdentifier(variable.getOid()), variable);
             }
         }
-        this.holder = new MibHolder(newModules, newVariables);
+        this.holder = new MibHolder(newModules, newVariables, newModulesById, newVariablesById);
     }
 
     private static final AtomicInteger EMPTY = new AtomicInteger();
@@ -157,15 +163,19 @@ public class MibService implements InitializingBean {
 
     private static class MibHolder {
 
-        private Map<String, MibModule> modules = Collections.emptyMap();
-        private Map<String, MibVariable> variables = Collections.emptyMap();
+        private Collection<MibModule> modules = Collections.emptyList();
+        private Collection<MibVariable> variables = Collections.emptyList();
+        private Map<String, MibModule> modulesById = Collections.emptyMap();
+        private Map<String, MibVariable> variablesById = Collections.emptyMap();
 
         MibHolder() {
         }
 
-        MibHolder(Map<String, MibModule> modules, Map<String, MibVariable> variables) {
+        public MibHolder(Collection<MibModule> modules, Collection<MibVariable> variables, Map<String, MibModule> modulesById, Map<String, MibVariable> variablesById) {
             this.modules = modules;
             this.variables = variables;
+            this.modulesById = modulesById;
+            this.variablesById = variablesById;
         }
     }
 }
