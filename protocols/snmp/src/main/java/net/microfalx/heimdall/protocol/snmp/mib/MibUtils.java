@@ -1,6 +1,7 @@
 package net.microfalx.heimdall.protocol.snmp.mib;
 
 import net.microfalx.lang.StringUtils;
+import org.snmp4j.smi.OID;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -39,5 +40,17 @@ public class MibUtils {
             if (!(Character.isDigit(c) || c == '.')) return false;
         }
         return true;
+    }
+
+    /**
+     * Returns the parent OID.
+     *
+     * @param oid the OID
+     * @return the parent, null if there is no parent
+     */
+    public static OID getParent(OID oid) {
+        if (oid == null) return null;
+        oid.removeLast();
+        return oid;
     }
 }

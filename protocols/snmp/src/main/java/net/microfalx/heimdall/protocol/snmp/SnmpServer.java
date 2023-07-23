@@ -3,6 +3,8 @@ package net.microfalx.heimdall.protocol.snmp;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import net.microfalx.heimdall.protocol.core.ProtocolException;
+import net.microfalx.heimdall.protocol.snmp.mib.MibService;
+import net.microfalx.heimdall.protocol.snmp.mib.MibVariable;
 import net.microfalx.lang.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +43,9 @@ public class SnmpServer implements CommandResponder {
     private MessageDispatcher messageDispatcher;
     private Snmp snmpV2server;
     private Snmp snmpV3server;
+
+    @Autowired
+    private MibService mibService;
 
     @Override
     public <A extends Address> void processPdu(CommandResponderEvent<A> event) {
@@ -141,6 +146,10 @@ public class SnmpServer implements CommandResponder {
 
     private void updateBindings(SnmpEvent snmpEvent, VariableBinding variable) {
         String attributeName = variable.getOid().format();
+        MibVariable mibVariable = mibService.findVariable(attributeName);
+        if (mibVariable != null && mibVariable.getName() != null) {
+            attributeName = mibVariable.getFullName();
+        }
         Variable attributeValue = variable.getVariable();
         if (attributeValue instanceof Integer32) {
             snmpEvent.addAttribute(attributeName, ((Integer32) attributeValue).getValue());

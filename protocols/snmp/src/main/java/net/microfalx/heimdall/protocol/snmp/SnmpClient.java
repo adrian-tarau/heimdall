@@ -1,6 +1,7 @@
 package net.microfalx.heimdall.protocol.snmp;
 
 import net.microfalx.heimdall.protocol.core.ProtocolClient;
+import net.microfalx.heimdall.protocol.core.ProtocolException;
 import org.snmp4j.*;
 import org.snmp4j.event.ResponseEvent;
 import org.snmp4j.mp.SnmpConstants;
@@ -10,7 +11,7 @@ import org.snmp4j.transport.DefaultTcpTransportMapping;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
 
 import java.io.IOException;
-import java.net.ProtocolException;
+import java.util.Map;
 
 import static org.snmp4j.mp.SnmpConstants.SNMP_ERROR_SUCCESS;
 
@@ -48,6 +49,41 @@ public class SnmpClient extends ProtocolClient<SnmpEvent> {
 
     @Override
     protected void doSend(SnmpEvent event) throws IOException {
+        PDU pdu = createPdu(event);
+        updateBindings(pdu, event);
+        Target<IpAddress> target = updateVersionAndTarget(pdu, event);
+
+        Snmp snmp = new Snmp(getTransport() == Transport.UDP ? new DefaultUdpTransportMapping() : new DefaultTcpTransportMapping());
+        ResponseEvent<IpAddress> response = snmp.send(pdu, target);
+        if (response != null && response.getResponse() == null && response.getResponse().getErrorStatus() != SNMP_ERROR_SUCCESS) {
+            throw new ProtocolException("Failed to send SNMP trap to " + getHostName() + ", reason: " + response.getResponse().getErrorStatusText());
+        }
+    }
+
+    private void updateBindings(PDU pdu, SnmpEvent event) {
+        pdu.add(new VariableBinding(SnmpConstants.sysUpTime, new TimeTicks(getSysUpTime())));
+        pdu.add(new VariableBinding(SnmpConstants.snmpTrapOID, SnmpConstants.linkDown));
+        for (Map.Entry<String, Object> entry : event.getAttributes().entrySet()) {
+            Object value = entry.getValue();
+            Variable variable;
+            if (value == null) {
+                variable = new Null();
+            } else if (value instanceof Integer) {
+                variable = new Counter32(((Integer) value));
+            } else if (value instanceof Long) {
+                variable = new Counter64(((Long) value));
+            } else if (value instanceof String) {
+                variable = new OctetString(((String) value));
+            } else if (value instanceof Variable) {
+                variable = (Variable) value;
+            } else {
+                throw new ProtocolException("Unknown variable bind data type: " + value.getClass());
+            }
+            pdu.add(new VariableBinding(new OID(entry.getKey()), variable));
+        }
+    }
+
+    private PDU createPdu(SnmpEvent event) {
         PDU pdu;
         if (version == SnmpConstants.version3) {
             ScopedPDU scopedPDU = new ScopedPDU();
@@ -58,9 +94,10 @@ public class SnmpClient extends ProtocolClient<SnmpEvent> {
             pdu = new PDUv1();
         }
         pdu.setType(PDU.TRAP);
-        pdu.add(new VariableBinding(SnmpConstants.sysUpTime, new TimeTicks(getSysUpTime())));
-        pdu.add(new VariableBinding(SnmpConstants.snmpTrapOID, SnmpConstants.linkDown));
+        return pdu;
+    }
 
+    private Target<IpAddress> updateVersionAndTarget(PDU pdu, SnmpEvent event) {
         Target<IpAddress> target;
         if (version == SnmpConstants.version3) {
             UserTarget<IpAddress> userTarget = new UserTarget<>();
@@ -78,12 +115,7 @@ public class SnmpClient extends ProtocolClient<SnmpEvent> {
             communityTarget.setVersion(SnmpConstants.version2c);
             target = communityTarget;
         }
-
-        Snmp snmp = new Snmp(getTransport() == Transport.UDP ? new DefaultUdpTransportMapping() : new DefaultTcpTransportMapping());
-        ResponseEvent<IpAddress> response = snmp.send(pdu, target);
-        if (response != null && response.getResponse() == null && response.getResponse().getErrorStatus() != SNMP_ERROR_SUCCESS) {
-            throw new ProtocolException("Failed to send SNMP trap to " + getHostName() + ", reason: " + response.getResponse().getErrorStatusText());
-        }
+        return target;
     }
 
     private IpAddress getSnmpAddress() {

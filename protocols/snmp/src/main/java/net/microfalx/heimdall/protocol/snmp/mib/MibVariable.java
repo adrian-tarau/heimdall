@@ -6,6 +6,8 @@ import net.microfalx.lang.Nameable;
 import org.jsmiparser.smi.SmiPrimitiveType;
 import org.jsmiparser.smi.SmiVariable;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
@@ -91,10 +93,23 @@ public class MibVariable implements Identifiable<String>, Nameable, Descriptable
     /**
      * Returns the (primitive) type of the variable.
      *
-     * @return a non-null instance
+     * @return a non-null instance if it is a primitive type, null otherwise
      */
     public SmiPrimitiveType getType() {
-        return variable.getType().getPrimitiveType();
+        return variable.getType() != null ? variable.getType().getPrimitiveType() : null;
+    }
+
+    /**
+     * Returns the available values for the enum, if the variable has an ENUM type.
+     *
+     * @return the enum
+     */
+    public Collection<MibNamedNumber> getEnumValues() {
+        if (getType() == SmiPrimitiveType.ENUM) {
+            return variable.getType().getNamedNumbers().stream().map(MibNamedNumber::new).toList();
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     @Override

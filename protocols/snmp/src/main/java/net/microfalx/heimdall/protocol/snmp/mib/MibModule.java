@@ -62,10 +62,10 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
     /**
      * Returns the organization.
      *
-     * @return a non-null instance
+     * @return a non-null instance if the organization is defined, null otherwise
      */
     public String getOrganization() {
-        return module.getModuleIdentity().getOrganization();
+        return module.getModuleIdentity() != null ? module.getModuleIdentity().getOrganization() : null;
     }
 
     /**
@@ -74,7 +74,7 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
      * @return a non-null instance if provided, null otherwise
      */
     public String getContactInformation() {
-        return module.getModuleIdentity().getContactInfo();
+        return module.getModuleIdentity() != null ? module.getModuleIdentity().getContactInfo() : null;
     }
 
     /**
@@ -83,7 +83,7 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
      * @return a non-null instance if provided, null for unknown
      */
     public ZonedDateTime getLastModified() {
-        return MibUtils.parseDateTime(module.getModuleIdentity().getLastUpdated());
+        return module.getModuleIdentity() != null ? MibUtils.parseDateTime(module.getModuleIdentity().getLastUpdated()) : null;
     }
 
     /**
@@ -92,7 +92,16 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
      * @return a non-null instance
      */
     public Collection<MibVariable> getVariables() {
-        return module.getVariables().stream().map(smiVariable -> new MibVariable(this, smiVariable)).toList();
+        return module.getVariables().stream().map(v -> new MibVariable(this, v)).toList();
+    }
+
+    /**
+     * Returns all symbols defined in the module.
+     *
+     * @return a non-null instance
+     */
+    public Collection<MibSymbol> getSymbols() {
+        return module.getSymbols().stream().map(s -> new MibSymbol(this, s)).toList();
     }
 
     @Override
@@ -112,8 +121,7 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
     public String toString() {
         return "MibModule{" +
                 "id=" + getId() +
-                ", organization=" + module.getModuleIdentity().getOrganization() +
-                ", description=" + module.getModuleIdentity().getDescription() +
+                ", identify=" + module.getModuleIdentity() +
                 '}';
     }
 }
