@@ -49,8 +49,6 @@ public class MibUtils {
      * @return the parent, null if there is no parent
      */
     public static OID getParent(OID oid) {
-        if (oid == null) return null;
-        oid.removeLast();
-        return oid;
+        return oid == null ? oid.trim() : null;
     }
 }
