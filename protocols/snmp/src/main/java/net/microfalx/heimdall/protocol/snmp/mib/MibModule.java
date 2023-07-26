@@ -1,8 +1,11 @@
 package net.microfalx.heimdall.protocol.snmp.mib;
 
+import net.microfalx.bootstrap.web.dataset.annotation.Formattable;
 import net.microfalx.lang.Descriptable;
 import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.Nameable;
+import net.microfalx.lang.annotation.Position;
+import net.microfalx.lang.annotation.Visible;
 import org.jsmiparser.smi.SmiModule;
 
 import java.time.ZonedDateTime;
@@ -17,7 +20,9 @@ import static net.microfalx.lang.StringUtils.toIdentifier;
  */
 public class MibModule implements Identifiable<String>, Nameable, Descriptable {
 
+    @Visible(false)
     private final String id;
+    @Visible(false)
     private final SmiModule module;
 
     MibModule(SmiModule module) {
@@ -40,14 +45,17 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
         return id;
     }
 
+    @Position(1)
     @Override
     public String getName() {
         return module.getId();
     }
 
     @Override
+    @Position(100)
+    @Formattable(maximumLines = 2)
     public String getDescription() {
-        return module.getModuleIdentity().getDescription();
+        return module.getModuleIdentity() != null ? module.getModuleIdentity().getDescription() : null;
     }
 
     /**
@@ -55,6 +63,7 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
      *
      * @return a non-null instance
      */
+    @Visible(false)
     public String getOid() {
         return module.getCodeId();
     }
@@ -64,6 +73,7 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
      *
      * @return a non-null instance if the organization is defined, null otherwise
      */
+    @Position(20)
     public String getOrganization() {
         return module.getModuleIdentity() != null ? module.getModuleIdentity().getOrganization() : null;
     }
@@ -73,6 +83,7 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
      *
      * @return a non-null instance if provided, null otherwise
      */
+    @Visible(false)
     public String getContactInformation() {
         return module.getModuleIdentity() != null ? module.getModuleIdentity().getContactInfo() : null;
     }
@@ -82,6 +93,7 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
      *
      * @return a non-null instance if provided, null for unknown
      */
+    @Position(110)
     public ZonedDateTime getLastModified() {
         return module.getModuleIdentity() != null ? MibUtils.parseDateTime(module.getModuleIdentity().getLastUpdated()) : null;
     }
@@ -91,6 +103,7 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
      *
      * @return a non-null instance
      */
+    @Visible(false)
     public Collection<MibVariable> getVariables() {
         return module.getVariables().stream().map(v -> new MibVariable(this, v)).toList();
     }
@@ -100,6 +113,7 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
      *
      * @return a non-null instance
      */
+    @Visible(false)
     public Collection<MibSymbol> getSymbols() {
         return module.getSymbols().stream().map(s -> new MibSymbol(this, s)).toList();
     }

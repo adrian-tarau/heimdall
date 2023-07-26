@@ -20,7 +20,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static java.util.Collections.unmodifiableCollection;
+import static java.util.Collections.unmodifiableList;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.StringUtils.toIdentifier;
 
@@ -36,8 +36,8 @@ public class MibService implements InitializingBean {
      *
      * @return a non-null instance
      */
-    public Collection<MibModule> getModules() {
-        return unmodifiableCollection(holder.modules);
+    public List<MibModule> getModules() {
+        return unmodifiableList(holder.modules);
     }
 
     /**
@@ -57,8 +57,8 @@ public class MibService implements InitializingBean {
      *
      * @return a non-null instance
      */
-    public Collection<MibSymbol> getSymbols() {
-        return unmodifiableCollection(holder.symbols);
+    public List<MibSymbol> getSymbols() {
+        return unmodifiableList(holder.symbols);
     }
 
     /**
@@ -77,8 +77,8 @@ public class MibService implements InitializingBean {
      *
      * @return a non-null instance
      */
-    public Collection<MibVariable> getVariables() {
-        return unmodifiableCollection(holder.variables);
+    public List<MibVariable> getVariables() {
+        return unmodifiableList(holder.variables);
     }
 
     /**
@@ -178,9 +178,9 @@ public class MibService implements InitializingBean {
     }
 
     private void extractModules(SmiMib mib) {
-        Collection<MibModule> newModules = new ArrayList<>();
-        Collection<MibSymbol> newSymbols = new ArrayList<>();
-        Collection<MibVariable> newVariables = new ArrayList<>();
+        List<MibModule> newModules = new ArrayList<>();
+        List<MibSymbol> newSymbols = new ArrayList<>();
+        List<MibVariable> newVariables = new ArrayList<>();
         Map<String, MibModule> newModulesById = new HashMap<>();
         Map<String, MibSymbol> newSymbolsById = new HashMap<>();
         Map<String, MibVariable> newVariablesById = new HashMap<>();
@@ -245,9 +245,9 @@ public class MibService implements InitializingBean {
 
     private static class MibHolder {
 
-        private Collection<MibModule> modules = Collections.emptyList();
-        private Collection<MibSymbol> symbols = Collections.emptyList();
-        private Collection<MibVariable> variables = Collections.emptyList();
+        private List<MibModule> modules = Collections.emptyList();
+        private List<MibSymbol> symbols = Collections.emptyList();
+        private List<MibVariable> variables = Collections.emptyList();
         private Map<String, MibModule> modulesById = Collections.emptyMap();
         private Map<String, MibSymbol> symbolsById = Collections.emptyMap();
         private Map<String, MibVariable> variablesById = Collections.emptyMap();
@@ -255,7 +255,7 @@ public class MibService implements InitializingBean {
         MibHolder() {
         }
 
-        public MibHolder(Collection<MibModule> modules, Collection<MibSymbol> symbols, Collection<MibVariable> variables,
+        public MibHolder(List<MibModule> modules, List<MibSymbol> symbols, List<MibVariable> variables,
                          Map<String, MibModule> modulesById, Map<String, MibSymbol> symbolsById, Map<String, MibVariable> variablesById) {
             this.modules = modules;
             this.symbols = symbols;

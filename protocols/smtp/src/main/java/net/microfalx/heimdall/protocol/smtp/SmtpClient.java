@@ -107,7 +107,7 @@ public class SmtpClient extends ProtocolClient<SmtpEvent> {
         props.put("mail.transport.protocol", "smtp");
         props.put("mail.smtp.auth", "false");
         props.put("mail.smtp.starttls.enable", "false");
-        props.put("mail.debug", "true");
+        props.put("mail.debug", "false");
         mailSender = sender;
     }
 

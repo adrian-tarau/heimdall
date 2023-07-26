@@ -1,4 +1,4 @@
-package net.microfalx.heimdall.protocol.snmp;
+package net.microfalx.heimdall.protocol.snmp.controller;
 
 import net.microfalx.bootstrap.web.dataset.annotation.DataSet;
 import net.microfalx.heimdall.protocol.core.ProtocolController;
