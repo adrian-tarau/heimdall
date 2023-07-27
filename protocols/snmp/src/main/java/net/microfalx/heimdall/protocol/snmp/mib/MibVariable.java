@@ -3,6 +3,8 @@ package net.microfalx.heimdall.protocol.snmp.mib;
 import net.microfalx.lang.Descriptable;
 import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.Nameable;
+import net.microfalx.lang.annotation.Name;
+import net.microfalx.lang.annotation.ReadOnly;
 import org.jsmiparser.smi.SmiPrimitiveType;
 import org.jsmiparser.smi.SmiVariable;
 
@@ -16,6 +18,8 @@ import static net.microfalx.lang.StringUtils.toIdentifier;
 /**
  * A MIB variable, part of a module.
  */
+@Name("Variables")
+@ReadOnly
 public class MibVariable implements Identifiable<String>, Nameable, Descriptable {
 
     private final String id;

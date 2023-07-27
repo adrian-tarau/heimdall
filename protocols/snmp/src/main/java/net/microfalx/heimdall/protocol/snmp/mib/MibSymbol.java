@@ -3,6 +3,8 @@ package net.microfalx.heimdall.protocol.snmp.mib;
 import net.microfalx.lang.Descriptable;
 import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.Nameable;
+import net.microfalx.lang.annotation.Name;
+import net.microfalx.lang.annotation.ReadOnly;
 import org.jsmiparser.smi.SmiOidValue;
 import org.jsmiparser.smi.SmiSymbol;
 
@@ -12,6 +14,8 @@ import static net.microfalx.lang.StringUtils.toIdentifier;
 /**
  * A MIB symbol.
  */
+@Name("Symbol")
+@ReadOnly
 public class MibSymbol implements Identifiable<String>, Nameable, Descriptable {
 
     private final String id;

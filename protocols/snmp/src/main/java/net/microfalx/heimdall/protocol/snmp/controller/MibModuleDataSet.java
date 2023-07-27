@@ -1,18 +1,20 @@
 package net.microfalx.heimdall.protocol.snmp.controller;
 
+import net.microfalx.bootstrap.model.Filter;
 import net.microfalx.bootstrap.model.Metadata;
 import net.microfalx.bootstrap.model.PojoField;
-import net.microfalx.bootstrap.web.dataset.AbstractDataSet;
 import net.microfalx.bootstrap.web.dataset.DataSetFactory;
 import net.microfalx.bootstrap.web.dataset.PojoDataSet;
-import net.microfalx.bootstrap.web.dataset.PojoDataSetFactory;
 import net.microfalx.heimdall.protocol.snmp.mib.MibModule;
 import net.microfalx.heimdall.protocol.snmp.mib.MibService;
+import net.microfalx.lang.annotation.Provider;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
-import static org.apache.commons.lang3.ClassUtils.isAssignable;
-
+@Provider
 public class MibModuleDataSet extends PojoDataSet<MibModule, PojoField<MibModule>, String> {
 
     public MibModuleDataSet(DataSetFactory<MibModule, PojoField<MibModule>, String> factory, Metadata<MibModule, PojoField<MibModule>> metadata) {
@@ -20,20 +22,9 @@ public class MibModuleDataSet extends PojoDataSet<MibModule, PojoField<MibModule
     }
 
     @Override
-    protected List<MibModule> doFindAll() {
-        return getService(MibService.class).getModules();
+    protected Page<MibModule> doFindAll(Pageable pageable, Filter filterable) {
+        List<MibModule> modules = getService(MibService.class).getModules();
+        return new PageImpl<>(modules, pageable, modules.size());
     }
 
-    public static class Factory extends PojoDataSetFactory<MibModule, PojoField<MibModule>, String> {
-
-        @Override
-        protected AbstractDataSet<MibModule, PojoField<MibModule>, String> doCreate(Metadata<MibModule, PojoField<MibModule>> metadata) {
-            return new MibModuleDataSet(this, metadata);
-        }
-
-        @Override
-        public boolean supports(Metadata<MibModule, PojoField<MibModule>> metadata) {
-            return isAssignable(metadata.getModel(), MibModule.class);
-        }
-    }
 }

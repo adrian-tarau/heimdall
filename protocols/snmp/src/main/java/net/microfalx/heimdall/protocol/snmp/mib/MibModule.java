@@ -4,7 +4,9 @@ import net.microfalx.bootstrap.web.dataset.annotation.Formattable;
 import net.microfalx.lang.Descriptable;
 import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.Nameable;
+import net.microfalx.lang.annotation.Name;
 import net.microfalx.lang.annotation.Position;
+import net.microfalx.lang.annotation.ReadOnly;
 import net.microfalx.lang.annotation.Visible;
 import org.jsmiparser.smi.SmiModule;
 
@@ -18,6 +20,8 @@ import static net.microfalx.lang.StringUtils.toIdentifier;
 /**
  * A MIB module.
  */
+@Name("Module")
+@ReadOnly
 public class MibModule implements Identifiable<String>, Nameable, Descriptable {
 
     @Visible(false)

@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatter;
  */
 public class MibUtils {
 
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_DATE_TIME;
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmX");
 
     /**
      * Parses a date/time.

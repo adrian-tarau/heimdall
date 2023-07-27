@@ -4,11 +4,13 @@ import jakarta.persistence.*;
 import net.microfalx.heimdall.protocol.core.jpa.Address;
 import net.microfalx.heimdall.protocol.core.jpa.Event;
 import net.microfalx.heimdall.protocol.core.jpa.Part;
+import net.microfalx.lang.annotation.ReadOnly;
 
 import java.util.Objects;
 
 @Entity
 @Table(name = "protocol_syslog_events")
+@ReadOnly
 public class SyslogEvent extends Event {
 
     @Id
