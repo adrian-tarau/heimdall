@@ -1,6 +1,6 @@
 package net.microfalx.heimdall.protocol.core;
 
-import net.microfalx.bootstrap.web.dataset.controller.DataSetController;
+import net.microfalx.bootstrap.dataset.DataSetController;
 import net.microfalx.heimdall.protocol.core.jpa.Event;
 
 /**

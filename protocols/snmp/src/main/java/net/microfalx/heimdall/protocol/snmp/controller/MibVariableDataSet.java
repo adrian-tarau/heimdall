@@ -1,9 +1,9 @@
 package net.microfalx.heimdall.protocol.snmp.controller;
 
+import net.microfalx.bootstrap.dataset.DataSetFactory;
+import net.microfalx.bootstrap.dataset.PojoDataSet;
 import net.microfalx.bootstrap.model.Metadata;
 import net.microfalx.bootstrap.model.PojoField;
-import net.microfalx.bootstrap.web.dataset.DataSetFactory;
-import net.microfalx.bootstrap.web.dataset.PojoDataSet;
 import net.microfalx.heimdall.protocol.snmp.mib.MibVariable;
 import net.microfalx.lang.annotation.Provider;
 

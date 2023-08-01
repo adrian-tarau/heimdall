@@ -1,6 +1,6 @@
 package net.microfalx.heimdall.protocol.snmp.mib;
 
-import net.microfalx.bootstrap.web.dataset.annotation.Formattable;
+import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.lang.Descriptable;
 import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.Nameable;

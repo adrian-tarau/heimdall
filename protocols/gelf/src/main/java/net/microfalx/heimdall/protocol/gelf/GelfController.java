@@ -1,6 +1,6 @@
 package net.microfalx.heimdall.protocol.gelf;
 
-import net.microfalx.bootstrap.web.dataset.annotation.DataSet;
+import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.heimdall.protocol.core.ProtocolController;
 import net.microfalx.heimdall.protocol.jpa.GelfEvent;
 import net.microfalx.heimdall.protocol.jpa.GelfEventRepository;
