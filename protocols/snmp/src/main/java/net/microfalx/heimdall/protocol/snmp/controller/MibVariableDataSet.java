@@ -10,7 +10,7 @@ import net.microfalx.lang.annotation.Provider;
 @Provider
 public class MibVariableDataSet extends PojoDataSet<MibVariable, PojoField<MibVariable>, String> {
 
-    public MibVariableDataSet(DataSetFactory<MibVariable, PojoField<MibVariable>, String> factory, Metadata<MibVariable, PojoField<MibVariable>> metadata) {
+    public MibVariableDataSet(DataSetFactory<MibVariable, PojoField<MibVariable>, String> factory, Metadata<MibVariable, PojoField<MibVariable>, String> metadata) {
         super(factory, metadata);
     }
 

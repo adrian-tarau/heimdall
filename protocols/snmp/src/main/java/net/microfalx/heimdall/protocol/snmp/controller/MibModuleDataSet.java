@@ -17,7 +17,7 @@ import java.util.List;
 @Provider
 public class MibModuleDataSet extends PojoDataSet<MibModule, PojoField<MibModule>, String> {
 
-    public MibModuleDataSet(DataSetFactory<MibModule, PojoField<MibModule>, String> factory, Metadata<MibModule, PojoField<MibModule>> metadata) {
+    public MibModuleDataSet(DataSetFactory<MibModule, PojoField<MibModule>, String> factory, Metadata<MibModule, PojoField<MibModule>, String> metadata) {
         super(factory, metadata);
     }
 

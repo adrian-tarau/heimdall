@@ -10,7 +10,7 @@ import net.microfalx.lang.annotation.Provider;
 @Provider
 public class MibSymbolDataSet extends PojoDataSet<MibSymbol, PojoField<MibSymbol>, String> {
 
-    public MibSymbolDataSet(DataSetFactory<MibSymbol, PojoField<MibSymbol>, String> factory, Metadata<MibSymbol, PojoField<MibSymbol>> metadata) {
+    public MibSymbolDataSet(DataSetFactory<MibSymbol, PojoField<MibSymbol>, String> factory, Metadata<MibSymbol, PojoField<MibSymbol>, String> metadata) {
         super(factory, metadata);
     }
 
