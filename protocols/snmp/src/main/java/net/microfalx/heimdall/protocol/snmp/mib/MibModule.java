@@ -4,10 +4,7 @@ import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.lang.Descriptable;
 import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.Nameable;
-import net.microfalx.lang.annotation.Name;
-import net.microfalx.lang.annotation.Position;
-import net.microfalx.lang.annotation.ReadOnly;
-import net.microfalx.lang.annotation.Visible;
+import net.microfalx.lang.annotation.*;
 import org.jsmiparser.smi.SmiModule;
 
 import java.time.ZonedDateTime;
@@ -24,8 +21,10 @@ import static net.microfalx.lang.StringUtils.toIdentifier;
 @ReadOnly
 public class MibModule implements Identifiable<String>, Nameable, Descriptable {
 
+    @Id
     @Visible(false)
     private final String id;
+
     @Visible(false)
     private final SmiModule module;
 
@@ -45,12 +44,14 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
     }
 
     @Override
+
     public String getId() {
         return id;
     }
 
     @Position(1)
     @Override
+    @Name
     public String getName() {
         return module.getId();
     }

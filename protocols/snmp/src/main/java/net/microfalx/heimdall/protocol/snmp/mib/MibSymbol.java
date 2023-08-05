@@ -1,12 +1,13 @@
 package net.microfalx.heimdall.protocol.snmp.mib;
 
+import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.lang.Descriptable;
 import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.Nameable;
-import net.microfalx.lang.annotation.Name;
-import net.microfalx.lang.annotation.ReadOnly;
+import net.microfalx.lang.annotation.*;
 import org.jsmiparser.smi.SmiOidValue;
 import org.jsmiparser.smi.SmiSymbol;
+import org.jsmiparser.smi.SmiTextualConvention;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.StringUtils.toIdentifier;
@@ -18,8 +19,14 @@ import static net.microfalx.lang.StringUtils.toIdentifier;
 @ReadOnly
 public class MibSymbol implements Identifiable<String>, Nameable, Descriptable {
 
+    @Id
+    @Visible(false)
     private final String id;
+
+    @Position(1)
     private final MibModule module;
+
+    @Visible(false)
     private final SmiSymbol symbol;
 
     public MibSymbol(MibModule module, SmiSymbol symbol) {
@@ -45,6 +52,8 @@ public class MibSymbol implements Identifiable<String>, Nameable, Descriptable {
     }
 
     @Override
+    @Position(10)
+    @Name
     public String getName() {
         return symbol.getId();
     }
@@ -54,13 +63,20 @@ public class MibSymbol implements Identifiable<String>, Nameable, Descriptable {
      *
      * @return a non-null instance
      */
+    @Visible(false)
     public String getFullName() {
         return module.getName() + "::" + getName();
     }
 
+    @Position(100)
+    @Formattable(maximumLength = 100)
     @Override
     public String getDescription() {
-        return null;
+        if (symbol instanceof SmiTextualConvention) {
+            return ((SmiTextualConvention) symbol).getDescription();
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -68,6 +84,7 @@ public class MibSymbol implements Identifiable<String>, Nameable, Descriptable {
      *
      * @return a non-null instance if the symbol has an OID, null otherwise
      */
+    @Position(50)
     public String getOid() {
         return symbol instanceof SmiOidValue ? ((SmiOidValue) symbol).getNode().getOidStr() : null;
     }
