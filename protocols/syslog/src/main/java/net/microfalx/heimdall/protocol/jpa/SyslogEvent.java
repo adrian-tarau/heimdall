@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import net.microfalx.heimdall.protocol.core.jpa.Address;
 import net.microfalx.heimdall.protocol.core.jpa.Event;
 import net.microfalx.heimdall.protocol.core.jpa.Part;
+import net.microfalx.lang.annotation.Name;
 import net.microfalx.lang.annotation.ReadOnly;
 
 import java.util.Objects;
@@ -24,6 +25,7 @@ public class SyslogEvent extends Event {
 
     @OneToOne
     @JoinColumn(name = "message_id", nullable = false)
+    @Name
     private Part message;
 
     @Column(name = "severity", nullable = false)

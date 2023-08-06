@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import net.microfalx.heimdall.protocol.core.jpa.Address;
 import net.microfalx.heimdall.protocol.core.jpa.Event;
 import net.microfalx.heimdall.protocol.core.jpa.Part;
+import net.microfalx.lang.annotation.Name;
 import net.microfalx.lang.annotation.ReadOnly;
 
 import java.util.Objects;
@@ -27,6 +28,7 @@ public class GelfEvent extends Event {
 
     @JoinColumn(name = "short_message_id")
     @OneToOne
+    @Name
     private Part shortMessage;
 
     @JoinColumn(name = "long_message_id")

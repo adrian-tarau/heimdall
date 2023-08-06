@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import net.microfalx.heimdall.protocol.core.MimeType;
+import net.microfalx.lang.annotation.Name;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -18,6 +19,7 @@ public class Part {
     private Integer id;
 
     @Column(name = "name")
+    @Name
     private String name;
 
     @Column(name = "file_name")

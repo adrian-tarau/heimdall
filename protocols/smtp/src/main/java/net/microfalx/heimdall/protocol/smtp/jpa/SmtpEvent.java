@@ -3,7 +3,9 @@ package net.microfalx.heimdall.protocol.smtp.jpa;
 import jakarta.persistence.*;
 import net.microfalx.heimdall.protocol.core.jpa.Address;
 import net.microfalx.heimdall.protocol.core.jpa.Event;
+import net.microfalx.lang.annotation.Name;
 import net.microfalx.lang.annotation.ReadOnly;
+import net.microfalx.lang.annotation.Visible;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,6 +24,7 @@ public class SmtpEvent extends Event {
     private Long id;
 
     @Column(name = "subject", length = 500)
+    @Name
     private String subject;
 
     @ManyToOne
@@ -34,6 +37,7 @@ public class SmtpEvent extends Event {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "smtp_event_id")
+    @Visible(false)
     private Collection<SmtpAttachment> attachments = new ArrayList<>();
 
     public Long getId() {
