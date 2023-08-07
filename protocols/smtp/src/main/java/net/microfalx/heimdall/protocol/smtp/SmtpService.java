@@ -31,7 +31,7 @@ public class SmtpService extends ProtocolService<SmtpEvent> {
         updateAddresses(smtpEvent, jpaSmtpEvent);
         List<SmtpAttachment> attachments = smtpEvent.getParts().stream().map(part -> {
             SmtpAttachment attachment = new SmtpAttachment();
-            attachment.setSmtp(jpaSmtpEvent);
+            attachment.setSmtpEvent(jpaSmtpEvent);
             attachment.setPart(persistPart(part));
             return attachment;
         }).toList();

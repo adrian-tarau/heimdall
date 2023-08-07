@@ -3,39 +3,54 @@ package net.microfalx.heimdall.protocol.snmp.jpa;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import net.microfalx.heimdall.protocol.core.jpa.Address;
 import net.microfalx.heimdall.protocol.core.jpa.Event;
 import net.microfalx.heimdall.protocol.core.jpa.Part;
+import net.microfalx.lang.annotation.Position;
 import net.microfalx.lang.annotation.ReadOnly;
-
-import java.util.Objects;
+import net.microfalx.lang.annotation.Visible;
 
 @Entity
 @Table(name = "protocol_snmp_events")
 @ReadOnly
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
+@ToString(callSuper = true)
 public class SnmpEvent extends Event {
 
     @Id
-    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    @EqualsAndHashCode.Include
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "agent_address_id", nullable = false)
     @NotNull
+    @Position(1)
     private Address agentAddress;
 
     @ManyToOne
     @JoinColumn(name = "bindings_id", nullable = false)
     @NotNull
+    @Position(10)
     private Part bindingPart;
 
     @Column(name = "version", nullable = false, length = 50)
     @NotBlank
+    @Visible(modes = Visible.Mode.VIEW)
+    @Position(20)
     private String version;
 
     @Column(name = "community_string", nullable = false, length = 200)
     @NotBlank
+    @Visible(modes = Visible.Mode.VIEW)
+    @Position(21)
     private String communityString;
 
     @Column(name = "enterprise", nullable = false, length = 200)
@@ -43,73 +58,4 @@ public class SnmpEvent extends Event {
 
     @Column(name = "trap_type")
     private Integer trapType;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Address getAgentAddress() {
-        return agentAddress;
-    }
-
-    public void setAgentAddress(Address agentAddress) {
-        this.agentAddress = agentAddress;
-    }
-
-    public Part getBindingPart() {
-        return bindingPart;
-    }
-
-    public void setBindingPart(Part bindingPart) {
-        this.bindingPart = bindingPart;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
-    public String getCommunityString() {
-        return communityString;
-    }
-
-    public void setCommunityString(String communityString) {
-        this.communityString = communityString;
-    }
-
-    public String getEnterprise() {
-        return enterprise;
-    }
-
-    public void setEnterprise(String enterprise) {
-        this.enterprise = enterprise;
-    }
-
-    public Integer getTrapType() {
-        return trapType;
-    }
-
-    public void setTrapType(Integer trapType) {
-        this.trapType = trapType;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof SnmpEvent snmpEvent)) return false;
-
-        return Objects.equals(id, snmpEvent.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return id != null ? id.hashCode() : 0;
-    }
 }

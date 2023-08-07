@@ -1,70 +1,34 @@
 package net.microfalx.heimdall.protocol.core.jpa;
 
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import net.microfalx.bootstrap.jdbc.entity.NamedTimestampAware;
-
-import java.util.Objects;
+import net.microfalx.lang.annotation.Position;
 
 @Entity
 @Table(name = "protocol_addresses")
+@ToString(callSuper = true)
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 public class Address extends NamedTimestampAware {
 
     @Id
-    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    @EqualsAndHashCode.Include
     private Integer id;
 
     @Column(name = "type", nullable = false)
+    @Position(10)
     @Enumerated(EnumType.STRING)
     private net.microfalx.heimdall.protocol.core.Address.Type type;
 
     @Column(name = "value")
+    @Position(15)
     private String value;
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public net.microfalx.heimdall.protocol.core.Address.Type getType() {
-        return type;
-    }
-
-    public void setType(net.microfalx.heimdall.protocol.core.Address.Type type) {
-        this.type = type;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Address address = (Address) o;
-        return Objects.equals(id, address.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
-
-    @Override
-    public String toString() {
-        return "Address{" +
-                "id=" + id +
-                ", type=" + type +
-                ", value='" + value + '\'' +
-                "} " + super.toString();
-    }
 
 }

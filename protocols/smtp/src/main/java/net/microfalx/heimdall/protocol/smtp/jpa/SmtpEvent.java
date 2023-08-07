@@ -1,83 +1,56 @@
 package net.microfalx.heimdall.protocol.smtp.jpa;
 
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import net.microfalx.heimdall.protocol.core.jpa.Address;
 import net.microfalx.heimdall.protocol.core.jpa.Event;
 import net.microfalx.lang.annotation.Name;
+import net.microfalx.lang.annotation.Position;
 import net.microfalx.lang.annotation.ReadOnly;
 import net.microfalx.lang.annotation.Visible;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Objects;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
 @Entity
 @Table(name = "protocol_smtp_events")
 @ReadOnly
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
+@ToString(callSuper = true)
 public class SmtpEvent extends Event {
 
     @Id
-    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    @EqualsAndHashCode.Include
     private Long id;
 
     @Column(name = "subject", length = 500)
     @Name
+    @Position(1)
     private String subject;
 
     @ManyToOne
     @JoinColumn(name = "from_id", nullable = false)
+    @Position(2)
     private Address from;
 
     @ManyToOne
     @JoinColumn(name = "to_id", nullable = false)
+    @Position(3)
     private Address to;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "smtp_event_id")
     @Visible(false)
     private Collection<SmtpAttachment> attachments = new ArrayList<>();
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getSubject() {
-        return subject;
-    }
-
-    public void setSubject(String subject) {
-        requireNonNull(subject);
-        this.subject = subject;
-    }
-
-    public Address getFrom() {
-        return from;
-    }
-
-    public void setFrom(Address from) {
-        requireNonNull(from);
-        this.from = from;
-    }
-
-    public Address getTo() {
-        return to;
-    }
-
-    public void setTo(Address to) {
-        requireNonNull(to);
-        this.to = to;
-    }
-
-    public Collection<SmtpAttachment> getAttachments() {
-        return attachments;
-    }
 
     public void addAttachment(SmtpAttachment attachment) {
         requireNonNull(attachment);
@@ -87,28 +60,5 @@ public class SmtpEvent extends Event {
     public void removeAttachment(SmtpAttachment attachment) {
         requireNonNull(attachment);
         this.attachments.remove(attachment);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof SmtpEvent smtpEvent)) return false;
-
-        return Objects.equals(id, smtpEvent.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return id != null ? id.hashCode() : 0;
-    }
-
-    @Override
-    public String toString() {
-        return "Smtp{" +
-                "id=" + id +
-                ", subject='" + subject + '\'' +
-                ", from=" + from +
-                ", to=" + to +
-                "} " + super.toString();
     }
 }

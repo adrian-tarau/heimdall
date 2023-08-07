@@ -3,8 +3,12 @@ package net.microfalx.heimdall.protocol.core.jpa;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.OrderBy;
 import net.microfalx.lang.annotation.Position;
+import net.microfalx.lang.annotation.Visible;
 
 import java.time.LocalDateTime;
 
@@ -14,52 +18,27 @@ import java.time.LocalDateTime;
  * All these entities are named entities too.
  */
 @MappedSuperclass
+@Getter
+@Setter
+@ToString
 public abstract class TimestampAware {
 
     @Column(name = "created_at", nullable = false)
     @NotNull
-    @Position(100)
+    @Position(500)
+    @Visible(modes = {Visible.Mode.BROWSE, Visible.Mode.VIEW})
     private LocalDateTime createdAt;
 
     @Column(name = "sent_at", nullable = false)
     @NotNull
-    @Position(101)
+    @Position(501)
+    @Visible(modes = {Visible.Mode.BROWSE, Visible.Mode.VIEW})
     private LocalDateTime sentAt;
 
     @Column(name = "received_at", nullable = false)
-    @Position(102)
+    @Position(502)
     @OrderBy
+    @Visible(modes = {Visible.Mode.BROWSE, Visible.Mode.VIEW})
     private LocalDateTime receivedAt;
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getSentAt() {
-        return sentAt;
-    }
-
-    public void setSentAt(LocalDateTime sentAt) {
-        this.sentAt = sentAt;
-    }
-
-    public LocalDateTime getReceivedAt() {
-        return receivedAt;
-    }
-
-    public void setReceivedAt(LocalDateTime receivedAt) {
-        this.receivedAt = receivedAt;
-    }
-
-    @Override
-    public String toString() {
-        return "TimestampAware{" +
-                "sentAt=" + sentAt +
-                ", receivedAt=" + receivedAt +
-                '}';
-    }
 }
