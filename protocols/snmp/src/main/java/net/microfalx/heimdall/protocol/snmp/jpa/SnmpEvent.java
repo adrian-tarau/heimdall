@@ -8,9 +8,11 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.microfalx.bootstrap.dataset.annotation.Lookup;
 import net.microfalx.heimdall.protocol.core.jpa.Address;
 import net.microfalx.heimdall.protocol.core.jpa.Event;
 import net.microfalx.heimdall.protocol.core.jpa.Part;
+import net.microfalx.heimdall.protocol.snmp.lookup.TrapLookup;
 import net.microfalx.lang.annotation.*;
 
 @Entity
@@ -60,5 +62,6 @@ public class SnmpEvent extends Event {
     private String enterprise;
 
     @Column(name = "trap_type")
+    @Lookup(model = TrapLookup.class)
     private Integer trapType;
 }
