@@ -26,18 +26,18 @@ public abstract class TimestampAware {
     @Column(name = "created_at", nullable = false)
     @NotNull
     @Position(500)
-    @Visible(modes = {Visible.Mode.BROWSE, Visible.Mode.VIEW})
+    @Visible(modes = {Visible.Mode.VIEW})
     private LocalDateTime createdAt;
 
     @Column(name = "sent_at", nullable = false)
     @NotNull
     @Position(501)
-    @Visible(modes = {Visible.Mode.BROWSE, Visible.Mode.VIEW})
+    @Visible(modes = {Visible.Mode.VIEW})
     private LocalDateTime sentAt;
 
     @Column(name = "received_at", nullable = false)
     @Position(502)
-    @OrderBy
+    @OrderBy(OrderBy.Direction.DESC)
     @Visible(modes = {Visible.Mode.BROWSE, Visible.Mode.VIEW})
     private LocalDateTime receivedAt;
 

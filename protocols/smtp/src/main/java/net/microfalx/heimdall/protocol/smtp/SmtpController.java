@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/protocol/smtp")
-@DataSet(model = SmtpEvent.class)
+@DataSet(model = SmtpEvent.class, viewTemplate = "smtp_view")
 public class SmtpController extends ProtocolController<SmtpEvent> {
 
     @Autowired

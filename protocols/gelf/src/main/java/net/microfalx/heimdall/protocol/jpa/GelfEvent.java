@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.protocol.jpa;
 
+import jakarta.persistence.Id;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -10,13 +11,11 @@ import lombok.ToString;
 import net.microfalx.heimdall.protocol.core.jpa.Address;
 import net.microfalx.heimdall.protocol.core.jpa.Event;
 import net.microfalx.heimdall.protocol.core.jpa.Part;
-import net.microfalx.lang.annotation.Name;
-import net.microfalx.lang.annotation.Position;
-import net.microfalx.lang.annotation.ReadOnly;
-import net.microfalx.lang.annotation.Visible;
+import net.microfalx.lang.annotation.*;
 
 @Entity
 @Table(name = "protocol_gelf_events")
+@Name("GELF")
 @ReadOnly
 @Getter
 @Setter
@@ -41,6 +40,7 @@ public class GelfEvent extends Event {
     @OneToOne
     @Name
     @Position(5)
+    @Label("Message")
     private Part shortMessage;
 
     @JoinColumn(name = "long_message_id")
@@ -57,7 +57,7 @@ public class GelfEvent extends Event {
 
     @Column(name = "version", length = 50, nullable = false)
     @NotBlank
-    @Position(20)
+    @Position(40)
     @Visible(modes = Visible.Mode.VIEW)
     private String version;
 

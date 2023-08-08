@@ -67,11 +67,16 @@ public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
         smtpEvent.setSource(sourceAddress);
         smtpEvent.addTarget(targetAddress);
         smtpEvent.setBody(Body.create(getRandomText()));
-        smtpEvent.setName("Subject");
+        smtpEvent.setName(getSubject());
         smtpEvent.setSentAt(ZonedDateTime.now());
         smtpEvent.setReceivedAt(ZonedDateTime.now());
         smtpEvent.setCreatedAt(ZonedDateTime.now());
         client.send(smtpEvent);
+    }
+
+    private String getSubject() {
+        Faker faker = new Faker();
+        return faker.book().title();
     }
 
     private String geRandomEmail() {

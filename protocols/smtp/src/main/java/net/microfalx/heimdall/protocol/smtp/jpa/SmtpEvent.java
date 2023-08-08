@@ -19,6 +19,7 @@ import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
 @Entity
 @Table(name = "protocol_smtp_events")
+@Name("SMTP")
 @ReadOnly
 @Getter
 @Setter

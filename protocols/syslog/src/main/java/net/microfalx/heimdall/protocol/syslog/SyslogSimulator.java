@@ -65,12 +65,11 @@ public class SyslogSimulator extends ProtocolSimulator<SyslogMessage, SyslogClie
     @Override
     protected void simulate(ProtocolClient<SyslogMessage> client, Address sourceAddress, Address targetAddress, int index) throws IOException {
         SyslogMessage syslogMessage = new SyslogMessage();
-        syslogMessage.setSyslogSeverity(Severity.INFORMATIONAL);
-        syslogMessage.setFacility(Facility.LOCAL1);
+        syslogMessage.setSyslogSeverity(getRandomEnum(Severity.class));
+        syslogMessage.setFacility(getRandomEnum(Facility.class));
         syslogMessage.setSource(sourceAddress);
         syslogMessage.addTarget(targetAddress);
         syslogMessage.setBody(Body.create(getRandomText()));
-        syslogMessage.setName("Syslog Message");
         syslogMessage.setCreatedAt(ZonedDateTime.now());
         syslogMessage.setSentAt(ZonedDateTime.now());
         client.send(syslogMessage);

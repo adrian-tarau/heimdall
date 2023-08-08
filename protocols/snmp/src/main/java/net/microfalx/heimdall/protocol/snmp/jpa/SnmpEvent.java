@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.protocol.snmp.jpa;
 
+import jakarta.persistence.Id;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -10,12 +11,11 @@ import lombok.ToString;
 import net.microfalx.heimdall.protocol.core.jpa.Address;
 import net.microfalx.heimdall.protocol.core.jpa.Event;
 import net.microfalx.heimdall.protocol.core.jpa.Part;
-import net.microfalx.lang.annotation.Position;
-import net.microfalx.lang.annotation.ReadOnly;
-import net.microfalx.lang.annotation.Visible;
+import net.microfalx.lang.annotation.*;
 
 @Entity
 @Table(name = "protocol_snmp_events")
+@Name("SNMP")
 @ReadOnly
 @Getter
 @Setter
@@ -33,12 +33,15 @@ public class SnmpEvent extends Event {
     @JoinColumn(name = "agent_address_id", nullable = false)
     @NotNull
     @Position(1)
+    @Label("Address")
     private Address agentAddress;
 
     @ManyToOne
     @JoinColumn(name = "bindings_id", nullable = false)
     @NotNull
+    @Name
     @Position(10)
+    @Label("Bindings")
     private Part bindingPart;
 
     @Column(name = "version", nullable = false, length = 50)

@@ -1,7 +1,10 @@
 package net.microfalx.heimdall.protocol.core;
 
+import net.microfalx.lang.StringUtils;
 import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.Resource;
+
+import static net.microfalx.heimdall.protocol.core.ProtocolConstants.MAX_MESSAGE_LENGTH;
 
 /**
  * Holds the body of the event.
@@ -38,6 +41,8 @@ public class Body extends AbstractPart {
         Body body = new Body();
         body.setMimeType(MimeType.TEXT_PLAIN);
         body.setResource(MemoryResource.create(text));
+        String firstLine = StringUtils.getMaximumLines(text, 1);
+        body.setName(org.apache.commons.lang3.StringUtils.abbreviate(firstLine, MAX_MESSAGE_LENGTH));
         return body;
     }
 

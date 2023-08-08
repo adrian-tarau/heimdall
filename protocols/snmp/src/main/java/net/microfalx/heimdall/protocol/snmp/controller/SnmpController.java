@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/protocol/snmp")
-@DataSet(model = SnmpEvent.class)
+@DataSet(model = SnmpEvent.class, viewTemplate = "snmp_view")
 public class SnmpController extends ProtocolController<SnmpEvent> {
 
     @Autowired

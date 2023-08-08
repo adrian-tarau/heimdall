@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/protocol/syslog")
-@DataSet(model = SyslogEvent.class)
+@DataSet(model = SyslogEvent.class, viewTemplate = "syslog_view")
 public class SyslogController extends ProtocolController<SyslogEvent> {
 
     @Autowired
