@@ -1,4 +1,4 @@
-package net.microfalx.heimdall.protocol.syslog.lookup;
+package net.microfalx.heimdall.protocol.lookup;
 
 import com.cloudbees.syslog.Facility;
 import net.microfalx.bootstrap.dataset.AbstractLookup;
