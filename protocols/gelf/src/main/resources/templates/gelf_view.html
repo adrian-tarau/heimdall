@@ -2,7 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 <div th:fragment="fields">
-    Add my content
+    <div class="overflow-auto" style="white-space: pre" th:text="${#models.describe(model)}"></div>
+    <div class="overflow-auto" style="white-space: pre" th:text="${#resources.load(model.getLongMessage().getResource())}"></div>
 </div>
 </body>
 </html>

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/protocol/gelf")
-@DataSet(model = GelfEvent.class, viewTemplate = "gelf_view")
+@DataSet(model = GelfEvent.class, viewTemplate = "gelf_view", viewClasses = "modal-xl")
 public class GelfController extends ProtocolController<GelfEvent> {
 
     @Autowired
