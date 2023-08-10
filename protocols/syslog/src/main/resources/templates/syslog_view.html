@@ -2,7 +2,19 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 <div th:fragment="fields">
-    Add my content
+    <div class="container-fluid">
+        <div class="row align-items-start border rounded bg-body-secondary p-10">
+            <div class="col-md-2"><span class="fw-bold">From:</span><span class="fst-italic" th:text="${model.address.value}"></span></div>
+            <div class="col-md-2"><span class="fw-bold">Severity:</span><span class="fst-italic" th:text="${model.severity}"></span></div>
+            <div class="col-md-2"><span class="fw-bold">Facility:</span><span class="fst-italic" th:text="${model.facility}"></span></div>
+            <div class="col-md-2"><span class="fw-bold">Created at:</span><span class="fst-italic" th:text="${model.createdAt}"></span></div>
+            <div class="col-md-2"><span class="fw-bold">Sent at:</span><span class="fst-italic" th:text="${model.sentAt}"></span></div>
+            <div class="col-md-2"><span class="fw-bold">Received at:</span><span class="fst-italic" th:text="${model.receivedAt}"></span></div>
+        </div>
+        <div class="row justify-content-start border rounded mt-2">
+            <p th:text="${#resources.load(model.message.resource)}"></p>
+        </div>
+    </div>
 </div>
 </body>
 </html>
