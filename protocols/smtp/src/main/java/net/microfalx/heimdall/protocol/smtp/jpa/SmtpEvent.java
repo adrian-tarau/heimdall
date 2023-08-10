@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.protocol.smtp.jpa;
 
+import jakarta.persistence.Id;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -7,10 +8,7 @@ import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.heimdall.protocol.core.jpa.Address;
 import net.microfalx.heimdall.protocol.core.jpa.Event;
-import net.microfalx.lang.annotation.Name;
-import net.microfalx.lang.annotation.Position;
-import net.microfalx.lang.annotation.ReadOnly;
-import net.microfalx.lang.annotation.Visible;
+import net.microfalx.lang.annotation.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -47,6 +45,11 @@ public class SmtpEvent extends Event {
     @JoinColumn(name = "to_id", nullable = false)
     @Position(3)
     private Address to;
+
+    @Column(name = "attachment_count", nullable = false)
+    @Label("A.C.")
+    @Position(10)
+    private int attachmentCount;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "smtp_event_id")

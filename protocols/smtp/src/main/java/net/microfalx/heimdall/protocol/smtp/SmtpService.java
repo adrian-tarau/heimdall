@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.protocol.smtp;
 
+import net.microfalx.heimdall.protocol.core.Part;
 import net.microfalx.heimdall.protocol.core.ProtocolService;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpAttachment;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpAttachmentRepository;
@@ -35,6 +36,7 @@ public class SmtpService extends ProtocolService<SmtpEvent> {
             attachment.setPart(persistPart(part));
             return attachment;
         }).toList();
+        jpaSmtpEvent.setAttachmentCount((int) smtpEvent.getParts().stream().filter(part -> part.getType() == Part.Type.ATTACHMENT).count());
         repository.save(jpaSmtpEvent);
         attachments.forEach(jpaSmtpEvent::addAttachment);
         attachmentRepository.saveAll(attachments);

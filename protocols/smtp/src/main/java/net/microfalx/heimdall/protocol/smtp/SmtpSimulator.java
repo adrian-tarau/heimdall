@@ -71,7 +71,19 @@ public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
         smtpEvent.setSentAt(ZonedDateTime.now());
         smtpEvent.setReceivedAt(ZonedDateTime.now());
         smtpEvent.setCreatedAt(ZonedDateTime.now());
+        createAttachments(smtpEvent);
         client.send(smtpEvent);
+    }
+
+    private void createAttachments(SmtpEvent smtpEvent) {
+        Faker faker = new Faker();
+        int attachmentCount = 0;
+        if (random.nextFloat() > 0.8) {
+            attachmentCount = 1 + random.nextInt(2);
+        }
+        for(int i = 0 ; i < attachmentCount; i++) {
+            smtpEvent.addPart(Attachment.create(getRandomText()).setFileName(faker.file().fileName()));
+        }
     }
 
     private String getSubject() {
