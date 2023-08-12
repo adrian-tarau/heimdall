@@ -3,8 +3,8 @@
 <body>
 <div th:fragment="fields">
     <div class="container-fluid">
-        <div class="row container-fluid border rounded bg-body-secondary mb-3 p-3">
-            <div class="row   ">
+        <div class="row container-fluid border rounded bg-body-secondary mb-3 p-3 fs-6">
+            <div class="row">
                 <div class="col-md-12"><span class="fw-bold">Subject: </span><span class="fst-italic" th:text="${model.subject}"></span></div>
             </div>
             <div class="row">
@@ -12,13 +12,20 @@
                 <div class="col-md-4"><span class="fw-bold">Received at: </span><span class="fst-italic" th:text="${model.receivedAt}"></span></div>
             </div>
             <div class="row">
-                <div class="col-md-4"><span class="fw-bold">To: </span><span class="fst-italic" th:text="${model.to.name}"></span></div>
+                <div class="col-md-8"><span class="fw-bold">To: </span><span class="fst-italic" th:text="${model.to.name}"></span></div>
                 <div class="col-md-4"><span class="fw-bold">Sent at: </span><span class="fst-italic" th:text="${model.sentAt}"></span></div>
-                <div class="col-md-4"><span class="fw-bold">Created at: </span><span class="fst-italic" th:text="${model.createdAt}"></span></div>
             </div>
-            <div class="row" th:unless="${attachments.isEmpty()}">
-                <a hre="#" th:each="attachment: ${attachments}"><span class="badge rounded-pill text-bg-secondary" th:text="${attachment.part.fileName}"></span></a>
+            <div class="flex-row m-4 p-2" th:unless="${attachments.isEmpty()}">
+                <a href="#" th:each="attachment: ${attachments}" class="icon-link p-2">
+                    <span class="badge rounded-pill text-bg-primary"><i class="fa-solid fa-paperclip"></i><span class="ms-1" th:text="${attachment.part.fileName}"></span></span>
+                </a>
             </div>
+        </div>
+        <div class="row border rounded p-3 mt-2" th:if="${bodyText}">
+            <p class="dataset-text-mono" th:text="${#resources.load(bodyText)}"></p>
+        </div>
+        <div class="row border rounded p-3 mt-2" th:if="${bodyHtml}">
+            <p class="dataset-text-mono" th:text="${#resources.load(bodyHtml)}"></p>
         </div>
     </div>
 </div>

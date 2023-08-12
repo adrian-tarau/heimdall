@@ -122,10 +122,11 @@ public class SmtpServer implements InitializingBean, BasicMessageListener {
         Collection<Part> parts = new ArrayList<>();
         for (int i = 0; i < multipart.getCount(); i++) {
             BodyPart bodyPart = multipart.getBodyPart(i);
-            if (bodyPart.getContent() instanceof String) {
-                parts.add(Body.create((String) bodyPart.getContent()).setMimeType(bodyPart.getContentType()));
-            } else if (isNotEmpty(bodyPart.getFileName())) {
-                parts.add(Attachment.create(createResource(bodyPart)).setMimeType(bodyPart.getContentType()));
+            if (isNotEmpty(bodyPart.getFileName())) {
+                Attachment attachment = Attachment.create(createResource(bodyPart));
+                attachment.setMimeType(bodyPart.getContentType());
+                attachment.setFileName(bodyPart.getFileName());
+                parts.add(attachment);
             } else {
                 parts.add(Body.create(createResource(bodyPart)).setMimeType(bodyPart.getContentType()));
             }

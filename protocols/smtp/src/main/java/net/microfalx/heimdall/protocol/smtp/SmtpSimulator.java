@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
@@ -66,7 +68,7 @@ public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
         SmtpEvent smtpEvent = new SmtpEvent();
         smtpEvent.setSource(sourceAddress);
         smtpEvent.addTarget(targetAddress);
-        smtpEvent.setBody(Body.create(getRandomText()));
+        smtpEvent.setBody((Body) Body.create(getRandomText()).setMimeType(random.nextFloat() > 0.5 ? MimeType.TEXT_PLAIN : MimeType.TEXT_HTML));
         smtpEvent.setName(getSubject());
         smtpEvent.setSentAt(ZonedDateTime.now());
         smtpEvent.setReceivedAt(ZonedDateTime.now());
@@ -77,12 +79,27 @@ public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
 
     private void createAttachments(SmtpEvent smtpEvent) {
         Faker faker = new Faker();
-        int attachmentCount = 0;
+        int attachmentCount = 3;
         if (random.nextFloat() > 0.8) {
             attachmentCount = 1 + random.nextInt(2);
         }
-        for(int i = 0 ; i < attachmentCount; i++) {
-            smtpEvent.addPart(Attachment.create(getRandomText()).setFileName(faker.file().fileName()));
+
+        for (int i = 0; i < attachmentCount; i++) {
+            String fileName = random.nextFloat() > 0.5 ? faker.code().isbn13() : faker.commerce().productName();
+            String extension = faker.file().extension();
+            MimeType mimeType = extensionsToMimeType.getOrDefault(extension.toLowerCase(), MimeType.APPLICATION_OCTET_STREAM);
+            Attachment attachment = createAttachment(mimeType);
+            attachment.setFileName(fileName + "." + extension);
+            attachment.setMimeType(mimeType);
+            smtpEvent.addPart(attachment);
+        }
+    }
+
+    private Attachment createAttachment(MimeType mimeType) {
+        if (mimeType == MimeType.APPLICATION_OCTET_STREAM) {
+            return Attachment.create(getRandomBytes(getProperties().getMinimumPartLength(), getProperties().getMaximumPartLength()));
+        } else {
+            return Attachment.create(getRandomText());
         }
     }
 
@@ -94,5 +111,12 @@ public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
     private String geRandomEmail() {
         Faker faker = new Faker();
         return faker.name().firstName() + "." + faker.name().lastName() + "@company.com";
+    }
+
+    private static final Map<String, MimeType> extensionsToMimeType = new HashMap<>();
+
+    static {
+        extensionsToMimeType.put("txt", MimeType.TEXT_PLAIN);
+        extensionsToMimeType.put("html", MimeType.TEXT_HTML);
     }
 }

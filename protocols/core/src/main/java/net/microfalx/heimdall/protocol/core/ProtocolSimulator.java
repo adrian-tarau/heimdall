@@ -179,6 +179,17 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
         return builder.toString();
     }
 
+    /**
+     * Returns the next body of random data.
+     *
+     * @return a non-null instance
+     */
+    protected final byte[] getRandomBytes(int min, int max) {
+        byte[] data = new byte[min + random.nextInt(Math.abs(max - min))];
+        random.nextBytes(data);
+        return data;
+    }
+
     private String getNextSentence() {
         Faker faker = new Faker();
         Shakespeare shakespeare = faker.shakespeare();

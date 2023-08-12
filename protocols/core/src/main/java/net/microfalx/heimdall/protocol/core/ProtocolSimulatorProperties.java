@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.protocol.core;
 
+import net.microfalx.lang.FormatterUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,6 +16,8 @@ public class ProtocolSimulatorProperties {
     private int maximumEventCount = 5;
     private int minimumAddressCount = 10;
     private int maximumAddressCount = 20;
+    private int minimumPartLength = (int) (FormatterUtils.K);
+    private int maximumPartLength = (int) (50 * FormatterUtils.K);
 
     public boolean isEnabled() {
         return enabled;
@@ -62,5 +65,21 @@ public class ProtocolSimulatorProperties {
 
     public void setMaximumAddressCount(int maximumAddressCount) {
         this.maximumAddressCount = maximumAddressCount;
+    }
+
+    public int getMinimumPartLength() {
+        return minimumPartLength;
+    }
+
+    public void setMinimumPartLength(int minimumPartLength) {
+        this.minimumPartLength = minimumPartLength;
+    }
+
+    public int getMaximumPartLength() {
+        return maximumPartLength;
+    }
+
+    public void setMaximumPartLength(int maximumPartLength) {
+        this.maximumPartLength = maximumPartLength;
     }
 }

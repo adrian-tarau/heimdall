@@ -17,6 +17,20 @@ public class Attachment extends AbstractPart {
     public static Attachment create(String text) {
         Attachment attachment = new Attachment();
         attachment.setResource(MemoryResource.create(text));
+        attachment.setMimeType(MimeType.TEXT_PLAIN);
+        return attachment;
+    }
+
+    /**
+     * Creates a body from bytes.
+     *
+     * @param data the data as bytes
+     * @return a non-null instance
+     */
+    public static Attachment create(byte[] data) {
+        Attachment attachment = new Attachment();
+        attachment.setResource(MemoryResource.create(data));
+        attachment.setMimeType(MimeType.APPLICATION_OCTET_STREAM);
         return attachment;
     }
 
