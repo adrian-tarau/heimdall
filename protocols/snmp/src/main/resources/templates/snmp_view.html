@@ -2,7 +2,26 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 <div th:fragment="fields">
-    Add my content
+    <div class="container-fluid">
+        <div class="row container-fluid border rounded bg-body-secondary mb-3 p-3 fs-6">
+            <div class="row">
+                <div class="col-md-4"><span class="fw-bold">From: </span><span class="fst-italic" th:text="${model.agentAddress.name}"></span></div>
+                <div class="col-md-4"><span class="fw-bold">Trap Type: </span><span class="fst-italic" th:text="${#dataset.getDisplayValue(model, 'trapType')}"></span></div>
+                <div class="col-md-4"><span class="fw-bold">Received At: </span><span class="fst-italic" th:text="${model.receivedAt}"></span></div>
+            </div>
+            <div class="row">
+                <div class="col-md-4"><span class="fw-bold">Enterprise: </span><span class="fst-italic" th:text="${model.enterprise}"></span></div>
+                <div class="col-md-4"><span class="fw-bold">Version: </span><span class="fst-italic" th:text="${model.version}"></span></div>
+                <div class="col-md-4"><span class="fw-bold">Send At: </span><span class="fst-italic" th:text="${model.createdAt}"></span></div>
+            </div>
+            <div class="row">
+                <div class="col-md-12"><span class="fw-bold">Community String: </span><span class="fst-italic" th:text="${model.communityString}"></span></div>
+            </div>
+        </div>
+        <div class="row border rounded p-3 mt-2">
+            <p class="dataset-text-mono" th:text="${#resources.load(model.bindingPart.resource)}"></p>
+        </div>
+    </div>
 </div>
 </body>
 </html>
