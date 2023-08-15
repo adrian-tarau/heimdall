@@ -1,4 +1,6 @@
 package net.microfalx.heimdall.protocol.snmp.jpa;
 
-public class SnmpMibRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface SnmpMibRepository extends JpaRepository<SnmpMib, Integer> {
 }

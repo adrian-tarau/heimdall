@@ -13,3 +13,14 @@ create table protocol_snmp_events
     constraint fk$snmps$agent foreign key (agent_address_id) references protocol_addresses (id),
     constraint fk$snmps$bindings foreign key (bindings_id) references protocol_parts (id)
 ) ENGINE = InnoDB;
+
+create table protocol_snmp_mibs
+(
+    id              integer       not null auto_increment primary key,
+    name            varchar(100)  not null,
+    `type`          enum('SYSTEM','USER') not null,
+    created_at      datetime      not null,
+    modified_at     datetime      not null,
+    content         mediumtext    not null,
+    description     varchar(1000) not null
+)ENGINE = InnoDB;
