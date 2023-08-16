@@ -1,5 +1,7 @@
 package net.microfalx.heimdall.protocol.snmp.mib;
 
+import net.microfalx.heimdall.protocol.snmp.jpa.SnmpMib;
+import net.microfalx.heimdall.protocol.snmp.jpa.SnmpMibRepository;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.resource.ClassPathResource;
 import org.jsmiparser.parser.SmiDefaultParser;
@@ -13,10 +15,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.smi.OID;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URL;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -30,6 +34,9 @@ public class MibService implements InitializingBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(MibService.class);
 
     private volatile MibHolder holder = new MibHolder();
+
+    @Autowired
+    private SnmpMibRepository snmpMibRepository;
 
     /**
      * Returns all registered modules.
@@ -148,10 +155,11 @@ public class MibService implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        loadMibs();
+        loadSystemMibs();
+        persistMibs();
     }
 
-    private void loadMibs() {
+    private void loadSystemMibs() {
         final List<URL> mibUrls = new ArrayList<>();
         try {
             ClassPathResource.directory("mib").walk((root, child) -> {
@@ -167,6 +175,29 @@ public class MibService implements InitializingBean {
             extractModules(mib);
         } catch (IOException e) {
             LOGGER.error("Failed to load MIBs", e);
+        }
+    }
+
+    private void persistMibs() {
+        for (MibModule module : holder.modules) {
+            try {
+                persistMib(module);
+            } catch (Exception e) {
+                LOGGER.error("Failed to persist MIB " + module.getName(), e);
+            }
+        }
+    }
+
+    private void persistMib(MibModule module) {
+        if (snmpMibRepository.findByModuleId(module.getId()) == null) {
+            SnmpMib snmpMib = new SnmpMib();
+            snmpMib.setType(MibType.SYSTEM);
+            snmpMib.setName(module.getName());
+            snmpMib.setModuleId(module.getId());
+            snmpMib.setCreatedAt(module.getLastModified() != null ? module.getLastModified().toLocalDateTime() : LocalDateTime.now());
+            snmpMib.setModifiedAt(LocalDateTime.now());
+            snmpMib.setDescription(org.apache.commons.lang3.StringUtils.abbreviate(StringUtils.getMaximumLines(module.getDescription(), 1), 200));
+            snmpMibRepository.saveAndFlush(snmpMib);
         }
     }
 

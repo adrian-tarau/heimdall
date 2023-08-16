@@ -28,6 +28,24 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
     @Visible(false)
     private final SmiModule module;
 
+    @Position(5)
+    private MibType type = MibType.SYSTEM;
+
+    @Position(10)
+    private String fileName;
+
+    @Position(11)
+    private String messageOid;
+
+    @Position(12)
+    private String enterpriseOid;
+
+    @Position(13)
+    private String createdAtOid;
+
+    @Position(14)
+    private String sentAtOid;
+
     MibModule(SmiModule module) {
         requireNonNull(module);
         this.module = module;
@@ -54,6 +72,15 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
     @Name
     public String getName() {
         return module.getId();
+    }
+
+    public MibType getType() {
+        return type;
+    }
+
+    void setType(MibType type) {
+        requireNonNull(type);
+        this.type = type;
     }
 
     @Override
@@ -129,6 +156,46 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
         if (o == null || getClass() != o.getClass()) return false;
         MibModule module = (MibModule) o;
         return Objects.equals(id, module.id);
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public String getMessageOid() {
+        return messageOid;
+    }
+
+    void setMessageOid(String messageOid) {
+        this.messageOid = messageOid;
+    }
+
+    public String getEnterpriseOid() {
+        return enterpriseOid;
+    }
+
+    void setEnterpriseOid(String enterpriseOid) {
+        this.enterpriseOid = enterpriseOid;
+    }
+
+    public String getCreatedAtOid() {
+        return createdAtOid;
+    }
+
+    void setCreatedAtOid(String createdAtOid) {
+        this.createdAtOid = createdAtOid;
+    }
+
+    public String getSentAtOid() {
+        return sentAtOid;
+    }
+
+    void setSentAtOid(String sentAtOid) {
+        this.sentAtOid = sentAtOid;
     }
 
     @Override

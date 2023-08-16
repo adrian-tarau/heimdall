@@ -30,9 +30,34 @@ public class SnmpMib extends NamedTimestampAware {
     @Enumerated(EnumType.STRING)
     private MibType type;
 
-    @Column(name = "content", nullable = false)
+    @Column(name = "module_id", nullable = false)
     @NotBlank
     @Position(10)
+    @Visible(modes = {Visible.Mode.VIEW})
+    private String moduleId;
+
+    @Column(name = "message_oid")
+    @Position(15)
+    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.BROWSE})
+    private String messageOid;
+
+    @Column(name = "enterprise_oid")
+    @Position(20)
+    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.BROWSE})
+    private String enterpriseOid;
+
+    @Column(name = "create_at_oid")
+    @Position(25)
+    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.BROWSE})
+    private String createAtOid;
+
+    @Column(name = "sent_at_oid")
+    @Position(30)
+    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.BROWSE})
+    private String sentAtOid;
+
+    @Column(name = "content")
+    @Position(50)
     @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.ADD, Visible.Mode.ADD})
     private String content;
 
