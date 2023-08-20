@@ -4,6 +4,8 @@ import net.microfalx.heimdall.protocol.snmp.jpa.SnmpMib;
 import net.microfalx.heimdall.protocol.snmp.jpa.SnmpMibRepository;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.resource.ClassPathResource;
+import net.microfalx.resource.Resource;
+import net.microfalx.resource.TemporaryFileResource;
 import org.jsmiparser.parser.SmiDefaultParser;
 import org.jsmiparser.smi.SmiMib;
 import org.jsmiparser.smi.SmiModule;
@@ -24,8 +26,10 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.util.Collections.singletonList;
 import static java.util.Collections.unmodifiableList;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
 import static net.microfalx.lang.StringUtils.toIdentifier;
 
 @Service
@@ -45,6 +49,38 @@ public class MibService implements InitializingBean {
      */
     public List<MibModule> getModules() {
         return unmodifiableList(holder.modules);
+    }
+
+    /**
+     * Loads and parses a new MIB to extract its metadata.
+     *
+     * @param resource the resource containing the content of the MIB.
+     * @return the MIB information
+     */
+    public MibModule parseModule(Resource resource) {
+        requireNonNull(resource);
+        Resource file = TemporaryFileResource.file(resource.getFileName() + ".tmp");
+        file.copyFrom(resource);
+        try {
+            SmiMib mib = load(singletonList(file.toURL()));
+            Collection<SmiModule> modules = mib.getModules();
+            if (modules.isEmpty()) {
+                throw new MibException("Failed to parse MIB " + resource.getName() + ", root cause: ");
+            }
+            return new MibModule(modules.iterator().next());
+        } catch (IOException e) {
+            throw new MibException("Failed to parse MIB " + resource.getName(), e);
+        }
+    }
+
+    /**
+     * Registers a new MIB or updates (based on module identifier) an existing MIB
+     *
+     * @param mibModule the MIB (module)
+     */
+    public void updateModule(MibModule mibModule) {
+        requireNotEmpty(mibModule);
+        persistMib(mibModule);
     }
 
     /**
@@ -189,16 +225,17 @@ public class MibService implements InitializingBean {
     }
 
     private void persistMib(MibModule module) {
-        if (snmpMibRepository.findByModuleId(module.getId()) == null) {
-            SnmpMib snmpMib = new SnmpMib();
+        SnmpMib snmpMib = snmpMibRepository.findByModuleId(module.getId());
+        if (snmpMib == null) {
+            snmpMib = new SnmpMib();
             snmpMib.setType(MibType.SYSTEM);
-            snmpMib.setName(module.getName());
             snmpMib.setModuleId(module.getId());
-            snmpMib.setCreatedAt(module.getLastModified() != null ? module.getLastModified().toLocalDateTime() : LocalDateTime.now());
-            snmpMib.setModifiedAt(LocalDateTime.now());
-            snmpMib.setDescription(org.apache.commons.lang3.StringUtils.abbreviate(StringUtils.getMaximumLines(module.getDescription(), 1), 200));
-            snmpMibRepository.saveAndFlush(snmpMib);
+            snmpMib.setCreatedAt(LocalDateTime.now());
         }
+        snmpMib.setName(module.getName());
+        snmpMib.setModifiedAt(LocalDateTime.now());
+        snmpMib.setDescription(org.apache.commons.lang3.StringUtils.abbreviate(StringUtils.removeLineBreaks(module.getDescription()), 200));
+        snmpMibRepository.save(snmpMib);
     }
 
     private SmiMib load(List<URL> mibUrls) throws IOException {

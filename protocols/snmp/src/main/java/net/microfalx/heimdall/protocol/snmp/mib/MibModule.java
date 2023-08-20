@@ -5,6 +5,7 @@ import net.microfalx.lang.Descriptable;
 import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.Nameable;
 import net.microfalx.lang.annotation.*;
+import net.microfalx.resource.Resource;
 import org.jsmiparser.smi.SmiModule;
 
 import java.time.ZonedDateTime;
@@ -45,6 +46,9 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
 
     @Position(14)
     private String sentAtOid;
+
+    @Visible(false)
+    private Resource content;
 
     MibModule(SmiModule module) {
         requireNonNull(module);
@@ -196,6 +200,14 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
 
     void setSentAtOid(String sentAtOid) {
         this.sentAtOid = sentAtOid;
+    }
+
+    public Resource getContent() {
+        return content;
+    }
+
+    public void setContent(Resource content) {
+        this.content = content;
     }
 
     @Override
