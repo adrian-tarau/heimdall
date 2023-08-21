@@ -17,7 +17,7 @@ import net.microfalx.lang.annotation.*;
 
 @Entity
 @Table(name = "protocol_snmp_events")
-@Name("SNMP")
+@Name("MIBs")
 @ReadOnly
 @Getter
 @Setter

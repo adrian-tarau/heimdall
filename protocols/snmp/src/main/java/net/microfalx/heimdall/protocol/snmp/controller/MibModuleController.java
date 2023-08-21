@@ -8,6 +8,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/protocol/snmp/module")
-@DataSet(model = MibModule.class)
+@DataSet(model = MibModule.class,viewTemplate = "snmp_module_view", viewClasses = "modal-xl")
 public class MibModuleController extends DataSetController<MibModule, String>  {
 }

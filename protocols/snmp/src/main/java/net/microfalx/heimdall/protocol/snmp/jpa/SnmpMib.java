@@ -38,22 +38,22 @@ public class SnmpMib extends NamedTimestampAware {
 
     @Column(name = "message_oid")
     @Position(15)
-    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.BROWSE})
+    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT})
     private String messageOid;
 
     @Column(name = "enterprise_oid")
     @Position(20)
-    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.BROWSE})
+    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT})
     private String enterpriseOid;
 
     @Column(name = "create_at_oid")
     @Position(25)
-    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.BROWSE})
+    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT})
     private String createAtOid;
 
     @Column(name = "sent_at_oid")
     @Position(30)
-    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.BROWSE})
+    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT})
     private String sentAtOid;
 
     @Column(name = "content")

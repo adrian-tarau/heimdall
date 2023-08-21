@@ -21,7 +21,7 @@ import static net.microfalx.lang.StringUtils.toIdentifier;
 /**
  * A MIB module.
  */
-@Name("Module")
+@Name("Modules")
 @ReadOnly
 public class MibModule implements Identifiable<String>, Nameable, Descriptable {
 
@@ -39,15 +39,19 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
     private String fileName;
 
     @Position(11)
+    @Visible(false)
     private String messageOid;
 
     @Position(12)
+    @Visible(false)
     private String enterpriseOid;
 
     @Position(13)
+    @Visible(false)
     private String createdAtOid;
 
     @Position(14)
+    @Visible(false)
     private String sentAtOid;
 
     @Visible(false)

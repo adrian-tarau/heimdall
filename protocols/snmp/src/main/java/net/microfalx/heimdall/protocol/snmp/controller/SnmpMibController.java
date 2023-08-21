@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/protocol/snmp/mib")
-@DataSet(model = SnmpMib.class, canAdd = false, canUpload = true, canDownload = true)
+@DataSet(model = SnmpMib.class, canAdd = false, canUpload = true, canDownload = true,viewTemplate = "snmp_mib_view", viewClasses = "modal-xl")
 public class SnmpMibController extends DataSetController<SnmpMib, String> {
 
     @Autowired

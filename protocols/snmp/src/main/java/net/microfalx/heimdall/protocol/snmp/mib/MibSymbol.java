@@ -15,7 +15,7 @@ import static net.microfalx.lang.StringUtils.toIdentifier;
 /**
  * A MIB symbol.
  */
-@Name("Symbol")
+@Name("Symbols")
 @ReadOnly
 public class MibSymbol implements Identifiable<String>, Nameable, Descriptable {
 
