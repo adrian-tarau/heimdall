@@ -3,13 +3,18 @@ package net.microfalx.heimdall.protocol.snmp.mib;
 import net.microfalx.lang.StringUtils;
 import org.snmp4j.smi.OID;
 
+import java.net.URI;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+
+import static net.microfalx.resource.ResourceUtils.isFileUri;
 
 /**
  * Utilities around MIBs.
  */
 public class MibUtils {
+
+    private static final String INTERNAL_MIB_SOURCE = "JSMI_INTERNAL_MIB";
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmX");
 
@@ -50,5 +55,19 @@ public class MibUtils {
      */
     public static OID getParent(OID oid) {
         return oid != null ? oid.trim() : null;
+    }
+
+    /**
+     * Returns whether the MIB Uri is valid.
+     *
+     * @param uri the URI
+     * @return {@code true} if valid,  {@code false} otherwise
+     */
+    public static boolean isValidMibUri(String uri) {
+        try {
+            return !INTERNAL_MIB_SOURCE.equals(uri) && isFileUri(URI.create(uri));
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

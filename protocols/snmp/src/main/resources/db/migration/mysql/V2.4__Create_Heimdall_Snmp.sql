@@ -26,7 +26,8 @@ create table protocol_snmp_mibs
     sent_at_oid     varchar(200),
     created_at      datetime      not null,
     modified_at     datetime      not null,
-    content         mediumtext,
+    file_name       varchar(100)  not null,
+    `content`         mediumtext,
     description     varchar(1000)
 )ENGINE = InnoDB;
 

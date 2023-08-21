@@ -4,6 +4,7 @@ import net.microfalx.heimdall.protocol.snmp.jpa.SnmpMib;
 import net.microfalx.heimdall.protocol.snmp.jpa.SnmpMibRepository;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.resource.ClassPathResource;
+import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.TemporaryFileResource;
 import org.jsmiparser.parser.SmiDefaultParser;
@@ -59,15 +60,19 @@ public class MibService implements InitializingBean {
      */
     public MibModule parseModule(Resource resource) {
         requireNonNull(resource);
+
         Resource file = TemporaryFileResource.file(resource.getFileName() + ".tmp");
         file.copyFrom(resource);
         try {
             SmiMib mib = load(singletonList(file.toURL()));
-            Collection<SmiModule> modules = mib.getModules();
+            Collection<SmiModule> modules = getModules(mib);
             if (modules.isEmpty()) {
                 throw new MibException("Failed to parse MIB " + resource.getName() + ", root cause: ");
             }
-            return new MibModule(modules.iterator().next());
+            MibModule mibModule = new MibModule(modules.iterator().next());
+            mibModule.setFileName(file.getFileName());
+            mibModule.setContent(MemoryResource.create(file));
+            return mibModule;
         } catch (IOException e) {
             throw new MibException("Failed to parse MIB " + resource.getName(), e);
         }
@@ -214,6 +219,20 @@ public class MibService implements InitializingBean {
         }
     }
 
+    /**
+     * Returns only the MIB modules which have a file reference since those are the ones
+     * that we load.
+     *
+     * @param mib the MIB container as returned by the SNMP parser
+     * @return the useful MIBs
+     */
+    private Collection<SmiModule> getModules(SmiMib mib) {
+        return mib.getModules().stream().filter(m -> {
+            Location location = m.getIdToken().getLocation();
+            return location != null && (MibUtils.isValidMibUri(location.getSource()));
+        }).toList();
+    }
+
     private void persistMibs() {
         for (MibModule module : holder.modules) {
             try {
@@ -228,11 +247,17 @@ public class MibService implements InitializingBean {
         SnmpMib snmpMib = snmpMibRepository.findByModuleId(module.getId());
         if (snmpMib == null) {
             snmpMib = new SnmpMib();
-            snmpMib.setType(MibType.SYSTEM);
+            snmpMib.setType(module.getType());
             snmpMib.setModuleId(module.getId());
             snmpMib.setCreatedAt(LocalDateTime.now());
         }
         snmpMib.setName(module.getName());
+        snmpMib.setFileName(module.getFileName());
+        try {
+            snmpMib.setContent(module.getContent().loadAsString());
+        } catch (Exception e) {
+            throw new MibException("Fail to read the content of the MIB module " + module.getName(), e);
+        }
         snmpMib.setModifiedAt(LocalDateTime.now());
         snmpMib.setDescription(org.apache.commons.lang3.StringUtils.abbreviate(StringUtils.removeLineBreaks(module.getDescription()), 200));
         snmpMibRepository.save(snmpMib);
@@ -252,7 +277,7 @@ public class MibService implements InitializingBean {
         Map<String, MibModule> newModulesById = new HashMap<>();
         Map<String, MibSymbol> newSymbolsById = new HashMap<>();
         Map<String, MibVariable> newVariablesById = new HashMap<>();
-        for (SmiModule smiModule : mib.getModules()) {
+        for (SmiModule smiModule : getModules(mib)) {
             MibModule module = new MibModule(smiModule);
             newModules.add(module);
             newModulesById.put(module.getId(), module);

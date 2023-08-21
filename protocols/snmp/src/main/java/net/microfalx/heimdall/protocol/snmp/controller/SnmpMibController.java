@@ -5,6 +5,8 @@ import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.web.dataset.DataSetController;
 import net.microfalx.heimdall.protocol.snmp.jpa.SnmpMib;
 import net.microfalx.heimdall.protocol.snmp.jpa.SnmpMibRepository;
+import net.microfalx.heimdall.protocol.snmp.mib.MibModule;
+import net.microfalx.heimdall.protocol.snmp.mib.MibService;
 import net.microfalx.resource.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -19,9 +21,13 @@ public class SnmpMibController extends DataSetController<SnmpMib, String> {
     @Autowired
     private SnmpMibRepository snmpMibRepository;
 
+    @Autowired
+    private MibService mibService;
+
     @Override
     protected void upload(net.microfalx.bootstrap.dataset.DataSet<SnmpMib, Field<SnmpMib>, String> dataSet, Model model, Resource resource) {
-        System.out.println("Implement me");
+        MibModule mibModule = mibService.parseModule(resource);
+        mibService.updateModule(mibModule);
     }
 
     @Override

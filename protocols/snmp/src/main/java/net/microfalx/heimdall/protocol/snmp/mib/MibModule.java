@@ -5,8 +5,11 @@ import net.microfalx.lang.Descriptable;
 import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.Nameable;
 import net.microfalx.lang.annotation.*;
+import net.microfalx.resource.NullResource;
 import net.microfalx.resource.Resource;
+import net.microfalx.resource.ResourceFactory;
 import org.jsmiparser.smi.SmiModule;
+import org.jsmiparser.util.location.Location;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
@@ -54,6 +57,7 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
         requireNonNull(module);
         this.module = module;
         this.id = toIdentifier(module.getId());
+        this.setContent(extractResource(module));
     }
 
     /**
@@ -207,7 +211,9 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
     }
 
     public void setContent(Resource content) {
+        requireNonNull(content);
         this.content = content;
+        this.fileName = content.getFileName();
     }
 
     @Override
@@ -221,5 +227,14 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
                 "id=" + getId() +
                 ", identify=" + module.getModuleIdentity() +
                 '}';
+    }
+
+    private Resource extractResource(SmiModule module) {
+        Location location = module.getIdToken().getLocation();
+        if (location != null && (MibUtils.isValidMibUri(location.getSource()))) {
+            return ResourceFactory.resolve(location.getSource());
+        } else {
+            return NullResource.createNull();
+        }
     }
 }

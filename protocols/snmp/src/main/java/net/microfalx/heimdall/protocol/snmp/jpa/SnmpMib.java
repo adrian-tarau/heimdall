@@ -61,4 +61,8 @@ public class SnmpMib extends NamedTimestampAware {
     @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.ADD, Visible.Mode.ADD})
     private String content;
 
+    @Column(name = "file_name", nullable = false)
+    @NotBlank
+    @Position(6)
+    private String fileName;
 }
