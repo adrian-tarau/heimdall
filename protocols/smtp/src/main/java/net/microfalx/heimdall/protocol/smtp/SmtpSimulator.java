@@ -2,6 +2,7 @@ package net.microfalx.heimdall.protocol.smtp;
 
 import net.datafaker.Faker;
 import net.microfalx.heimdall.protocol.core.*;
+import net.microfalx.resource.MimeType;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;

@@ -1,6 +1,7 @@
 package net.microfalx.heimdall.protocol.core;
 
 import net.microfalx.resource.MemoryResource;
+import net.microfalx.resource.MimeType;
 import net.microfalx.resource.Resource;
 
 /**

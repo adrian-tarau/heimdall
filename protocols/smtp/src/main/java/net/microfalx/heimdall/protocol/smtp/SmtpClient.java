@@ -3,6 +3,7 @@ package net.microfalx.heimdall.protocol.smtp;
 import jakarta.mail.MessagingException;
 import jakarta.mail.util.ByteArrayDataSource;
 import net.microfalx.heimdall.protocol.core.*;
+import net.microfalx.resource.MimeType;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -64,9 +65,9 @@ public class SmtpClient extends ProtocolClient<SmtpEvent> {
         Body htmlBody = null;
         for (Part part : event.getParts()) {
             if (part instanceof Body) {
-                if (MimeType.TEXT_PLAIN.getValue().equals(part.getMimeType())) {
+                if (MimeType.TEXT_PLAIN.equals(part.getMimeType())) {
                     textBody = (Body) part;
-                } else if (MimeType.TEXT_HTML.getValue().equals(part.getMimeType())) {
+                } else if (MimeType.TEXT_HTML.equals(part.getMimeType())) {
                     htmlBody = (Body) part;
                 }
             }
@@ -95,7 +96,7 @@ public class SmtpClient extends ProtocolClient<SmtpEvent> {
     }
 
     private boolean isMultiPart(SmtpEvent event) {
-        return !(event.getParts().size() == 1 && MimeType.TEXT.getValue().equals(event.getBody().getMimeType()));
+        return !(event.getParts().size() == 1 && MimeType.TEXT.equals(event.getBody().getMimeType()));
     }
 
     public void initializeMailSender() {

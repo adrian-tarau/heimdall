@@ -2,6 +2,7 @@ package net.microfalx.heimdall.protocol.core;
 
 import net.microfalx.lang.StringUtils;
 import net.microfalx.resource.MemoryResource;
+import net.microfalx.resource.MimeType;
 import net.microfalx.resource.Resource;
 
 import static net.microfalx.heimdall.protocol.core.ProtocolConstants.MAX_MESSAGE_LENGTH;

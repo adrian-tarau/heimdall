@@ -1,8 +1,8 @@
 package net.microfalx.heimdall.protocol.core;
 
+import net.microfalx.resource.MimeType;
 import net.microfalx.resource.NullResource;
 import net.microfalx.resource.Resource;
-import org.apache.tika.Tika;
 
 import java.io.IOException;
 
@@ -15,7 +15,7 @@ public abstract class AbstractPart implements Part {
     private AbstractEvent event;
     private String name;
     private Type type;
-    private String mimeType = MimeType.APPLICATION_OCTET_STREAM.getValue();
+    private String mimeType = MimeType.APPLICATION_OCTET_STREAM.toString();
     private String fileName;
     Resource resource = NullResource.createNull();
 
@@ -61,12 +61,24 @@ public abstract class AbstractPart implements Part {
         return mimeType;
     }
 
+    /**
+     * Changes the mime type  associated with this part.
+     *
+     * @param mimeType the mime type
+     * @return self
+     */
     public final Part setMimeType(String mimeType) {
         requireNonNull(mimeType);
         this.mimeType = mimeType;
         return this;
     }
 
+    /**
+     * Changes the mime type associated with this part.
+     *
+     * @param mimeType the mime type
+     * @return self
+     */
     public final Part setMimeType(MimeType mimeType) {
         requireNonNull(mimeType);
         this.mimeType = mimeType.getValue();
@@ -78,6 +90,12 @@ public abstract class AbstractPart implements Part {
         return fileName;
     }
 
+    /**
+     * Changes the file name associated with this part.
+     *
+     * @param fileName the file name
+     * @return self
+     */
     public final Part setFileName(String fileName) {
         this.fileName = fileName;
         return this;
@@ -97,15 +115,17 @@ public abstract class AbstractPart implements Part {
         }
     }
 
-    public final void setResource(Resource resource) {
+    /**
+     * Changes the resource associated with the part.
+     *
+     * @param resource the resource
+     * @return self
+     */
+    public final Part setResource(Resource resource) {
         requireNonNull(resource);
         this.resource = resource;
-        Tika tika = new Tika();
-        try {
-            setMimeType(tika.detect(resource.getInputStream()));
-        } catch (IOException e) {
-            // if we cannot detect, just assume is binary
-        }
+        setMimeType(resource.getMimeType());
+        return this;
     }
 
     @Override

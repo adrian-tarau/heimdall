@@ -9,12 +9,14 @@ import net.microfalx.bootstrap.search.SearchService;
 import net.microfalx.heimdall.protocol.core.jpa.AddressRepository;
 import net.microfalx.heimdall.protocol.core.jpa.PartRepository;
 import net.microfalx.lang.IOUtils;
+import net.microfalx.resource.MimeType;
 import net.microfalx.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.PeriodicTrigger;
 
@@ -209,7 +211,12 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
             addressJpa.setType(address.getType());
             addressJpa.setName(address.getName());
             addressJpa.setValue(address.getValue());
-            addressRepository.save(addressJpa);
+            net.microfalx.heimdall.protocol.core.jpa.Address finalAddressJpa = addressJpa;
+            RetryTemplate template = new RetryTemplate();
+            template.execute(context -> {
+                addressRepository.save(finalAddressJpa);
+                return null;
+            });
         }
         return addressJpa;
     }

@@ -7,9 +7,9 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import net.microfalx.heimdall.protocol.core.MimeType;
 import net.microfalx.lang.annotation.Name;
 import net.microfalx.lang.annotation.Position;
+import net.microfalx.resource.MimeType;
 
 import java.time.LocalDateTime;
 
