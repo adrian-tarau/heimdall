@@ -7,6 +7,7 @@ import net.microfalx.heimdall.protocol.snmp.jpa.SnmpMib;
 import net.microfalx.heimdall.protocol.snmp.jpa.SnmpMibRepository;
 import net.microfalx.heimdall.protocol.snmp.mib.MibModule;
 import net.microfalx.heimdall.protocol.snmp.mib.MibService;
+import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -32,7 +33,6 @@ public class SnmpMibController extends DataSetController<SnmpMib, String> {
 
     @Override
     protected Resource download(net.microfalx.bootstrap.dataset.DataSet<SnmpMib, Field<SnmpMib>, String> dataSet, Model controllerModel, SnmpMib dataSetModel) {
-        System.out.println("Implement me");
-        return super.download(dataSet, controllerModel, dataSetModel);
+        return MemoryResource.create(dataSetModel.getContent(), dataSetModel.getFileName());
     }
 }
