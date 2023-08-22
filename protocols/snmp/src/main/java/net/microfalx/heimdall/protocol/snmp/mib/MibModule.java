@@ -14,7 +14,10 @@ import org.jsmiparser.util.location.Location;
 import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Set;
 
+import static java.util.Collections.emptySet;
+import static java.util.Collections.unmodifiableSet;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.StringUtils.toIdentifier;
 
@@ -40,23 +43,23 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
 
     @Position(11)
     @Visible(false)
-    private String messageOid;
+    private String enterpriseOid;
 
     @Position(12)
     @Visible(false)
-    private String enterpriseOid;
+    private Set<String> messageOids;
 
     @Position(13)
     @Visible(false)
-    private String createdAtOid;
+    private Set<String> createdAtOid;
 
     @Position(14)
     @Visible(false)
-    private String sentAtOid;
+    private Set<String> sentAtOid;
 
     @Position(15)
     @Visible(false)
-    private String severityOid;
+    private Set<String> severityOid;
 
     @Visible(false)
     private Resource content;
@@ -154,7 +157,7 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
      */
     @Visible(false)
     public Collection<MibVariable> getVariables() {
-        return module.getVariables().stream().map(v -> new MibVariable(this, v)).toList();
+        return module.getVariables().stream().filter(MibUtils::isValid).map(v -> new MibVariable(this, v)).toList();
     }
 
     /**
@@ -164,7 +167,7 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
      */
     @Visible(false)
     public Collection<MibSymbol> getSymbols() {
-        return module.getSymbols().stream().map(s -> new MibSymbol(this, s)).toList();
+        return module.getSymbols().stream().filter(MibUtils::isValid).map(s -> new MibSymbol(this, s)).toList();
     }
 
     @Override
@@ -175,52 +178,32 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
         return Objects.equals(id, module.id);
     }
 
+    public String getEnterpriseOid() {
+        return enterpriseOid;
+    }
+
+    public Set<String> getMessageOids() {
+        return messageOids != null ? unmodifiableSet(messageOids) : emptySet();
+    }
+
+    public Set<String> getCreatedAtOids() {
+        return createdAtOid != null ? unmodifiableSet(createdAtOid) : emptySet();
+    }
+
+    public Set<String> getSentAtOids() {
+        return sentAtOid != null ? unmodifiableSet(sentAtOid) : emptySet();
+    }
+
+    public Set<String> getSeverityOids() {
+        return severityOid != null ? unmodifiableSet(severityOid) : emptySet();
+    }
+
     public String getFileName() {
         return fileName;
     }
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
-    }
-
-    public String getMessageOid() {
-        return messageOid;
-    }
-
-    void setMessageOid(String messageOid) {
-        this.messageOid = messageOid;
-    }
-
-    public String getEnterpriseOid() {
-        return enterpriseOid;
-    }
-
-    void setEnterpriseOid(String enterpriseOid) {
-        this.enterpriseOid = enterpriseOid;
-    }
-
-    public String getCreatedAtOid() {
-        return createdAtOid;
-    }
-
-    void setCreatedAtOid(String createdAtOid) {
-        this.createdAtOid = createdAtOid;
-    }
-
-    public String getSentAtOid() {
-        return sentAtOid;
-    }
-
-    void setSentAtOid(String sentAtOid) {
-        this.sentAtOid = sentAtOid;
-    }
-
-    public String getSeverityOid() {
-        return severityOid;
-    }
-
-    public void setSeverityOid(String severityOid) {
-        this.severityOid = severityOid;
     }
 
     public Resource getContent() {
@@ -258,11 +241,10 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
     private void extractOids() {
         MibMetadataExtractor extractor = new MibMetadataExtractor(this);
         extractor.execute();
-        messageOid = extractor.getMessageOid();
         enterpriseOid = extractor.getEnterpriseOid();
+        messageOids = extractor.getMessageOid();
         createdAtOid = extractor.getCreatedAtOid();
         sentAtOid = extractor.getSentAtOid();
         severityOid = extractor.getSeverityOid();
-
     }
 }

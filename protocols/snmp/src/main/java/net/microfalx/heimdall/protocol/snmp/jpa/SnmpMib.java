@@ -8,6 +8,8 @@ import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.jdbc.entity.NamedTimestampAware;
 import net.microfalx.heimdall.protocol.snmp.mib.MibType;
+import net.microfalx.lang.annotation.Label;
+import net.microfalx.lang.annotation.Name;
 import net.microfalx.lang.annotation.Position;
 import net.microfalx.lang.annotation.Visible;
 
@@ -17,6 +19,7 @@ import net.microfalx.lang.annotation.Visible;
 @Setter
 @ToString
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
+@Name("MIBs")
 public class SnmpMib extends NamedTimestampAware {
 
     @Id
@@ -36,30 +39,30 @@ public class SnmpMib extends NamedTimestampAware {
     @Visible(modes = {Visible.Mode.VIEW})
     private String moduleId;
 
-    @Column(name = "message_oid")
-    @Position(15)
-    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT})
-    private String messageOid;
-
     @Column(name = "enterprise_oid")
-    @Position(20)
-    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT})
+    @Position(15)
+    @Label("Enterprise OID")
     private String enterpriseOid;
 
-    @Column(name = "create_at_oid")
+    @Column(name = "message_oids")
+    @Position(20)
+    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT})
+    private String messageOids;
+
+    @Column(name = "create_at_oids")
     @Position(25)
     @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT})
-    private String createAtOid;
+    private String createAtOids;
 
-    @Column(name = "sent_at_oid")
+    @Column(name = "sent_at_oids")
     @Position(30)
     @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT})
-    private String sentAtOid;
+    private String sentAtOids;
 
-    @Column(name = "severity_oid")
+    @Column(name = "severity_oids")
     @Position(35)
     @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT})
-    private String severityOid;
+    private String severityOids;
 
     @Column(name = "content")
     @Position(50)

@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,37 +29,48 @@ class MibMetadataExtractorTest {
     }
 
     @Test
-    void validateSnmpMib() {
-        module = mibService.findModule("snmpv2_mib");
+    void validateMessageOid() {
+        module = mibService.findModule("SNMP-FRAMEWORK-MIB");
         mibMetadataExtractor = new MibMetadataExtractor(module);
         mibMetadataExtractor.execute();
         assertNull(mibMetadataExtractor.getEnterpriseOid());
-        assertNull(mibMetadataExtractor.getMessageOid());
-        assertNull(mibMetadataExtractor.getCreatedAtOid());
+        assertEquals("1.3.6.1.6.3.10.2.1.4", mibMetadataExtractor.getMessageOid());
+        assertEquals(null, mibMetadataExtractor.getCreatedAtOid());
         assertNull(mibMetadataExtractor.getSentAtOid());
         assertNull(mibMetadataExtractor.getSeverityOid());
     }
 
     @Test
-    void validateSnmpTargetMib() {
-        module = mibService.findModule("snmp_target_mib");
+    void validateCreateAtOid() {
+        module = mibService.findModule("INTERFACETOPN-MIB");
         mibMetadataExtractor = new MibMetadataExtractor(module);
         mibMetadataExtractor.execute();
         assertNull(mibMetadataExtractor.getEnterpriseOid());
         assertNull(mibMetadataExtractor.getMessageOid());
-        assertNull(mibMetadataExtractor.getCreatedAtOid());
-        assertNull(mibMetadataExtractor.getSentAtOid());
+        assertEquals("1.3.6.1.2.1.16.27.1.2.1.12", mibMetadataExtractor.getCreatedAtOid());
+        assertEquals(null, mibMetadataExtractor.getSentAtOid());
         assertNull(mibMetadataExtractor.getSeverityOid());
     }
 
-
     @Test
-    void validateIanaItuAlarmTcMib() {
-        module = mibService.findModule("iana_printer_mib");
+    void validateSentAtOid() {
+        module = mibService.findModule("SNMPv2-M2M-MIB");
         mibMetadataExtractor = new MibMetadataExtractor(module);
         mibMetadataExtractor.execute();
         assertNull(mibMetadataExtractor.getSeverityOid());
         assertNull(mibMetadataExtractor.getEnterpriseOid());
+        assertNull(mibMetadataExtractor.getMessageOid());
+        assertNull(mibMetadataExtractor.getCreatedAtOid());
+        assertEquals("1.3.6.1.6.3.2.1.2.2.1.5", mibMetadataExtractor.getSentAtOid());
+    }
+
+    @Test
+    void validateSeverityOid() {
+        module = mibService.findModule("SNMP-TARGET-MIB");
+        mibMetadataExtractor = new MibMetadataExtractor(module);
+        mibMetadataExtractor.execute();
+        assertEquals("1.3.6.1.6.3.12.1.3.1.5", mibMetadataExtractor.getSeverityOid());
+        assertEquals(null, mibMetadataExtractor.getEnterpriseOid());
         assertNull(mibMetadataExtractor.getMessageOid());
         assertNull(mibMetadataExtractor.getCreatedAtOid());
         assertNull(mibMetadataExtractor.getSentAtOid());

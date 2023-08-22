@@ -31,6 +31,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.unmodifiableList;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
+import static net.microfalx.lang.FormatterUtils.formatNumber;
 import static net.microfalx.lang.StringUtils.toIdentifier;
 
 @Service
@@ -212,8 +213,13 @@ public class MibService implements InitializingBean {
             return;
         }
         try {
+            LOGGER.info("Load system " + formatNumber(mibUrls.size()) + " MIBs");
             SmiMib mib = load(mibUrls);
+            Collection<SmiModule> modules = getModules(mib);
+            LOGGER.info("Extract modules from " + formatNumber(modules.size()));
             extractModules(mib);
+            LOGGER.info("Loaded " + formatNumber(holder.modules.size()) + " modules, symbols " + formatNumber(holder.symbols.size())
+                    + ", variables " + formatNumber(holder.variables.size()));
         } catch (IOException e) {
             LOGGER.error("Failed to load MIBs", e);
         }
@@ -258,9 +264,14 @@ public class MibService implements InitializingBean {
         } catch (Exception e) {
             throw new MibException("Fail to read the content of the MIB module " + module.getName(), e);
         }
+        snmpMib.setEnterpriseOid(module.getEnterpriseOid());
+        snmpMib.setMessageOids(String.join(",", module.getMessageOids()));
+        snmpMib.setSeverityOids(String.join(",", module.getSeverityOids()));
+        snmpMib.setCreateAtOids(String.join(",", module.getCreatedAtOids()));
+        snmpMib.setSentAtOids(String.join(",", module.getSentAtOids()));
         snmpMib.setModifiedAt(LocalDateTime.now());
         snmpMib.setDescription(org.apache.commons.lang3.StringUtils.abbreviate(StringUtils.removeLineBreaks(module.getDescription()), 200));
-        snmpMibRepository.save(snmpMib);
+        snmpMibRepository.saveAndFlush(snmpMib);
     }
 
     private SmiMib load(List<URL> mibUrls) throws IOException {
@@ -279,6 +290,7 @@ public class MibService implements InitializingBean {
         Map<String, MibVariable> newVariablesById = new HashMap<>();
         for (SmiModule smiModule : getModules(mib)) {
             MibModule module = new MibModule(smiModule);
+            LOGGER.debug(" - " + module.getName() + ", symbols " + module.getSymbols().size() + ", variables " + module.getVariables().size());
             newModules.add(module);
             newModulesById.put(module.getId(), module);
             newModulesById.put(toIdentifier(module.getOid()), module);

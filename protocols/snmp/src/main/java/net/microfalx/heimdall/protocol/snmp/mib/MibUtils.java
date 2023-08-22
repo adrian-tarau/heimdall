@@ -1,6 +1,8 @@
 package net.microfalx.heimdall.protocol.snmp.mib;
 
 import net.microfalx.lang.StringUtils;
+import org.jsmiparser.smi.SmiOidValue;
+import org.jsmiparser.smi.SmiSymbol;
 import org.snmp4j.smi.OID;
 
 import java.net.URI;
@@ -68,6 +70,21 @@ public class MibUtils {
             return !INTERNAL_MIB_SOURCE.equals(uri) && isFileUri(URI.create(uri));
         } catch (Exception e) {
             return false;
+        }
+    }
+
+    /**
+     * Returns whether the symbol is valid in the context of our application.
+     *
+     * @param symbol the symbol
+     * @return {@code true} if valid, {@code false} otherwise
+     */
+    public static boolean isValid(SmiSymbol symbol) {
+        if (symbol == null) return false;
+        if (symbol instanceof SmiOidValue) {
+            return ((SmiOidValue) symbol).getNode() != null;
+        } else {
+            return true;
         }
     }
 }
