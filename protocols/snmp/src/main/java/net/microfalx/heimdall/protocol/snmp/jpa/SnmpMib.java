@@ -42,6 +42,7 @@ public class SnmpMib extends NamedTimestampAware {
     @Column(name = "enterprise_oid")
     @Position(15)
     @Label("Enterprise OID")
+    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT})
     private String enterpriseOid;
 
     @Column(name = "message_oids")

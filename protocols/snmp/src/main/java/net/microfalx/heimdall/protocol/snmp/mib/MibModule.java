@@ -42,23 +42,23 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
     private String fileName;
 
     @Position(11)
-    @Visible(false)
+    @Visible(modes = {Visible.Mode.VIEW})
     private String enterpriseOid;
 
     @Position(12)
-    @Visible(false)
+    @Visible(modes = {Visible.Mode.VIEW})
     private Set<String> messageOids;
 
     @Position(13)
-    @Visible(false)
+    @Visible(modes = {Visible.Mode.VIEW})
     private Set<String> createdAtOid;
 
     @Position(14)
-    @Visible(false)
+    @Visible(modes = {Visible.Mode.VIEW})
     private Set<String> sentAtOid;
 
     @Position(15)
-    @Visible(false)
+    @Visible(modes = {Visible.Mode.VIEW})
     private Set<String> severityOid;
 
     @Visible(false)
@@ -178,22 +178,27 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
         return Objects.equals(id, module.id);
     }
 
+    @Visible(modes = {Visible.Mode.VIEW})
     public String getEnterpriseOid() {
         return enterpriseOid;
     }
 
+    @Visible(modes = {Visible.Mode.VIEW})
     public Set<String> getMessageOids() {
         return messageOids != null ? unmodifiableSet(messageOids) : emptySet();
     }
 
+    @Visible(modes = {Visible.Mode.VIEW})
     public Set<String> getCreatedAtOids() {
         return createdAtOid != null ? unmodifiableSet(createdAtOid) : emptySet();
     }
 
+    @Visible(modes = {Visible.Mode.VIEW})
     public Set<String> getSentAtOids() {
         return sentAtOid != null ? unmodifiableSet(sentAtOid) : emptySet();
     }
 
+    @Visible(modes = {Visible.Mode.VIEW})
     public Set<String> getSeverityOids() {
         return severityOid != null ? unmodifiableSet(severityOid) : emptySet();
     }
