@@ -56,6 +56,11 @@ public class SnmpMib extends NamedTimestampAware {
     @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT})
     private String sentAtOid;
 
+    @Column(name = "severity_oid")
+    @Position(35)
+    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT})
+    private String severityOid;
+
     @Column(name = "content")
     @Position(50)
     @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.ADD, Visible.Mode.ADD})

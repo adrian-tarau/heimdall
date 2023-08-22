@@ -54,6 +54,10 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
     @Visible(false)
     private String sentAtOid;
 
+    @Position(15)
+    @Visible(false)
+    private String severityOid;
+
     @Visible(false)
     private Resource content;
 
@@ -62,6 +66,7 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
         this.module = module;
         this.id = toIdentifier(module.getId());
         this.setContent(extractResource(module));
+        this.extractOids();
     }
 
     /**
@@ -210,6 +215,14 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
         this.sentAtOid = sentAtOid;
     }
 
+    public String getSeverityOid() {
+        return severityOid;
+    }
+
+    public void setSeverityOid(String severityOid) {
+        this.severityOid = severityOid;
+    }
+
     public Resource getContent() {
         return content;
     }
@@ -240,5 +253,16 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
         } else {
             return NullResource.createNull();
         }
+    }
+
+    private void extractOids() {
+        MibMetadataExtractor extractor = new MibMetadataExtractor(this);
+        extractor.execute();
+        messageOid = extractor.getMessageOid();
+        enterpriseOid = extractor.getEnterpriseOid();
+        createdAtOid = extractor.getCreatedAtOid();
+        sentAtOid = extractor.getSentAtOid();
+        severityOid = extractor.getSeverityOid();
+
     }
 }

@@ -24,6 +24,7 @@ create table protocol_snmp_mibs
     enterprise_oid  varchar(200),
     create_at_oid   varchar(200),
     sent_at_oid     varchar(200),
+    severity_oid    varchar(200),
     created_at      datetime      not null,
     modified_at     datetime      not null,
     file_name       varchar(100)  not null,
