@@ -1,36 +1,33 @@
 package net.microfalx.heimdall.protocol.snmp.mib;
 
+import net.microfalx.bootstrap.core.async.TaskExecutorFactory;
+import net.microfalx.bootstrap.resource.ResourceService;
 import net.microfalx.heimdall.protocol.snmp.jpa.SnmpMib;
 import net.microfalx.heimdall.protocol.snmp.jpa.SnmpMibRepository;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.resource.ClassPathResource;
 import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.Resource;
-import net.microfalx.resource.TemporaryFileResource;
-import org.jsmiparser.parser.SmiDefaultParser;
-import org.jsmiparser.smi.SmiMib;
-import org.jsmiparser.smi.SmiModule;
-import org.jsmiparser.util.location.Location;
-import org.jsmiparser.util.problem.ProblemEvent;
-import org.jsmiparser.util.problem.ProblemEventHandler;
-import org.jsmiparser.util.problem.annotations.ProblemSeverity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.smi.OID;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.net.URL;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.CountDownLatch;
 
-import static java.util.Collections.singletonList;
+import static java.time.Duration.ofSeconds;
 import static java.util.Collections.unmodifiableList;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
+import static net.microfalx.lang.ConcurrencyUtils.await;
 import static net.microfalx.lang.FormatterUtils.formatNumber;
 import static net.microfalx.lang.StringUtils.toIdentifier;
 
@@ -40,9 +37,33 @@ public class MibService implements InitializingBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(MibService.class);
 
     private volatile MibHolder holder = new MibHolder();
+    private final Set<String> registeredModules = new CopyOnWriteArraySet<>();
+    private final Set<String> importedModules = new CopyOnWriteArraySet<>();
+    private final Set<String> resolvedModules = new CopyOnWriteArraySet<>();
 
     @Autowired
     private SnmpMibRepository snmpMibRepository;
+
+    @Autowired
+    private ResourceService resourceService;
+
+    @Autowired
+    private AsyncTaskExecutor taskExecutor;
+
+    private final CountDownLatch latch = new CountDownLatch(1);
+    private static final Duration DEFAULT_WAIT = ofSeconds(60);
+
+    private Resource workspace;
+
+    /**
+     * Returns the task scheduler associated with this service.
+     *
+     * @return a non-null instance
+     */
+    public AsyncTaskExecutor getTaskExecutor() {
+        if (taskExecutor == null) taskExecutor = new TaskExecutorFactory().createExecutor();
+        return taskExecutor;
+    }
 
     /**
      * Returns all registered modules.
@@ -50,7 +71,20 @@ public class MibService implements InitializingBean {
      * @return a non-null instance
      */
     public List<MibModule> getModules() {
+        waitInitialization();
         return unmodifiableList(holder.modules);
+    }
+
+    /**
+     * Loads MIBs from a file resource or directory with resources into the user space.
+     *
+     * @param resource the resource or resources
+     */
+    public void loadModules(Resource resource) {
+        requireNonNull(resource);
+        waitInitialization();
+        doRegisterMibs(resource, MibType.USER);
+        loadModulesFromDatabaseAndResolve();
     }
 
     /**
@@ -61,22 +95,8 @@ public class MibService implements InitializingBean {
      */
     public MibModule parseModule(Resource resource) {
         requireNonNull(resource);
-
-        Resource file = TemporaryFileResource.file(resource.getFileName() + ".tmp");
-        file.copyFrom(resource);
-        try {
-            SmiMib mib = load(singletonList(file.toURL()));
-            Collection<SmiModule> modules = getModules(mib);
-            if (modules.isEmpty()) {
-                throw new MibException("Failed to parse MIB " + resource.getName() + ", root cause: ");
-            }
-            MibModule mibModule = new MibModule(modules.iterator().next());
-            mibModule.setFileName(file.getFileName());
-            mibModule.setContent(MemoryResource.create(file));
-            return mibModule;
-        } catch (IOException e) {
-            throw new MibException("Failed to parse MIB " + resource.getName(), e);
-        }
+        MibParser parser = new MibParser(resource, MibType.USER);
+        return parser.parse();
     }
 
     /**
@@ -97,6 +117,7 @@ public class MibService implements InitializingBean {
      */
     public MibModule findModule(String id) {
         requireNonNull(id);
+        waitInitialization();
         return holder.modulesById.get(toIdentifier(id));
     }
 
@@ -107,6 +128,7 @@ public class MibService implements InitializingBean {
      * @return a non-null instance
      */
     public List<MibSymbol> getSymbols() {
+        waitInitialization();
         return unmodifiableList(holder.symbols);
     }
 
@@ -118,6 +140,7 @@ public class MibService implements InitializingBean {
      */
     public MibSymbol findSymbol(String id) {
         requireNonNull(id);
+        waitInitialization();
         return holder.symbolsById.get(toIdentifier(id));
     }
 
@@ -127,6 +150,7 @@ public class MibService implements InitializingBean {
      * @return a non-null instance
      */
     public List<MibVariable> getVariables() {
+        waitInitialization();
         return unmodifiableList(holder.variables);
     }
 
@@ -138,6 +162,7 @@ public class MibService implements InitializingBean {
      */
     public MibVariable findVariable(String id) {
         requireNonNull(id);
+        waitInitialization();
         return holder.variablesById.get(toIdentifier(id));
     }
 
@@ -197,54 +222,64 @@ public class MibService implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        loadSystemMibs();
-        persistMibs();
+        initWorkspace();
+        getTaskExecutor().execute(this::initializeMibs);
     }
 
-    private void loadSystemMibs() {
-        final List<URL> mibUrls = new ArrayList<>();
-        try {
-            ClassPathResource.directory("mib").walk((root, child) -> {
-                if (child.isFile()) mibUrls.add(child.toURI().toURL());
-                return true;
-            });
-        } catch (IOException e) {
-            LOGGER.error("Failed to list internal MIBs", e);
-            return;
+    private void registerSystemMibs() {
+        Resource mibs = ClassPathResource.directory("mib");
+        doRegisterMibs(mibs, MibType.SYSTEM);
+    }
+
+    private boolean isRegisteredOrResolved(String tokenId) {
+        String tokenIdLc = tokenId.toLowerCase();
+        boolean registered = registeredModules.contains(tokenIdLc) || resolvedModules.contains(tokenIdLc);
+        if (!registered && tokenIdLc.endsWith("mib")) {
+            tokenId = tokenIdLc.substring(0, tokenId.length() - 3);
         }
-        try {
-            LOGGER.info("Load system " + formatNumber(mibUrls.size()) + " MIBs");
-            SmiMib mib = load(mibUrls);
-            Collection<SmiModule> modules = getModules(mib);
-            LOGGER.info("Extract modules from " + formatNumber(modules.size()));
-            extractModules(mib);
-            LOGGER.info("Loaded " + formatNumber(holder.modules.size()) + " modules, symbols " + formatNumber(holder.symbols.size())
-                    + ", variables " + formatNumber(holder.variables.size()));
-        } catch (IOException e) {
-            LOGGER.error("Failed to load MIBs", e);
+        return registeredModules.contains(tokenIdLc) || resolvedModules.contains(tokenIdLc);
+    }
+
+    private boolean resolveMissingMibs() {
+        int missingCount = 0;
+        for (String importedModule : importedModules) {
+            if (!isRegisteredOrResolved(importedModule)) missingCount++;
         }
-    }
-
-    /**
-     * Returns only the MIB modules which have a file reference since those are the ones
-     * that we load.
-     *
-     * @param mib the MIB container as returned by the SNMP parser
-     * @return the useful MIBs
-     */
-    private Collection<SmiModule> getModules(SmiMib mib) {
-        return mib.getModules().stream().filter(m -> {
-            Location location = m.getIdToken().getLocation();
-            return location != null && (MibUtils.isValidMibUri(location.getSource()));
-        }).toList();
-    }
-
-    private void persistMibs() {
-        for (MibModule module : holder.modules) {
+        if (missingCount == 0) return false;
+        int fetchedCount = 0;
+        Collection<Resource> externalResources = new ArrayList<>();
+        for (String importedModule : importedModules) {
+            if (isRegisteredOrResolved(importedModule)) continue;
+            MibFetcher fetcher = MibFetcher.create(importedModule);
             try {
-                persistMib(module);
+                Resource resource = fetcher.execute();
+                if (resource.exists()) externalResources.add(resource);
+                fetchedCount++;
             } catch (Exception e) {
-                LOGGER.error("Failed to persist MIB " + module.getName(), e);
+                LOGGER.error("Failed to fetch module '{}' from external registries", importedModule, e);
+            }
+        }
+        doRegisterMibs(externalResources, MibType.IMPORT);
+        return fetchedCount > 0;
+    }
+
+    private void doRegisterMibs(Resource resource, MibType type) {
+        final Collection<Resource> resources = discoverMibs(resource, type);
+        if (!resources.isEmpty()) doRegisterMibs(resources, type);
+    }
+
+    private void doRegisterMibs(Collection<Resource> resources, MibType type) {
+        LOGGER.info("Register " + formatNumber(resources.size()) + " MIBs, type " + type);
+        for (Resource resource : resources) {
+            MibParser parser = new MibParser(resource, type);
+            try {
+                MibModule module = parser.parse();
+                extractImports(module);
+                extractOids(module);
+                persistMib(module);
+                registeredModules.add(module.getIdToken().toLowerCase());
+            } catch (Exception e) {
+                LOGGER.error("Failed to register MIB from " + resource.toURI(), e);
             }
         }
     }
@@ -256,6 +291,12 @@ public class MibService implements InitializingBean {
             snmpMib.setType(module.getType());
             snmpMib.setModuleId(module.getId());
             snmpMib.setCreatedAt(LocalDateTime.now());
+
+            snmpMib.setEnterpriseOid(module.getEnterpriseOid());
+            snmpMib.setMessageOids(String.join(",", module.getMessageOids()));
+            snmpMib.setSeverityOids(String.join(",", module.getSeverityOids()));
+            snmpMib.setCreateAtOids(String.join(",", module.getCreatedAtOids()));
+            snmpMib.setSentAtOids(String.join(",", module.getSentAtOids()));
         }
         snmpMib.setName(module.getName());
         snmpMib.setFileName(module.getFileName());
@@ -264,36 +305,39 @@ public class MibService implements InitializingBean {
         } catch (Exception e) {
             throw new MibException("Fail to read the content of the MIB module " + module.getName(), e);
         }
-        snmpMib.setEnterpriseOid(module.getEnterpriseOid());
-        snmpMib.setMessageOids(String.join(",", module.getMessageOids()));
-        snmpMib.setSeverityOids(String.join(",", module.getSeverityOids()));
-        snmpMib.setCreateAtOids(String.join(",", module.getCreatedAtOids()));
-        snmpMib.setSentAtOids(String.join(",", module.getSentAtOids()));
         snmpMib.setModifiedAt(LocalDateTime.now());
         snmpMib.setDescription(org.apache.commons.lang3.StringUtils.abbreviate(StringUtils.removeLineBreaks(module.getDescription()), 200));
         snmpMibRepository.saveAndFlush(snmpMib);
     }
 
-    private SmiMib load(List<URL> mibUrls) throws IOException {
-        ProblemEventHandlerImpl eventHandler = new ProblemEventHandlerImpl();
-        SmiDefaultParser parser = new SmiDefaultParser(eventHandler);
-        parser.getFileParserPhase().setInputUrls(mibUrls);
-        return parser.parse();
+    private void loadModulesFromDatabaseAndResolve() {
+        int maxRetries = 5;
+        while (maxRetries-- > 0) {
+            loadModulesFromDatabase();
+            if (!resolveMissingMibs()) break;
+        }
     }
 
-    private void extractModules(SmiMib mib) {
+    private void loadModulesFromDatabase() {
         List<MibModule> newModules = new ArrayList<>();
         List<MibSymbol> newSymbols = new ArrayList<>();
         List<MibVariable> newVariables = new ArrayList<>();
         Map<String, MibModule> newModulesById = new HashMap<>();
         Map<String, MibSymbol> newSymbolsById = new HashMap<>();
         Map<String, MibVariable> newVariablesById = new HashMap<>();
-        for (SmiModule smiModule : getModules(mib)) {
-            MibModule module = new MibModule(smiModule);
+        MibParser parser = new MibParser();
+        for (SnmpMib snmpMib : snmpMibRepository.findAll()) {
+            Resource resource = MemoryResource.create(snmpMib.getContent(), snmpMib.getFileName());
+            resource = copyWorkspace(resource);
+            parser.add(resource, snmpMib.getType());
+        }
+        Collection<MibModule> modules = parser.parseAll();
+        LOGGER.info("Load modules from database");
+        for (MibModule module : modules) {
             LOGGER.debug(" - " + module.getName() + ", symbols " + module.getSymbols().size() + ", variables " + module.getVariables().size());
             newModules.add(module);
             newModulesById.put(module.getId(), module);
-            newModulesById.put(toIdentifier(module.getOid()), module);
+            newModulesById.put(toIdentifier(module.getIdToken()), module);
             for (MibSymbol symbol : module.getSymbols()) {
                 newSymbols.add(symbol);
                 newSymbolsById.putIfAbsent(symbol.getId(), symbol);
@@ -304,70 +348,93 @@ public class MibService implements InitializingBean {
                 newVariablesById.putIfAbsent(variable.getId(), variable);
                 newVariablesById.putIfAbsent(toIdentifier(variable.getOid()), variable);
             }
+            if (module.getType() == MibType.IMPORT) {
+                this.resolvedModules.add(module.getIdToken().toLowerCase());
+            }
         }
         this.holder = new MibHolder(newModules, newSymbols, newVariables, newModulesById, newSymbolsById, newVariablesById);
     }
 
-    private static final AtomicInteger EMPTY = new AtomicInteger();
-
-    private class ProblemEventHandlerImpl implements ProblemEventHandler {
-
-        private final Map<ProblemSeverity, AtomicInteger> severityCounts = new HashMap<>();
-
-        @Override
-        public void handle(ProblemEvent event) {
-            severityCounts.computeIfAbsent(event.getSeverity(), problemSeverity -> new AtomicInteger()).incrementAndGet();
-            Location location = event.getLocation();
-            if (location == null) location = new Location(StringUtils.NA_STRING, -1, -1);
-            String message = "[" + location.getSource() + " - " + location.getLine() + ":" + location.getColumn() + "] " + event.getLocalizedMessage();
-            switch (event.getSeverity()) {
-                case FATAL, ERROR, WARNING -> LOGGER.warn(message);
-                case INFO -> LOGGER.info(message);
-                case DEBUG -> LOGGER.debug(message);
+    private Collection<Resource> discoverMibs(Resource resource, MibType type) {
+        final List<Resource> resources = new ArrayList<>();
+        try {
+            if (resource.isFile()) {
+                resources.add(resource);
+            } else {
+                resource.walk((root, child) -> {
+                    if (child.isFile()) resources.add(child);
+                    return true;
+                });
             }
+            LOGGER.info("Discovered " + formatNumber(resources.size()) + " MIBs from " + resource.toURI() + ", type " + type);
+        } catch (IOException e) {
+            LOGGER.error("Failed to discover MIBs from " + resource.toURI(), e);
         }
+        return resources;
+    }
 
-        @Override
-        public boolean isOk() {
-            return getSeverityCount(ProblemSeverity.ERROR) + getSeverityCount(ProblemSeverity.FATAL) == 0;
-        }
+    private void initWorkspace() {
+        workspace = resourceService.getPersisted("mib");
+        LOGGER.info("MIB workspace is " + workspace.toURI());
+    }
 
-        @Override
-        public boolean isNotOk() {
-            return false;
-        }
+    private void waitInitialization() {
+        await(latch, DEFAULT_WAIT, l -> LOGGER.warn("Timeout waiting for MIB initialization"));
+    }
 
-        @Override
-        public int getSeverityCount(ProblemSeverity severity) {
-            return severityCounts.getOrDefault(severity, EMPTY).get();
+    private void initializeMibs() {
+        try {
+            registerSystemMibs();
+            loadModulesFromDatabaseAndResolve();
+        } catch (Exception e) {
+            LOGGER.error("Failed to initialize system MIBs");
+        } finally {
+            latch.countDown();
         }
+    }
 
-        @Override
-        public int getTotalCount() {
-            return severityCounts.values().stream().mapToInt(AtomicInteger::get).sum();
+    private void extractImports(MibModule module) {
+        for (MibImport importedModule : module.getImportedModules()) {
+            this.importedModules.add(importedModule.getIdToken());
         }
+    }
+
+    private void extractOids(MibModule module) {
+        MibMetadataExtractor extractor = new MibMetadataExtractor(module);
+        extractor.execute();
+        module.enterpriseOid = extractor.getEnterpriseOid();
+        module.messageOids = extractor.getMessageOid();
+        module.createdAtOid = extractor.getCreatedAtOid();
+        module.sentAtOid = extractor.getSentAtOid();
+        module.severityOid = extractor.getSeverityOid();
+    }
+
+    private Resource copyWorkspace(Resource resource) {
+        Resource workspaceResource = workspace.resolve(String.valueOf(resource.getFileName().charAt(0)).toLowerCase(), Resource.Type.DIRECTORY);
+        workspaceResource = workspaceResource.resolve(resource.getFileName(), Resource.Type.FILE);
+        return workspaceResource.copyFrom(resource);
     }
 
     private static class MibHolder {
 
-        private List<MibModule> modules = Collections.emptyList();
-        private List<MibSymbol> symbols = Collections.emptyList();
-        private List<MibVariable> variables = Collections.emptyList();
-        private Map<String, MibModule> modulesById = Collections.emptyMap();
-        private Map<String, MibSymbol> symbolsById = Collections.emptyMap();
-        private Map<String, MibVariable> variablesById = Collections.emptyMap();
+        private final List<MibModule> modules = new ArrayList<>();
+        private final List<MibSymbol> symbols = new ArrayList<>();
+        private final List<MibVariable> variables = new ArrayList<>();
+        private final Map<String, MibModule> modulesById = new HashMap<>();
+        private final Map<String, MibSymbol> symbolsById = new HashMap<>();
+        private final Map<String, MibVariable> variablesById = new HashMap<>();
 
         MibHolder() {
         }
 
         public MibHolder(List<MibModule> modules, List<MibSymbol> symbols, List<MibVariable> variables,
                          Map<String, MibModule> modulesById, Map<String, MibSymbol> symbolsById, Map<String, MibVariable> variablesById) {
-            this.modules = modules;
-            this.symbols = symbols;
-            this.variables = variables;
-            this.modulesById = modulesById;
-            this.symbolsById = symbolsById;
-            this.variablesById = variablesById;
+            this.modules.addAll(modules);
+            this.symbols.addAll(symbols);
+            this.variables.addAll(variables);
+            this.modulesById.putAll(modulesById);
+            this.symbolsById.putAll(symbolsById);
+            this.variablesById.putAll(variablesById);
         }
     }
 }

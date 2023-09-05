@@ -14,11 +14,13 @@ create table protocol_snmp_events
     constraint fk$snmps$bindings foreign key (bindings_id) references protocol_parts (id)
 ) ENGINE = InnoDB;
 
+create index protocol_snmp_events$received_at on protocol_snmp_events (received_at);
+
 create table protocol_snmp_mibs
 (
     id             integer                not null auto_increment primary key,
     name           varchar(100)           not null,
-    `type`         enum ('SYSTEM','USER') not null,
+    `type`         enum ('SYSTEM','USER','IMPORT') not null,
     module_id      varchar(200)           not null,
     enterprise_oid varchar(200),
     message_oids   varchar(5000),

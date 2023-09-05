@@ -1,40 +1,70 @@
 package net.microfalx.heimdall.protocol.snmp.mib;
 
+import net.microfalx.bootstrap.test.AbstractBootstrapServiceTestCase;
+import net.microfalx.heimdall.protocol.snmp.jpa.SnmpMib;
+import net.microfalx.heimdall.protocol.snmp.jpa.SnmpMibRepository;
+import net.microfalx.resource.ClassPathResource;
+import net.microfalx.resource.Resource;
 import org.assertj.core.api.Assertions;
 import org.jsmiparser.smi.SmiPrimitiveType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.mp.SnmpConstants;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
-class MibServiceTest {
+@ContextConfiguration(classes = {MibService.class})
+class MibServiceTest extends AbstractBootstrapServiceTestCase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MibService.class);
 
-    @InjectMocks
+    private final AtomicLong SEQUENCE = new AtomicLong(1);
+    private final List<SnmpMib> persistedMibs = new ArrayList<>();
+
+    @MockBean
+    private SnmpMibRepository snmpMibRepository;
+
+    @Autowired
     private MibService mibService;
 
     @BeforeEach
     void setup() throws Exception {
-        mibService.afterPropertiesSet();
+        when(snmpMibRepository.saveAndFlush(any(SnmpMib.class)))
+                .then(invocation -> {
+                    SnmpMib snmpMib = invocation.getArgument(0);
+                    persistedMibs.add(snmpMib);
+                    snmpMib.setId(SEQUENCE.getAndIncrement());
+                    return snmpMib;
+                });
+        doReturn(persistedMibs).when(snmpMibRepository).findAll();
     }
 
     @Test
-    void loadMibs() {
-        assertEquals(80, mibService.getModules().size());
-        assertEquals(774, mibService.getVariables().size());
+    void loadSystemMibs() {
+        assertEquals(331, mibService.getModules().size());
+        assertEquals(17082, mibService.getVariables().size());
+    }
+
+    @Test
+    void loadUserMibs() {
+        Resource simulatorMibs = ClassPathResource.directory("simulator/snmp/mib");
+        mibService.loadModules(simulatorMibs);
+        assertEquals(329, mibService.getModules().size());
+        assertEquals(17082, mibService.getVariables().size());
     }
 
     @Test
@@ -45,13 +75,13 @@ class MibServiceTest {
 
     @Test
     void findVariableName() {
-        assertEquals("DISMAN-EVENT-MIB::sysUpTimeInstance", mibService.findName("1.3.6.1.2.1.1.3.0"));
-        assertEquals("SNMPv2-MIB::sysUpTime.9", mibService.findName("1.3.6.1.2.1.1.3.9"));
-        assertEquals("SNMPv2-MIB::sysUpTime.1.2.3", mibService.findName("1.3.6.1.2.1.1.3.1.2.3"));
+        assertEquals("DISMAN-EXPRESSION-MIB::sysUpTimeInstance", mibService.findName("1.3.6.1.2.1.1.3.0"));
+        assertEquals("RFC1213-MIB::sysUpTime.9", mibService.findName("1.3.6.1.2.1.1.3.9"));
+        assertEquals("RFC1213-MIB::sysUpTime.1.2.3", mibService.findName("1.3.6.1.2.1.1.3.1.2.3"));
         assertEquals("IF-MIB::ifLastChange", mibService.findName("1.3.6.1.2.1.2.2.1.9"));
         assertEquals("IF-MIB::ifLastChange", mibService.findName("1.3.6.1.2.1.2.2.1.9"));
         assertEquals("IF-MIB::ifMIBObjects", mibService.findName("1.3.6.1.2.1.31.1"));
-        assertEquals("SNMPv2-SMI::internet", mibService.findName("1.3.6.1"));
+        assertEquals("RFC1065-SMI::internet", mibService.findName("1.3.6.1"));
     }
 
     @Test
@@ -93,7 +123,7 @@ class MibServiceTest {
         MibVariable variable = mibService.findVariable(SnmpConstants.sysUpTime.predecessor().toDottedString());
         assertNotNull(variable);
         assertEquals("sysUpTime", variable.getName());
-        assertEquals("SNMPv2-MIB::sysUpTime", variable.getFullName());
+        assertEquals("RFC1213-MIB::sysUpTime", variable.getFullName());
         Assertions.assertThat(variable.getDescription()).contains("in hundredths of a second");
     }
 

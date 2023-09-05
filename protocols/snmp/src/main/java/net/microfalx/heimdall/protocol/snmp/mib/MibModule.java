@@ -9,7 +9,6 @@ import net.microfalx.resource.NullResource;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceFactory;
 import org.jsmiparser.smi.SmiModule;
-import org.jsmiparser.util.location.Location;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
@@ -43,23 +42,23 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
 
     @Position(11)
     @Visible(modes = {Visible.Mode.VIEW})
-    private String enterpriseOid;
+    String enterpriseOid;
 
     @Position(12)
     @Visible(modes = {Visible.Mode.VIEW})
-    private Set<String> messageOids;
+    Set<String> messageOids;
 
     @Position(13)
     @Visible(modes = {Visible.Mode.VIEW})
-    private Set<String> createdAtOid;
+    Set<String> createdAtOid;
 
     @Position(14)
     @Visible(modes = {Visible.Mode.VIEW})
-    private Set<String> sentAtOid;
+    Set<String> sentAtOid;
 
     @Position(15)
     @Visible(modes = {Visible.Mode.VIEW})
-    private Set<String> severityOid;
+    Set<String> severityOid;
 
     @Visible(false)
     private Resource content;
@@ -69,7 +68,6 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
         this.module = module;
         this.id = toIdentifier(module.getId());
         this.setContent(extractResource(module));
-        this.extractOids();
     }
 
     /**
@@ -94,11 +92,21 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
         return module.getId();
     }
 
+    /**
+     * Returns the type of the MIB.
+     *
+     * @return a non-null instance
+     */
     public MibType getType() {
         return type;
     }
 
-    void setType(MibType type) {
+    /**
+     * CHanges the type of the MIB.
+     *
+     * @param type the type
+     */
+    public void setType(MibType type) {
         requireNonNull(type);
         this.type = type;
     }
@@ -111,13 +119,13 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
     }
 
     /**
-     * Returns the OID for this module.
+     * Returns the MIB token ID for this module (what comes before <code>DEFINITIONS ::= BEGIN</code>).
      *
      * @return a non-null instance
      */
     @Visible(false)
-    public String getOid() {
-        return module.getCodeId();
+    public String getIdToken() {
+        return module.getIdToken().getValue();
     }
 
     /**
@@ -148,6 +156,16 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
     @Position(110)
     public ZonedDateTime getLastModified() {
         return module.getModuleIdentity() != null ? MibUtils.parseDateTime(module.getModuleIdentity().getLastUpdated()) : null;
+    }
+
+    /**
+     * Returns all imported modules.
+     *
+     * @return a non-null instance
+     */
+    @Visible(false)
+    public Collection<MibImport> getImportedModules() {
+        return module.getImports().stream().map(i -> new MibImport(this, i)).toList();
     }
 
     /**
@@ -235,21 +253,8 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
     }
 
     private Resource extractResource(SmiModule module) {
-        Location location = module.getIdToken().getLocation();
-        if (location != null && (MibUtils.isValidMibUri(location.getSource()))) {
-            return ResourceFactory.resolve(location.getSource());
-        } else {
-            return NullResource.createNull();
-        }
+        return MibUtils.isValid(module) ? ResourceFactory.resolve(module.getIdToken().getLocation().getSource()) : NullResource.createNull();
     }
 
-    private void extractOids() {
-        MibMetadataExtractor extractor = new MibMetadataExtractor(this);
-        extractor.execute();
-        enterpriseOid = extractor.getEnterpriseOid();
-        messageOids = extractor.getMessageOid();
-        createdAtOid = extractor.getCreatedAtOid();
-        sentAtOid = extractor.getSentAtOid();
-        severityOid = extractor.getSeverityOid();
-    }
+
 }
