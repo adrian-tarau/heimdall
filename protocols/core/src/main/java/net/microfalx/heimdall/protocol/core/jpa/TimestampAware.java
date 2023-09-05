@@ -8,6 +8,7 @@ import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.OrderBy;
 import net.microfalx.lang.annotation.Position;
+import net.microfalx.lang.annotation.Timestamp;
 import net.microfalx.lang.annotation.Visible;
 
 import java.time.LocalDateTime;
@@ -39,6 +40,7 @@ public abstract class TimestampAware {
     @Position(502)
     @OrderBy(OrderBy.Direction.DESC)
     @Visible(modes = {Visible.Mode.BROWSE, Visible.Mode.VIEW})
+    @Timestamp
     private LocalDateTime receivedAt;
 
 }

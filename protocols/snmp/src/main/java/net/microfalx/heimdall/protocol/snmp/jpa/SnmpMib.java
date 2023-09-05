@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.microfalx.bootstrap.dataset.annotation.Searchable;
 import net.microfalx.bootstrap.jdbc.entity.NamedTimestampAware;
 import net.microfalx.heimdall.protocol.snmp.mib.MibType;
 import net.microfalx.lang.annotation.Label;
@@ -43,26 +44,31 @@ public class SnmpMib extends NamedTimestampAware {
     @Position(15)
     @Label("Enterprise OID")
     @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT})
+    @Searchable
     private String enterpriseOid;
 
     @Column(name = "message_oids")
     @Position(20)
     @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT})
+    @Searchable
     private String messageOids;
 
     @Column(name = "create_at_oids")
     @Position(25)
     @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT})
+    @Searchable
     private String createAtOids;
 
     @Column(name = "sent_at_oids")
     @Position(30)
     @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT})
+    @Searchable
     private String sentAtOids;
 
     @Column(name = "severity_oids")
     @Position(35)
     @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT})
+    @Searchable
     private String severityOids;
 
     @Column(name = "content")

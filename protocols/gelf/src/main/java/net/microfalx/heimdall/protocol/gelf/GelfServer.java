@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
@@ -41,19 +40,17 @@ public class GelfServer implements InitializingBean, ProtocolServerHandler {
     @Autowired
     private GelfService gelfService;
 
-    private ThreadPoolTaskExecutor executor;
     private TcpProtocolServer tcpServer;
     private UdpProtocolServer udpServer;
 
     private final Map<Long, SortedSet<GelfChunk>> chunks = new ConcurrentHashMap<>();
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         initialize();
     }
 
     public void initialize() {
-        initThreadPool();
         initializeTcpServer();
         initializeUdpServer();
     }
@@ -62,13 +59,12 @@ public class GelfServer implements InitializingBean, ProtocolServerHandler {
     protected void destroy() {
         if (tcpServer != null) tcpServer.shutdown();
         if (udpServer != null) udpServer.shutdown();
-        if (executor != null) executor.destroy();
     }
 
     private void initializeTcpServer() {
         tcpServer = new TcpProtocolServer();
         tcpServer.setPort(configuration.getTcpPort());
-        tcpServer.setExecutor(executor);
+        tcpServer.setExecutor(gelfService.getTaskExecutor());
         tcpServer.setHandler(this);
         tcpServer.listen();
     }
@@ -76,7 +72,7 @@ public class GelfServer implements InitializingBean, ProtocolServerHandler {
     private void initializeUdpServer() {
         udpServer = new UdpProtocolServer();
         udpServer.setPort(configuration.getUdpPort());
-        udpServer.setExecutor(executor);
+        udpServer.setExecutor(gelfService.getTaskExecutor());
         udpServer.setHandler(this);
         udpServer.listen();
     }
@@ -137,7 +133,7 @@ public class GelfServer implements InitializingBean, ProtocolServerHandler {
 
     private void doHandle(InetAddress address, InputStream inputStream) throws IOException {
         JsonNode jsonNode = readJson(inputStream);
-        if (LOGGER.isDebugEnabled()) LOGGER.debug("Received GELF event:\n{}",jsonNode.toPrettyString());
+        if (LOGGER.isDebugEnabled()) LOGGER.debug("Received GELF event:\n{}", jsonNode.toPrettyString());
         String shortMessage = getField(jsonNode, "short_message");
         String fullMessage = getRequiredField(jsonNode, "full_message");
         String host = net.microfalx.lang.StringUtils.defaultIfNull(getField(jsonNode, "host"), "0.0.0.0");
@@ -193,17 +189,6 @@ public class GelfServer implements InitializingBean, ProtocolServerHandler {
         JsonNode fieldNode = jsonNode.findValue(field);
         if (fieldNode == null) throw new ProtocolException("A required field (" + field + ") does not exist");
         return fieldNode.asInt();
-    }
-
-    private void initThreadPool() {
-        executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(5);
-        executor.setMaxPoolSize(10);
-        executor.setQueueCapacity(50);
-        executor.setThreadNamePrefix("heimdall-gelf");
-        executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setAwaitTerminationSeconds(5);
-        executor.initialize();
     }
 
     /**

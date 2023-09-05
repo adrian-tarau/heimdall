@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.protocol.syslog;
 
+import net.microfalx.heimdall.protocol.core.Event;
 import net.microfalx.heimdall.protocol.core.ProtocolService;
 import net.microfalx.heimdall.protocol.jpa.SyslogEvent;
 import net.microfalx.heimdall.protocol.jpa.SyslogEventRepository;
@@ -7,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class SyslogService extends ProtocolService<SyslogMessage> {
+public final class SyslogService extends ProtocolService<SyslogMessage> {
 
     @Autowired
     private SyslogEventRepository syslogEventRepository;
@@ -17,6 +18,11 @@ public class SyslogService extends ProtocolService<SyslogMessage> {
 
     @Autowired
     private SyslogConfiguration syslogConfiguration;
+
+    @Override
+    protected Event.Type getEventType() {
+        return Event.Type.SYSLOG;
+    }
 
     protected void persist(SyslogMessage message) {
         SyslogEvent syslogEvent = new SyslogEvent();

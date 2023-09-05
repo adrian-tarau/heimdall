@@ -1,9 +1,9 @@
 package net.microfalx.heimdall.protocol.core;
 
+import net.microfalx.bootstrap.core.async.TaskExecutorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.SchedulingTaskExecutor;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.core.task.AsyncTaskExecutor;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -25,7 +25,7 @@ public abstract class ProtocolServer {
     private String hostname;
     private int port;
     private ProtocolServerHandler handler;
-    private SchedulingTaskExecutor executor;
+    private AsyncTaskExecutor executor;
 
     /**
      * Returns the transport protocol used by this server.
@@ -112,7 +112,7 @@ public abstract class ProtocolServer {
      *
      * @return the executor, null if not set
      */
-    public SchedulingTaskExecutor getExecutor() {
+    public AsyncTaskExecutor getExecutor() {
         return executor;
     }
 
@@ -122,7 +122,7 @@ public abstract class ProtocolServer {
      * @param executor the executor
      * @return self
      */
-    public ProtocolServer setExecutor(SchedulingTaskExecutor executor) {
+    public ProtocolServer setExecutor(AsyncTaskExecutor executor) {
         requireNonNull(executor);
         this.executor = executor;
         return this;
@@ -177,17 +177,7 @@ public abstract class ProtocolServer {
     private void initExecutor() {
         if (this.executor != null) return;
         LOGGER.info("Start internal thread pool");
-        ThreadPoolTaskExecutor threadPool = new ThreadPoolTaskExecutor();
-        threadPool.setCorePoolSize(5);
-        threadPool.setMaxPoolSize(10);
-        threadPool.setQueueCapacity(500);
-        threadPool.setThreadNamePrefix(getClass().getSimpleName().toLowerCase());
-        threadPool.setWaitForTasksToCompleteOnShutdown(true);
-        threadPool.setAllowCoreThreadTimeOut(true);
-        threadPool.setAwaitTerminationSeconds(5);
-        threadPool.initialize();
-
-        this.executor = threadPool;
+        this.executor = new TaskExecutorFactory().createExecutor();
     }
 
     private String describeHostname() {

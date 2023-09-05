@@ -1,6 +1,7 @@
 package net.microfalx.heimdall.protocol.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.microfalx.bootstrap.core.async.TaskExecutorFactory;
 import net.microfalx.bootstrap.resource.ResourceService;
 import net.microfalx.bootstrap.search.Attribute;
 import net.microfalx.bootstrap.search.Document;
@@ -15,9 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.retry.support.RetryTemplate;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.PeriodicTrigger;
 
 import java.io.IOException;
@@ -61,8 +62,9 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
     private ProtocolSimulatorProperties simulatorProperties;
 
     @Autowired
-    @Qualifier("protocol-executor")
-    private ThreadPoolTaskScheduler taskExecutor;
+    private TaskScheduler taskScheduler;
+
+    private AsyncTaskExecutor taskExecutor;
 
     private Map<LocalDate, AtomicInteger> resourceSequences = new ConcurrentHashMap<>();
 
@@ -116,11 +118,22 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
     }
 
     /**
+     * Returns the shared scheduler.
+     *
+     * @return a non-null instance
+     */
+    public final TaskScheduler getTaskScheduler() {
+        if (taskExecutor == null) initializeScheduler();
+        return taskScheduler;
+    }
+
+    /**
      * Returns the shared executor.
      *
      * @return a non-null instance
      */
-    public final ThreadPoolTaskScheduler getTaskScheduler() {
+    public final AsyncTaskExecutor getTaskExecutor() {
+        if (taskExecutor == null) initializeExecutor();
         return taskExecutor;
     }
 
@@ -169,6 +182,13 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
             LOGGER.error("Failed to index event " + event, e);
         }
     }
+
+    /**
+     * Returns the event type supported by this service.
+     *
+     * @return a non-null instance
+     */
+    protected abstract Event.Type getEventType();
 
     /**
      * Persists an event in the data store.
@@ -263,6 +283,7 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        initializeExecutor();
         initializeSimulator();
     }
 
@@ -278,6 +299,14 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
                 apart.resource = upload(apart.resource);
             }
         }
+    }
+
+    private void initializeExecutor() {
+        taskExecutor = new TaskExecutorFactory().setSuffix(getEventType().name().toLowerCase()).setQueueCapacity(5000).createExecutor();
+    }
+
+    private void initializeScheduler() {
+        taskScheduler = new TaskExecutorFactory().setSuffix(getEventType().name().toLowerCase()).createScheduler();
     }
 
     private int getNextSequence() {

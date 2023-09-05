@@ -1,6 +1,7 @@
 package net.microfalx.heimdall.protocol.jpa;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface GelfEventRepository extends JpaRepository<GelfEvent,Long> {
+public interface GelfEventRepository extends JpaRepository<GelfEvent,Long>, JpaSpecificationExecutor {
 }

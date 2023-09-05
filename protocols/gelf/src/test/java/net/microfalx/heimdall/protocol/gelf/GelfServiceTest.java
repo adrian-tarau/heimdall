@@ -5,7 +5,6 @@ import com.cloudbees.syslog.Severity;
 import net.microfalx.bootstrap.test.AbstractBootstrapServiceTestCase;
 import net.microfalx.heimdall.protocol.core.Address;
 import net.microfalx.heimdall.protocol.core.Body;
-import net.microfalx.heimdall.protocol.core.ProtocolConfiguration;
 import net.microfalx.heimdall.protocol.core.ProtocolSimulatorProperties;
 import net.microfalx.heimdall.protocol.core.jpa.AddressRepository;
 import net.microfalx.heimdall.protocol.core.jpa.PartRepository;
@@ -26,7 +25,7 @@ import java.time.ZonedDateTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@ContextConfiguration(classes = {ProtocolConfiguration.class, ProtocolSimulatorProperties.class, GelfService.class, GelfConfiguration.class})
+@ContextConfiguration(classes = {ProtocolSimulatorProperties.class, GelfService.class, GelfConfiguration.class})
 public class GelfServiceTest extends AbstractBootstrapServiceTestCase {
 
     @MockBean

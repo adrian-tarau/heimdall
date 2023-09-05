@@ -60,12 +60,9 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        initialize();
-    }
-
-    public final void initialize() {
         initializeAddresses();
         initializeClient();
+        initializeData();
     }
 
     /**
@@ -99,6 +96,15 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
      * @throws IOException if an I/O error occurs
      */
     protected abstract void simulate(ProtocolClient<E> client, Address sourceAddress, Address targetAddress, int index) throws IOException;
+
+    /**
+     * Registers data for simulator.
+     *
+     * @throws IOException if an I/O failure occurs
+     */
+    protected void initializeData() throws IOException {
+        // empty on purpose
+    }
 
     /**
      * Returns the next target address to simulate an event.

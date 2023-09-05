@@ -11,3 +11,5 @@ create table protocol_syslog_events
     constraint fk$syslogs$address foreign key (address_id) references protocol_addresses (id),
     constraint fk$syslogs$attachment foreign key (message_id) references protocol_parts (id)
 ) ENGINE = InnoDB;
+
+create index protocol_syslog_events$received_at on protocol_syslog_events (received_at);

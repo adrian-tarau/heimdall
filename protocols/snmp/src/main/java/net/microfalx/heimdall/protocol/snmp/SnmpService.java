@@ -2,6 +2,7 @@ package net.microfalx.heimdall.protocol.snmp;
 
 import net.microfalx.heimdall.protocol.core.Address;
 import net.microfalx.heimdall.protocol.core.Body;
+import net.microfalx.heimdall.protocol.core.Event;
 import net.microfalx.heimdall.protocol.core.ProtocolService;
 import net.microfalx.heimdall.protocol.snmp.jpa.SnmpEventRepository;
 import net.microfalx.lang.StringUtils;
@@ -12,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class SnmpService extends ProtocolService<SnmpEvent> {
+public final class SnmpService extends ProtocolService<SnmpEvent> {
 
     @Autowired
     private SnmpSimulator simulator;
@@ -26,6 +27,11 @@ public class SnmpService extends ProtocolService<SnmpEvent> {
     @Override
     protected SnmpSimulator getSimulator() {
         return simulator;
+    }
+
+    @Override
+    protected Event.Type getEventType() {
+        return Event.Type.SNMP;
     }
 
     protected void persist(SnmpEvent trap) {

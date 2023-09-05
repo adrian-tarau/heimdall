@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.protocol.smtp;
 
+import net.microfalx.heimdall.protocol.core.Event;
 import net.microfalx.heimdall.protocol.core.Part;
 import net.microfalx.heimdall.protocol.core.ProtocolService;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpAttachment;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class SmtpService extends ProtocolService<SmtpEvent> {
+public final class SmtpService extends ProtocolService<SmtpEvent> {
 
     @Autowired
     private SmtpProperties configuration;
@@ -22,6 +23,11 @@ public class SmtpService extends ProtocolService<SmtpEvent> {
 
     @Autowired
     private SmtpAttachmentRepository attachmentRepository;
+
+    @Override
+    protected Event.Type getEventType() {
+        return Event.Type.SMTP;
+    }
 
     protected void persist(SmtpEvent smtpEvent) {
         net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent jpaSmtpEvent = new net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent();

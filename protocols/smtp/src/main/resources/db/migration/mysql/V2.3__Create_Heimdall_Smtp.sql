@@ -12,6 +12,8 @@ create table protocol_smtp_events
     constraint fk$smtps$to foreign key (to_id) references protocol_addresses (id)
 ) ENGINE = InnoDB;
 
+create index protocol_smtp_events$received_at on protocol_smtp_events (received_at);
+
 create table protocol_smtp_attachments
 (
     id            integer not null auto_increment primary key,

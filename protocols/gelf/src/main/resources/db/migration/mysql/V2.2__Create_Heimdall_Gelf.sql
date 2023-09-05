@@ -16,3 +16,5 @@ create table protocol_gelf_events
     constraint fk$gelf$long_message foreign key (long_message_id) references protocol_parts (id),
     constraint fk$gelf$fields foreign key (fields_id) references protocol_parts (id)
 ) ENGINE = InnoDB;
+
+create index protocol_gelf_events$received_at on protocol_gelf_events (received_at);

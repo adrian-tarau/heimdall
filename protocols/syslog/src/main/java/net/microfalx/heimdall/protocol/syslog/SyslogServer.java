@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import java.net.InetSocketAddress;
@@ -39,7 +38,6 @@ public class SyslogServer implements InitializingBean {
     private SyslogService syslogService;
 
     private SyslogListener listener = new SyslogListener();
-    private ThreadPoolTaskExecutor executor;
     private TCPNetSyslogServer tcpServer;
     private UDPNetSyslogServer udpServer;
 
@@ -53,7 +51,6 @@ public class SyslogServer implements InitializingBean {
     }
 
     public void initialize() {
-        initThreadPool();
         initializeTcpServer();
         initializeUdpServer();
     }
@@ -62,7 +59,6 @@ public class SyslogServer implements InitializingBean {
     protected void destroy() {
         if (tcpServer != null) tcpServer.shutdown();
         if (udpServer != null) udpServer.shutdown();
-        if (executor != null) executor.destroy();
     }
 
     private void initializeTcpServer() {
@@ -72,7 +68,7 @@ public class SyslogServer implements InitializingBean {
         config.setUseStructuredData(true);
         tcpServer = new TCPNetSyslogServer();
         tcpServer.initialize("TCP", config);
-        executor.execute(tcpServer);
+        syslogService.getTaskExecutor().execute(tcpServer);
     }
 
     private void initializeUdpServer() {
@@ -82,7 +78,7 @@ public class SyslogServer implements InitializingBean {
         config.setUseStructuredData(true);
         udpServer = new UDPNetSyslogServer();
         udpServer.initialize("UDP", config);
-        executor.execute(udpServer);
+        syslogService.getTaskExecutor().execute(udpServer);
     }
 
     private void event(SyslogServerIF syslogServer, SocketAddress socketAddress, SyslogServerEventIF event) {
@@ -98,17 +94,6 @@ public class SyslogServer implements InitializingBean {
         message.setSentAt(message.getCreatedAt());
         message.setReceivedAt(ZonedDateTime.now());
         syslogService.accept(message);
-    }
-
-    private void initThreadPool() {
-        executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(5);
-        executor.setMaxPoolSize(10);
-        executor.setQueueCapacity(50);
-        executor.setThreadNamePrefix("heimdall-syslog");
-        executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setAwaitTerminationSeconds(5);
-        executor.initialize();
     }
 
     private class SyslogListener implements SyslogServerSessionEventHandlerIF {

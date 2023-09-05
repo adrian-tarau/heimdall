@@ -21,12 +21,14 @@ import org.snmp4j.util.MultiThreadedMessageDispatcher;
 import org.snmp4j.util.WorkerPool;
 import org.snmp4j.util.WorkerTask;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.time.ZonedDateTime;
+
+import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
 @Component
 public class SnmpServer implements CommandResponder {
@@ -39,7 +41,6 @@ public class SnmpServer implements CommandResponder {
     @Autowired
     private SnmpService snmpService;
 
-    private ThreadPoolTaskExecutor executor;
     private MessageDispatcher messageDispatcher;
     private Snmp snmpV2server;
     private Snmp snmpV3server;
@@ -63,7 +64,6 @@ public class SnmpServer implements CommandResponder {
 
     @PostConstruct
     protected void initialize() {
-        initThreadPool();
         initializeV2Server();
         initializeV3Server();
     }
@@ -72,7 +72,6 @@ public class SnmpServer implements CommandResponder {
     protected void destroy() {
         if (snmpV2server != null) IOUtils.closeQuietly(snmpV2server);
         if (snmpV3server != null) IOUtils.closeQuietly(snmpV3server);
-        if (executor != null) executor.destroy();
     }
 
     private void initializeV2Server() {
@@ -114,18 +113,7 @@ public class SnmpServer implements CommandResponder {
         dispatcher.addMessageProcessingModel(new MPv2c());
         dispatcher.addMessageProcessingModel(new MPv3());
         SecurityProtocols.getInstance().addDefaultProtocols();
-        messageDispatcher = new MultiThreadedMessageDispatcher(new WorkerPoolImpl(executor), dispatcher);
-    }
-
-    private void initThreadPool() {
-        executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(5);
-        executor.setMaxPoolSize(10);
-        executor.setQueueCapacity(50);
-        executor.setThreadNamePrefix("heimdall-snmp");
-        executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setAwaitTerminationSeconds(5);
-        executor.initialize();
+        messageDispatcher = new MultiThreadedMessageDispatcher(new WorkerPoolImpl(snmpService.getTaskExecutor()), dispatcher);
     }
 
     private void updateCommonAttributes(SnmpEvent event, PDU pdu) {
@@ -172,9 +160,10 @@ public class SnmpServer implements CommandResponder {
 
     static class WorkerPoolImpl implements WorkerPool {
 
-        private final ThreadPoolTaskExecutor executor;
+        private final TaskExecutor executor;
 
-        WorkerPoolImpl(ThreadPoolTaskExecutor executor) {
+        WorkerPoolImpl(TaskExecutor executor) {
+            requireNonNull(executor);
             this.executor = executor;
         }
 
@@ -195,12 +184,10 @@ public class SnmpServer implements CommandResponder {
 
         @Override
         public void stop() {
-
         }
 
         @Override
         public void cancel() {
-            executor.afterPropertiesSet();
         }
 
         @Override
