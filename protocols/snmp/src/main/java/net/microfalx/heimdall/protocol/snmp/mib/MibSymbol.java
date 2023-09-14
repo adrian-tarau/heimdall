@@ -5,9 +5,7 @@ import net.microfalx.lang.Descriptable;
 import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.Nameable;
 import net.microfalx.lang.annotation.*;
-import org.jsmiparser.smi.SmiOidValue;
-import org.jsmiparser.smi.SmiSymbol;
-import org.jsmiparser.smi.SmiTextualConvention;
+import org.jsmiparser.smi.*;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.StringUtils.toIdentifier;
@@ -68,6 +66,46 @@ public class MibSymbol implements Identifiable<String>, Nameable, Descriptable {
         return module.getName() + "::" + getName();
     }
 
+    /**
+     * Returns the type of the symbol.
+     *
+     * @return a non-null instance
+     */
+    @Position(20)
+    public SymbolType getType() {
+        if (symbol instanceof SmiVariable) {
+            return SymbolType.VARIABLE;
+        } else if (symbol instanceof SmiTrapType) {
+            return SymbolType.TRAP_TYPE;
+        } else if (symbol instanceof SmiRow) {
+            return SymbolType.ROW;
+        } else if (symbol instanceof SmiTable) {
+            return SymbolType.TABLE;
+        } else if (symbol instanceof SmiReferencedType) {
+            return SymbolType.REFERENCED_TYPE;
+        } else if (symbol instanceof SmiTextualConvention) {
+            return SymbolType.TEXTUAL_CONVENTION;
+        } else if (symbol instanceof SmiProtocolType) {
+            return SymbolType.PROTOCOL_TYPE;
+        } else if (symbol instanceof SmiMacro) {
+            return SymbolType.MACRO;
+        } else if (symbol instanceof SmiType) {
+            return SymbolType.TYPE;
+        } else {
+            return SymbolType.OTHER;
+        }
+    }
+
+    /**
+     * Returns the (primitive) type of the variable.
+     *
+     * @return a non-null instance if it is a primitive type, null otherwise
+     */
+    @Position(30)
+    public SmiPrimitiveType getPrimitiveType() {
+        return symbol instanceof SmiType ? ((SmiType) symbol).getPrimitiveType() : null;
+    }
+
     @Position(100)
     @Formattable(maximumLength = 100)
     @Override
@@ -86,7 +124,17 @@ public class MibSymbol implements Identifiable<String>, Nameable, Descriptable {
      */
     @Position(50)
     public String getOid() {
-        return symbol instanceof SmiOidValue ? ((SmiOidValue) symbol).getNode().getOidStr() : null;
+        return MibUtils.getOid(symbol);
+    }
+
+    /**
+     * Returns whether the symbol is actually a variable.
+     *
+     * @return {@code true} if it is a variable, {@code false} otherwise
+     */
+    @Visible(false)
+    public boolean isVariable() {
+        return symbol instanceof SmiVariable;
     }
 
     @Override

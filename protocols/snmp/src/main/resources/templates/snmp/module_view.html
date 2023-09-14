@@ -14,9 +14,8 @@
                 <div class="col-md-6"><span class="fw-bold">File Name: </span><span class="fst-italic" th:text="${model.getOrganization}"></span></div>
             </div>
         </div>
-        <div class="row border rounded p-3 mt-2">
-            <p class="dataset-text-mono"  th:text="${model.getDescription}"></p>
-        </div>
+        <div th:replace="~{ fragments/snmp :: imports}"></div>
+        <div th:replace="~{ fragments/snmp :: variables}"></div>
     </div>
 </div>
 </body>

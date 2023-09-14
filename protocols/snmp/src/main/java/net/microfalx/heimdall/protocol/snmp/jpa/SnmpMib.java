@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.protocol.snmp.jpa;
 
+import jakarta.persistence.Id;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.EqualsAndHashCode;
@@ -9,10 +10,7 @@ import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Searchable;
 import net.microfalx.bootstrap.jdbc.entity.NamedTimestampAware;
 import net.microfalx.heimdall.protocol.snmp.mib.MibType;
-import net.microfalx.lang.annotation.Label;
-import net.microfalx.lang.annotation.Name;
-import net.microfalx.lang.annotation.Position;
-import net.microfalx.lang.annotation.Visible;
+import net.microfalx.lang.annotation.*;
 
 @Entity
 @Table(name = "protocol_snmp_mibs")
@@ -32,6 +30,7 @@ public class SnmpMib extends NamedTimestampAware {
     @Column(name = "type", nullable = false)
     @Position(5)
     @Enumerated(EnumType.STRING)
+    @Width(min = "50")
     private MibType type;
 
     @Column(name = "module_id", nullable = false)

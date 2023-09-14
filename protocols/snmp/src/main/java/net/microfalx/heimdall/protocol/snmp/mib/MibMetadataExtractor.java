@@ -4,11 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.smi.OID;
 
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
@@ -21,6 +18,7 @@ class MibMetadataExtractor {
     private static final Logger LOGGER = LoggerFactory.getLogger(MibService.class);
 
     private static final OID ENTERPRISE_PREFIX = new OID("1.3.6.1.4.1");
+    private static final int MAX_OID_COUNT = 20;
 
     private final MibModule module;
     private String enterpriseOid;
@@ -93,28 +91,29 @@ class MibMetadataExtractor {
      * Finds first bind variable which has its name matches by any of the given patterns.
      *
      * @param patterns the patters to select a variable
-     * @return the variable's OID, null if there is no match
+     * @return the variable's OID
      */
     private Set<String> findModuleOIDs(Pattern[] patterns) {
-        return module.getVariables().stream().filter(v -> matches(v.getName(), patterns)).map(MibVariable::getOid).collect(Collectors.toSet());
+        Collection<MibVariable> variables = getVariables();
+        Set<String> oids = new HashSet<>();
+        for (Pattern pattern : patterns) {
+            for (MibVariable variable : variables) {
+                if (pattern.matcher(variable.getName()).matches()) oids.add(variable.getOid());
+                if (oids.size() >= MAX_OID_COUNT) break;
+            }
+            if (oids.size() >= MAX_OID_COUNT) break;
+        }
+        return oids;
     }
 
-
     private void extractEnterprise() {
-        Optional<MibVariable> firstVariable = module.getVariables().stream()
-                .filter(v -> ENTERPRISE_PREFIX.startsWith(new OID(v.getOid()))).findFirst();
+        Optional<MibVariable> firstVariable = getVariables().stream()
+                .filter(v -> new OID(v.getOid()).startsWith(ENTERPRISE_PREFIX)).findFirst();
         if (firstVariable.isPresent()) {
             MibVariable variable = firstVariable.get();
             OID oid = new OID(variable.getOid());
             enterpriseOid = oid.subOID(0, 7).toDottedString();
         }
-    }
-
-    private boolean matches(String name, Pattern[] patterns) {
-        for (Pattern pattern : patterns) {
-            if (pattern.matcher(name).matches()) return true;
-        }
-        return false;
     }
 
     private void extractMessage() {
@@ -131,6 +130,10 @@ class MibMetadataExtractor {
 
     private void extractSeverity() {
         severityOids = findModuleOIDs(SEVERITY_PATTERNS);
+    }
+
+    private Collection<MibVariable> getVariables() {
+        return MibUtils.getValid(module.getVariables());
     }
 
     private static final Pattern[] MESSAGE_PATTERNS = new Pattern[]{
@@ -151,7 +154,8 @@ class MibMetadataExtractor {
     };
     private static final Pattern[] SEVERITY_PATTERNS = new Pattern[]{
             Pattern.compile(".*severity.*", Pattern.CASE_INSENSITIVE),
-            Pattern.compile(".*level.*", Pattern.CASE_INSENSITIVE)
+            Pattern.compile(".*level.*", Pattern.CASE_INSENSITIVE),
+            Pattern.compile(".*state.*", Pattern.CASE_INSENSITIVE)
     };
 
 }

@@ -3,7 +3,7 @@
 <body>
 <div th:fragment="fields">
     <div class="container-fluid">
-        <div class="row container-fluid border rounded bg-body-secondary mb-3 p-3 fs-6">
+        <div class="row border rounded bg-body-secondary mb-3 p-3 fs-6">
             <div class="row mb-2">
                 <div class="col-md-8"><span class="fw-bold">Name: </span><span class="fst-italic" th:text="${model.name}"></span></div>
                 <div class="col-md-4"><span class="fw-bold">Created At: </span><span class="fst-italic" th:text="${model.createdAt}"></span></div>
@@ -22,9 +22,9 @@
                 <div class="col-md-12"><span class="fw-bold">Description: </span><span class="fst-italic" th:text="${model.description}"></span></div>
             </div>
         </div>
-        <div class="row border rounded p-3 mt-2">
-            <p class="dataset-text-mono" th:text="${model.content}"></p>
-        </div>
+
+        <div th:replace="~{ fragments/snmp :: imports}"></div>
+        <div th:replace="~{ fragments/snmp :: variables}"></div>
     </div>
 </div>
 </body>

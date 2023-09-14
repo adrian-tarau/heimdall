@@ -1,6 +1,9 @@
 package net.microfalx.heimdall.protocol.snmp.mib;
 
 import net.microfalx.bootstrap.core.async.TaskExecutorFactory;
+import net.microfalx.bootstrap.model.Field;
+import net.microfalx.bootstrap.model.Metadata;
+import net.microfalx.bootstrap.model.MetadataService;
 import net.microfalx.bootstrap.resource.ResourceService;
 import net.microfalx.heimdall.protocol.snmp.jpa.SnmpMib;
 import net.microfalx.heimdall.protocol.snmp.jpa.SnmpMibRepository;
@@ -23,12 +26,14 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.CountDownLatch;
 
+import static java.lang.String.join;
 import static java.time.Duration.ofSeconds;
 import static java.util.Collections.unmodifiableList;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
 import static net.microfalx.lang.ConcurrencyUtils.await;
 import static net.microfalx.lang.FormatterUtils.formatNumber;
+import static net.microfalx.lang.StringUtils.nullIfEmpty;
 import static net.microfalx.lang.StringUtils.toIdentifier;
 
 @Service
@@ -48,6 +53,9 @@ public class MibService implements InitializingBean {
     private ResourceService resourceService;
 
     @Autowired
+    private MetadataService metadataService;
+
+    @Autowired(required = false)
     private AsyncTaskExecutor taskExecutor;
 
     private final CountDownLatch latch = new CountDownLatch(1);
@@ -275,7 +283,6 @@ public class MibService implements InitializingBean {
             try {
                 MibModule module = parser.parse();
                 extractImports(module);
-                extractOids(module);
                 persistMib(module);
                 registeredModules.add(module.getIdToken().toLowerCase());
             } catch (Exception e) {
@@ -291,12 +298,6 @@ public class MibService implements InitializingBean {
             snmpMib.setType(module.getType());
             snmpMib.setModuleId(module.getId());
             snmpMib.setCreatedAt(LocalDateTime.now());
-
-            snmpMib.setEnterpriseOid(module.getEnterpriseOid());
-            snmpMib.setMessageOids(String.join(",", module.getMessageOids()));
-            snmpMib.setSeverityOids(String.join(",", module.getSeverityOids()));
-            snmpMib.setCreateAtOids(String.join(",", module.getCreatedAtOids()));
-            snmpMib.setSentAtOids(String.join(",", module.getSentAtOids()));
         }
         snmpMib.setName(module.getName());
         snmpMib.setFileName(module.getFileName());
@@ -316,6 +317,7 @@ public class MibService implements InitializingBean {
             loadModulesFromDatabase();
             if (!resolveMissingMibs()) break;
         }
+        updateModuleOidsInDatabase();
     }
 
     private void loadModulesFromDatabase() {
@@ -336,6 +338,7 @@ public class MibService implements InitializingBean {
         for (MibModule module : modules) {
             LOGGER.debug(" - " + module.getName() + ", symbols " + module.getSymbols().size() + ", variables " + module.getVariables().size());
             newModules.add(module);
+            extractOids(module);
             newModulesById.put(module.getId(), module);
             newModulesById.put(toIdentifier(module.getIdToken()), module);
             for (MibSymbol symbol : module.getSymbols()) {
@@ -353,6 +356,28 @@ public class MibService implements InitializingBean {
             }
         }
         this.holder = new MibHolder(newModules, newSymbols, newVariables, newModulesById, newSymbolsById, newVariablesById);
+    }
+
+    private void updateModuleOidsInDatabase() {
+        LOGGER.info("Update modules OIDs into database");
+        Metadata<SnmpMib, Field<SnmpMib>, Long> metadata = metadataService.getMetadata(SnmpMib.class);
+        for (MibModule module : holder.modules) {
+            SnmpMib snmpMib = snmpMibRepository.findByModuleId(module.getId());
+            if (snmpMib == null) continue;
+            SnmpMib snmpMibCopy = metadata.copy(snmpMib);
+            snmpMibCopy.setEnterpriseOid(module.getEnterpriseOid());
+            snmpMibCopy.setMessageOids(nullIfEmpty(join(",", module.getMessageOids())));
+            snmpMibCopy.setSeverityOids(nullIfEmpty(join(",", module.getSeverityOids())));
+            snmpMibCopy.setCreateAtOids(nullIfEmpty(join(",", module.getCreatedAtOids())));
+            snmpMibCopy.setSentAtOids(nullIfEmpty(join(",", module.getSentAtOids())));
+            if (!metadata.identical(snmpMib, snmpMibCopy)) {
+                try {
+                    snmpMibRepository.saveAndFlush(snmpMibCopy);
+                } catch (Exception e) {
+                    LOGGER.error("Failed to update MIB OIDs for "+module.getName(), e);
+                }
+            }
+        }
     }
 
     private Collection<Resource> discoverMibs(Resource resource, MibType type) {

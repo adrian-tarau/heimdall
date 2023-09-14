@@ -19,4 +19,16 @@ class MibUtilsTest {
         assertTrue(MibUtils.isOid("1.12.3"));
     }
 
+    @Test
+    void isValidOid() {
+        assertFalse(MibUtils.isValidOid(null));
+        assertFalse(MibUtils.isValidOid(""));
+        assertFalse(MibUtils.isValidOid("a"));
+        assertFalse(MibUtils.isValidOid("a"));
+        assertFalse(MibUtils.isValidOid("a.1"));
+        assertFalse(MibUtils.isValidOid("0"));
+        assertTrue(MibUtils.isValidOid("1.1"));
+        assertTrue(MibUtils.isValidOid("1.12.3"));
+    }
+
 }

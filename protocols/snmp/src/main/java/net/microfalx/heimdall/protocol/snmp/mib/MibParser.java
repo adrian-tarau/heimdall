@@ -231,9 +231,6 @@ public class MibParser {
             }
             urls.add(url);
         }
-        if (urls.isEmpty()) {
-            System.out.println("Stop");
-        }
         return new ArrayList<>(urls);
     }
 

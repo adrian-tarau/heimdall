@@ -15,11 +15,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import static net.microfalx.heimdall.protocol.snmp.controller.MibControllerUtilities.updateContext;
+
 @Controller
 @RequestMapping("/protocol/snmp/mib")
 @DataSet(model = SnmpMib.class, defaultQuery = "type = User",
         canAdd = false, canUpload = true, canDownload = true,
-        viewTemplate = "snmp_mib_view", viewClasses = "modal-xl")
+        viewTemplate = "snmp/mib_view", viewClasses = "modal-xl")
 public class SnmpMibController extends DataSetController<SnmpMib, String> {
 
     @Autowired
@@ -27,6 +29,13 @@ public class SnmpMibController extends DataSetController<SnmpMib, String> {
 
     @Autowired
     private MibService mibService;
+
+    @Override
+    protected void beforeView(net.microfalx.bootstrap.dataset.DataSet<SnmpMib, Field<SnmpMib>, String> dataSet, Model controllerModel, SnmpMib dataSetModel) {
+        super.beforeView(dataSet, controllerModel, dataSetModel);
+        MibModule module = mibService.findModule(dataSetModel.getModuleId());
+        updateContext(controllerModel, module);
+    }
 
     @Override
     protected void upload(net.microfalx.bootstrap.dataset.DataSet<SnmpMib, Field<SnmpMib>, String> dataSet, Model model, Resource resource) {

@@ -10,6 +10,8 @@ import org.snmp4j.smi.OID;
 import java.net.URI;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 import static net.microfalx.resource.ResourceUtils.isFileUri;
 
@@ -49,6 +51,18 @@ public class MibUtils {
             if (!(Character.isDigit(c) || c == '.')) return false;
         }
         return true;
+    }
+
+    /**
+     * Returns whether the OID is valid.
+     *
+     * @param value the value to test
+     * @return {@code true} if it is an OID and it is valid,  {@code false} otherwise
+     */
+    public static boolean isValidOid(String value) {
+        if (!isOid(value)) return false;
+        OID oid = new OID(value);
+        return oid.get(0) > 0;
     }
 
     /**
@@ -102,5 +116,27 @@ public class MibUtils {
         } else {
             return true;
         }
+    }
+
+    /**
+     * Returns a collection of variables which have valid OIDs.
+     *
+     * @param variables a collection with variables
+     * @return a collection with variables which they have OIDs
+     */
+    public static Collection<MibVariable> getValid(Collection<MibVariable> variables) {
+        return variables.stream().filter(v -> v.getOid() != null).collect(Collectors.toList());
+    }
+
+
+    /**
+     * Returns the OID from a symbol.
+     *
+     * @param value the value
+     * @return the OID if symbol has an OID or it could be resolved, null otherwise
+     */
+    public static String getOid(SmiSymbol value) {
+        return value instanceof SmiOidValue && ((SmiOidValue) value).getNode() != null
+                ? ((SmiOidValue) value).getNode().getOidStr() : null;
     }
 }

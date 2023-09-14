@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div class="row border rounded bg-body-secondary mb-3 p-3 fs-6" th:unless="${imports.isEmpty()}" th:fragment="imports">
+    <h5>Imports</h5>
+    <div class="flex-row m-4 p-2">
+        <a th:each="import : ${imports}" href="#" th:onclick="return false" class="d-inline">
+            <span class="badge rounded-pill text-bg-primary" th:text="${import.getName()}"></span>
+        </a>
+    </div>
+</div>
+
+<div class="row mb-3 p-3 fs-6" th:fragment="variables">
+    <ul class="nav nav-tabs" >
+        <li class="nav-item active">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#variables" type="button">Variables</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link " data-bs-toggle="tab" data-bs-target="#symbols" type="button">Symbols</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link " data-bs-toggle="tab" data-bs-target="#content" type="button">Content</button>
+        </li>
+    </ul>
+    <div class="tab-content h-100 overflow-auto">
+        <div class="tab-pane fade show active" id="variables">
+            <table class="table">
+                <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">OID</th>
+                    <th scope="col">Unit</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Description</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="variable : ${variables}">
+                    <td th:text="${variable.getName()}"></td>
+                    <td th:text="${variable.getOid()}"></td>
+                    <td th:text="${variable.getUnits()}"></td>
+                    <td th:text="${variable.getType()}"></td>
+                    <td th:text="${variable.getDescription()}" class="dataset-text-mono"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="tab-pane fade" id="symbols" >
+            <table class="table">
+                <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Primitive Type</th>
+                    <th scope="col">Description</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="symbol : ${symbols}">
+                    <td th:text="${symbol.name}"></td>
+                    <td th:text="${symbol.type}"></td>
+                    <td th:text="${symbol.primitiveType}"></td>
+                    <td th:text="${symbol.description}" class="dataset-text-mono"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="tab-pane fade show active" id="content" >
+            <p class="dataset-text-mono" th:text="${model.content}"></p>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

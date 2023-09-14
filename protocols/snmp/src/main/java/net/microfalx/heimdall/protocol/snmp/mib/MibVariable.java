@@ -1,10 +1,10 @@
 package net.microfalx.heimdall.protocol.snmp.mib;
 
+import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.lang.Descriptable;
 import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.Nameable;
-import net.microfalx.lang.annotation.Name;
-import net.microfalx.lang.annotation.ReadOnly;
+import net.microfalx.lang.annotation.*;
 import org.jsmiparser.smi.SmiPrimitiveType;
 import org.jsmiparser.smi.SmiVariable;
 
@@ -22,8 +22,14 @@ import static net.microfalx.lang.StringUtils.toIdentifier;
 @ReadOnly
 public class MibVariable implements Identifiable<String>, Nameable, Descriptable {
 
+    @Id
+    @Visible(false)
     private final String id;
+
+    @Position(1)
     private final MibModule module;
+
+    @Visible(false)
     private final SmiVariable variable;
 
     MibVariable(MibModule module, SmiVariable variable) {
@@ -58,6 +64,8 @@ public class MibVariable implements Identifiable<String>, Nameable, Descriptable
     }
 
     @Override
+    @Position(10)
+    @Name
     public String getName() {
         return variable.getId();
     }
@@ -67,11 +75,14 @@ public class MibVariable implements Identifiable<String>, Nameable, Descriptable
      *
      * @return a non-null instance
      */
+    @Visible(false)
     public String getFullName() {
         return module.getName() + "::" + getName();
     }
 
     @Override
+    @Position(100)
+    @Formattable(maximumLength = 100)
     public String getDescription() {
         return variable.getDescription();
     }
@@ -81,8 +92,9 @@ public class MibVariable implements Identifiable<String>, Nameable, Descriptable
      *
      * @return a non-null instance
      */
+    @Position(50)
     public String getOid() {
-        return variable.getCodeOid();
+        return MibUtils.getOid(variable);
     }
 
     /**
@@ -90,6 +102,7 @@ public class MibVariable implements Identifiable<String>, Nameable, Descriptable
      *
      * @return a non-null instance if there is a unit, null otherwise
      */
+    @Position(60)
     public String getUnits() {
         return variable.getUnits();
     }
@@ -99,6 +112,7 @@ public class MibVariable implements Identifiable<String>, Nameable, Descriptable
      *
      * @return a non-null instance if it is a primitive type, null otherwise
      */
+    @Position(70)
     public SmiPrimitiveType getType() {
         return variable.getType() != null ? variable.getType().getPrimitiveType() : null;
     }
@@ -108,6 +122,7 @@ public class MibVariable implements Identifiable<String>, Nameable, Descriptable
      *
      * @return the enum
      */
+    @Visible(false)
     public Collection<MibNamedNumber> getEnumValues() {
         if (getType() == SmiPrimitiveType.ENUM) {
             return variable.getType().getNamedNumbers().stream().map(MibNamedNumber::new).toList();
@@ -133,8 +148,8 @@ public class MibVariable implements Identifiable<String>, Nameable, Descriptable
     public String toString() {
         return "MibVariable{" +
                 "id=" + getId() +
-                ", oid=" + variable.getOidStr() +
-                ", description=" + variable.getDescription() +
+                ", oid=" + getOid() +
+                ", description=" + getDescription() +
                 '}';
     }
 }

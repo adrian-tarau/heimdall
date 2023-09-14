@@ -35,6 +35,7 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
     private final SmiModule module;
 
     @Position(5)
+    @Width(min = "50")
     private MibType type = MibType.SYSTEM;
 
     @Position(10)
@@ -175,7 +176,7 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
      */
     @Visible(false)
     public Collection<MibVariable> getVariables() {
-        return module.getVariables().stream().filter(MibUtils::isValid).map(v -> new MibVariable(this, v)).toList();
+        return module.getVariables().stream().map(v -> new MibVariable(this, v)).toList();
     }
 
     /**
@@ -185,7 +186,7 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
      */
     @Visible(false)
     public Collection<MibSymbol> getSymbols() {
-        return module.getSymbols().stream().filter(MibUtils::isValid).map(s -> new MibSymbol(this, s)).toList();
+        return module.getSymbols().stream().map(s -> new MibSymbol(this, s)).toList();
     }
 
     @Override
