@@ -3,7 +3,7 @@ package net.microfalx.heimdall.protocol.gelf;
 import net.microfalx.heimdall.protocol.core.ProtocolClient;
 import net.microfalx.heimdall.protocol.core.jpa.AddressRepository;
 import net.microfalx.heimdall.protocol.core.jpa.PartRepository;
-import net.microfalx.heimdall.protocol.jpa.GelfEventRepository;
+import net.microfalx.heimdall.protocol.gelf.jpa.GelfEventRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

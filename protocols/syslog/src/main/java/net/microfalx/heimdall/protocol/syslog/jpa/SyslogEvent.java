@@ -1,4 +1,4 @@
-package net.microfalx.heimdall.protocol.jpa;
+package net.microfalx.heimdall.protocol.syslog.jpa;
 
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
@@ -9,8 +9,8 @@ import net.microfalx.bootstrap.dataset.annotation.Lookup;
 import net.microfalx.heimdall.protocol.core.jpa.Address;
 import net.microfalx.heimdall.protocol.core.jpa.Event;
 import net.microfalx.heimdall.protocol.core.jpa.Part;
-import net.microfalx.heimdall.protocol.lookup.FacilityLookup;
-import net.microfalx.heimdall.protocol.lookup.SeverityLookup;
+import net.microfalx.heimdall.protocol.syslog.lookup.FacilityLookup;
+import net.microfalx.heimdall.protocol.syslog.lookup.SeverityLookup;
 import net.microfalx.lang.annotation.Name;
 import net.microfalx.lang.annotation.Position;
 import net.microfalx.lang.annotation.ReadOnly;

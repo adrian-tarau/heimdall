@@ -3,7 +3,7 @@ package net.microfalx.heimdall.protocol.gelf;
 import net.microfalx.heimdall.protocol.core.Attachment;
 import net.microfalx.heimdall.protocol.core.Event;
 import net.microfalx.heimdall.protocol.core.ProtocolService;
-import net.microfalx.heimdall.protocol.jpa.GelfEventRepository;
+import net.microfalx.heimdall.protocol.gelf.jpa.GelfEventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +27,7 @@ public final class GelfService extends ProtocolService<GelfEvent> {
     }
 
     protected void persist(GelfEvent message) {
-        net.microfalx.heimdall.protocol.jpa.GelfEvent gelfEvent = new net.microfalx.heimdall.protocol.jpa.GelfEvent();
+        net.microfalx.heimdall.protocol.gelf.jpa.GelfEvent gelfEvent = new net.microfalx.heimdall.protocol.gelf.jpa.GelfEvent();
         gelfEvent.setFacility(message.getFacility().numericalCode());
         gelfEvent.setLevel(message.getSeverity().getLevel());
         gelfEvent.setVersion(message.getVersion());

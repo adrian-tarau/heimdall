@@ -1,4 +1,4 @@
-package net.microfalx.heimdall.protocol.jpa;
+package net.microfalx.heimdall.protocol.gelf.jpa;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;

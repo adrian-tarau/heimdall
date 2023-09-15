@@ -2,7 +2,7 @@ package net.microfalx.heimdall.protocol.syslog;
 
 import net.microfalx.heimdall.protocol.core.jpa.AddressRepository;
 import net.microfalx.heimdall.protocol.core.jpa.PartRepository;
-import net.microfalx.heimdall.protocol.jpa.SyslogEventRepository;
+import net.microfalx.heimdall.protocol.syslog.jpa.SyslogEventRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

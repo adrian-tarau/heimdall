@@ -1,4 +1,4 @@
-package net.microfalx.heimdall.protocol.lookup;
+package net.microfalx.heimdall.protocol.gelf.lookup;
 
 import com.cloudbees.syslog.Severity;
 import net.microfalx.bootstrap.dataset.AbstractLookup;

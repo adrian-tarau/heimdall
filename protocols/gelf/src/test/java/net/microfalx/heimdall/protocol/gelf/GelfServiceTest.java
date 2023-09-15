@@ -8,7 +8,7 @@ import net.microfalx.heimdall.protocol.core.Body;
 import net.microfalx.heimdall.protocol.core.ProtocolSimulatorProperties;
 import net.microfalx.heimdall.protocol.core.jpa.AddressRepository;
 import net.microfalx.heimdall.protocol.core.jpa.PartRepository;
-import net.microfalx.heimdall.protocol.jpa.GelfEventRepository;
+import net.microfalx.heimdall.protocol.gelf.jpa.GelfEventRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -69,10 +69,10 @@ public class GelfServiceTest extends AbstractBootstrapServiceTestCase {
 
     @Test
     void sendTcp() throws IOException {
-        ArgumentCaptor<net.microfalx.heimdall.protocol.jpa.GelfEvent> smtpCapture = ArgumentCaptor.forClass(net.microfalx.heimdall.protocol.jpa.GelfEvent.class);
+        ArgumentCaptor<net.microfalx.heimdall.protocol.gelf.jpa.GelfEvent> smtpCapture = ArgumentCaptor.forClass(net.microfalx.heimdall.protocol.gelf.jpa.GelfEvent.class);
         gelfService.accept(gelfEvent);
         Mockito.verify(gelfEventRepository).save(smtpCapture.capture());
-        net.microfalx.heimdall.protocol.jpa.GelfEvent gelfEvent = smtpCapture.getValue();
+        net.microfalx.heimdall.protocol.gelf.jpa.GelfEvent gelfEvent = smtpCapture.getValue();
         assertEquals(this.gelfEvent.getSeverity().getLevel(), gelfEvent.getLevel());
         assertEquals(this.gelfEvent.getVersion(), "1.1");
         assertEquals(this.gelfEvent.getParts().stream().toList().get(0).getResource().loadAsString(),

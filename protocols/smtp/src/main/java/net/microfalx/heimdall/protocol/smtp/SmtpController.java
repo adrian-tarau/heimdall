@@ -18,7 +18,7 @@ import java.util.Iterator;
 
 @Controller
 @RequestMapping("/protocol/smtp")
-@DataSet(model = SmtpEvent.class, viewTemplate = "smtp_view", viewClasses = "modal-xl")
+@DataSet(model = SmtpEvent.class, viewTemplate = "smtp/event_view", viewClasses = "modal-xl")
 public class SmtpController extends ProtocolController<SmtpEvent> {
 
     @Autowired

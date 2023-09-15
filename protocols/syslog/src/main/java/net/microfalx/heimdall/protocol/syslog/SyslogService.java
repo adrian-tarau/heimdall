@@ -2,8 +2,8 @@ package net.microfalx.heimdall.protocol.syslog;
 
 import net.microfalx.heimdall.protocol.core.Event;
 import net.microfalx.heimdall.protocol.core.ProtocolService;
-import net.microfalx.heimdall.protocol.jpa.SyslogEvent;
-import net.microfalx.heimdall.protocol.jpa.SyslogEventRepository;
+import net.microfalx.heimdall.protocol.syslog.jpa.SyslogEvent;
+import net.microfalx.heimdall.protocol.syslog.jpa.SyslogEventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -1,4 +1,4 @@
-package net.microfalx.heimdall.protocol.jpa;
+package net.microfalx.heimdall.protocol.gelf.jpa;
 
 import jakarta.persistence.Id;
 import jakarta.persistence.*;
@@ -12,8 +12,8 @@ import net.microfalx.bootstrap.dataset.annotation.Lookup;
 import net.microfalx.heimdall.protocol.core.jpa.Address;
 import net.microfalx.heimdall.protocol.core.jpa.Event;
 import net.microfalx.heimdall.protocol.core.jpa.Part;
-import net.microfalx.heimdall.protocol.lookup.FacilityLookup;
-import net.microfalx.heimdall.protocol.lookup.SeverityLookup;
+import net.microfalx.heimdall.protocol.gelf.lookup.FacilityLookup;
+import net.microfalx.heimdall.protocol.gelf.lookup.SeverityLookup;
 import net.microfalx.lang.annotation.*;
 
 @Entity

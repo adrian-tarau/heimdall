@@ -1,4 +1,4 @@
-package net.microfalx.heimdall.protocol.jpa;
+package net.microfalx.heimdall.protocol.syslog.jpa;
 
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
