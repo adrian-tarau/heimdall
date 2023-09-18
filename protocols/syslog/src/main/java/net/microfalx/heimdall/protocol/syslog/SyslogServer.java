@@ -23,6 +23,10 @@ import java.net.SocketAddress;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
+import static net.microfalx.heimdall.protocol.core.ProtocolConstants.MAX_NAME_LENGTH;
+import static net.microfalx.lang.StringUtils.removeLineBreaks;
+import static org.apache.commons.lang3.StringUtils.abbreviate;
+
 /**
  * Service for all Syslog servers, TPC and UDP protocols.
  */
@@ -85,6 +89,7 @@ public class SyslogServer implements InitializingBean {
         InetSocketAddress address = (InetSocketAddress) socketAddress;
         if (LOGGER.isDebugEnabled()) LOGGER.debug("Received syslog even from {}", address.getHostName());
         SyslogMessage message = new SyslogMessage();
+        message.setName(abbreviate(removeLineBreaks(event.getMessage()), MAX_NAME_LENGTH));
         message.setFacility(Facility.fromNumericalCode(event.getFacility()));
         message.setSyslogSeverity(Severity.fromNumericalCode(event.getLevel()));
         message.setSource(Address.create(Address.Type.HOSTNAME, address.getHostName(), address.getAddress().getHostAddress()));

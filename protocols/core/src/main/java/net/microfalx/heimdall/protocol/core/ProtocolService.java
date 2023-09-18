@@ -155,7 +155,9 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
     private void index(E event, Address target) {
         Document document = Document.create(event.getId(), event.getName());
         document.setType(event.getType().name().toLowerCase());
-        document.setCreatedTime(event.getCreatedAt().toInstant().toEpochMilli());
+        document.setCreatedAt(event.getCreatedAt());
+        document.setSentAt(event.getSentAt());
+        document.setReceivedAt(event.getReceivedAt());
         if (event.getBody() != null) document.setBody(event.getBody().getResource());
         document.addAttribute(Attribute.create("source", event.getSource().toDisplay()).setTokenized(true));
         if (target != null) document.addAttribute(Attribute.create("target", target.toDisplay()).setTokenized(true));

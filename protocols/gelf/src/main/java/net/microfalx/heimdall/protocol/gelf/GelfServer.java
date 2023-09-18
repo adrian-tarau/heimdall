@@ -11,7 +11,6 @@ import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.Resource;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -27,7 +26,10 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
+import static net.microfalx.heimdall.protocol.core.ProtocolConstants.MAX_NAME_LENGTH;
 import static net.microfalx.lang.IOUtils.appendStream;
+import static net.microfalx.lang.StringUtils.removeLineBreaks;
+import static org.apache.commons.lang3.StringUtils.abbreviate;
 
 @Component
 public class GelfServer implements InitializingBean, ProtocolServerHandler {
@@ -139,7 +141,7 @@ public class GelfServer implements InitializingBean, ProtocolServerHandler {
         String host = net.microfalx.lang.StringUtils.defaultIfNull(getField(jsonNode, "host"), "0.0.0.0");
         GelfEvent message = new GelfEvent();
         message.setFacility(Facility.fromLabel(getRequiredField(jsonNode, "facility")));
-        message.setName(StringUtils.abbreviate(shortMessage, 80));
+        message.setName(abbreviate(removeLineBreaks(shortMessage), MAX_NAME_LENGTH));
         message.setReceivedAt(ZonedDateTime.now());
         message.setSource(Address.create(Address.Type.HOSTNAME, host));
         message.addPart(Body.create(shortMessage));

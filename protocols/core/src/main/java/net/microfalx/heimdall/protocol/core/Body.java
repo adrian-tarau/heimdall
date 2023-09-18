@@ -5,7 +5,7 @@ import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.MimeType;
 import net.microfalx.resource.Resource;
 
-import static net.microfalx.heimdall.protocol.core.ProtocolConstants.MAX_MESSAGE_LENGTH;
+import static net.microfalx.heimdall.protocol.core.ProtocolConstants.MAX_NAME_LENGTH;
 
 /**
  * Holds the body of the event.
@@ -43,7 +43,7 @@ public class Body extends AbstractPart {
         body.setMimeType(MimeType.TEXT_PLAIN);
         body.setResource(MemoryResource.create(text));
         String firstLine = StringUtils.getMaximumLines(text, 1);
-        body.setName(org.apache.commons.lang3.StringUtils.abbreviate(firstLine, MAX_MESSAGE_LENGTH));
+        body.setName(org.apache.commons.lang3.StringUtils.abbreviate(firstLine, MAX_NAME_LENGTH));
         return body;
     }
 

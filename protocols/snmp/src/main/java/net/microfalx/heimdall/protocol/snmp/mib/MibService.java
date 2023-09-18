@@ -7,7 +7,6 @@ import net.microfalx.bootstrap.model.MetadataService;
 import net.microfalx.bootstrap.resource.ResourceService;
 import net.microfalx.heimdall.protocol.snmp.jpa.SnmpMib;
 import net.microfalx.heimdall.protocol.snmp.jpa.SnmpMibRepository;
-import net.microfalx.lang.StringUtils;
 import net.microfalx.resource.ClassPathResource;
 import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.Resource;
@@ -29,12 +28,13 @@ import java.util.concurrent.CountDownLatch;
 import static java.lang.String.join;
 import static java.time.Duration.ofSeconds;
 import static java.util.Collections.unmodifiableList;
+import static net.microfalx.heimdall.protocol.core.ProtocolConstants.MAX_DESCRIPTION_LENGTH;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
 import static net.microfalx.lang.ConcurrencyUtils.await;
 import static net.microfalx.lang.FormatterUtils.formatNumber;
-import static net.microfalx.lang.StringUtils.nullIfEmpty;
-import static net.microfalx.lang.StringUtils.toIdentifier;
+import static net.microfalx.lang.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.abbreviate;
 
 @Service
 public class MibService implements InitializingBean {
@@ -307,7 +307,7 @@ public class MibService implements InitializingBean {
             throw new MibException("Fail to read the content of the MIB module " + module.getName(), e);
         }
         snmpMib.setModifiedAt(LocalDateTime.now());
-        snmpMib.setDescription(org.apache.commons.lang3.StringUtils.abbreviate(StringUtils.removeLineBreaks(module.getDescription()), 200));
+        snmpMib.setDescription(abbreviate(removeLineBreaks(module.getDescription()), MAX_DESCRIPTION_LENGTH));
         snmpMibRepository.saveAndFlush(snmpMib);
     }
 
