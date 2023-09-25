@@ -81,6 +81,14 @@ public class MibSymbol implements Identifiable<String>, Nameable, Descriptable {
             return SymbolType.ROW;
         } else if (symbol instanceof SmiTable) {
             return SymbolType.TABLE;
+        } else if (symbol instanceof SmiObjectType) {
+            return SymbolType.OBJECT_TYPE;
+        } else if (symbol instanceof SmiNotificationType) {
+            return SymbolType.NOTIFICATION_TYPE;
+        } else if (symbol instanceof SmiOidMacro) {
+            return SymbolType.OBJECT_GROUP;
+        } else if (symbol instanceof SmiOidValue) {
+            return SymbolType.OID;
         } else if (symbol instanceof SmiReferencedType) {
             return SymbolType.REFERENCED_TYPE;
         } else if (symbol instanceof SmiTextualConvention) {

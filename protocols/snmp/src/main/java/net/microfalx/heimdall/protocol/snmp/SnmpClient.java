@@ -13,12 +13,17 @@ import org.snmp4j.transport.DefaultUdpTransportMapping;
 import java.io.IOException;
 import java.util.Map;
 
+import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static org.snmp4j.mp.SnmpConstants.SNMP_ERROR_SUCCESS;
+import static org.snmp4j.mp.SnmpConstants.sysDescr;
 
 public class SnmpClient extends ProtocolClient<SnmpEvent> {
 
+    public static String DEFAULT_MESSAGE_OID = sysDescr.toDottedString();
+
     private static final long startTime = System.currentTimeMillis();
     private int version = SnmpConstants.version2c;
+    private String messageOid = DEFAULT_MESSAGE_OID;
 
     @Override
     protected int getDefaultPort() {
@@ -47,6 +52,23 @@ public class SnmpClient extends ProtocolClient<SnmpEvent> {
         this.version = version;
     }
 
+    /**
+     * Returns the OID which carries the event message.
+     * @return a non-null instance
+     */
+    public String getMessageOid() {
+        return messageOid;
+    }
+
+    /**
+     * Changes the OID which carries the event message.
+     * @param messageOid the OID
+     */
+    public void setMessageOid(String messageOid) {
+        requireNonNull(messageOid);
+        this.messageOid = messageOid;
+    }
+
     @Override
     protected void doSend(SnmpEvent event) throws IOException {
         PDU pdu = createPdu(event);
@@ -62,7 +84,7 @@ public class SnmpClient extends ProtocolClient<SnmpEvent> {
 
     private void updateBindings(PDU pdu, SnmpEvent event) {
         pdu.add(new VariableBinding(SnmpConstants.sysUpTime, new TimeTicks(getSysUpTime())));
-        pdu.add(new VariableBinding(SnmpConstants.snmpTrapOID, SnmpConstants.linkDown));
+        pdu.add(new VariableBinding(new OID(messageOid), new OctetString(event.getBodyAsString())));
         for (Map.Entry<String, Object> entry : event.getAttributes().entrySet()) {
             Object value = entry.getValue();
             Variable variable;

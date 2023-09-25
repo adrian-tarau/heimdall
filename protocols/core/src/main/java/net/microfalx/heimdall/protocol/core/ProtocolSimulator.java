@@ -49,7 +49,7 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
         for (int i = 0; i < eventCount; i++) {
             Address sourceAddress = getRandomSourceAddress();
             Address targetAddress = getRandomTargetAddress();
-            ProtocolClient<E> client = getRandomClient();
+            C client = (C) getRandomClient();
             try {
                 simulate(client, sourceAddress, targetAddress, i + 1);
             } catch (IOException e) {
@@ -84,7 +84,7 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
      *
      * @return a non-null instance
      */
-    protected abstract Collection<ProtocolClient<E>> createClients();
+    protected abstract Collection<C> createClients();
 
     /**
      * Simulates an event.
@@ -95,7 +95,7 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
      * @param index         the event index
      * @throws IOException if an I/O error occurs
      */
-    protected abstract void simulate(ProtocolClient<E> client, Address sourceAddress, Address targetAddress, int index) throws IOException;
+    protected abstract void simulate(C client, Address sourceAddress, Address targetAddress, int index) throws IOException;
 
     /**
      * Registers data for simulator.
@@ -163,8 +163,29 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
      *
      * @return a non-null instance
      */
-    protected final String getRandomName() {
+    protected final String getRandomSentence() {
         return getNextSentence();
+    }
+
+    /**
+     * Returns the next name.
+     *
+     * @return a non-null instance
+     */
+    protected final String getRandomName() {
+        Faker faker = new Faker();
+        float value = random.nextFloat();
+        if (value > 0.9) {
+            return faker.appliance().equipment();
+        } else if (value > 0.8) {
+            return faker.brand().car();
+        } else if (value > 0.7) {
+            return faker.brand().watch();
+        } else if (value > 0.6) {
+            return faker.commerce().productName();
+        } else {
+            return faker.construction().materials();
+        }
     }
 
     /**

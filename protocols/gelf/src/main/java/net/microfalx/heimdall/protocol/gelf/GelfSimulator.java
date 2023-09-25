@@ -3,7 +3,10 @@ package net.microfalx.heimdall.protocol.gelf;
 import com.cloudbees.syslog.Facility;
 import com.cloudbees.syslog.Severity;
 import net.datafaker.Faker;
-import net.microfalx.heimdall.protocol.core.*;
+import net.microfalx.heimdall.protocol.core.Address;
+import net.microfalx.heimdall.protocol.core.Body;
+import net.microfalx.heimdall.protocol.core.ProtocolSimulator;
+import net.microfalx.heimdall.protocol.core.ProtocolSimulatorProperties;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -28,14 +31,14 @@ public class GelfSimulator extends ProtocolSimulator<GelfEvent, GelfClient> {
     }
 
     @Override
-    protected Collection<ProtocolClient<GelfEvent>> createClients() {
+    protected Collection<GelfClient> createClients() {
         GelfClient client = new GelfClient();
         return Arrays.asList(client);
     }
 
 
     @Override
-    protected void simulate(ProtocolClient<GelfEvent> client, Address sourceAddress, Address targetAddress, int index) throws IOException {
+    protected void simulate(GelfClient client, Address sourceAddress, Address targetAddress, int index) throws IOException {
         GelfEvent message = new GelfEvent();
         message.setBody(Body.create(getRandomText()));
         message.setGelfSeverity(getRandomEnum(Severity.class));

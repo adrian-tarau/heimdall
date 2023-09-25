@@ -118,6 +118,27 @@ public class MibVariable implements Identifiable<String>, Nameable, Descriptable
     }
 
     /**
+     * Returns whether the variable is of type ENUM.
+     *
+     * @return {@code true} if enum, {@code false} otherwise
+     */
+    @Visible(false)
+    public boolean isEnum() {
+        return getType() == SmiPrimitiveType.ENUM;
+    }
+
+    /**
+     * Returns whether the variable is of type number.
+     *
+     * @return {@code true} if number, {@code false} otherwise
+     */
+    @Visible(false)
+    public boolean isNumber() {
+        return getType() == SmiPrimitiveType.COUNTER_32 || getType() == SmiPrimitiveType.COUNTER_64 || getType() == SmiPrimitiveType.INTEGER
+                || getType() == SmiPrimitiveType.INTEGER_32 || getType() == SmiPrimitiveType.UNSIGNED_32 || getType() == SmiPrimitiveType.GAUGE_32;
+    }
+
+    /**
      * Returns the available values for the enum, if the variable has an ENUM type.
      *
      * @return the enum

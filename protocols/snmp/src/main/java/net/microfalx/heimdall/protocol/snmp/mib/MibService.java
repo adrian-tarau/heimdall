@@ -69,7 +69,7 @@ public class MibService implements InitializingBean {
      * @return a non-null instance
      */
     public AsyncTaskExecutor getTaskExecutor() {
-        if (taskExecutor == null) taskExecutor = new TaskExecutorFactory().createExecutor();
+        if (taskExecutor == null) taskExecutor = TaskExecutorFactory.create("mib").createExecutor();
         return taskExecutor;
     }
 
@@ -185,6 +185,21 @@ public class MibService implements InitializingBean {
      * @return the name or the object identifier if there is no match
      */
     public String findName(String value) {
+        return findName(value, true);
+    }
+
+    /**
+     * Returns the closest name for given OID.
+     * <p>
+     * The method tries to find first a module, variable, or any definition by an exact match.
+     * <p>
+     * If there is no 1:1 mapping, it finds the closest match and appends the OID suffix.
+     *
+     * @param value    the object identifier
+     * @param fullName {@code true} to return full name (module + name), {@code false} otherwie
+     * @return the name or the object identifier if there is no match
+     */
+    public String findName(String value, boolean fullName) {
         requireNonNull(value);
         if (!MibUtils.isOid(value)) throw new IllegalArgumentException("An OID is required, received '" + value + "'");
         OID oid = new OID(value);
@@ -192,8 +207,9 @@ public class MibService implements InitializingBean {
             MibSymbol symbol = findSymbol(oid.toDottedString());
             if (symbol != null) {
                 int length = symbol.getOid().length();
-                if (length == value.length()) return symbol.getFullName();
-                return symbol.getFullName() + value.substring(length);
+                String name = fullName ? symbol.getFullName() : symbol.getName();
+                if (length == value.length()) return name;
+                return name + value.substring(length);
             }
             oid = MibUtils.getParent(oid);
         }
@@ -349,7 +365,7 @@ public class MibService implements InitializingBean {
             for (MibVariable variable : module.getVariables()) {
                 newVariables.add(variable);
                 newVariablesById.putIfAbsent(variable.getId(), variable);
-                newVariablesById.putIfAbsent(toIdentifier(variable.getOid()), variable);
+                if (variable.getOid() != null) newVariablesById.putIfAbsent(toIdentifier(variable.getOid()), variable);
             }
             if (module.getType() == MibType.IMPORT) {
                 this.resolvedModules.add(module.getIdToken().toLowerCase());
@@ -374,7 +390,7 @@ public class MibService implements InitializingBean {
                 try {
                     snmpMibRepository.saveAndFlush(snmpMibCopy);
                 } catch (Exception e) {
-                    LOGGER.error("Failed to update MIB OIDs for "+module.getName(), e);
+                    LOGGER.error("Failed to update MIB OIDs for " + module.getName(), e);
                 }
             }
         }

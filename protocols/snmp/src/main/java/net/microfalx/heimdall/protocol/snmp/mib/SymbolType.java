@@ -25,5 +25,11 @@ public enum SymbolType {
 
     MACRO,
 
-    OTHER
+    OBJECT_TYPE,
+
+    OBJECT_GROUP,
+
+    OID,
+
+    OTHER,
 }

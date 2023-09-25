@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.protocol.core;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.microfalx.bootstrap.core.async.TaskExecutorFactory;
 import net.microfalx.bootstrap.resource.ResourceService;
@@ -26,6 +27,8 @@ import java.io.StringWriter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -162,6 +165,9 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
         document.addAttribute(Attribute.create("source", event.getSource().toDisplay()).setTokenized(true));
         if (target != null) document.addAttribute(Attribute.create("target", target.toDisplay()).setTokenized(true));
         document.addAttribute(Attribute.create("severity", event.getSeverity().name()).setIndexed(true));
+        for (Map.Entry<String, Object> entry : event.getAttributes().entrySet()) {
+            document.addAttributeIfAbsent(Attribute.create(entry.getKey(), entry.getValue()).setIndexed(true).setStored(true));
+        }
         updateDocument(event, document);
         indexService.index(document);
     }
@@ -249,7 +255,7 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
      * @param event the event
      * @return the JSON
      */
-    protected final String encodeAttributes(E event) {
+    public final String encodeAttributes(E event) {
         ObjectMapper objectMapper = new ObjectMapper();
         StringWriter writer = new StringWriter();
         try {
@@ -258,6 +264,31 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
             // It will never happen
         }
         return writer.toString();
+    }
+
+    /**
+     * Encodes the attributes from a JSON.
+     *
+     * @param resource the JSON as a resource
+     * @return the attributes
+     */
+    public final Map<String, Object> decodeAttributes(Resource resource) {
+        try {
+            if (resource == null || !resource.exists()) return Collections.emptyMap();
+        } catch (IOException e) {
+            LOGGER.error("Failed to extract attributes from " + resource.getName(), e);
+            return Collections.emptyMap();
+        }
+        ObjectMapper objectMapper = new ObjectMapper();
+        StringWriter writer = new StringWriter();
+        try {
+            TypeReference<HashMap<String, Object>> typeRef = new TypeReference<HashMap<String, Object>>() {
+            };
+            return objectMapper.readValue(resource.getReader(), typeRef);
+        } catch (IOException e) {
+            LOGGER.error("Failed to read attributes from " + resource.getName(), e);
+            return Collections.emptyMap();
+        }
     }
 
     /**
@@ -304,11 +335,11 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
     }
 
     private void initializeExecutor() {
-        taskExecutor = new TaskExecutorFactory().setSuffix(getEventType().name().toLowerCase()).setQueueCapacity(5000).createExecutor();
+        taskExecutor = TaskExecutorFactory.create(getEventType().name().toLowerCase()).setQueueCapacity(5000).createExecutor();
     }
 
     private void initializeScheduler() {
-        taskScheduler = new TaskExecutorFactory().setSuffix(getEventType().name().toLowerCase()).createScheduler();
+        taskScheduler = TaskExecutorFactory.create(getEventType().name().toLowerCase()).createScheduler();
     }
 
     private int getNextSequence() {

@@ -1,12 +1,21 @@
 package net.microfalx.heimdall.protocol.snmp.controller;
 
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
+import net.microfalx.bootstrap.model.Field;
 import net.microfalx.heimdall.protocol.core.ProtocolController;
+import net.microfalx.heimdall.protocol.snmp.SnmpService;
 import net.microfalx.heimdall.protocol.snmp.jpa.SnmpEvent;
 import net.microfalx.heimdall.protocol.snmp.jpa.SnmpEventRepository;
+import net.microfalx.resource.Resource;
+import net.microfalx.resource.ResourceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.TreeMap;
 
 @Controller
 @RequestMapping("/protocol/snmp")
@@ -15,4 +24,22 @@ public class SnmpController extends ProtocolController<SnmpEvent> {
 
     @Autowired
     private SnmpEventRepository snmpRepository;
+
+    @Autowired
+    private SnmpService snmpService;
+
+    @Override
+    protected void beforeView(net.microfalx.bootstrap.dataset.DataSet<SnmpEvent, Field<SnmpEvent>, Integer> dataSet, Model controllerModel, SnmpEvent dataSetModel) {
+        super.beforeView(dataSet, controllerModel, dataSetModel);
+
+        Resource bindingsResource = ResourceFactory.resolve(dataSetModel.getBindingPart().getResource());
+        Resource messageResource = ResourceFactory.resolve(dataSetModel.getMessage().getResource());
+        Map<String, Object> attributes = new TreeMap<>(snmpService.decodeAttributes(bindingsResource));
+        try {
+            controllerModel.addAttribute("message", messageResource.loadAsString());
+        } catch (IOException e) {
+            controllerModel.addAttribute("message", "#ERROR: " + e.getMessage());
+        }
+        controllerModel.addAttribute("attributes", attributes);
+    }
 }

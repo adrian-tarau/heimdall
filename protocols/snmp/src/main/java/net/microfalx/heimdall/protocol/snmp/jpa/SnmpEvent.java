@@ -17,7 +17,7 @@ import net.microfalx.lang.annotation.*;
 
 @Entity
 @Table(name = "protocol_snmp_events")
-@Name("MIBs")
+@Name("SNMPs")
 @ReadOnly
 @Getter
 @Setter
@@ -38,27 +38,32 @@ public class SnmpEvent extends Event {
     @Label("Address")
     private Address agentAddress;
 
+    @OneToOne
+    @JoinColumn(name = "message_id", nullable = false)
+    @Name
+    @Position(10)
+    private Part message;
+
     @ManyToOne
     @JoinColumn(name = "bindings_id", nullable = false)
     @NotNull
-    @Name
     @Position(10)
     @Label("Bindings")
+    @Visible(value = false)
     private Part bindingPart;
 
-    @Column(name = "version", nullable = false, length = 50)
-    @NotBlank
+    @Column(name = "version")
     @Visible(modes = Visible.Mode.VIEW)
     @Position(20)
-    private String version;
+    private int version;
 
-    @Column(name = "community_string", nullable = false, length = 200)
+    @Column(name = "community_string", length = 200)
     @NotBlank
     @Visible(modes = Visible.Mode.VIEW)
     @Position(21)
     private String communityString;
 
-    @Column(name = "enterprise", nullable = false, length = 200)
+    @Column(name = "enterprise", length = 200)
     private String enterprise;
 
     @Column(name = "trap_type")

@@ -46,7 +46,7 @@ public class SyslogSimulator extends ProtocolSimulator<SyslogMessage, SyslogClie
      * @return a non-null instance
      */
     @Override
-    protected Collection<ProtocolClient<SyslogMessage>> createClients() {
+    protected Collection<SyslogClient> createClients() {
         SyslogClient syslogClient = new SyslogClient();
         syslogClient.setPort(syslogConfiguration.getUdpPort());
         syslogClient.setTransport(ProtocolClient.Transport.UDP);
@@ -63,7 +63,7 @@ public class SyslogSimulator extends ProtocolSimulator<SyslogMessage, SyslogClie
      * @throws IOException if an I/O error occurs
      */
     @Override
-    protected void simulate(ProtocolClient<SyslogMessage> client, Address sourceAddress, Address targetAddress, int index) throws IOException {
+    protected void simulate(SyslogClient client, Address sourceAddress, Address targetAddress, int index) throws IOException {
         SyslogMessage syslogMessage = new SyslogMessage();
         syslogMessage.setSyslogSeverity(getRandomEnum(Severity.class));
         syslogMessage.setFacility(getRandomEnum(Facility.class));

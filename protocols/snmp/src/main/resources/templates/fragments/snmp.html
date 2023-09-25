@@ -53,6 +53,7 @@
                     <th scope="col">Name</th>
                     <th scope="col">Type</th>
                     <th scope="col">Primitive Type</th>
+                    <th scope="col">OID</th>
                     <th scope="col">Description</th>
                 </tr>
                 </thead>
@@ -61,12 +62,13 @@
                     <td th:text="${symbol.name}"></td>
                     <td th:text="${symbol.type}"></td>
                     <td th:text="${symbol.primitiveType}"></td>
+                    <td th:text="${symbol.oid}"></td>
                     <td th:text="${symbol.description}" class="dataset-text-mono"></td>
                 </tr>
                 </tbody>
             </table>
         </div>
-        <div class="tab-pane fade show active" id="content" >
+        <div class="tab-pane fade" id="content" >
             <p class="dataset-text-mono" th:text="${model.content}"></p>
         </div>
     </div>

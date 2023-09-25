@@ -220,7 +220,6 @@ public abstract class AbstractEvent implements Event {
 
     public void addAttribute(String key, Object value) {
         requireNonNull(key);
-        requireNonNull(value);
         attributes.put(key, value);
     }
 }

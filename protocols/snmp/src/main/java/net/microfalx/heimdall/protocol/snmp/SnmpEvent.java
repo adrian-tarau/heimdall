@@ -1,6 +1,8 @@
 package net.microfalx.heimdall.protocol.snmp;
 
 import net.microfalx.heimdall.protocol.core.AbstractEvent;
+import net.microfalx.heimdall.protocol.core.Severity;
+import net.microfalx.lang.EnumUtils;
 
 public class SnmpEvent extends AbstractEvent {
 
@@ -34,5 +36,9 @@ public class SnmpEvent extends AbstractEvent {
 
     public void setEnterprise(String enterprise) {
         this.enterprise = enterprise;
+    }
+
+    void setSeverity(String value) {
+        setSeverity(EnumUtils.fromName(Severity.class, value, Severity.INFO));
     }
 }

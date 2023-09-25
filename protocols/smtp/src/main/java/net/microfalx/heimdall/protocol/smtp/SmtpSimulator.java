@@ -48,7 +48,7 @@ public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
      * @return a non-null instance
      */
     @Override
-    protected Collection<ProtocolClient<SmtpEvent>> createClients() {
+    protected Collection<SmtpClient> createClients() {
         SmtpClient smtpClient = new SmtpClient();
         smtpClient.setPort(smtpProperties.getPort());
         smtpClient.setTransport(ProtocolClient.Transport.UDP);
@@ -65,7 +65,7 @@ public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
      * @throws IOException if an I/O error occurs
      */
     @Override
-    protected void simulate(ProtocolClient<SmtpEvent> client, Address sourceAddress, Address targetAddress, int index) throws IOException {
+    protected void simulate(SmtpClient client, Address sourceAddress, Address targetAddress, int index) throws IOException {
         SmtpEvent smtpEvent = new SmtpEvent();
         smtpEvent.setSource(sourceAddress);
         smtpEvent.addTarget(targetAddress);
@@ -84,7 +84,6 @@ public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
         if (random.nextFloat() > 0.8) {
             attachmentCount = 1 + random.nextInt(2);
         }
-
         for (int i = 0; i < attachmentCount; i++) {
             String fileName = random.nextFloat() > 0.5 ? faker.code().isbn13() : faker.commerce().productName();
             String extension = faker.file().extension();
