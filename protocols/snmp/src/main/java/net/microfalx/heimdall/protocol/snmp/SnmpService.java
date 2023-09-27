@@ -5,12 +5,15 @@ import net.microfalx.heimdall.protocol.core.Body;
 import net.microfalx.heimdall.protocol.core.Event;
 import net.microfalx.heimdall.protocol.core.ProtocolService;
 import net.microfalx.heimdall.protocol.snmp.jpa.SnmpEventRepository;
+import net.microfalx.resource.MimeType;
+import net.microfalx.resource.Resource;
+import net.microfalx.resource.ResourceFactory;
 import org.snmp4j.PDU;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public final class SnmpService extends ProtocolService<SnmpEvent> {
+public final class SnmpService extends ProtocolService<SnmpEvent, net.microfalx.heimdall.protocol.snmp.jpa.SnmpEvent> {
 
     @Autowired
     private SnmpSimulator simulator;
@@ -47,9 +50,14 @@ public final class SnmpService extends ProtocolService<SnmpEvent> {
         snmpEvent.setTrapType(PDU.TRAP);
 
         snmpEvent.setMessage(persistPart(trap.getBody()));
-        trap.setBody(Body.create(encodeAttributes(trap)));
+        trap.setBody(Body.create(trap.toJson()));
         snmpEvent.setBindingPart(persistPart(trap.getBody()));
 
         repository.save(snmpEvent);
+    }
+
+    @Override
+    protected Resource getAttributesResource(net.microfalx.heimdall.protocol.snmp.jpa.SnmpEvent model) {
+        return ResourceFactory.resolve(model.getBindingPart().getResource()).withMimeType(MimeType.APPLICATION_JSON);
     }
 }

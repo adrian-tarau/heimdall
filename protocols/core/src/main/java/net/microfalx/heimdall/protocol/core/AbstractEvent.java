@@ -1,14 +1,18 @@
 package net.microfalx.heimdall.protocol.core;
 
 import io.azam.ulidj.ULID;
+import net.microfalx.bootstrap.model.AbstractAttributes;
+import net.microfalx.bootstrap.model.Attribute;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
-public abstract class AbstractEvent implements Event {
+public abstract class AbstractEvent extends AbstractAttributes<Attribute> implements Event {
 
     private String id = ULID.random();
     private String name;
@@ -19,7 +23,6 @@ public abstract class AbstractEvent implements Event {
     private ZonedDateTime receivedAt;
     private ZonedDateTime createdAt = ZonedDateTime.now();
     private ZonedDateTime sentAt;
-    private Map<String, Object> attributes = new HashMap<>();
 
     private Collection<Part> parts = new ArrayList<>();
 
@@ -208,18 +211,8 @@ public abstract class AbstractEvent implements Event {
         if (part instanceof AbstractPart apart) apart.setEvent(this);
     }
 
-    /**
-     * Returns a collection of attributes
-     *
-     * @return a non-null instance
-     */
     @Override
-    public Map<String, Object> getAttributes() {
-        return Collections.unmodifiableMap(attributes);
-    }
-
-    public void addAttribute(String key, Object value) {
-        requireNonNull(key);
-        attributes.put(key, value);
+    protected Attribute createAttribute(String name, Object value) {
+        return Attribute.create(name, value);
     }
 }

@@ -1,8 +1,7 @@
 package net.microfalx.heimdall.protocol.core;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import net.microfalx.bootstrap.core.async.TaskExecutorFactory;
+import net.microfalx.bootstrap.model.Attributes;
 import net.microfalx.bootstrap.resource.ResourceService;
 import net.microfalx.bootstrap.search.Attribute;
 import net.microfalx.bootstrap.search.Document;
@@ -23,12 +22,9 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.PeriodicTrigger;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -39,12 +35,15 @@ import static net.microfalx.lang.StringUtils.NA_STRING;
 /**
  * Base class for all protocol services.
  */
-public abstract class ProtocolService<E extends Event> implements InitializingBean {
+public abstract class ProtocolService<E extends Event, M extends net.microfalx.heimdall.protocol.core.jpa.Event> implements InitializingBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolService.class);
 
     private static final DateTimeFormatter DIRECTORY_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
     private static final String FILE_NAME_FORMAT = "%09d";
+    private static final String PART_FILE_EXTENSION = "part";
+
+    private static final LocalDateTime STARTUP = LocalDateTime.now();
 
     @Autowired
     private ResourceService resourceService;
@@ -109,8 +108,9 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
      */
     public final Resource upload(Resource resource) {
         requireNonNull(resource);
-        Resource directory = resourceService.getShared(DIRECTORY_DATE_FORMATTER.format(LocalDateTime.now()));
-        Resource target = directory.resolve(String.format(FILE_NAME_FORMAT, getNextSequence()));
+        Resource directory = resourceService.getShared("parts");
+        directory = directory.resolve(DIRECTORY_DATE_FORMATTER.format(LocalDateTime.now()), Resource.Type.DIRECTORY);
+        Resource target = directory.resolve(String.format(FILE_NAME_FORMAT, getNextSequence()) + "." + PART_FILE_EXTENSION);
         try {
             if (!directory.exists()) directory.create();
             IOUtils.appendStream(target.getOutputStream(), resource.getInputStream());
@@ -155,21 +155,18 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
         }
     }
 
-    private void index(E event, Address target) {
-        Document document = Document.create(event.getId(), event.getName());
-        document.setType(event.getType().name().toLowerCase());
-        document.setCreatedAt(event.getCreatedAt());
-        document.setSentAt(event.getSentAt());
-        document.setReceivedAt(event.getReceivedAt());
-        if (event.getBody() != null) document.setBody(event.getBody().getResource());
-        document.addAttribute(Attribute.create("source", event.getSource().toDisplay()).setTokenized(true));
-        if (target != null) document.addAttribute(Attribute.create("target", target.toDisplay()).setTokenized(true));
-        document.addAttribute(Attribute.create("severity", event.getSeverity().name()).setIndexed(true));
-        for (Map.Entry<String, Object> entry : event.getAttributes().entrySet()) {
-            document.addAttributeIfAbsent(Attribute.create(entry.getKey(), entry.getValue()).setIndexed(true).setStored(true));
-        }
-        updateDocument(event, document);
-        indexService.index(document);
+    /**
+     * Returns a list of attributes associated with the model.
+     * <p>
+     * The attributes will be displayed in the result set dashboards, for each model.
+     *
+     * @param model the model
+     * @return a non-null instance
+     */
+    public final Attributes<?> getAttributes(M model) {
+        requireNonNull(model);
+        Resource resource = getAttributesResource(model);
+        return readAttributes(model, resource);
     }
 
     /**
@@ -178,7 +175,6 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
      * @param event the event
      */
     public final void accept(E event) {
-        uploadParts(event);
         try {
             persist(event);
         } catch (Exception e) {
@@ -225,6 +221,32 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
     }
 
     /**
+     * Returns the resource which stores the attribute for a model.
+     *
+     * @param model the model
+     * @return a non-null instance
+     */
+    protected Resource getAttributesResource(M model) {
+        throw new ProtocolException("Not supported");
+    }
+
+    /**
+     * Returns a list of attributes associated with a model from a resource (usually encoded as a JSON document).
+     *
+     * @param model the model
+     * @return a collection of attributes
+     */
+    protected final Attributes<?> readAttributes(M model, Resource resource) {
+        Attributes<?> attributes = Attributes.create();
+        try {
+            attributes.copyFrom(resource);
+            return attributes;
+        } catch (IOException e) {
+            throw new ProtocolException("Failed to load attributes from " + resource.toURI(), e);
+        }
+    }
+
+    /**
      * Looks up an address in the database based on the value.
      * <p>
      * If the address does not exist, create a new entry
@@ -250,48 +272,6 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
     }
 
     /**
-     * Encodes the attributes into a JSON.
-     *
-     * @param event the event
-     * @return the JSON
-     */
-    public final String encodeAttributes(E event) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        StringWriter writer = new StringWriter();
-        try {
-            objectMapper.writeValue(writer, event.getAttributes());
-        } catch (IOException e) {
-            // It will never happen
-        }
-        return writer.toString();
-    }
-
-    /**
-     * Encodes the attributes from a JSON.
-     *
-     * @param resource the JSON as a resource
-     * @return the attributes
-     */
-    public final Map<String, Object> decodeAttributes(Resource resource) {
-        try {
-            if (resource == null || !resource.exists()) return Collections.emptyMap();
-        } catch (IOException e) {
-            LOGGER.error("Failed to extract attributes from " + resource.getName(), e);
-            return Collections.emptyMap();
-        }
-        ObjectMapper objectMapper = new ObjectMapper();
-        StringWriter writer = new StringWriter();
-        try {
-            TypeReference<HashMap<String, Object>> typeRef = new TypeReference<HashMap<String, Object>>() {
-            };
-            return objectMapper.readValue(resource.getReader(), typeRef);
-        } catch (IOException e) {
-            LOGGER.error("Failed to read attributes from " + resource.getName(), e);
-            return Collections.emptyMap();
-        }
-    }
-
-    /**
      * Persists the event part in the database.
      *
      * @param part the part
@@ -302,6 +282,9 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
         partJpa.setType(part.getType());
         if (!NA_STRING.equals(part.getName())) partJpa.setName(part.getName());
         partJpa.setFileName(part.getFileName());
+        if (part instanceof AbstractPart apart) {
+            apart.resource = upload(apart.resource);
+        }
         try {
             partJpa.setLength((int) part.getResource().length());
         } catch (IOException e) {
@@ -326,14 +309,6 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
         getTaskScheduler().schedule(new SimulatorWorker(), new PeriodicTrigger(simulatorProperties.getInterval()));
     }
 
-    private void uploadParts(E event) {
-        for (Part part : event.getParts()) {
-            if (part instanceof AbstractPart apart) {
-                apart.resource = upload(apart.resource);
-            }
-        }
-    }
-
     private void initializeExecutor() {
         taskExecutor = TaskExecutorFactory.create(getEventType().name().toLowerCase()).setQueueCapacity(5000).createExecutor();
     }
@@ -343,7 +318,30 @@ public abstract class ProtocolService<E extends Event> implements InitializingBe
     }
 
     private int getNextSequence() {
-        return resourceSequences.computeIfAbsent(LocalDate.now(), localDate -> new AtomicInteger(1)).getAndIncrement();
+        return resourceSequences.computeIfAbsent(LocalDate.now(), localDate -> {
+            int start = 1;
+            if (STARTUP.toLocalDate().equals(localDate)) {
+                start = STARTUP.toLocalTime().toSecondOfDay();
+            }
+            return new AtomicInteger(start);
+        }).getAndIncrement();
+    }
+
+    private void index(E event, Address target) {
+        Document document = Document.create(event.getId(), event.getName());
+        document.setType(event.getType().name().toLowerCase());
+        document.setCreatedAt(event.getCreatedAt());
+        document.setSentAt(event.getSentAt());
+        document.setReceivedAt(event.getReceivedAt());
+        if (event.getBody() != null) document.setBody(event.getBody().getResource());
+        document.addAttribute(Attribute.create("source", event.getSource().toDisplay()).setTokenized(true));
+        if (target != null) document.addAttribute(Attribute.create("target", target.toDisplay()).setTokenized(true));
+        document.addAttribute(Attribute.create("severity", event.getSeverity().name()).setIndexed(true));
+        for (net.microfalx.bootstrap.model.Attribute attribute : event) {
+            document.addAttributeIfAbsent(Attribute.create(attribute).setIndexed(true).setStored(true));
+        }
+        updateDocument(event, document);
+        indexService.index(document);
     }
 
     class SimulatorWorker implements Runnable {

@@ -4,9 +4,9 @@ import biz.paluch.logging.gelf.*;
 import biz.paluch.logging.gelf.intern.ErrorReporter;
 import biz.paluch.logging.gelf.intern.GelfSender;
 import biz.paluch.logging.gelf.intern.GelfSenderFactory;
+import net.microfalx.bootstrap.model.Attribute;
 import net.microfalx.heimdall.protocol.core.ProtocolClient;
 import net.microfalx.lang.ExceptionUtils;
-import net.microfalx.lang.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 
 public class GelfClient extends ProtocolClient<GelfEvent> {
@@ -28,8 +27,8 @@ public class GelfClient extends ProtocolClient<GelfEvent> {
         createMessageAssembler(event);
         GelfSender sender = createGelfSender();
         biz.paluch.logging.gelf.intern.GelfMessage gelfMessage = assembler.createGelfMessage(new LogEventImpl(event));
-        for (Map.Entry<String, Object> attribute : event.getAttributes().entrySet()) {
-            gelfMessage.addField(attribute.getKey(), ObjectUtils.toString(attribute));
+        for (Attribute attribute : event) {
+            gelfMessage.addField(attribute.getName(), attribute.asString());
         }
         sender.sendMessage(gelfMessage);
         sender.close();

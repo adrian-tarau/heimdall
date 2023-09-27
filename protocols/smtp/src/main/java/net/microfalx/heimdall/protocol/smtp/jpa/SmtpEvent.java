@@ -22,7 +22,7 @@ import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
-@ToString(callSuper = true)
+@ToString(callSuper = true, exclude = "attachments")
 public class SmtpEvent extends Event {
 
     @Id

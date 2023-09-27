@@ -158,7 +158,7 @@ public class GelfServer implements InitializingBean, ProtocolServerHandler {
         while (fields.hasNext()) {
             Map.Entry<String, JsonNode> field = fields.next();
             if (field.getKey().startsWith("_")) {
-                gelfEvent.addAttribute(field.getKey().substring(1), field.getValue());
+                gelfEvent.addAttribute(field.getKey().substring(1), field.getValue().textValue());
             }
         }
     }

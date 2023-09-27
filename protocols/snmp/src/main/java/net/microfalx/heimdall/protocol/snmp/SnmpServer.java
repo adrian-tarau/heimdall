@@ -2,13 +2,13 @@ package net.microfalx.heimdall.protocol.snmp;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import net.microfalx.bootstrap.model.Attribute;
 import net.microfalx.heimdall.protocol.core.Body;
 import net.microfalx.heimdall.protocol.core.ProtocolException;
 import net.microfalx.heimdall.protocol.snmp.mib.MibModule;
 import net.microfalx.heimdall.protocol.snmp.mib.MibService;
 import net.microfalx.heimdall.protocol.snmp.mib.MibVariable;
 import net.microfalx.lang.IOUtils;
-import net.microfalx.lang.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.*;
@@ -32,7 +32,10 @@ import java.net.InetSocketAddress;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static net.microfalx.heimdall.protocol.core.ProtocolConstants.MAX_NAME_LENGTH;
@@ -178,18 +181,17 @@ public class SnmpServer implements CommandResponder {
     }
 
     private void updateNameFromAttributes(SnmpEvent event) {
-        TreeMap<String, Object> attributes = new TreeMap<>(event.getAttributes());
-        Iterator<Map.Entry<String, Object>> entries = attributes.entrySet().iterator();
+        Iterator<Attribute> entries = event.iterator();
         StringBuilder nameBuilder = new StringBuilder();
         StringBuilder bodyBuilder = new StringBuilder();
         int count = 3;
         while (entries.hasNext()) {
-            Map.Entry<String, Object> entry = entries.next();
+            Attribute attribute = entries.next();
             if (count-- > 0) {
-                String nameFragment = abbreviate(ObjectUtils.toString(entry.getValue()), MAX_NAME_LENGTH / 3);
-                append(nameBuilder, entry.getKey() + ": " + nameFragment, " / ");
+                String nameFragment = abbreviate(attribute.asString(), MAX_NAME_LENGTH / 3);
+                append(nameBuilder, attribute.getLabel() + ": " + nameFragment, " / ");
             }
-            append(bodyBuilder, entry.getKey() + ": " + entry.getValue(), "\n");
+            append(bodyBuilder, attribute.getLabel() + ": " + attribute.asString(), "\n");
         }
         event.setName(nameBuilder.toString());
         event.setBody(Body.create(event.getName()));

@@ -4,13 +4,16 @@ import net.microfalx.heimdall.protocol.core.Attachment;
 import net.microfalx.heimdall.protocol.core.Event;
 import net.microfalx.heimdall.protocol.core.ProtocolService;
 import net.microfalx.heimdall.protocol.gelf.jpa.GelfEventRepository;
+import net.microfalx.resource.MimeType;
+import net.microfalx.resource.Resource;
+import net.microfalx.resource.ResourceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Iterator;
 
 @Service
-public final class GelfService extends ProtocolService<GelfEvent> {
+public final class GelfService extends ProtocolService<GelfEvent, net.microfalx.heimdall.protocol.gelf.jpa.GelfEvent> {
 
     @Autowired
     private GelfEventRepository gelfEventRepository;
@@ -38,7 +41,7 @@ public final class GelfService extends ProtocolService<GelfEvent> {
         Iterator<net.microfalx.heimdall.protocol.core.Part> parts = message.getParts().iterator();
         gelfEvent.setShortMessage(persistPart(parts.next()));
         if (parts.hasNext()) gelfEvent.setLongMessage(persistPart(parts.next()));
-        Attachment fields = Attachment.create(encodeAttributes(message));
+        Attachment fields = Attachment.create(message.toJson());
         message.addPart(fields);
         gelfEvent.setFields(persistPart(fields));
         gelfEventRepository.save(gelfEvent);
@@ -49,4 +52,8 @@ public final class GelfService extends ProtocolService<GelfEvent> {
         return gelfSimulator;
     }
 
+    @Override
+    protected Resource getAttributesResource(net.microfalx.heimdall.protocol.gelf.jpa.GelfEvent model) {
+        return ResourceFactory.resolve(model.getFields().getResource()).withMimeType(MimeType.APPLICATION_JSON);
+    }
 }

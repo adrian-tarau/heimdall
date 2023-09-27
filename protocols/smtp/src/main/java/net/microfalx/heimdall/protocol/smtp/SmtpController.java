@@ -14,7 +14,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.Collection;
 
 @Controller
 @RequestMapping("/protocol/smtp")
@@ -27,20 +28,22 @@ public class SmtpController extends ProtocolController<SmtpEvent> {
     @Override
     protected void updateModel(net.microfalx.bootstrap.dataset.DataSet<SmtpEvent, Field<SmtpEvent>, Integer> dataSet, Model controllerModel, SmtpEvent dataSetModel, State state) {
         if (state == State.VIEW) {
-            controllerModel.addAttribute("attachments", dataSetModel.getAttachments().stream().filter(
-                    a -> a.getPart().getType() == Part.Type.ATTACHMENT).toList());
-            Iterator<SmtpAttachment> bodies = dataSetModel.getAttachments().stream().filter(
-                    a -> a.getPart().getType() == Part.Type.BODY).toList().iterator();
             String bodyText = null;
             String bodyHtml = null;
-            while (bodies.hasNext()) {
-                net.microfalx.heimdall.protocol.core.jpa.Part part = bodies.next().getPart();
-                if (MimeType.TEXT_PLAIN.equals(part.getMimeType())) {
-                    bodyText = part.getResource();
-                } else {
-                    bodyHtml = part.getResource();
+            Collection<SmtpAttachment> realAttachments = new ArrayList<>();
+            for (SmtpAttachment attachment : dataSetModel.getAttachments()) {
+                net.microfalx.heimdall.protocol.core.jpa.Part part = attachment.getPart();
+                if (part.getType() == Part.Type.ATTACHMENT) {
+                    realAttachments.add(attachment);
+                } else if (part.getType() == Part.Type.BODY) {
+                    if (MimeType.TEXT_PLAIN.equals(part.getMimeType())) {
+                        bodyText = part.getResource();
+                    } else {
+                        bodyHtml = part.getResource();
+                    }
                 }
             }
+            controllerModel.addAttribute("attachments", realAttachments);
             controllerModel.addAttribute("bodyText", bodyText);
             controllerModel.addAttribute("bodyHtml", bodyHtml);
         }

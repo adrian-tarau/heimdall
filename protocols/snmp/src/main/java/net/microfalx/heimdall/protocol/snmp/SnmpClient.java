@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.protocol.snmp;
 
+import net.microfalx.bootstrap.model.Attribute;
 import net.microfalx.heimdall.protocol.core.ProtocolClient;
 import net.microfalx.heimdall.protocol.core.ProtocolException;
 import org.snmp4j.*;
@@ -11,7 +12,6 @@ import org.snmp4j.transport.DefaultTcpTransportMapping;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
 
 import java.io.IOException;
-import java.util.Map;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static org.snmp4j.mp.SnmpConstants.SNMP_ERROR_SUCCESS;
@@ -54,6 +54,7 @@ public class SnmpClient extends ProtocolClient<SnmpEvent> {
 
     /**
      * Returns the OID which carries the event message.
+     *
      * @return a non-null instance
      */
     public String getMessageOid() {
@@ -62,6 +63,7 @@ public class SnmpClient extends ProtocolClient<SnmpEvent> {
 
     /**
      * Changes the OID which carries the event message.
+     *
      * @param messageOid the OID
      */
     public void setMessageOid(String messageOid) {
@@ -85,8 +87,8 @@ public class SnmpClient extends ProtocolClient<SnmpEvent> {
     private void updateBindings(PDU pdu, SnmpEvent event) {
         pdu.add(new VariableBinding(SnmpConstants.sysUpTime, new TimeTicks(getSysUpTime())));
         pdu.add(new VariableBinding(new OID(messageOid), new OctetString(event.getBodyAsString())));
-        for (Map.Entry<String, Object> entry : event.getAttributes().entrySet()) {
-            Object value = entry.getValue();
+        for (Attribute attribute : event) {
+            Object value = attribute.getValue();
             Variable variable;
             if (value == null) {
                 variable = new Null();
@@ -101,7 +103,7 @@ public class SnmpClient extends ProtocolClient<SnmpEvent> {
             } else {
                 throw new ProtocolException("Unknown variable bind data type: " + value.getClass());
             }
-            pdu.add(new VariableBinding(new OID(entry.getKey()), variable));
+            pdu.add(new VariableBinding(new OID(attribute.getName()), variable));
         }
     }
 

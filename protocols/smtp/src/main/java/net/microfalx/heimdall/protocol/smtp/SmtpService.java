@@ -12,12 +12,14 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public final class SmtpService extends ProtocolService<SmtpEvent> {
+public final class SmtpService extends ProtocolService<SmtpEvent, net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent> {
 
     @Autowired
     private SmtpProperties configuration;
+
     @Autowired
     private SmtpEventRepository repository;
+
     @Autowired
     private SmtpSimulator smtpSimulator;
 

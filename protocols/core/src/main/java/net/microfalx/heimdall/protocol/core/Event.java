@@ -1,13 +1,15 @@
 package net.microfalx.heimdall.protocol.core;
 
+import net.microfalx.bootstrap.model.Attribute;
+import net.microfalx.bootstrap.model.Attributes;
+
 import java.time.ZonedDateTime;
 import java.util.Collection;
-import java.util.Map;
 
 /**
  * Holds an event received over the wire.
  */
-public interface Event {
+public interface Event extends Attributes<Attribute> {
 
     /**
      * Returns a unique identifier associated with an event.
@@ -108,13 +110,6 @@ public interface Event {
      * @return {@code true} if it has at least one attachment, {@code false} otherwise
      */
     boolean hasAttachments();
-
-    /**
-     * Returns a collection of attributes
-     *
-     * @return a non-null instance
-     */
-    Map<String, Object> getAttributes();
 
     /**
      * En enum for the type of event.

@@ -3,7 +3,7 @@
 <body>
 <div th:fragment="fields">
     <div class="container-fluid">
-        <div class="row container-fluid border rounded bg-body-secondary mb-3 p-3 fs-6">
+        <div class="row border rounded bg-body-secondary mb-3 p-3 fs-6">
             <div class="row">
                 <div class="col-md-8"><span class="fw-bold">From: </span><span class="fst-italic" th:text="${model.address.name}"></span></div>
                 <div class="col-md-4"><span class="fw-bold">Receive At: </span><span class="fst-italic" th:text="${model.receivedAt}"></span></div>
@@ -14,6 +14,14 @@
                 <div class="col-md-2"><span class="fw-bold">Facility: </span><span class="fst-italic" th:text="${#dataset.getDisplayValue(model, 'facility')}"></span></div>
                 <div class="col-md-4"></div>
                 <div class="col-md-4"><span class="fw-bold">Send At: </span><span class="fst-italic" th:text="${model.sentAt}"></span></div>
+            </div>
+        </div>
+        <div class="row border rounded bg-body-secondary mb-3 p-3 fs-6 dataset-attributes">
+            <div class="col-md-12 p-5">
+            <span th:each="attribute : ${attributes}" th:class="|badge rounded-pill me-1 name-default ${#dataset.getAttributeClasses(attribute)}|">
+                <span th:text="${attribute.label}"></span><span>:&nbsp;</span>
+                <span th:text="${attribute.value}"></span>
+            </span>
             </div>
         </div>
         <div class="row border rounded p-3 mt-2">

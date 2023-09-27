@@ -3,7 +3,7 @@
 <body>
 <div th:fragment="fields">
     <div class="container-fluid">
-        <div class="row container-fluid border rounded bg-body-secondary mb-3 p-3 fs-6">
+        <div class="row border rounded bg-body-secondary mb-3 p-3 fs-6">
             <div class="row">
                 <div class="col-md-4"><span class="fw-bold">From: </span><span class="fst-italic" th:text="${model.agentAddress.name}"></span></div>
                 <div class="col-md-4"><span class="fw-bold">Trap Type: </span><span class="fst-italic" th:text="${#dataset.getDisplayValue(model, 'trapType')}"></span></div>
@@ -41,13 +41,12 @@
                         </thead>
                         <tbody>
                         <tr th:each="attribute : ${attributes}">
-                            <td th:text="${attribute.key}"></td>
+                            <td th:text="${attribute.name}"></td>
                             <td th:text="${attribute.value}"></td>
                         </tr>
                         </tbody>
                     </table>
                 </div>
-
             </div>
         </div>
     </div>
