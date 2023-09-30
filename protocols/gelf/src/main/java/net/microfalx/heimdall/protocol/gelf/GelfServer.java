@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 
 import static net.microfalx.heimdall.protocol.core.ProtocolConstants.MAX_NAME_LENGTH;
 import static net.microfalx.lang.IOUtils.appendStream;
-import static net.microfalx.lang.StringUtils.removeLineBreaks;
+import static net.microfalx.lang.StringUtils.*;
 import static org.apache.commons.lang3.StringUtils.abbreviate;
 
 @Component
@@ -136,7 +136,7 @@ public class GelfServer implements InitializingBean, ProtocolServerHandler {
     private void doHandle(InetAddress address, InputStream inputStream) throws IOException {
         JsonNode jsonNode = readJson(inputStream);
         if (LOGGER.isDebugEnabled()) LOGGER.debug("Received GELF event:\n{}", jsonNode.toPrettyString());
-        String shortMessage = getField(jsonNode, "short_message");
+        String shortMessage = defaultIfEmpty(getField(jsonNode, "short_message"), NA_STRING);
         String fullMessage = getRequiredField(jsonNode, "full_message");
         String host = net.microfalx.lang.StringUtils.defaultIfNull(getField(jsonNode, "host"), "0.0.0.0");
         GelfEvent message = new GelfEvent();
@@ -145,7 +145,7 @@ public class GelfServer implements InitializingBean, ProtocolServerHandler {
         message.setReceivedAt(ZonedDateTime.now());
         message.setSource(Address.create(Address.Type.HOSTNAME, host));
         message.addPart(Body.create(shortMessage));
-        message.addPart(Body.create(fullMessage));
+        if (!shortMessage.equals(fullMessage)) message.addPart(Body.create(fullMessage));
         message.setCreatedAt(createTimeStamp(jsonNode));
         message.setSentAt(createTimeStamp(jsonNode));
         message.setGelfSeverity(Severity.fromNumericalCode(getRequiredIntField(jsonNode, "level")));

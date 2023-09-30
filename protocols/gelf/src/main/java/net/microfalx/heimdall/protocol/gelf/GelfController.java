@@ -1,6 +1,7 @@
 package net.microfalx.heimdall.protocol.gelf;
 
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
+import net.microfalx.bootstrap.model.Attribute;
 import net.microfalx.bootstrap.model.Attributes;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.heimdall.protocol.core.ProtocolController;
@@ -10,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import static net.microfalx.bootstrap.model.AttributeUtils.shouldDisplayAsBadge;
 
 @Controller
 @RequestMapping("/protocol/gelf")
@@ -22,10 +25,22 @@ public class GelfController extends ProtocolController<GelfEvent> {
     @Autowired
     private GelfService gelfService;
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     protected void beforeView(net.microfalx.bootstrap.dataset.DataSet<GelfEvent, Field<GelfEvent>, Integer> dataSet,
                               Model controllerModel, GelfEvent dataSetModel) {
         Attributes<?> attributes = gelfService.getAttributes(dataSetModel);
-        controllerModel.addAttribute("attributes", attributes);
+        Attributes badgeAttributes = Attributes.create();
+        Attributes fieldAttributes = Attributes.create();
+        for (Attribute attribute : attributes) {
+            if (shouldDisplayAsBadge(attribute, true)) {
+                badgeAttributes.addAttribute(attribute);
+            } else {
+                fieldAttributes.addAttribute(attribute);
+            }
+        }
+        controllerModel.addAttribute("complex", fieldAttributes.hasAttributes() || dataSetModel.getLongMessage() != null);
+        controllerModel.addAttribute("badges", badgeAttributes);
+        controllerModel.addAttribute("fields", fieldAttributes);
     }
 }

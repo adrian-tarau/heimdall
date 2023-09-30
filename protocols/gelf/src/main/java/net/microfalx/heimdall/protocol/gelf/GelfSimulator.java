@@ -22,12 +22,12 @@ public class GelfSimulator extends ProtocolSimulator<GelfEvent, GelfClient> {
 
     @Override
     protected Address createSourceAddress() {
-        return Address.create(Address.Type.HOSTNAME, "192.168." + getRandomSubnet());
+        return Address.create(Address.Type.HOSTNAME, getRandomDomainOrIp());
     }
 
     @Override
     protected Address createTargetAddress() {
-        return Address.create(Address.Type.HOSTNAME, "192.168." + getRandomSubnet());
+        return Address.create(Address.Type.HOSTNAME, getRandomDomainOrIp());
     }
 
     @Override
@@ -51,9 +51,9 @@ public class GelfSimulator extends ProtocolSimulator<GelfEvent, GelfClient> {
     }
 
     private void updateAttributes(GelfEvent message) {
-        Faker faker = new Faker();
+        Faker faker = getFaker();
         message.addAttribute("OS", faker.computer().operatingSystem());
         message.addAttribute("Platform", faker.computer().platform());
-        message.addAttribute("Domain", faker.domain().fullDomain("spirent.com"));
+        message.addAttribute("Domain", faker.domain().fullDomain("net.microfalx.simulator"));
     }
 }

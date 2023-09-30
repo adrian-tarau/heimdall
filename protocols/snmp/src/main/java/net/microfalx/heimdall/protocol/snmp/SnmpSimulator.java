@@ -33,12 +33,12 @@ public class SnmpSimulator extends ProtocolSimulator<SnmpEvent, SnmpClient> {
 
     @Override
     protected Address createSourceAddress() {
-        return Address.create(Address.Type.HOSTNAME, "192.168." + getRandomSubnet());
+        return Address.create(Address.Type.HOSTNAME, getRandomDomainOrIp());
     }
 
     @Override
     protected Address createTargetAddress() {
-        return Address.create(Address.Type.HOSTNAME, "192.168." + getRandomSubnet());
+        return Address.create(Address.Type.HOSTNAME, getRandomDomainOrIp());
     }
 
     @Override
@@ -111,7 +111,7 @@ public class SnmpSimulator extends ProtocolSimulator<SnmpEvent, SnmpClient> {
         } else if (severityVariable.isNumber()) {
             return Integer.toString(random.nextInt(1000));
         } else if (type == SmiPrimitiveType.IP_ADDRESS) {
-            return "192.168." + getRandomSubnet();
+            return "192.168." + getRandomIp();
         } else if (type == SmiPrimitiveType.OCTET_STRING) {
             return getRandomName();
         } else {

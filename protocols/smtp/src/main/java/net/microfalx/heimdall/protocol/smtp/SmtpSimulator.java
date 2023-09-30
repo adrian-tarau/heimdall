@@ -79,7 +79,7 @@ public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
     }
 
     private void createAttachments(SmtpEvent smtpEvent) {
-        Faker faker = new Faker();
+        Faker faker = getFaker();
         int attachmentCount = 3;
         if (random.nextFloat() > 0.8) {
             attachmentCount = 1 + random.nextInt(2);
@@ -104,12 +104,12 @@ public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
     }
 
     private String getSubject() {
-        Faker faker = new Faker();
+        Faker faker = getFaker();
         return faker.book().title();
     }
 
     private String geRandomEmail() {
-        Faker faker = new Faker();
+        Faker faker = getFaker();
         return faker.name().firstName() + "." + faker.name().lastName() + "@company.com";
     }
 

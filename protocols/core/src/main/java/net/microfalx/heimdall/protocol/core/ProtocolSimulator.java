@@ -31,6 +31,7 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
     private final List<Address> sourceAddresses = new ArrayList<>();
     private final List<Address> targetAddresses = new ArrayList<>();
     private final List<ProtocolClient<E>> clients = new ArrayList<>();
+    private final Faker faker = new Faker();
 
     public ProtocolSimulator(ProtocolSimulatorProperties properties) {
         requireNonNull(properties);
@@ -42,9 +43,18 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
     }
 
     /**
+     * Returns the data generator associated with this simulator.
+     *
+     * @return a non-null instance
+     */
+    protected final Faker getFaker() {
+        return faker;
+    }
+
+    /**
      * Invoked to simulate an event, if the simulator is enabled.
      */
-    public void simulate() {
+    public final void simulate() {
         int eventCount = properties.getMinimumEventCount() + ThreadLocalRandom.current().nextInt(properties.getMaximumEventCount());
         for (int i = 0; i < eventCount; i++) {
             Address sourceAddress = getRandomSourceAddress();
@@ -146,16 +156,41 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
     }
 
     /**
-     * Returns the next subnet.
+     * Returns the next random IP.
      *
      * @return a non-null instance
      */
-    protected final String getRandomSubnet() {
-        if (SUBNET_INDEX1_GENERATOR.get() >= 255) {
-            SUBNET_INDEX1_GENERATOR.set(1);
+    protected final String getRandomIp() {
+        int iterations = random.nextInt(10);
+        for (int i = 0; i < iterations; i++) {
             SUBNET_INDEX2_GENERATOR.incrementAndGet();
+            if (SUBNET_INDEX1_GENERATOR.get() >= 255) {
+                SUBNET_INDEX1_GENERATOR.set(1);
+            }
         }
-        return SUBNET_INDEX2_GENERATOR.get() + "." + SUBNET_INDEX1_GENERATOR.getAndIncrement();
+        return "192.168." + SUBNET_INDEX2_GENERATOR.get() + "." + SUBNET_INDEX1_GENERATOR.getAndIncrement();
+    }
+
+    /**
+     * Returns the next domain.
+     *
+     * @return a non-null instance
+     */
+    protected final String getRandomDomain() {
+        return faker.domain().fullDomain("microfalx");
+    }
+
+    /**
+     * Returns the next domain or IP.
+     *
+     * @return a non-null instance
+     */
+    protected final String getRandomDomainOrIp() {
+        if (random.nextFloat() > 0.8) {
+            return getRandomIp();
+        } else {
+            return getRandomDomain();
+        }
     }
 
     /**
@@ -173,7 +208,6 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
      * @return a non-null instance
      */
     protected final String getRandomName() {
-        Faker faker = new Faker();
         float value = random.nextFloat();
         if (value > 0.9) {
             return faker.appliance().equipment();
@@ -218,7 +252,6 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
     }
 
     private String getNextSentence() {
-        Faker faker = new Faker();
         Shakespeare shakespeare = faker.shakespeare();
         float value = random.nextFloat();
         if (value > 0.9) {
@@ -243,11 +276,11 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
     }
 
     private void initializeAddresses() {
-        int addressCount = properties.getMinimumAddressCount() + ThreadLocalRandom.current().nextInt(properties.getMaximumAddressCount());
+        int addressCount = properties.getMinimumAddressCount() + random.nextInt(properties.getMaximumAddressCount());
         for (int i = 0; i < addressCount; i++) {
             this.targetAddresses.add(createTargetAddress());
         }
-        addressCount = properties.getMinimumAddressCount() + ThreadLocalRandom.current().nextInt(properties.getMaximumAddressCount());
+        addressCount = properties.getMinimumAddressCount() + random.nextInt(properties.getMaximumAddressCount());
         for (int i = 0; i < addressCount; i++) {
             this.sourceAddresses.add(createSourceAddress());
         }

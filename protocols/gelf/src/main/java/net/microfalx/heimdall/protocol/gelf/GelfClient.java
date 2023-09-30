@@ -42,7 +42,7 @@ public class GelfClient extends ProtocolClient<GelfEvent> {
     private void addAdditionalFields(MdcGelfMessageAssembler assembler) {
         assembler.addField(new StaticMessageField("Application", "Heimdall"));
         try {
-            assembler.addField(new StaticMessageField("Server", InetAddress.getLocalHost().getHostAddress()));
+            assembler.addField(new StaticMessageField("Server", InetAddress.getLocalHost().getHostName()));
         } catch (UnknownHostException e) {
             // ignore this
         }

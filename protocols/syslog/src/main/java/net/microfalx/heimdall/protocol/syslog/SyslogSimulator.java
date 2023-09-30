@@ -27,7 +27,7 @@ public class SyslogSimulator extends ProtocolSimulator<SyslogMessage, SyslogClie
      */
     @Override
     protected Address createSourceAddress() {
-        return Address.create(Address.Type.HOSTNAME, "192.168." + getRandomSubnet());
+        return Address.create(Address.Type.HOSTNAME, getRandomDomainOrIp());
     }
 
     /**
@@ -37,7 +37,7 @@ public class SyslogSimulator extends ProtocolSimulator<SyslogMessage, SyslogClie
      */
     @Override
     protected Address createTargetAddress() {
-        return Address.create(Address.Type.HOSTNAME, "192.168." + getRandomSubnet());
+        return Address.create(Address.Type.HOSTNAME, getRandomDomainOrIp());
     }
 
     /**

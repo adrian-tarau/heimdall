@@ -10,6 +10,7 @@ import net.microfalx.bootstrap.search.SearchService;
 import net.microfalx.heimdall.protocol.core.jpa.AddressRepository;
 import net.microfalx.heimdall.protocol.core.jpa.PartRepository;
 import net.microfalx.lang.IOUtils;
+import net.microfalx.lang.StringUtils;
 import net.microfalx.resource.MimeType;
 import net.microfalx.resource.Resource;
 import org.slf4j.Logger;
@@ -240,10 +241,16 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
         Attributes<?> attributes = Attributes.create();
         try {
             attributes.copyFrom(resource);
-            return attributes;
-        } catch (IOException e) {
-            throw new ProtocolException("Failed to load attributes from " + resource.toURI(), e);
+        } catch (Exception e) {
+            String resourceFragment = NA_STRING;
+            try {
+                resourceFragment = StringUtils.getMaximumLines(resource.loadAsString(), 5);
+            } catch (Exception ex) {
+                // ignore
+            }
+            LOGGER.error("Failed to load attributes from " + resource.toURI() + ", content: " + resourceFragment, e);
         }
+        return attributes;
     }
 
     /**
