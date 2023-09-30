@@ -43,6 +43,7 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
     private static final DateTimeFormatter DIRECTORY_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
     private static final String FILE_NAME_FORMAT = "%09d";
     private static final String PART_FILE_EXTENSION = "part";
+    public static final String PROTOCOL = "protocol";
 
     private static final LocalDateTime STARTUP = LocalDateTime.now();
 
@@ -347,6 +348,7 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
         for (net.microfalx.bootstrap.model.Attribute attribute : event) {
             document.addAttributeIfAbsent(Attribute.create(attribute).setIndexed(true).setStored(true));
         }
+        document.setOwner(PROTOCOL);
         updateDocument(event, document);
         indexService.index(document);
     }
