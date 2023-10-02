@@ -263,20 +263,19 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
      * @return the JPA address
      */
     protected final net.microfalx.heimdall.protocol.core.jpa.Address lookupAddress(Address address) {
-        net.microfalx.heimdall.protocol.core.jpa.Address addressJpa = addressRepository.findByValue(address.getValue());
-        if (addressJpa == null) {
-            addressJpa = new net.microfalx.heimdall.protocol.core.jpa.Address();
-            addressJpa.setType(address.getType());
-            addressJpa.setName(address.getName());
-            addressJpa.setValue(address.getValue());
-            net.microfalx.heimdall.protocol.core.jpa.Address finalAddressJpa = addressJpa;
-            RetryTemplate template = new RetryTemplate();
-            template.execute(context -> {
+        RetryTemplate template = new RetryTemplate();
+        return template.execute(context -> {
+            net.microfalx.heimdall.protocol.core.jpa.Address addressJpa = addressRepository.findByValue(address.getValue());
+            if (addressJpa == null) {
+                addressJpa = new net.microfalx.heimdall.protocol.core.jpa.Address();
+                addressJpa.setType(address.getType());
+                addressJpa.setName(address.getName());
+                addressJpa.setValue(address.getValue());
+                net.microfalx.heimdall.protocol.core.jpa.Address finalAddressJpa = addressJpa;
                 addressRepository.save(finalAddressJpa);
-                return null;
-            });
-        }
-        return addressJpa;
+            }
+            return addressJpa;
+        });
     }
 
     /**

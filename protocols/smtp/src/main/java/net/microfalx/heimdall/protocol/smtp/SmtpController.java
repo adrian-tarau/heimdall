@@ -29,7 +29,7 @@ public class SmtpController extends ProtocolController<SmtpEvent> {
     protected void updateModel(net.microfalx.bootstrap.dataset.DataSet<SmtpEvent, Field<SmtpEvent>, Integer> dataSet, Model controllerModel, SmtpEvent dataSetModel, State state) {
         if (state == State.VIEW) {
             String bodyText = null;
-            String bodyHtml = null;
+            Integer bodyHtmlPartId = null;
             Collection<SmtpAttachment> realAttachments = new ArrayList<>();
             for (SmtpAttachment attachment : dataSetModel.getAttachments()) {
                 net.microfalx.heimdall.protocol.core.jpa.Part part = attachment.getPart();
@@ -39,13 +39,13 @@ public class SmtpController extends ProtocolController<SmtpEvent> {
                     if (MimeType.TEXT_PLAIN.equals(part.getMimeType())) {
                         bodyText = part.getResource();
                     } else {
-                        bodyHtml = part.getResource();
+                        bodyHtmlPartId = part.getId();
                     }
                 }
             }
             controllerModel.addAttribute("attachments", realAttachments);
             controllerModel.addAttribute("bodyText", bodyText);
-            controllerModel.addAttribute("bodyHtml", bodyHtml);
+            controllerModel.addAttribute("bodyHtmlPartId", bodyHtmlPartId);
         }
     }
 }

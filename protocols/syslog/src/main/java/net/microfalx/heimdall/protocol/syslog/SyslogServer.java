@@ -5,9 +5,11 @@ import com.cloudbees.syslog.Severity;
 import jakarta.annotation.PreDestroy;
 import net.microfalx.heimdall.protocol.core.Address;
 import net.microfalx.heimdall.protocol.core.Body;
+import org.graylog2.syslog4j.impl.message.structured.StructuredSyslogMessage;
 import org.graylog2.syslog4j.server.SyslogServerEventIF;
 import org.graylog2.syslog4j.server.SyslogServerIF;
 import org.graylog2.syslog4j.server.SyslogServerSessionEventHandlerIF;
+import org.graylog2.syslog4j.server.impl.event.structured.StructuredSyslogServerEvent;
 import org.graylog2.syslog4j.server.impl.net.tcp.TCPNetSyslogServer;
 import org.graylog2.syslog4j.server.impl.net.tcp.TCPNetSyslogServerConfig;
 import org.graylog2.syslog4j.server.impl.net.udp.UDPNetSyslogServer;
@@ -24,6 +26,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 import static net.microfalx.heimdall.protocol.core.ProtocolConstants.MAX_NAME_LENGTH;
+import static net.microfalx.lang.StringUtils.isNotEmpty;
 import static net.microfalx.lang.StringUtils.removeLineBreaks;
 import static org.apache.commons.lang3.StringUtils.abbreviate;
 
@@ -88,16 +91,32 @@ public class SyslogServer implements InitializingBean {
     private void event(SyslogServerIF syslogServer, SocketAddress socketAddress, SyslogServerEventIF event) {
         InetSocketAddress address = (InetSocketAddress) socketAddress;
         if (LOGGER.isDebugEnabled()) LOGGER.debug("Received syslog even from {}", address.getHostName());
+        StructuredSyslogServerEvent structuredEvent = null;
+        if (event instanceof StructuredSyslogServerEvent) {
+            structuredEvent = (StructuredSyslogServerEvent) event;
+        }
+        String originalMessage = event.getMessage();
+        StructuredSyslogMessage structuredMessage = structuredEvent.getStructuredMessage();
+        if (structuredMessage != null) {
+            originalMessage = structuredMessage.getMessage();
+        }
         SyslogMessage message = new SyslogMessage();
-        message.setName(abbreviate(removeLineBreaks(event.getMessage()), MAX_NAME_LENGTH));
+        message.setName(abbreviate(removeLineBreaks(originalMessage), MAX_NAME_LENGTH));
         message.setFacility(Facility.fromNumericalCode(event.getFacility()));
         message.setSyslogSeverity(Severity.fromNumericalCode(event.getLevel()));
         message.setSource(Address.create(Address.Type.HOSTNAME, address.getHostName(), address.getAddress().getHostAddress()));
         message.addTarget(Address.create(Address.Type.HOSTNAME, event.getHost()));
-        message.setBody(Body.create(event.getMessage()));
+        message.setBody(Body.create(originalMessage));
         message.setCreatedAt(event.getDate().toInstant().atZone(ZoneId.systemDefault()));
         message.setSentAt(message.getCreatedAt());
         message.setReceivedAt(ZonedDateTime.now());
+        message.addAttribute("Server", event.getHost());
+        if (structuredEvent != null) {
+            message.addAttribute("ProcessId", structuredEvent.getProcessId());
+            message.addAttribute("Application", structuredEvent.getApplicationName());
+            if (isNotEmpty(structuredMessage.getMessageId())) message.addAttribute("MessageId", structuredMessage.getMessageId());
+            if (isNotEmpty(structuredMessage.getProcId())) message.addAttribute("PID", structuredMessage.getProcId());
+        }
         syslogService.accept(message);
     }
 

@@ -115,7 +115,7 @@ public class SmtpServer implements InitializingBean, BasicMessageListener {
 
     private Body extractBody(MimeMessage message) throws MessagingException, IOException {
         if (message.getContent() instanceof String) {
-            return (Body) Body.create((String) message.getContent()).setMimeType(MimeType.TEXT_PLAIN);
+            return (Body) Body.create((String) message.getContent()).setMimeType(MimeType.get(message.getContentType()));
         } else {
             return null;
         }
@@ -128,11 +128,11 @@ public class SmtpServer implements InitializingBean, BasicMessageListener {
             BodyPart bodyPart = multipart.getBodyPart(i);
             if (isNotEmpty(bodyPart.getFileName())) {
                 Attachment attachment = Attachment.create(createResource(bodyPart));
-                attachment.setMimeType(bodyPart.getContentType());
+                attachment.setMimeType(MimeType.get(bodyPart.getContentType()));
                 attachment.setFileName(bodyPart.getFileName());
                 parts.add(attachment);
             } else {
-                parts.add(Body.create(createResource(bodyPart)).setMimeType(bodyPart.getContentType()));
+                parts.add(Body.create(createResource(bodyPart)).setMimeType(MimeType.get(bodyPart.getContentType())));
             }
         }
         return parts;
