@@ -124,9 +124,16 @@ public class SmtpServer implements InitializingBean, BasicMessageListener {
     private Collection<Part> extractParts(MimeMessage message) throws MessagingException, IOException {
         if (!(message.getContent() instanceof Multipart multipart)) return Collections.emptyList();
         Collection<Part> parts = new ArrayList<>();
+        extractParts(multipart, parts);
+        return parts;
+    }
+
+    private void extractParts(Multipart multipart, Collection<Part> parts) throws MessagingException, IOException {
         for (int i = 0; i < multipart.getCount(); i++) {
             BodyPart bodyPart = multipart.getBodyPart(i);
-            if (isNotEmpty(bodyPart.getFileName())) {
+            if (bodyPart.getContent() instanceof Multipart) {
+                extractParts((Multipart) bodyPart.getContent(), parts);
+            } else if (isNotEmpty(bodyPart.getFileName())) {
                 Attachment attachment = Attachment.create(createResource(bodyPart));
                 attachment.setMimeType(MimeType.get(bodyPart.getContentType()));
                 attachment.setFileName(bodyPart.getFileName());
@@ -135,7 +142,6 @@ public class SmtpServer implements InitializingBean, BasicMessageListener {
                 parts.add(Body.create(createResource(bodyPart)).setMimeType(MimeType.get(bodyPart.getContentType())));
             }
         }
-        return parts;
     }
 
     private Resource createResource(BodyPart bodyPart) throws MessagingException, IOException {

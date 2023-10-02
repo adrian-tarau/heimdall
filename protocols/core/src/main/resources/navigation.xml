@@ -2,5 +2,6 @@
 <navigations xmlns="https://net.microfalx/xsd/navigation-1.0.xsd">
     <menu id="left">
         <menu id="protocols" text="Protocols" position="10" icon="fa-solid fa-network-wired"/>
+        <item id="mib" text="Addresses" parent="administration" action="/protocol/address" icon="fa-solid fa-address-book"/>
     </menu>
 </navigations>

@@ -16,13 +16,14 @@
                 <div class="col-md-4"><span class="fw-bold">Sent at: </span><span class="fst-italic" th:text="${#temporals.format(model.sentAt)}"></span></div>
             </div>
             <div class="flex-row m-4 p-2" th:unless="${attachments.isEmpty()}">
-                <a href="#" th:each="attachment: ${attachments}" class="icon-link p-2">
-                    <span class="badge rounded-pill text-bg-primary"><i class="fa-solid fa-paperclip"></i><span class="ms-1" th:text="${attachment.part.fileName}"></span></span>
-                </a>
+                <div th:each="attachment: ${attachments}" th:remove="tag">
+                    <a th:href="@{'/protocol/smtp/part/'+${attachment.part.id}+'/download'}" class="icon-link p-2">
+                        <span class="badge rounded-pill text-bg-primary"><i class="fa-solid fa-paperclip"></i><span class="ms-1" th:text="${attachment.part.fileName}"></span></span>
+                    </a>
+                </div>
             </div>
         </div>
         <div class="row border rounded p-3 mt-2" th:if="${bodyText}">
-            <p>aaa</p>
             <p class="dataset-text-mono" th:text="${#resources.load(bodyText)}"></p>
         </div>
         <div class="row border rounded p-3 mt-2" th:if="${bodyHtmlPartId}">

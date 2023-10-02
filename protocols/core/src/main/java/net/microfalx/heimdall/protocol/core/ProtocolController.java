@@ -33,7 +33,8 @@ public abstract class ProtocolController<E extends Event> extends DataSetControl
     @ResponseBody()
     public final ResponseEntity<InputStreamResource> viewPart(Model model, @PathVariable("partId") String partId) throws IOException {
         Resource resource = findResource(Integer.parseInt(partId));
-        if (!resource.exists()) resource = MemoryResource.create("A part with identifier '" + partId + "' does not exist");
+        if (!resource.exists())
+            resource = MemoryResource.create("A part with identifier '" + partId + "' does not exist");
         return ResponseEntity.ok().contentType(MediaType.parseMediaType(resource.getMimeType()))
                 .body(new InputStreamResource(resource.getInputStream()));
     }
@@ -42,9 +43,9 @@ public abstract class ProtocolController<E extends Event> extends DataSetControl
     @ResponseBody()
     public final ResponseEntity<InputStreamResource> downloadPart(Model model, @PathVariable("partId") String partId) throws IOException {
         Resource resource = findResource(Integer.parseInt(partId));
-        if (resource.exists()) return ResponseEntity.notFound().build();
+        if (!resource.exists()) return ResponseEntity.notFound().build();
         return ResponseEntity.ok().contentType(MediaType.parseMediaType(resource.getMimeType()))
-                .header("Content-Disposition", "attachment; filename=\"" + resource.getFileName() + "\"")
+                .header("Content-Disposition", "attachment; filename=\"" + resource.getName() + "\"")
                 .body(new InputStreamResource(resource.getInputStream()));
     }
 
@@ -52,6 +53,6 @@ public abstract class ProtocolController<E extends Event> extends DataSetControl
         Optional<net.microfalx.heimdall.protocol.core.jpa.Part> partOptional = partRepository.findById(partId);
         if (partOptional.isEmpty()) return NullResource.createNull();
         net.microfalx.heimdall.protocol.core.jpa.Part part = partOptional.get();
-        return ResourceFactory.resolve(part.getResource()).withMimeType(part.getMimeType());
+        return ResourceFactory.resolve(part.getResource()).withName(part.getFileName()).withMimeType(part.getMimeType());
     }
 }
