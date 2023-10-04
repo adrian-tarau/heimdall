@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.OrderBy;
+import net.microfalx.lang.annotation.Description;
 import net.microfalx.lang.annotation.Position;
 import net.microfalx.lang.annotation.Timestamp;
 import net.microfalx.lang.annotation.Visible;
@@ -28,12 +29,14 @@ public abstract class TimestampAware {
     @NotNull
     @Position(500)
     @Visible(modes = {Visible.Mode.VIEW})
+    @Description("The time for when the {name} was created")
     private LocalDateTime createdAt;
 
     @Column(name = "sent_at", nullable = false)
     @NotNull
     @Position(501)
     @Visible(modes = {Visible.Mode.VIEW})
+    @Description("The time for when the {name} was send")
     private LocalDateTime sentAt;
 
     @Column(name = "received_at", nullable = false)
@@ -41,6 +44,7 @@ public abstract class TimestampAware {
     @OrderBy(OrderBy.Direction.DESC)
     @Visible(modes = {Visible.Mode.BROWSE, Visible.Mode.VIEW})
     @Timestamp
+    @Description("The time for when the {name} was received")
     private LocalDateTime receivedAt;
 
 }
