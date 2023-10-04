@@ -22,6 +22,7 @@ public class MibSymbol implements Identifiable<String>, Nameable, Descriptable {
     private final String id;
 
     @Position(1)
+    @Description("The MIB Module that the MIB Symbol is a part of")
     private final MibModule module;
 
     @Visible(false)
@@ -52,6 +53,7 @@ public class MibSymbol implements Identifiable<String>, Nameable, Descriptable {
     @Override
     @Position(10)
     @Name
+    @Description("The name for the MIB Symbol")
     public String getName() {
         return symbol.getId();
     }
@@ -72,6 +74,7 @@ public class MibSymbol implements Identifiable<String>, Nameable, Descriptable {
      * @return a non-null instance
      */
     @Position(20)
+    @Description("The type of MIB Symbol")
     public SymbolType getType() {
         if (symbol instanceof SmiVariable) {
             return SymbolType.VARIABLE;
@@ -110,6 +113,7 @@ public class MibSymbol implements Identifiable<String>, Nameable, Descriptable {
      * @return a non-null instance if it is a primitive type, null otherwise
      */
     @Position(30)
+    @Description("the primitive data type of the Mib Symbol")
     public SmiPrimitiveType getPrimitiveType() {
         return symbol instanceof SmiType ? ((SmiType) symbol).getPrimitiveType() : null;
     }
@@ -117,6 +121,7 @@ public class MibSymbol implements Identifiable<String>, Nameable, Descriptable {
     @Position(100)
     @Formattable(maximumLength = 100)
     @Override
+    @Description("A description for a MIB Symbol")
     public String getDescription() {
         if (symbol instanceof SmiTextualConvention) {
             return ((SmiTextualConvention) symbol).getDescription();
@@ -131,6 +136,7 @@ public class MibSymbol implements Identifiable<String>, Nameable, Descriptable {
      * @return a non-null instance if the symbol has an OID, null otherwise
      */
     @Position(50)
+    @Description("The OID for MIB Symbol")
     public String getOid() {
         return MibUtils.getOid(symbol);
     }

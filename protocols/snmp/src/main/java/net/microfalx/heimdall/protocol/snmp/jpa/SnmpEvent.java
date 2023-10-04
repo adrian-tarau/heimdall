@@ -36,12 +36,14 @@ public class SnmpEvent extends Event {
     @NotNull
     @Position(1)
     @Label("Address")
+    @Description("The name of the host, source or application that sent the SNMP event")
     private Address agentAddress;
 
     @OneToOne
     @JoinColumn(name = "message_id", nullable = false)
     @Name
     @Position(10)
+    @Description("The content of the SNMP event")
     private Part message;
 
     @ManyToOne
@@ -64,9 +66,11 @@ public class SnmpEvent extends Event {
     private String communityString;
 
     @Column(name = "enterprise", length = 200)
+    @Description("The unique identifier of the SNMP agent that is sending the trap")
     private String enterprise;
 
     @Column(name = "trap_type")
     @Lookup(model = TrapLookup.class)
+    @Description("The type of trap for the SNMP event")
     private Integer trapType;
 }

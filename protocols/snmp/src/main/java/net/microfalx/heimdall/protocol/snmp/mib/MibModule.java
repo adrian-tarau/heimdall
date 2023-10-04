@@ -36,9 +36,11 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
 
     @Position(5)
     @Width(min = "50")
+    @Description("A MIB can be either an internal MIB provided by the system. Or an external MIB provided by the user")
     private MibType type = MibType.SYSTEM;
 
     @Position(10)
+    @Description("The file the contain the MIB Module")
     private String fileName;
 
     @Position(11)
@@ -89,6 +91,7 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
     @Position(1)
     @Override
     @Name
+    @Description("The name for the MIB Module")
     public String getName() {
         return module.getId();
     }
@@ -115,6 +118,7 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
     @Override
     @Position(100)
     @Formattable(maximumLines = 2)
+    @Description("A description for the MIB Module")
     public String getDescription() {
         return module.getModuleIdentity() != null ? module.getModuleIdentity().getDescription() : null;
     }
@@ -135,6 +139,7 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
      * @return a non-null instance if the organization is defined, null otherwise
      */
     @Position(20)
+    @Description("The organization that is assign to the OID of the associated MIB Module")
     public String getOrganization() {
         return module.getModuleIdentity() != null ? module.getModuleIdentity().getOrganization() : null;
     }
@@ -155,6 +160,7 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
      * @return a non-null instance if provided, null for unknown
      */
     @Position(110)
+    @Description("The date/time when the MIB was last modified")
     public ZonedDateTime getLastModified() {
         return module.getModuleIdentity() != null ? MibUtils.parseDateTime(module.getModuleIdentity().getLastUpdated()) : null;
     }

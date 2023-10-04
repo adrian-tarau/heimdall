@@ -27,9 +27,11 @@ public class MibVariable implements Identifiable<String>, Nameable, Descriptable
     private final String id;
 
     @Position(1)
+    @Description("The Mib Module that MIB Variable is a part of")
     private final MibModule module;
 
     @Visible(false)
+    @Description("Contain all of the OIDs that is associated for each primitive data type that MIB Variable can have")
     private final SmiVariable variable;
 
     MibVariable(MibModule module, SmiVariable variable) {
@@ -66,6 +68,7 @@ public class MibVariable implements Identifiable<String>, Nameable, Descriptable
     @Override
     @Position(10)
     @Name
+    @Description("The name of the MIB Variable that is part of the MIB Module")
     public String getName() {
         return variable.getId();
     }
@@ -83,6 +86,7 @@ public class MibVariable implements Identifiable<String>, Nameable, Descriptable
     @Override
     @Position(100)
     @Formattable(maximumLength = 100)
+    @Description("The description for MIB Variable")
     public String getDescription() {
         return variable.getDescription();
     }
@@ -93,6 +97,7 @@ public class MibVariable implements Identifiable<String>, Nameable, Descriptable
      * @return a non-null instance
      */
     @Position(50)
+    @Description("The OID for MIB Variable")
     public String getOid() {
         return MibUtils.getOid(variable);
     }
@@ -103,6 +108,7 @@ public class MibVariable implements Identifiable<String>, Nameable, Descriptable
      * @return a non-null instance if there is a unit, null otherwise
      */
     @Position(60)
+    @Description("The units for MIB Variable if it is a numerical data type")
     public String getUnits() {
         return variable.getUnits();
     }
@@ -113,6 +119,7 @@ public class MibVariable implements Identifiable<String>, Nameable, Descriptable
      * @return a non-null instance if it is a primitive type, null otherwise
      */
     @Position(70)
+    @Description("The primitive data type for MIB Variable")
     public SmiPrimitiveType getType() {
         return variable.getType() != null ? variable.getType().getPrimitiveType() : null;
     }
