@@ -34,21 +34,25 @@ public class SmtpEvent extends Event {
     @Column(name = "subject", length = 500)
     @Name
     @Position(1)
+    @Description("The subject in the email")
     private String subject;
 
     @ManyToOne
     @JoinColumn(name = "from_id", nullable = false)
     @Position(2)
+    @Description("the host that is sending the email")
     private Address from;
 
     @ManyToOne
     @JoinColumn(name = "to_id", nullable = false)
     @Position(3)
+    @Description("the host that is receiving the email")
     private Address to;
 
     @Column(name = "attachment_count", nullable = false)
     @Label(value = "", icon = "fa-solid fa-paperclip")
     @Position(10)
+    @Description("The number of attachments in the email")
     private int attachmentCount;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
