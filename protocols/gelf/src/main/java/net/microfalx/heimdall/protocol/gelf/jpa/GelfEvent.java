@@ -37,6 +37,7 @@ public class GelfEvent extends Event {
     @ManyToOne
     @NotNull
     @Position(1)
+    @Description("The name of the host, source or application that sent the Gelf log event")
     private Address address;
 
     @JoinColumn(name = "short_message_id")
@@ -44,12 +45,14 @@ public class GelfEvent extends Event {
     @Name
     @Position(5)
     @Label("Message")
+    @Description("The short version of the Gelf message")
     private Part shortMessage;
 
     @JoinColumn(name = "long_message_id")
     @OneToOne
     @Position(6)
     @Visible(modes = Visible.Mode.VIEW)
+    @Description("The full version of the Gelf message")
     private Part longMessage;
 
     @JoinColumn(name = "fields_id")
@@ -67,11 +70,13 @@ public class GelfEvent extends Event {
     @Column(name = "level", nullable = false)
     @Position(25)
     @Lookup(model = SeverityLookup.class)
+    @Description("Identify the importance of the Gelf log event")
     private int level;
 
     @Column(name = "facility", nullable = false)
     @Position(30)
     @Lookup(model = FacilityLookup.class)
+    @Description("Determines which process of the machine created the Gelf log event")
     private int facility;
 
 }
