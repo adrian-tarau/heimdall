@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import static net.microfalx.heimdall.protocol.snmp.controller.MibControllerUtilities.updateContext;
 
 @Controller
-@RequestMapping("/protocol/snmp/module")
+@RequestMapping("/admin/protocol/snmp/module")
 @DataSet(model = MibModule.class,viewTemplate = "snmp/module_view", viewClasses = "modal-xl")
 public class MibModuleController extends DataSetController<MibModule, String>  {
 

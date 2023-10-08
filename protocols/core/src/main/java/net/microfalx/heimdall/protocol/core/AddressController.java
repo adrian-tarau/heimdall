@@ -9,7 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("protocol/address")
+@RequestMapping("/admin/protocol/address")
 @DataSet(model = Address.class, canAdd = false)
 public class AddressController extends DataSetController<Address, Integer> {
 

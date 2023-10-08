@@ -7,7 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/protocol/snmp/variable")
+@RequestMapping("/admin/protocol/snmp/variable")
 @DataSet(model = MibVariable.class)
 public class MibVariableController extends DataSetController<MibVariable, String> {
 }
