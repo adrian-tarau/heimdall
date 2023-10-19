@@ -57,8 +57,8 @@ public class GelfServiceTest extends AbstractBootstrapServiceTestCase {
         gelfEvent.addPart(Body.create("fullMessage"));
         gelfEvent.setSource(Address.create(Address.Type.HOSTNAME, InetAddress.getLocalHost().getHostName(),
                 InetAddress.getLoopbackAddress().getHostAddress()));
-        gelfEvent.addAttribute("a1", 1);
-        gelfEvent.addAttribute("a2", "2");
+        gelfEvent.add("a1", 1);
+        gelfEvent.add("a2", "2");
         gelfEvent.setGelfSeverity(Severity.INFORMATIONAL);
     }
 

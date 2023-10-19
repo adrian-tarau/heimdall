@@ -85,20 +85,20 @@ public class SnmpSimulator extends ProtocolSimulator<SnmpEvent, SnmpClient> {
         Iterators.advance(variableIterator, start);
         for (int i = start; i < count && variableIterator.hasNext(); i++) {
             MibVariable variable = variableIterator.next();
-            trap.addAttribute(variable.getOid(), getNextValue(variable));
+            trap.add(variable.getOid(), getNextValue(variable));
             if (step > 1) Iterators.advance(variableIterator, random.nextInt(step));
         }
         Set<String> severityOids = module.getSeverityOids();
         if (!severityOids.isEmpty()) {
             String severity = Iterators.get(severityOids.iterator(), random.nextInt(severityOids.size()));
             MibVariable severityVariable = mibService.findVariable(severity);
-            if (severityVariable != null) trap.addAttribute(severity, getNextValue(severityVariable));
+            if (severityVariable != null) trap.add(severity, getNextValue(severityVariable));
         }
         Set<String> sentAtOids = module.getSentAtOids();
         if (!sentAtOids.isEmpty()) {
             String sentAtOid = Iterators.get(sentAtOids.iterator(), random.nextInt(sentAtOids.size()));
             MibVariable severityVariable = mibService.findVariable(sentAtOid);
-            if (severityVariable != null) trap.addAttribute(sentAtOid, getNextValue(severityVariable));
+            if (severityVariable != null) trap.add(sentAtOid, getNextValue(severityVariable));
         }
     }
 

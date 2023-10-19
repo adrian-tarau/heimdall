@@ -210,21 +210,21 @@ public class SnmpServer implements CommandResponder {
         if (attributeNameFromOid != null) attributeName = attributeNameFromOid;
         Variable attributeValue = variable.getVariable();
         if (attributeValue instanceof Integer32) {
-            snmpEvent.addAttribute(attributeName, ((Integer32) attributeValue).getValue());
+            snmpEvent.add(attributeName, ((Integer32) attributeValue).getValue());
         } else if (attributeValue instanceof TimeTicks) {
-            snmpEvent.addAttribute(attributeName, attributeValue.toLong());
+            snmpEvent.add(attributeName, attributeValue.toLong());
         } else if (attributeValue instanceof Null) {
-            snmpEvent.addAttribute(attributeName, null);
+            snmpEvent.add(attributeName, null);
         } else if (attributeValue instanceof OctetString) {
-            snmpEvent.addAttribute(attributeName, attributeValue.toString());
+            snmpEvent.add(attributeName, attributeValue.toString());
         } else if (attributeValue instanceof Counter64) {
-            snmpEvent.addAttribute(attributeName, attributeValue.toLong());
+            snmpEvent.add(attributeName, attributeValue.toLong());
         } else if (attributeValue instanceof UnsignedInteger32) {
-            snmpEvent.addAttribute(attributeName, attributeValue.toInt());
+            snmpEvent.add(attributeName, attributeValue.toInt());
         } else if (attributeValue instanceof OID) {
-            snmpEvent.addAttribute(attributeName, ((OID) attributeValue).toDottedString());
+            snmpEvent.add(attributeName, ((OID) attributeValue).toDottedString());
         } else if (attributeValue instanceof IpAddress) {
-            snmpEvent.addAttribute(attributeName, ((IpAddress) attributeValue).getInetAddress().getHostAddress());
+            snmpEvent.add(attributeName, ((IpAddress) attributeValue).getInetAddress().getHostAddress());
         }
     }
 

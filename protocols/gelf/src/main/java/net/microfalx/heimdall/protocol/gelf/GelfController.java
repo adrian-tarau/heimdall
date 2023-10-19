@@ -34,12 +34,12 @@ public class GelfController extends ProtocolController<GelfEvent> {
         Attributes fieldAttributes = Attributes.create();
         for (Attribute attribute : attributes) {
             if (shouldDisplayAsBadge(attribute, true)) {
-                badgeAttributes.addAttribute(attribute);
+                badgeAttributes.add(attribute);
             } else {
-                fieldAttributes.addAttribute(attribute);
+                fieldAttributes.add(attribute);
             }
         }
-        controllerModel.addAttribute("complex", fieldAttributes.hasAttributes() || dataSetModel.getLongMessage() != null);
+        controllerModel.addAttribute("complex", !fieldAttributes.isEmpty() || dataSetModel.getLongMessage() != null);
         controllerModel.addAttribute("badges", badgeAttributes);
         controllerModel.addAttribute("fields", fieldAttributes);
     }

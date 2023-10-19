@@ -341,11 +341,11 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
         document.setSentAt(event.getSentAt());
         document.setReceivedAt(event.getReceivedAt());
         if (event.getBody() != null) document.setBody(event.getBody().getResource());
-        document.addAttribute(Attribute.create("source", event.getSource().toDisplay()).setTokenized(true));
-        if (target != null) document.addAttribute(Attribute.create("target", target.toDisplay()).setTokenized(true));
-        document.addAttribute(Attribute.create("severity", event.getSeverity().name()).setIndexed(true));
+        document.add(Attribute.create("source", event.getSource().toDisplay()).setTokenized(true));
+        if (target != null) document.add(Attribute.create("target", target.toDisplay()).setTokenized(true));
+        document.add(Attribute.create("severity", event.getSeverity().name()).setIndexed(true));
         for (net.microfalx.bootstrap.model.Attribute attribute : event) {
-            document.addAttributeIfAbsent(Attribute.create(attribute).setIndexed(true).setStored(true));
+            document.addIfAbsent(Attribute.create(attribute).setIndexed(true).setStored(true));
         }
         document.setOwner(PROTOCOL);
         updateDocument(event, document);

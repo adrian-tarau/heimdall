@@ -110,13 +110,13 @@ public class SyslogServer implements InitializingBean {
         message.setCreatedAt(event.getDate().toInstant().atZone(ZoneId.systemDefault()));
         message.setSentAt(message.getCreatedAt());
         message.setReceivedAt(ZonedDateTime.now());
-        message.addAttribute("server", event.getHost());
+        message.add("server", event.getHost());
         if (structuredEvent != null) {
-            message.addAttribute("processId", structuredEvent.getProcessId());
-            message.addAttribute("application", structuredEvent.getApplicationName());
+            message.add("processId", structuredEvent.getProcessId());
+            message.add("application", structuredEvent.getApplicationName());
             if (isNotEmpty(structuredMessage.getMessageId()))
-                message.addAttribute("messageId", structuredMessage.getMessageId());
-            if (isNotEmpty(structuredMessage.getProcId())) message.addAttribute("pid", structuredMessage.getProcId());
+                message.add("messageId", structuredMessage.getMessageId());
+            if (isNotEmpty(structuredMessage.getProcId())) message.add("pid", structuredMessage.getProcId());
         }
         syslogService.accept(message);
     }

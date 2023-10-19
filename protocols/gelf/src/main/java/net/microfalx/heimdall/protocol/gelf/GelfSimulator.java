@@ -52,8 +52,8 @@ public class GelfSimulator extends ProtocolSimulator<GelfEvent, GelfClient> {
 
     private void updateAttributes(GelfEvent message) {
         Faker faker = getFaker();
-        message.addAttribute("os", faker.computer().operatingSystem());
-        message.addAttribute("platform", faker.computer().platform());
-        message.addAttribute("domain", faker.domain().fullDomain("net.microfalx.simulator"));
+        message.add("os", faker.computer().operatingSystem());
+        message.add("platform", faker.computer().platform());
+        message.add("domain", faker.domain().fullDomain("net.microfalx.simulator"));
     }
 }

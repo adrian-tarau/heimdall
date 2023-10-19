@@ -45,7 +45,7 @@ class SnmpTestHelper {
         trap.setSource(Address.create(Address.Type.HOSTNAME, "localhost"));
         trap.addTarget(Address.create(Address.Type.HOSTNAME,"localhost"));
         trap.setBody(Body.create("Test Message"));
-        attributes.forEach(trap::addAttribute);
+        attributes.forEach(trap::add);
         client.setPort(transport == ProtocolClient.Transport.TCP ? configuration.getTcpPort() : configuration.getUdpPort());
         if (large) {
             trap.setBody(Body.create(new Faker().text().text(16000, 16000)));
