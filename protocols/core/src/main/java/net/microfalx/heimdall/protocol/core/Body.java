@@ -40,8 +40,7 @@ public class Body extends AbstractPart {
      */
     public static Body create(String text) {
         Body body = new Body();
-        body.setMimeType(MimeType.TEXT_PLAIN);
-        body.setResource(MemoryResource.create(text));
+        body.setResource(MemoryResource.create(text).withMimeType(MimeType.TEXT_PLAIN));
         body.setName(org.apache.commons.lang3.StringUtils.abbreviate(StringUtils.removeLineBreaks(text), MAX_NAME_LENGTH));
         return body;
     }

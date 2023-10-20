@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/admin/protocol/address")
-@DataSet(model = Address.class, canAdd = false)
+@DataSet(model = Address.class, canAdd = false, canDelete = false)
 public class AddressController extends DataSetController<Address, Integer> {
 
     @Autowired

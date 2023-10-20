@@ -134,18 +134,17 @@ public class SmtpServer implements InitializingBean, BasicMessageListener {
             if (bodyPart.getContent() instanceof Multipart) {
                 extractParts((Multipart) bodyPart.getContent(), parts);
             } else if (isNotEmpty(bodyPart.getFileName())) {
-                Attachment attachment = Attachment.create(createResource(bodyPart));
-                attachment.setMimeType(MimeType.get(bodyPart.getContentType()));
+                Attachment attachment = Attachment.create(createResource(bodyPart).withMimeType(MimeType.get(bodyPart.getContentType())));
                 attachment.setFileName(bodyPart.getFileName());
                 parts.add(attachment);
             } else {
-                parts.add(Body.create(createResource(bodyPart)).setMimeType(MimeType.get(bodyPart.getContentType())));
+                parts.add(Body.create(createResource(bodyPart).withMimeType(MimeType.get(bodyPart.getContentType()))));
             }
         }
     }
 
     private Resource createResource(BodyPart bodyPart) throws MessagingException, IOException {
-        return MemoryResource.create(getInputStreamAsBytes(bodyPart.getInputStream()));
+        return MemoryResource.create(getInputStreamAsBytes(bodyPart.getInputStream())).withMimeType(MimeType.get(bodyPart.getContentType()));
     }
 
 }

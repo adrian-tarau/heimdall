@@ -4,6 +4,8 @@ import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.MimeType;
 import net.microfalx.resource.Resource;
 
+import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+
 /**
  * An email attachment.
  */
@@ -17,8 +19,7 @@ public class Attachment extends AbstractPart {
      */
     public static Attachment create(String text) {
         Attachment attachment = new Attachment();
-        attachment.setResource(MemoryResource.create(text));
-        attachment.setMimeType(MimeType.TEXT_PLAIN);
+        attachment.setResource(MemoryResource.create(text).withMimeType(MimeType.TEXT_PLAIN));
         return attachment;
     }
 
@@ -31,7 +32,6 @@ public class Attachment extends AbstractPart {
     public static Attachment create(byte[] data) {
         Attachment attachment = new Attachment();
         attachment.setResource(MemoryResource.create(data));
-        attachment.setMimeType(MimeType.APPLICATION_OCTET_STREAM);
         return attachment;
     }
 
@@ -42,6 +42,7 @@ public class Attachment extends AbstractPart {
      * @return a non-null instance
      */
     public static Attachment create(Resource resource) {
+        requireNonNull(resource);
         Attachment attachment = new Attachment();
         attachment.setResource(resource);
         return attachment;

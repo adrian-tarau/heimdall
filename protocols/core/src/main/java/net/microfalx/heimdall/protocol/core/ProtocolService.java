@@ -9,7 +9,6 @@ import net.microfalx.bootstrap.search.IndexService;
 import net.microfalx.bootstrap.search.SearchService;
 import net.microfalx.heimdall.protocol.core.jpa.AddressRepository;
 import net.microfalx.heimdall.protocol.core.jpa.PartRepository;
-import net.microfalx.lang.IOUtils;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.resource.MimeType;
 import net.microfalx.resource.Resource;
@@ -30,6 +29,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static net.microfalx.bootstrap.search.Document.*;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.StringUtils.NA_STRING;
 
@@ -115,7 +115,7 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
         Resource target = directory.resolve(String.format(FILE_NAME_FORMAT, getNextSequence()) + "." + PART_FILE_EXTENSION);
         try {
             if (!directory.exists()) directory.create();
-            IOUtils.appendStream(target.getOutputStream(), resource.getInputStream());
+            target.copyFrom(resource);
         } catch (Exception e) {
             LOGGER.error("Failed to copy resource part to storage: " + target.toURI() + ", retry later", e);
         }
@@ -341,11 +341,11 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
         document.setSentAt(event.getSentAt());
         document.setReceivedAt(event.getReceivedAt());
         if (event.getBody() != null) document.setBody(event.getBody().getResource());
-        document.add(Attribute.create("source", event.getSource().toDisplay()).setTokenized(true));
-        if (target != null) document.add(Attribute.create("target", target.toDisplay()).setTokenized(true));
-        document.add(Attribute.create("severity", event.getSeverity().name()).setIndexed(true));
+        document.add(Attribute.create(SOURCE_FIELD, event.getSource().toDisplay()).enableAll());
+        if (target != null) document.add(Attribute.create(TARGET_FIELD, target.toDisplay()).enableAll());
+        document.add(Attribute.create(SEVERITY_FIELD, event.getSeverity().name()).enableAll());
         for (net.microfalx.bootstrap.model.Attribute attribute : event) {
-            document.addIfAbsent(Attribute.create(attribute).setIndexed(true).setStored(true));
+            document.addIfAbsent(Attribute.create(attribute).enableAll());
         }
         document.setOwner(PROTOCOL);
         updateDocument(event, document);
