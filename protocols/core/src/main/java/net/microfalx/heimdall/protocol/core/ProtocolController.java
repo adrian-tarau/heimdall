@@ -3,6 +3,7 @@ package net.microfalx.heimdall.protocol.core;
 import net.microfalx.bootstrap.web.dataset.DataSetController;
 import net.microfalx.heimdall.protocol.core.jpa.Event;
 import net.microfalx.heimdall.protocol.core.jpa.PartRepository;
+import net.microfalx.lang.StringUtils;
 import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.NullResource;
 import net.microfalx.resource.Resource;
@@ -53,6 +54,8 @@ public abstract class ProtocolController<E extends Event> extends DataSetControl
         Optional<net.microfalx.heimdall.protocol.core.jpa.Part> partOptional = partRepository.findById(partId);
         if (partOptional.isEmpty()) return NullResource.createNull();
         net.microfalx.heimdall.protocol.core.jpa.Part part = partOptional.get();
-        return ResourceFactory.resolve(part.getResource()).withName(part.getFileName()).withMimeType(part.getMimeType());
+        Resource resource = ResourceFactory.resolve(part.getResource()).withMimeType(part.getMimeType());
+        if (StringUtils.isNotEmpty(part.getFileName())) resource = resource.withName(part.getFileName());
+        return resource;
     }
 }
