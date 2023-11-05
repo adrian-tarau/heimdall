@@ -52,6 +52,9 @@
     <modules>
         <module>core</module>
         <module>protocols</module>
+        <module>database</module>
+        <module>broker</module>
+        <module>other</module>
         <module>web</module>
     </modules>
 

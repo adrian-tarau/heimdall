@@ -69,8 +69,45 @@
         </dependency>
 
         <dependency>
-            <groupId>net.microfalx.bootstrap</groupId>
-            <artifactId>bootstrap-web</artifactId>
+            <groupId>net.microfalx.heimdall</groupId>
+            <artifactId>heimdall-broker-kafka</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.microfalx.heimdall</groupId>
+            <artifactId>heimdall-broker-pulsar</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.microfalx.heimdall</groupId>
+            <artifactId>heimdall-broker-rabbitmq</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.microfalx.heimdall</groupId>
+            <artifactId>heimdall-database-mysql</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.microfalx.heimdall</groupId>
+            <artifactId>heimdall-database-postgres</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.microfalx.heimdall</groupId>
+            <artifactId>heimdall-database-vertica</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.microfalx.heimdall</groupId>
+            <artifactId>heimdall-other-rest</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>

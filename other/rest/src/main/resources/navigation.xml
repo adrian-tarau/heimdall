@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<navigations xmlns="https://net.microfalx/xsd/navigation-1.0.xsd">
+    <menu id="left">
+        <item id="rest" text="Rest API" position="100" action="/rest/session" icon="fa-solid fa-plug"/>
+        <menu id="rest_admin" text="Rest API" position="100" parent="administration" icon="fa-solid fa-plug">
+            <item id="rest_env" text="Environments" action="/admin/rest/environment" icon="fa-solid fa-server"/>
+            <item id="rest_test" text="Tests" action="/admin/rest/test" icon="fa-solid fa-hammer"/>
+        </menu>
+    </menu>
+</navigations>

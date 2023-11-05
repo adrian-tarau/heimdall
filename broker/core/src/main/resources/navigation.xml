@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<navigations xmlns="https://net.microfalx/xsd/navigation-1.0.xsd">
+    <menu id="left">
+        <menu id="brokers" text="Brokers" position="20" icon="fa-regular fa-message"/>
+        <item id="brokers_admin" text="Brokers" position="30" parent="administration" action="/admin/broker" icon="fa-regular fa-message"/>
+    </menu>
+</navigations>
