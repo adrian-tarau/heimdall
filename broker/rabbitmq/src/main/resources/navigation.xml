@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <navigations xmlns="https://net.microfalx/xsd/navigation-1.0.xsd">
     <menu id="left">
-        <item id="rabbitmq" text="Rabbit MQ" parent="brokers" action="/broker/rabbitmq" icon="fa-regular fa-message"/>
     </menu>
 </navigations>
