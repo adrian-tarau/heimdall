@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @Transactional
-public interface SmtpEventRepository extends JpaRepository<SmtpEvent, Integer>, JpaSpecificationExecutor {
+public interface SmtpEventRepository extends JpaRepository<SmtpEvent, Integer>, JpaSpecificationExecutor<SmtpEvent> {
 
 }

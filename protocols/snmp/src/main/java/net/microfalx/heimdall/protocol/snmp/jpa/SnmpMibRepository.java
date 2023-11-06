@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 
 @Transactional
 @Repository
-public interface SnmpMibRepository extends JpaRepository<SnmpMib, Integer>, JpaSpecificationExecutor {
+public interface SnmpMibRepository extends JpaRepository<SnmpMib, Integer>, JpaSpecificationExecutor<SnmpMib> {
 
     /**
      * Finds the Mib module reference by its module identifier.

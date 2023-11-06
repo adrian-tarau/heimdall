@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @Transactional
-public interface SyslogEventRepository extends JpaRepository<SyslogEvent, Long>, JpaSpecificationExecutor {
+public interface SyslogEventRepository extends JpaRepository<SyslogEvent, Long>, JpaSpecificationExecutor<SyslogEvent> {
 }
