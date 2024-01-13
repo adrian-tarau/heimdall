@@ -1,0 +1,34 @@
+version: "3.5"
+
+services:
+  heimdell:
+    image: heimdall:1.0.0-SNAPSHOT
+    ports:
+      - 8080:8080
+    volumes:
+      - heimdall-data:/data
+    depends_on:
+      - mysql
+    environment:
+      HEIMDALL_DATABASE_HOST: mysql
+      HEIMDALL_DATABASE_NAME: heimdall
+      HEIMDALL_DATABASE_USERNAME: heimdall
+      HEIMDALL_DATABASE_PASSWORD: 7Ry4j2Y5j1Of
+      HEIMDALL_PROTOCOL_SIMULATOR_ENABLED: true
+      HEIMDALL_RESOURCE_DIRECTORY: /data
+
+  mysql:
+    image: mysql:8.2
+    ports:
+      - 3306
+    volumes:
+      - mysql-data:/var/lib/mysql
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: yes
+      MYSQL_DATABASE: heimdall
+      MYSQL_USER: heimdall
+      MYSQL_PASSWORD: 7Ry4j2Y5j1Of
+
+volumes:
+  mysql-data:
+  heimdall-data:

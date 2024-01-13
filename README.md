@@ -78,4 +78,7 @@ Under `application.properties` the database name or the database user/password c
 
 ## Container
 
-The project is available in [Docker Hub](https://hub.docker.com/repository/docker/adriantarau/heimdall) 
+The project is available in [Docker Hub](https://hub.docker.com/repository/docker/adriantarau/heimdall). Heimdall relies on MySQL as a required dependency and an optional 
+S3 object store to store data collected from services.
+
+Read [docker](docs/docker.md) document to learn how to deploy Heimdall in Docker.
