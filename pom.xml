@@ -70,18 +70,18 @@
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.app.profiles>local,dev</spring.app.profiles>
-        <spring.boot.version>3.1.1</spring.boot.version>
+        <spring.boot.version>3.2.2</spring.boot.version>
         <bootstrap.version>1.0.0-SNAPSHOT</bootstrap.version>
-        <apache.tika.version>2.8.0</apache.tika.version>
-        <subethasmtp.version>6.0.5</subethasmtp.version>
-        <datafaker.version>2.0.1</datafaker.version>
+        <apache.tika.version>2.9.1</apache.tika.version>
+        <subethasmtp.version>7.0.1</subethasmtp.version>
+        <datafaker.version>2.1.0</datafaker.version>
         <syslog4j.version>0.9.61</syslog4j.version>
-        <logstash-gelf.version>1.15.0</logstash-gelf.version>
+        <logstash-gelf.version>1.15.1</logstash-gelf.version>
         <snmp4j.version>3.7.7</snmp4j.version>
         <jsmiparser.version>0.14</jsmiparser.version>
         <syslog.version>1.1.7</syslog.version>
         <commons-email>1.5</commons-email>
-        <mysql.version>8.0.33</mysql.version>
+        <mysql.version>8.3.0</mysql.version>
     </properties>
 
     <developers>
@@ -194,10 +194,8 @@
 
             <dependency>
                 <groupId>org.apache.tika</groupId>
-                <artifactId>tika-bom</artifactId>
+                <artifactId>tika-core</artifactId>
                 <version>${apache.tika.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
             </dependency>
 
             <dependency>

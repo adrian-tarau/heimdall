@@ -115,13 +115,6 @@
             <artifactId>bootstrap-security</artifactId>
         </dependency>
 
-        <!-- Why in the hell it picks some 8.X version??? -->
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-core</artifactId>
-            <version>9.7.0</version>
-        </dependency>
-
     </dependencies>
 
 </project>
