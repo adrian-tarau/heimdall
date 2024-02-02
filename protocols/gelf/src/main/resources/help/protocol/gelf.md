@@ -1,0 +1,3 @@
+The [Graylog Extended Log Format (GELF)](https://go2docs.graylog.org/5-0/getting_in_log_data/gelf.html?tocpath=Getting%20in%20Logs%7CLog%20Sources%7CGELF%7C_____0) is a log format that avoids the shortcomings of classic plain Syslog and is perfect for logging from your application layer. It comes with optional compression, chunking, and, most importantly, a clearly defined structure. The Input of GELF messages can be UDP, TCP, or HTTP. Additionally, a queue is possible.
+
+_Heimdall_ acts like such a GELF server, receives the log event and stores it for later retrieval and exploration.

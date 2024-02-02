@@ -1,6 +1,7 @@
 package net.microfalx.heimdall.protocol.snmp.controller;
 
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
+import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.web.dataset.DataSetController;
 import net.microfalx.heimdall.protocol.snmp.jpa.SnmpMib;
@@ -22,6 +23,7 @@ import static net.microfalx.heimdall.protocol.snmp.controller.MibControllerUtili
 @DataSet(model = SnmpMib.class, defaultQuery = "type = User",
         canAdd = false, canUpload = true, canDownload = true,
         viewTemplate = "snmp/mib_view", viewClasses = "modal-xl")
+@Help("protocol/snmp/mib")
 public class SnmpMibController extends DataSetController<SnmpMib, String> {
 
     @Autowired

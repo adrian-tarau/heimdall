@@ -1,6 +1,7 @@
 package net.microfalx.heimdall.protocol.gelf;
 
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
+import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.model.Attribute;
 import net.microfalx.bootstrap.model.Attributes;
 import net.microfalx.bootstrap.model.Field;
@@ -17,6 +18,7 @@ import static net.microfalx.bootstrap.model.AttributeUtils.shouldDisplayAsBadge;
 @Controller
 @RequestMapping("/protocol/gelf")
 @DataSet(model = GelfEvent.class, viewTemplate = "gelf/event_view", viewClasses = "modal-xl")
+@Help("protocol/gelf")
 public class GelfController extends ProtocolController<GelfEvent> {
 
     @Autowired

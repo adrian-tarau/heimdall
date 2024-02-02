@@ -1,6 +1,7 @@
 package net.microfalx.heimdall.protocol.snmp.controller;
 
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
+import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.model.Attributes;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.heimdall.protocol.core.ProtocolController;
@@ -19,6 +20,7 @@ import java.io.IOException;
 @Controller
 @RequestMapping("/protocol/snmp")
 @DataSet(model = SnmpEvent.class, viewTemplate = "snmp/event_view", viewClasses = "modal-xl")
+@Help("protocol/snmp")
 public class SnmpController extends ProtocolController<SnmpEvent> {
 
     @Autowired

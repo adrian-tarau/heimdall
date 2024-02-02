@@ -1,0 +1,3 @@
+[Simple Network Management Protocol (SNMP)](https://en.wikipedia.org/wiki/Simple_Network_Management_Protocol) is an internet standard protocol used to monitor and manage network devices connected over an IP. SNMP is used for communication between routers, switches, firewalls, load balancers, servers, CCTV cameras, and wireless devices.
+
+_Heimdall_ acts like such a SNMP server, receives the network event and stores it for later retrieval and exploration.

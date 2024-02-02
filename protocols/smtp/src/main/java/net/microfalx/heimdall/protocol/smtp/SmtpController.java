@@ -2,6 +2,7 @@ package net.microfalx.heimdall.protocol.smtp;
 
 import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
+import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.heimdall.protocol.core.Part;
 import net.microfalx.heimdall.protocol.core.ProtocolController;
@@ -20,6 +21,7 @@ import java.util.Collection;
 @Controller
 @RequestMapping("/protocol/smtp")
 @DataSet(model = SmtpEvent.class, viewTemplate = "smtp/event_view", viewClasses = "modal-xl")
+@Help("protocol/smtp")
 public class SmtpController extends ProtocolController<SmtpEvent> {
 
     @Autowired
