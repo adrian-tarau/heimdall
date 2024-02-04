@@ -43,6 +43,15 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
     }
 
     /**
+     * Returns whether the simulator is enabled.
+     *
+     * @return <code>true</code> if enabled, <code>false</code> otherwise
+     */
+    public boolean isEnabled() {
+        return properties.isEnabled();
+    }
+
+    /**
      * Returns the data generator associated with this simulator.
      *
      * @return a non-null instance
@@ -55,6 +64,7 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
      * Invoked to simulate an event, if the simulator is enabled.
      */
     public final void simulate() {
+        if (!isEnabled()) return;
         int eventCount = properties.getMinimumEventCount() + ThreadLocalRandom.current().nextInt(properties.getMaximumEventCount());
         for (int i = 0; i < eventCount; i++) {
             Address sourceAddress = getRandomSourceAddress();
@@ -70,6 +80,7 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        if (!isEnabled()) return;
         initializeAddresses();
         initializeClient();
         initializeData();
@@ -160,15 +171,19 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
      *
      * @return a non-null instance
      */
-    protected final String getRandomIp() {
-        int iterations = random.nextInt(10);
-        for (int i = 0; i < iterations; i++) {
-            SUBNET_INDEX2_GENERATOR.incrementAndGet();
-            if (SUBNET_INDEX1_GENERATOR.get() >= 255) {
-                SUBNET_INDEX1_GENERATOR.set(1);
+    protected final String getRandomIp(boolean source) {
+        if (source && random.nextFloat() > 0.5) {
+            return PUBLIC_IPS[random.nextInt(PUBLIC_IPS.length)];
+        } else {
+            int iterations = random.nextInt(10);
+            for (int i = 0; i < iterations; i++) {
+                SUBNET_INDEX2_GENERATOR.incrementAndGet();
+                if (SUBNET_INDEX1_GENERATOR.get() >= 255) {
+                    SUBNET_INDEX1_GENERATOR.set(1);
+                }
             }
+            return "192.168." + SUBNET_INDEX2_GENERATOR.get() + "." + SUBNET_INDEX1_GENERATOR.getAndIncrement();
         }
-        return "192.168." + SUBNET_INDEX2_GENERATOR.get() + "." + SUBNET_INDEX1_GENERATOR.getAndIncrement();
     }
 
     /**
@@ -185,9 +200,9 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
      *
      * @return a non-null instance
      */
-    protected final String getRandomDomainOrIp() {
+    protected final String getRandomDomainOrIp(boolean source) {
         if (random.nextFloat() > 0.8) {
-            return getRandomIp();
+            return getRandomIp(source);
         } else {
             return getRandomDomain();
         }
@@ -289,4 +304,12 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
     private void initializeClient() {
         clients.addAll(createClients());
     }
+
+    private static final String[] PUBLIC_IPS = new String[]{
+            "142.251.32.110", "142.251.40.165", "142.251.40.238",
+            "20.236.44.162", "20.112.250.133", "20.231.239.246", "31.13.71.36",
+            "54.237.226.164", "52.3.144.142", "52.94.236.248", "54.239.28.85"
+    };
+
+
 }

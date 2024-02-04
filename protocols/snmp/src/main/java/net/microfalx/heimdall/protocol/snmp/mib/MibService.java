@@ -115,6 +115,7 @@ public class MibService implements InitializingBean {
     public void updateModule(MibModule mibModule) {
         requireNotEmpty(mibModule);
         persistMib(mibModule);
+        taskExecutor.submit(this::loadModulesFromDatabaseAndResolve);
     }
 
     /**
@@ -382,10 +383,10 @@ public class MibService implements InitializingBean {
             if (snmpMib == null) continue;
             SnmpMib snmpMibCopy = metadata.copy(snmpMib);
             snmpMibCopy.setEnterpriseOid(module.getEnterpriseOid());
-            snmpMibCopy.setMessageOids(nullIfEmpty(join(",", module.getMessageOids())));
-            snmpMibCopy.setSeverityOids(nullIfEmpty(join(",", module.getSeverityOids())));
-            snmpMibCopy.setCreateAtOids(nullIfEmpty(join(",", module.getCreatedAtOids())));
-            snmpMibCopy.setSentAtOids(nullIfEmpty(join(",", module.getSentAtOids())));
+            snmpMibCopy.setMessageOids(defaultIfEmpty(snmpMibCopy.getMessageOids(), nullIfEmpty(join(",", module.getMessageOids()))));
+            snmpMibCopy.setSeverityOids(defaultIfEmpty(snmpMibCopy.getSeverityOids(), nullIfEmpty(join(",", module.getSeverityOids()))));
+            snmpMibCopy.setCreateAtOids(defaultIfEmpty(snmpMibCopy.getCreateAtOids(), nullIfEmpty(join(",", module.getCreatedAtOids()))));
+            snmpMibCopy.setSentAtOids(defaultIfEmpty(snmpMibCopy.getSentAtOids(), nullIfEmpty(join(",", module.getSentAtOids()))));
             if (!metadata.identical(snmpMib, snmpMibCopy)) {
                 try {
                     snmpMibRepository.saveAndFlush(snmpMibCopy);

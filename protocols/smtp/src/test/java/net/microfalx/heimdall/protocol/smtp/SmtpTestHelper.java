@@ -34,8 +34,8 @@ public class SmtpTestHelper {
         client.setPort(configuration.getPort());
         SmtpEvent smtp = new SmtpEvent();
         smtp.setName("Test Email");
-        smtp.setSource(Address.create(Address.Type.EMAIL, "john@company.com"));
-        smtp.addTarget(Address.create(Address.Type.EMAIL, "doe@company.com"));
+        smtp.setSource(Address.email("john@company.com"));
+        smtp.addTarget(Address.email("doe@company.com"));
         client.setPort(configuration.getPort());
         if (html) {
             smtp.setBody(Body.html("<p>HTML Body</p>"));

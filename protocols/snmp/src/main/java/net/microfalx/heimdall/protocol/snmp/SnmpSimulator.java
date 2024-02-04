@@ -33,17 +33,21 @@ public class SnmpSimulator extends ProtocolSimulator<SnmpEvent, SnmpClient> {
 
     @Override
     protected Address createSourceAddress() {
-        return Address.create(Address.Type.HOSTNAME, getRandomDomainOrIp());
+        return Address.create(Address.Type.HOSTNAME, getRandomDomainOrIp(true));
     }
 
     @Override
     protected Address createTargetAddress() {
-        return Address.create(Address.Type.HOSTNAME, getRandomDomainOrIp());
+        return Address.create(Address.Type.HOSTNAME, getRandomDomainOrIp(false));
     }
 
     @Override
     protected void initializeData() {
-        mibService.getTaskExecutor().execute(new LoadMibsWorker());
+        if (getProperties().isUseSamples()) {
+            mibService.getTaskExecutor().execute(new LoadMibsWorker());
+        } else {
+            latch.countDown();
+        }
     }
 
     @Override
@@ -57,14 +61,13 @@ public class SnmpSimulator extends ProtocolSimulator<SnmpEvent, SnmpClient> {
     protected void simulate(SnmpClient client, Address sourceAddress, Address targetAddress, int index) throws IOException {
         await(latch);
         MibModule module = getNextModule();
+        if (module == null) return;
         SnmpEvent trap = new SnmpEvent();
         trap.setSource(sourceAddress);
         trap.addTarget(targetAddress);
         trap.setBody(Body.create(getRandomText()));
-        if (module != null) {
-            updateClient(client, trap, module);
-            updateBindings(client, trap, module);
-        }
+        updateClient(client, trap, module);
+        updateBindings(client, trap, module);
         client.send(trap);
     }
 
@@ -111,7 +114,7 @@ public class SnmpSimulator extends ProtocolSimulator<SnmpEvent, SnmpClient> {
         } else if (severityVariable.isNumber()) {
             return Integer.toString(random.nextInt(1000));
         } else if (type == SmiPrimitiveType.IP_ADDRESS) {
-            return "192.168." + getRandomIp();
+            return getRandomDomainOrIp(true);
         } else if (type == SmiPrimitiveType.OCTET_STRING) {
             return getRandomName();
         } else {

@@ -3,7 +3,7 @@
     <menu id="left">
         <menu id="protocols" text="Protocols" position="10" icon="fa-solid fa-network-wired"/>
         <menu id="protocols_admin" text="Protocols" position="50" parent="administration" action="/admin/broker" icon="fa-solid fa-network-wired">
-            <item id="mib" text="Addresses" action="/admin/protocol/address" icon="fa-solid fa-address-book"/>
+            <item id="address" text="Addresses" action="/admin/protocol/address" icon="fa-solid fa-address-book"/>
         </menu>
     </menu>
 </navigations>

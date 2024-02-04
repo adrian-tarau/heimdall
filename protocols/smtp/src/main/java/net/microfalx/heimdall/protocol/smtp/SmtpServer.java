@@ -107,9 +107,9 @@ public class SmtpServer implements InitializingBean, BasicMessageListener {
 
     private Address extractAddress(jakarta.mail.Address mimeAddress) {
         if (mimeAddress instanceof InternetAddress) {
-            return Address.create(Address.Type.EMAIL, ((InternetAddress) mimeAddress).getPersonal(), ((InternetAddress) mimeAddress).getAddress());
+            return Address.email(((InternetAddress) mimeAddress).getPersonal(), ((InternetAddress) mimeAddress).getAddress());
         } else {
-            return Address.create(Address.Type.EMAIL, mimeAddress.toString());
+            return Address.email(mimeAddress.toString());
         }
     }
 

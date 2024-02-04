@@ -34,8 +34,8 @@ class SmtpServiceTest {
     @BeforeEach
     void setup() {
         smtpEvent.setName("Email from Alex");
-        smtpEvent.setSource(Address.create(Address.Type.EMAIL, "Alex Tarau", "alex@tarau.net"));
-        smtpEvent.addTarget(Address.create(Address.Type.EMAIL, "Adrian Tarau", "adrian@tarau.net"));
+        smtpEvent.setSource(Address.email("Alex Tarau", "alex@tarau.net"));
+        smtpEvent.addTarget(Address.email("Adrian Tarau", "adrian@tarau.net"));
         smtpEvent.setCreatedAt(ZonedDateTime.now());
         smtpEvent.setSentAt(ZonedDateTime.now().plusSeconds(2));
         smtpEvent.setReceivedAt(smtpEvent.getSentAt().plusSeconds(5));

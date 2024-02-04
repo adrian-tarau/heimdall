@@ -30,7 +30,7 @@ public interface Address {
      * @return a non-null instance
      */
     static Address email(String value, String name) {
-        return create(Type.HOSTNAME, value, name);
+        return create(Type.EMAIL, value, name);
     }
 
     /**

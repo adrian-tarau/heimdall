@@ -22,12 +22,12 @@ public class GelfSimulator extends ProtocolSimulator<GelfEvent, GelfClient> {
 
     @Override
     protected Address createSourceAddress() {
-        return Address.create(Address.Type.HOSTNAME, getRandomDomainOrIp());
+        return Address.create(Address.Type.HOSTNAME, getRandomDomainOrIp(true));
     }
 
     @Override
     protected Address createTargetAddress() {
-        return Address.create(Address.Type.HOSTNAME, getRandomDomainOrIp());
+        return Address.create(Address.Type.HOSTNAME, getRandomDomainOrIp(false));
     }
 
     @Override

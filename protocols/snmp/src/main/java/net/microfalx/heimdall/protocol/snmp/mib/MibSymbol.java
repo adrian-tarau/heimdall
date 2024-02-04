@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.protocol.snmp.mib;
 
+import net.microfalx.bootstrap.dataset.annotation.Component;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.lang.Descriptable;
 import net.microfalx.lang.Identifiable;
@@ -120,6 +121,7 @@ public class MibSymbol implements Identifiable<String>, Nameable, Descriptable {
 
     @Position(100)
     @Formattable(maximumLength = 100)
+    @Component(Component.Type.TEXT_AREA)
     @Override
     @Description("A description for a MIB Symbol")
     public String getDescription() {

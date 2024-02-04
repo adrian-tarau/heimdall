@@ -14,10 +14,11 @@ public class ProtocolSimulatorProperties {
     private Duration interval = Duration.ofSeconds(10);
     private int minimumEventCount = 1;
     private int maximumEventCount = 5;
-    private int minimumAddressCount = 10;
-    private int maximumAddressCount = 20;
+    private int minimumAddressCount = 20;
+    private int maximumAddressCount = 50;
     private int minimumPartLength = (int) (FormatterUtils.K);
-    private int maximumPartLength = (int) (50 * FormatterUtils.K);
+    private int maximumPartLength = (int) (5 * FormatterUtils.K);
+    private boolean useSamples = true;
 
     public boolean isEnabled() {
         return enabled;
@@ -81,5 +82,13 @@ public class ProtocolSimulatorProperties {
 
     public void setMaximumPartLength(int maximumPartLength) {
         this.maximumPartLength = maximumPartLength;
+    }
+
+    public boolean isUseSamples() {
+        return useSamples;
+    }
+
+    public void setUseSamples(boolean useSamples) {
+        this.useSamples = useSamples;
     }
 }

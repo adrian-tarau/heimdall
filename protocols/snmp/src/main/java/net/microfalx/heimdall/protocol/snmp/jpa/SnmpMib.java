@@ -32,6 +32,7 @@ public class SnmpMib extends NamedTimestampAware {
     @Enumerated(EnumType.STRING)
     @Width(min = "50")
     @Description("A MIB can be either an internal Mib provided by the system. Or an external MIB provided by the user")
+    @Visible(modes = Visible.Mode.BROWSE)
     private MibType type;
 
     @Column(name = "module_id", nullable = false)
@@ -80,5 +81,6 @@ public class SnmpMib extends NamedTimestampAware {
     @NotBlank
     @Position(6)
     @Description("The file that contains the MIB")
+    @Visible(modes = Visible.Mode.BROWSE)
     private String fileName;
 }

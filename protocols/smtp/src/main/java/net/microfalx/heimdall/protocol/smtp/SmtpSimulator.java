@@ -3,6 +3,7 @@ package net.microfalx.heimdall.protocol.smtp;
 import net.datafaker.Faker;
 import net.microfalx.heimdall.protocol.core.*;
 import net.microfalx.resource.MimeType;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -11,10 +12,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Component
 public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
 
+    private static AtomicLong COUNTER = new AtomicLong();
     private SmtpProperties smtpProperties;
 
     public SmtpSimulator(ProtocolSimulatorProperties properties, SmtpProperties smtpProperties) {
@@ -29,7 +32,8 @@ public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
      */
     @Override
     protected Address createSourceAddress() {
-        return Address.create(Address.Type.EMAIL, geRandomEmail());
+        Pair<String, String> pair = geRandomEmail();
+        return Address.email(pair.getLeft(), pair.getRight());
     }
 
     /**
@@ -39,7 +43,7 @@ public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
      */
     @Override
     protected Address createTargetAddress() {
-        return Address.create(Address.Type.EMAIL, geRandomEmail());
+        return createSourceAddress();
     }
 
     /**
@@ -97,7 +101,13 @@ public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
 
     private Attachment createAttachment(MimeType mimeType) {
         if (mimeType == MimeType.APPLICATION_OCTET_STREAM) {
-            return Attachment.create(getRandomBytes(getProperties().getMinimumPartLength(), getProperties().getMaximumPartLength()));
+            int maximumPartLength = getProperties().getMaximumPartLength();
+            if ((COUNTER.get() % 100) == 0) {
+                maximumPartLength = 5 * maximumPartLength;
+            } else if ((COUNTER.get() % 500) == 0) {
+                maximumPartLength = 100 * maximumPartLength;
+            }
+            return Attachment.create(getRandomBytes(getProperties().getMinimumPartLength(), maximumPartLength));
         } else {
             return Attachment.create(getRandomText());
         }
@@ -108,9 +118,11 @@ public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
         return faker.book().title();
     }
 
-    private String geRandomEmail() {
+    private Pair<String, String> geRandomEmail() {
         Faker faker = getFaker();
-        return faker.name().firstName() + "." + faker.name().lastName() + "@company.com";
+        String firstName = faker.name().firstName();
+        String lastName = faker.name().lastName();
+        return Pair.of(firstName + " " + lastName, firstName + "." + lastName + "@company.com");
     }
 
     private static final Map<String, MimeType> extensionsToMimeType = new HashMap<>();

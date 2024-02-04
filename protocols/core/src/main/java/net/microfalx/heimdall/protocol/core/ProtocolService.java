@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.protocol.core;
 
+import inet.ipaddr.IPAddressString;
 import net.microfalx.bootstrap.core.async.TaskExecutorFactory;
 import net.microfalx.bootstrap.model.Attributes;
 import net.microfalx.bootstrap.resource.ResourceService;
@@ -22,6 +23,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.PeriodicTrigger;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -269,7 +271,7 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
             if (addressJpa == null) {
                 addressJpa = new net.microfalx.heimdall.protocol.core.jpa.Address();
                 addressJpa.setType(address.getType());
-                addressJpa.setName(address.getName());
+                addressJpa.setName(resolveName(address));
                 addressJpa.setValue(address.getValue());
                 net.microfalx.heimdall.protocol.core.jpa.Address finalAddressJpa = addressJpa;
                 addressRepository.save(finalAddressJpa);
@@ -332,6 +334,17 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
             }
             return new AtomicInteger(start);
         }).getAndIncrement();
+    }
+
+    private String resolveName(Address address) {
+        if (address.getType() != Address.Type.HOSTNAME) return address.getName();
+        if (!new IPAddressString(address.getName()).isIPAddress()) return address.getName();
+        try {
+            InetAddress inetAddress = InetAddress.getByName(address.getValue());
+            return inetAddress.getCanonicalHostName();
+        } catch (Exception e) {
+            return address.getName();
+        }
     }
 
     private void index(E event, Address target) {

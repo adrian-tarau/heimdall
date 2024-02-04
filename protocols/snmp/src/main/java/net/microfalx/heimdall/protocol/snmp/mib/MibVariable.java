@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.protocol.snmp.mib;
 
+import net.microfalx.bootstrap.dataset.annotation.Component;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.lang.Descriptable;
 import net.microfalx.lang.Identifiable;
@@ -85,6 +86,7 @@ public class MibVariable implements Identifiable<String>, Nameable, Descriptable
 
     @Override
     @Position(100)
+    @Component(Component.Type.TEXT_AREA)
     @Formattable(maximumLength = 100)
     @Description("The description for MIB Variable")
     public String getDescription() {

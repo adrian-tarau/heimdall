@@ -58,6 +58,11 @@
             <artifactId>datafaker</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.seancfoley</groupId>
+            <artifactId>ipaddress</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>

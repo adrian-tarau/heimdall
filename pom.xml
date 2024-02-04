@@ -82,6 +82,7 @@
         <syslog.version>1.1.7</syslog.version>
         <commons-email>1.5</commons-email>
         <mysql.version>8.3.0</mysql.version>
+        <ipaddress.version>5.4.0</ipaddress.version>
     </properties>
 
     <developers>
@@ -202,6 +203,12 @@
                 <groupId>net.datafaker</groupId>
                 <artifactId>datafaker</artifactId>
                 <version>${datafaker.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.github.seancfoley</groupId>
+                <artifactId>ipaddress</artifactId>
+                <version>${ipaddress.version}</version>
             </dependency>
 
             <!-- Tests -->

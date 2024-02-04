@@ -5,6 +5,7 @@ import net.microfalx.lang.StringUtils;
 import java.util.Objects;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.StringUtils.defaultIfEmpty;
 
 public class DefaultAddress implements Address {
 
@@ -16,7 +17,11 @@ public class DefaultAddress implements Address {
         requireNonNull(type);
         requireNonNull(value);
         this.type = type;
-        this.name = StringUtils.defaultIfEmpty(name, value);
+        if (type == Type.HOSTNAME) {
+            value = StringUtils.removeStartSlash(value);
+            if ("127.0.0.1".equals(value)) name = "Local";
+        }
+        this.name = defaultIfEmpty(name, value);
         this.value = value;
     }
 
