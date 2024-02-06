@@ -76,6 +76,7 @@ public class SyslogServer implements InitializingBean {
         tcpServer = new TCPNetSyslogServer();
         tcpServer.initialize("TCP", config);
         syslogService.getTaskExecutor().execute(tcpServer);
+        LOGGER.info("Listen on " + config.getPort() + " for TCP");
     }
 
     private void initializeUdpServer() {
@@ -86,6 +87,7 @@ public class SyslogServer implements InitializingBean {
         udpServer = new UDPNetSyslogServer();
         udpServer.initialize("UDP", config);
         syslogService.getTaskExecutor().execute(udpServer);
+        LOGGER.info("Listen on " + config.getPort() + " for UDP");
     }
 
     private void event(SyslogServerIF syslogServer, SocketAddress socketAddress, SyslogServerEventIF event) {

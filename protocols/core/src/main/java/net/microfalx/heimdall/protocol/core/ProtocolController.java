@@ -52,7 +52,7 @@ public abstract class ProtocolController<E extends Event> extends DataSetControl
 
     private Resource findResource(int partId) {
         Optional<net.microfalx.heimdall.protocol.core.jpa.Part> partOptional = partRepository.findById(partId);
-        if (partOptional.isEmpty()) return NullResource.createNull();
+        if (partOptional.isEmpty()) return NullResource.NULL;
         net.microfalx.heimdall.protocol.core.jpa.Part part = partOptional.get();
         Resource resource = ResourceFactory.resolve(part.getResource()).withMimeType(part.getMimeType());
         if (StringUtils.isNotEmpty(part.getFileName())) resource = resource.withName(part.getFileName());

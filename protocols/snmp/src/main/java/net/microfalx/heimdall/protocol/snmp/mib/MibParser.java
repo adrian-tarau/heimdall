@@ -3,6 +3,7 @@ package net.microfalx.heimdall.protocol.snmp.mib;
 import com.google.common.collect.Iterables;
 import net.microfalx.lang.EnumUtils;
 import net.microfalx.resource.Resource;
+import net.microfalx.resource.ResourceUtils;
 import net.microfalx.resource.TemporaryFileResource;
 import org.jsmiparser.parser.SmiDefaultParser;
 import org.jsmiparser.phase.xref.AbstractSymbolDefiner;
@@ -221,10 +222,14 @@ public class MibParser {
     private List<URL> convertResourcesToURLs(Collection<Resource> resources) {
         Set<URL> urls = new HashSet<>();
         for (Resource resource : resources) {
-            URL url;
+            URL url = null;
             try {
                 url = resource.toURL();
+                if (!ResourceUtils.isFileUrl(url)) url = null;
             } catch (Exception e) {
+                // if we cannot get a URL, let it copy
+            }
+            if (url == null) {
                 Resource tmpResource = TemporaryFileResource.file(resource.getFileName() + ".tmp", null);
                 tmpResource.copyFrom(resource);
                 url = tmpResource.toURL();

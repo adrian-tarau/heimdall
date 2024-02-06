@@ -296,6 +296,7 @@ public class MibService implements InitializingBean {
     private void doRegisterMibs(Collection<Resource> resources, MibType type) {
         LOGGER.info("Register " + formatNumber(resources.size()) + " MIBs, type " + type);
         for (Resource resource : resources) {
+            LOGGER.debug(" - " + resource.toURI());
             MibParser parser = new MibParser(resource, type);
             try {
                 MibModule module = parser.parse();

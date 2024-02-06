@@ -62,10 +62,11 @@
                         <ports>
                             <port>8080</port>
                         </ports>
+                        <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
                         <mainClass>net.microfalx.heimdall.web.HeimdallApplication</mainClass>
                     </container>
                     <from>
-                        <image>openjdk:17-alpine</image>
+                        <image>openjdk:17-slim</image>
                     </from>
                     <to>
                         <image>heimdall:${project.version}</image>

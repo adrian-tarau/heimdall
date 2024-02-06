@@ -98,6 +98,7 @@ public class SmtpServer implements InitializingBean, BasicMessageListener {
                 .messageHandler(this)
                 .build();
         server.start();
+        LOGGER.info("Listen on " + server.getPort() + ",TLS " + server.getRequireTLS());
     }
 
     private void initializeSession() {

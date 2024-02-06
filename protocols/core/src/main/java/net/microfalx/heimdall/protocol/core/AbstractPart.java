@@ -1,7 +1,6 @@
 package net.microfalx.heimdall.protocol.core;
 
 import net.microfalx.resource.MimeType;
-import net.microfalx.resource.NullResource;
 import net.microfalx.resource.Resource;
 
 import java.io.IOException;
@@ -17,7 +16,7 @@ public abstract class AbstractPart implements Part {
     private Type type;
     private String mimeType = MimeType.APPLICATION_OCTET_STREAM.toString();
     private String fileName;
-    Resource resource = NullResource.createNull();
+    Resource resource = Resource.NULL;
 
     public AbstractPart(Type type) {
         requireNonNull(type);

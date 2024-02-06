@@ -95,6 +95,7 @@ public class SnmpServer implements CommandResponder {
             snmpV2server.addTransportMapping(transport);
             snmpV2server.addCommandResponder(this);
             snmpV2server.listen();
+            LOGGER.info("Listen on " + transport.getListenAddress().getPort() + " SNMP v2");
         } catch (IOException e) {
             throw new ProtocolException("Failed to start SNMP server on " + configuration.getUdpPort(), e);
         }
@@ -113,6 +114,7 @@ public class SnmpServer implements CommandResponder {
             snmpV3server.addTransportMapping(transport);
             snmpV3server.addCommandResponder(this);
             snmpV3server.listen();
+            LOGGER.info("Listen on " + transport.getListenAddress().getPort() + " SNMP v3");
         } catch (IOException e) {
             throw new ProtocolException("Failed to start SNMP server on " + configuration.getUdpPort(), e);
         }

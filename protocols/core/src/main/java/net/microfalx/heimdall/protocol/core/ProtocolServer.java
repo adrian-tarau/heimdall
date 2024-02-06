@@ -17,7 +17,7 @@ import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
  */
 public abstract class ProtocolServer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolServer.class);
+    private volatile Logger LOGGER;
 
     public static final int BUFFER_SIZE = 4 * 1024;
 
@@ -134,7 +134,7 @@ public abstract class ProtocolServer {
     public void listen() {
         if (handler == null) throw new ProtocolException("A handler is required to start the server");
         initExecutor();
-        LOGGER.info("Listen on {}:{}", describeHostname(), port);
+        getLogger().info("Listen on {} for {}", port, getTransport().name());
         try {
             doListen();
         } catch (IOException e) {
@@ -146,7 +146,7 @@ public abstract class ProtocolServer {
      * Stops the server and releases all resources.
      */
     public void shutdown() {
-        LOGGER.info("Shutdown at {}:{}", describeHostname(), port);
+        getLogger().info("Shutdown at {} for {}", port, getTransport().name());
         try {
             doShutdown();
         } catch (IOException e) {
@@ -174,9 +174,19 @@ public abstract class ProtocolServer {
         return new BufferedInputStream(inputStream, BUFFER_SIZE);
     }
 
+    /**
+     * Returns a logger using the subclass name.
+     *
+     * @return a non-null instance
+     */
+    protected final Logger getLogger() {
+        if (LOGGER == null) LOGGER = LoggerFactory.getLogger(getClass());
+        return LOGGER;
+    }
+
     private void initExecutor() {
         if (this.executor != null) return;
-        LOGGER.info("Start internal thread pool");
+        getLogger().info("Start internal thread pool");
         this.executor = TaskExecutorFactory.create("protocol").createExecutor();
     }
 
