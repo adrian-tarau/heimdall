@@ -24,6 +24,11 @@ public final class SyslogService extends ProtocolService<SyslogMessage, SyslogEv
         return Event.Type.SYSLOG;
     }
 
+    @Override
+    protected void prepare(SyslogMessage message) {
+        lookupAddress(message.getSource());
+    }
+
     protected void persist(SyslogMessage message) {
         SyslogEvent syslogEvent = new SyslogEvent();
         syslogEvent.setFacility(message.getFacility().numericalCode());

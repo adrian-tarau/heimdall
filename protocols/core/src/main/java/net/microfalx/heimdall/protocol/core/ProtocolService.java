@@ -11,8 +11,11 @@ import net.microfalx.bootstrap.search.SearchService;
 import net.microfalx.heimdall.protocol.core.jpa.AddressRepository;
 import net.microfalx.heimdall.protocol.core.jpa.PartRepository;
 import net.microfalx.lang.StringUtils;
+import net.microfalx.lang.TimeUtils;
 import net.microfalx.resource.MimeType;
 import net.microfalx.resource.Resource;
+import net.microfalx.resource.ResourceFactory;
+import net.microfalx.resource.rocksdb.RocksDbResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -21,16 +24,24 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.PeriodicTrigger;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.lang.System.currentTimeMillis;
 import static net.microfalx.bootstrap.search.Document.*;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.StringUtils.NA_STRING;
@@ -40,14 +51,22 @@ import static net.microfalx.lang.StringUtils.NA_STRING;
  */
 public abstract class ProtocolService<E extends Event, M extends net.microfalx.heimdall.protocol.core.jpa.Event> implements InitializingBean {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolService.class);
+    private final Logger LOGGER;
 
     private static final DateTimeFormatter DIRECTORY_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
+    private static final long STATS_INTERVAL = 300_000;
     private static final String FILE_NAME_FORMAT = "%09d";
     private static final String PART_FILE_EXTENSION = "part";
     public static final String PROTOCOL = "protocol";
 
     private static final LocalDateTime STARTUP = LocalDateTime.now();
+    private final Map<String, net.microfalx.heimdall.protocol.core.jpa.Address> addressCache = new ConcurrentHashMap<>();
+    private final AtomicInteger eventCount = new AtomicInteger();
+    private volatile long lastStats = currentTimeMillis();
+
+    public ProtocolService() {
+        LOGGER = LoggerFactory.getLogger(getClass());
+    }
 
     @Autowired
     private ResourceService resourceService;
@@ -68,11 +87,20 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
     private ProtocolSimulatorProperties simulatorProperties;
 
     @Autowired
+    private ProtocolProperties properties;
+
+    @Autowired
+    private PlatformTransactionManager transactionManager;
+
+    @Autowired
     private TaskScheduler taskScheduler;
 
     private AsyncTaskExecutor taskExecutor;
 
-    private Map<LocalDate, AtomicInteger> resourceSequences = new ConcurrentHashMap<>();
+    private Resource partsResource;
+    private final Map<LocalDate, AtomicInteger> resourceSequences = new ConcurrentHashMap<>();
+    private BlockingQueue<E> queue;
+
 
     /**
      * Returns the resource service.
@@ -112,8 +140,7 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
      */
     public final Resource upload(Resource resource) {
         requireNonNull(resource);
-        Resource directory = resourceService.getShared("parts");
-        directory = directory.resolve(DIRECTORY_DATE_FORMATTER.format(LocalDateTime.now()), Resource.Type.DIRECTORY);
+        Resource directory = partsResource.resolve(DIRECTORY_DATE_FORMATTER.format(LocalDateTime.now()), Resource.Type.DIRECTORY);
         Resource target = directory.resolve(String.format(FILE_NAME_FORMAT, getNextSequence()) + "." + PART_FILE_EXTENSION);
         try {
             if (!directory.exists()) directory.create();
@@ -150,13 +177,31 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
      * @param event the event to index
      */
     public final void index(E event) {
-        if (event.getTargets().isEmpty()) {
-            index(event, null);
-        } else {
-            for (Address target : event.getTargets()) {
-                index(event, target);
+        index(Collections.singleton(event));
+    }
+
+    /**
+     * Indexes a collection of events.
+     *
+     * @param events the events to index
+     */
+    public final void index(Collection<E> events) {
+        Collection<Document> documents = new ArrayList<>();
+        for (E event : events) {
+            if (event.getTargets().isEmpty()) {
+                documents.add(index(event, null));
+            } else {
+                for (Address target : event.getTargets()) {
+                    documents.add(index(event, target));
+                }
             }
         }
+        try {
+            indexService.index(documents);
+        } catch (Exception e) {
+            LOGGER.error("Failed to index events " + events.size(), e);
+        }
+
     }
 
     /**
@@ -179,15 +224,9 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
      * @param event the event
      */
     public final void accept(E event) {
-        try {
-            persist(event);
-        } catch (Exception e) {
-            LOGGER.error("Failed to persist event" + event, e);
-        }
-        try {
-            index(event);
-        } catch (Exception e) {
-            LOGGER.error("Failed to index event " + event, e);
+        for (; ; ) {
+            if (queue.offer(event)) break;
+            flush();
         }
     }
 
@@ -197,6 +236,13 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
      * @return a non-null instance
      */
     protected abstract Event.Type getEventType();
+
+    /**
+     * Prepares an event to be stored in the data store.
+     *
+     * @param event the event
+     */
+    protected abstract void prepare(E event);
 
     /**
      * Persists an event in the data store.
@@ -265,16 +311,21 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
      * @return the JPA address
      */
     protected final net.microfalx.heimdall.protocol.core.jpa.Address lookupAddress(Address address) {
+        requireNonNull(address);
+        String addressValue = address.getValue();
+        net.microfalx.heimdall.protocol.core.jpa.Address cachedAddress = addressCache.get(addressValue);
+        if (cachedAddress != null) return cachedAddress;
         RetryTemplate template = new RetryTemplate();
         return template.execute(context -> {
-            net.microfalx.heimdall.protocol.core.jpa.Address addressJpa = addressRepository.findByValue(address.getValue());
+            net.microfalx.heimdall.protocol.core.jpa.Address addressJpa = addressRepository.findByValue(addressValue);
             if (addressJpa == null) {
                 addressJpa = new net.microfalx.heimdall.protocol.core.jpa.Address();
                 addressJpa.setType(address.getType());
                 addressJpa.setName(resolveName(address));
-                addressJpa.setValue(address.getValue());
+                addressJpa.setValue(addressValue);
                 net.microfalx.heimdall.protocol.core.jpa.Address finalAddressJpa = addressJpa;
                 addressRepository.save(finalAddressJpa);
+                addressCache.put(addressValue, finalAddressJpa);
             }
             return addressJpa;
         });
@@ -310,12 +361,36 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
     public void afterPropertiesSet() throws Exception {
         initializeExecutor();
         initializeSimulator();
+        initializeQueue();
+        initResources();
     }
 
     private void initializeSimulator() {
         if (!simulatorProperties.isEnabled()) return;
         LOGGER.info("Simulator is enabled, interval " + simulatorProperties.getInterval());
         getTaskScheduler().schedule(new SimulatorWorker(), new PeriodicTrigger(simulatorProperties.getInterval()));
+    }
+
+    private void initResources() {
+        partsResource = resourceService.getShared("parts");
+        if (partsResource.isLocal()) {
+            LOGGER.info("Protocol parts are stored in a RocksDB database: " + partsResource);
+            Resource dbPartsResource = RocksDbResource.create(partsResource);
+            try {
+                dbPartsResource.create();
+            } catch (IOException e) {
+                LOGGER.error("Failed to initialize parts store", e);
+                System.exit(10);
+            }
+            ResourceFactory.registerSymlink("parts", dbPartsResource);
+        } else {
+            LOGGER.info("Protocol parts are stored in a remote storage: " + partsResource);
+        }
+    }
+
+    private void initializeQueue() {
+        queue = new ArrayBlockingQueue<>(properties.getBatchSize());
+        getTaskScheduler().schedule(new FlushWorker(), new PeriodicTrigger(properties.getBatchInterval()));
     }
 
     private void initializeExecutor() {
@@ -347,7 +422,7 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
         }
     }
 
-    private void index(E event, Address target) {
+    private Document index(E event, Address target) {
         Document document = Document.create(event.getId(), event.getName());
         document.setType(event.getType().name().toLowerCase());
         document.setCreatedAt(event.getCreatedAt());
@@ -362,7 +437,52 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
         }
         document.setOwner(PROTOCOL);
         updateDocument(event, document);
-        indexService.index(document);
+        return document;
+    }
+
+    private void flush() {
+        Collection<E> events = new ArrayList<>();
+        queue.drainTo(events);
+        eventCount.addAndGet(events.size());
+        if (!events.isEmpty()) {
+            prepare(events);
+            persist(events);
+            index(events);
+        }
+        printStats();
+    }
+
+    private void printStats() {
+        if (TimeUtils.millisSince(lastStats) < STATS_INTERVAL) return;
+        int currentCount = eventCount.getAndSet(0);
+        if (currentCount > 0) {
+            LOGGER.info("Processed " + currentCount + " events of type " + getEventType().name());
+        }
+        lastStats = currentTimeMillis();
+    }
+
+    private void prepare(Collection<E> events) {
+        for (E event : events) {
+            try {
+                prepare(event);
+            } catch (Exception e) {
+                LOGGER.error("Failed to prepare event " + event, e);
+            }
+        }
+    }
+
+    private void persist(Collection<E> events) {
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+        transactionTemplate.execute(status -> {
+            for (E event : events) {
+                try {
+                    persist(event);
+                } catch (Exception e) {
+                    LOGGER.error("Failed to persist event" + event, e);
+                }
+            }
+            return null;
+        });
     }
 
     class SimulatorWorker implements Runnable {
@@ -373,6 +493,14 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
             if (simulator != null) {
                 simulator.simulate();
             }
+        }
+    }
+
+    class FlushWorker implements Runnable {
+
+        @Override
+        public void run() {
+            flush();
         }
     }
 }

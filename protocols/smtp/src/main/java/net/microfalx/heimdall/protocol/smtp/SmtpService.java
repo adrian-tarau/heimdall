@@ -31,6 +31,12 @@ public final class SmtpService extends ProtocolService<SmtpEvent, net.microfalx.
         return Event.Type.SMTP;
     }
 
+    @Override
+    protected void prepare(SmtpEvent event) {
+        net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent jpaSmtpEvent = new net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent();
+        updateAddresses(event, jpaSmtpEvent);
+    }
+
     protected void persist(SmtpEvent smtpEvent) {
         net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent jpaSmtpEvent = new net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent();
         jpaSmtpEvent.setCreatedAt(smtpEvent.getCreatedAt().toLocalDateTime());

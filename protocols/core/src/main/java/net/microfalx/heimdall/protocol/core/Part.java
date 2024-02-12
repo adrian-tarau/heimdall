@@ -1,22 +1,16 @@
 package net.microfalx.heimdall.protocol.core;
 
 import net.microfalx.lang.Descriptable;
+import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.Nameable;
 import net.microfalx.resource.Resource;
 
 /**
  * Holds a part of the event.
+ * <p>
+ * The name of a part could be a label, a subject, a file name, etc.
  */
-public interface Part extends Nameable, Descriptable {
-
-    /**
-     * Returns the name of the part.
-     * <p>
-     * The name could be a label, a subject, a file name, etc.
-     *
-     * @return a non-null instance
-     */
-    String getName();
+public interface Part extends Identifiable<String>, Nameable, Descriptable {
 
     /**
      * Return the event.

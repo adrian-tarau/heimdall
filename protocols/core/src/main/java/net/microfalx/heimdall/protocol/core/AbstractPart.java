@@ -4,6 +4,7 @@ import net.microfalx.resource.MimeType;
 import net.microfalx.resource.Resource;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.StringUtils.NA_STRING;
@@ -11,6 +12,7 @@ import static net.microfalx.lang.StringUtils.defaultIfEmpty;
 
 public abstract class AbstractPart implements Part {
 
+    private final String id = UUID.randomUUID().toString();
     private AbstractEvent event;
     private String name;
     private Type type;
@@ -21,6 +23,11 @@ public abstract class AbstractPart implements Part {
     public AbstractPart(Type type) {
         requireNonNull(type);
         this.type = type;
+    }
+
+    @Override
+    public String getId() {
+        return id;
     }
 
     @Override

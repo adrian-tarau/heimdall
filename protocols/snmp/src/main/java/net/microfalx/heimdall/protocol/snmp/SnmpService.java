@@ -34,24 +34,27 @@ public final class SnmpService extends ProtocolService<SnmpEvent, net.microfalx.
         return Event.Type.SNMP;
     }
 
-    protected void persist(SnmpEvent trap) {
+    @Override
+    protected void prepare(SnmpEvent event) {
+        lookupAddress(createAddress(event));
+    }
+
+    protected void persist(SnmpEvent event) {
         net.microfalx.heimdall.protocol.snmp.jpa.SnmpEvent snmpEvent = new net.
                 microfalx.heimdall.protocol.snmp.jpa.SnmpEvent();
-        Address address = Address.create(trap.getSource().getType(),
-                trap.getSource().getName(), trap.getSource().getValue());
-        snmpEvent.setAgentAddress(lookupAddress(address));
-        snmpEvent.setCreatedAt(trap.getCreatedAt().toLocalDateTime());
-        snmpEvent.setSentAt(trap.getSentAt().toLocalDateTime());
-        snmpEvent.setReceivedAt(trap.getReceivedAt().toLocalDateTime());
-        snmpEvent.setVersion(trap.getVersion());
+        snmpEvent.setAgentAddress(lookupAddress(createAddress(event)));
+        snmpEvent.setCreatedAt(event.getCreatedAt().toLocalDateTime());
+        snmpEvent.setSentAt(event.getSentAt().toLocalDateTime());
+        snmpEvent.setReceivedAt(event.getReceivedAt().toLocalDateTime());
+        snmpEvent.setVersion(event.getVersion());
 
-        snmpEvent.setCommunityString(trap.getCommunity());
-        snmpEvent.setEnterprise(trap.getEnterprise());
+        snmpEvent.setCommunityString(event.getCommunity());
+        snmpEvent.setEnterprise(event.getEnterprise());
         snmpEvent.setTrapType(PDU.TRAP);
 
-        snmpEvent.setMessage(persistPart(trap.getBody()));
-        trap.setBody(Body.create(trap.toJson()));
-        snmpEvent.setBindingPart(persistPart(trap.getBody()));
+        snmpEvent.setMessage(persistPart(event.getBody()));
+        event.setBody(Body.create(event.toJson()));
+        snmpEvent.setBindingPart(persistPart(event.getBody()));
 
         repository.save(snmpEvent);
     }
@@ -59,5 +62,9 @@ public final class SnmpService extends ProtocolService<SnmpEvent, net.microfalx.
     @Override
     protected Resource getAttributesResource(net.microfalx.heimdall.protocol.snmp.jpa.SnmpEvent model) {
         return ResourceFactory.resolve(model.getBindingPart().getResource()).withMimeType(MimeType.APPLICATION_JSON);
+    }
+
+    private Address createAddress(SnmpEvent event) {
+        return Address.create(event.getSource().getType(), event.getSource().getName(), event.getSource().getValue());
     }
 }
