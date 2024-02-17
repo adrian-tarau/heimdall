@@ -2,7 +2,7 @@
 
 _Heimdall_ is a monitoring/testing tool for developers, used to validate or troubleshoot services. The tool provides fake services which are used by applications to mimic a real interaction with a remote service.
 
-However, all services provided by _Heimdall_ will be partially or completely faked. For example, the _SMTP_ server will act like a real SMTP server, but it will not forward the email to real accounts - it will accept an email, store it, make it available for introspection but it will not be forwarded to users.
+However, all services provided by _Heimdall_ will be partially or completely faked. For example, the _SMTP_ server will act like a real SMTP server, but it will not forward the email to real accounts - it will accept an email, store it, make it available for introspection, but it will not be forwarded to users.
 
 The following services are faked and available to be used:
 
@@ -21,4 +21,10 @@ The following services are faked and available to be used:
 
 If _Heimdall_ runs in containers, check on which port the above ports (services) are configured. 
 
-A [search engine](search) is available to make all the data collected by these mocked services available to be searched by users (developer). Each document is tagged with the _owner_ service and events can be sliced by service or custom attributes. 
+### Workspace
+
+The application [workspace](workspace) is organized in a typical web application: header, navigation on the left and content in the middle. 
+
+### Finding Information
+
+A [search engine](search) is available to make all the data collected by these mocked services available to be searched by users (developers). Each document is tagged with the _owner_ service and events can be sliced by service or custom attributes. 
