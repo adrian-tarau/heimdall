@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.microfalx.bootstrap.dataset.annotation.Filterable;
 import net.microfalx.heimdall.protocol.core.jpa.Address;
 import net.microfalx.heimdall.protocol.core.jpa.Event;
 import net.microfalx.lang.annotation.*;
@@ -58,6 +59,7 @@ public class SmtpEvent extends Event {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "smtp_event_id")
     @Visible(false)
+    @Filterable
     private Collection<SmtpAttachment> attachments = new ArrayList<>();
 
     public void addAttachment(SmtpAttachment attachment) {

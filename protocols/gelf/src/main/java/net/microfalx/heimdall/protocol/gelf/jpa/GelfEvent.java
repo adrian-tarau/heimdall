@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.microfalx.bootstrap.dataset.annotation.Filterable;
 import net.microfalx.bootstrap.dataset.annotation.Lookup;
 import net.microfalx.heimdall.protocol.core.jpa.Address;
 import net.microfalx.heimdall.protocol.core.jpa.Event;
@@ -46,6 +47,7 @@ public class GelfEvent extends Event {
     @Position(5)
     @Label("Message")
     @Description("The short version of the Gelf message")
+    @Filterable
     private Part shortMessage;
 
     @JoinColumn(name = "long_message_id")
@@ -53,12 +55,14 @@ public class GelfEvent extends Event {
     @Position(6)
     @Visible(modes = Visible.Mode.VIEW)
     @Description("The full version of the Gelf message")
+    @Filterable
     private Part longMessage;
 
     @JoinColumn(name = "fields_id")
     @OneToOne
     @Position(10)
     @Visible(modes = Visible.Mode.VIEW)
+    @Filterable
     private Part fields;
 
     @Column(name = "version", length = 50, nullable = false)

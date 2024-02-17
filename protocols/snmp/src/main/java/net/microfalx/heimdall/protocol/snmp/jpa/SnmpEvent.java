@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.microfalx.bootstrap.dataset.annotation.Filterable;
 import net.microfalx.bootstrap.dataset.annotation.Lookup;
 import net.microfalx.heimdall.protocol.core.jpa.Address;
 import net.microfalx.heimdall.protocol.core.jpa.Event;
@@ -52,6 +53,7 @@ public class SnmpEvent extends Event {
     @Position(10)
     @Label("Bindings")
     @Visible(value = false)
+    @Filterable
     private Part bindingPart;
 
     @Column(name = "version")
@@ -63,6 +65,7 @@ public class SnmpEvent extends Event {
     @NotBlank
     @Visible(modes = Visible.Mode.VIEW)
     @Position(21)
+    @Filterable
     private String communityString;
 
     @Column(name = "enterprise", length = 200)

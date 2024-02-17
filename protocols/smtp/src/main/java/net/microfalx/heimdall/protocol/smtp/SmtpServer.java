@@ -10,6 +10,7 @@ import net.microfalx.heimdall.protocol.core.Address;
 import net.microfalx.heimdall.protocol.core.Attachment;
 import net.microfalx.heimdall.protocol.core.Body;
 import net.microfalx.heimdall.protocol.core.Part;
+import net.microfalx.lang.StringUtils;
 import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.MimeType;
 import net.microfalx.resource.Resource;
@@ -58,7 +59,9 @@ public class SmtpServer implements InitializingBean, BasicMessageListener {
         if (LOGGER.isDebugEnabled()) LOGGER.debug("Received email from {} for : {}", from, to);
         try {
             MimeMessage message = new MimeMessage(session, new ByteArrayInputStream(data));
-            SmtpEvent smtpEvent = new SmtpEvent(message.getMessageID());
+            String messageID = message.getMessageID();
+            if (StringUtils.isEmpty(messageID)) messageID = UUID.randomUUID().toString();
+            SmtpEvent smtpEvent = new SmtpEvent(messageID);
             smtpEvent.setName(message.getSubject());
             smtpEvent.setSource(extractAddress(Arrays.asList(message.getFrom()).iterator().next()));
             Arrays.stream(message.getAllRecipients()).map(this::extractAddress).forEach(smtpEvent::addTarget);

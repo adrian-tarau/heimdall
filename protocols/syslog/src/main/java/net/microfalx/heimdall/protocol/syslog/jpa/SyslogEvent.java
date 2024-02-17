@@ -5,6 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.microfalx.bootstrap.dataset.annotation.Filterable;
 import net.microfalx.bootstrap.dataset.annotation.Lookup;
 import net.microfalx.heimdall.protocol.core.jpa.Address;
 import net.microfalx.heimdall.protocol.core.jpa.Event;
@@ -43,6 +44,7 @@ public class SyslogEvent extends Event {
     @Name
     @Position(1)
     @Description("The content of the Syslog log event")
+    @Filterable
     private Part message;
 
     @Column(name = "severity", nullable = false)
