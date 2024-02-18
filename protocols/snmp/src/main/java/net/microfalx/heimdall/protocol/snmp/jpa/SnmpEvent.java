@@ -75,5 +75,6 @@ public class SnmpEvent extends Event {
     @Column(name = "trap_type")
     @Lookup(model = TrapLookup.class)
     @Description("The type of trap for the SNMP event")
+    @Filterable
     private Integer trapType;
 }

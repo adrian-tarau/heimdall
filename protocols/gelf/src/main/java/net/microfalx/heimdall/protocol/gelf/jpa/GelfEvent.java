@@ -74,12 +74,14 @@ public class GelfEvent extends Event {
     @Column(name = "level", nullable = false)
     @Position(25)
     @Lookup(model = SeverityLookup.class)
+    @Filterable
     @Description("Identify the importance of the Gelf log event")
     private int level;
 
     @Column(name = "facility", nullable = false)
     @Position(30)
     @Lookup(model = FacilityLookup.class)
+    @Filterable
     @Description("Determines which process of the machine created the Gelf log event")
     private int facility;
 
