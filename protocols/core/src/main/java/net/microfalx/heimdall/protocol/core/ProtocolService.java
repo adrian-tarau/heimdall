@@ -10,6 +10,7 @@ import net.microfalx.bootstrap.search.IndexService;
 import net.microfalx.bootstrap.search.SearchService;
 import net.microfalx.heimdall.protocol.core.jpa.AddressRepository;
 import net.microfalx.heimdall.protocol.core.jpa.PartRepository;
+import net.microfalx.lang.ObjectUtils;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.TimeUtils;
 import net.microfalx.resource.MimeType;
@@ -44,7 +45,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static java.lang.System.currentTimeMillis;
 import static net.microfalx.bootstrap.search.Document.*;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
 import static net.microfalx.lang.StringUtils.NA_STRING;
+import static net.microfalx.lang.StringUtils.capitalizeWords;
 
 /**
  * Base class for all protocol services.
@@ -55,6 +58,7 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
 
     private static final DateTimeFormatter DIRECTORY_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
     private static final long STATS_INTERVAL = 300_000;
+    private static final String REFERENCE_ATTR = "reference";
     private static final String FILE_NAME_FORMAT = "%09d";
     private static final String PART_FILE_EXTENSION = "part";
     public static final String PROTOCOL = "protocol";
@@ -231,6 +235,13 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
     }
 
     /**
+     * Returns the controller path used to create references.
+     *
+     * @return a non-null instance
+     */
+    protected abstract String getControllerPath();
+
+    /**
      * Returns the event type supported by this service.
      *
      * @return a non-null instance
@@ -278,6 +289,29 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
      */
     protected Resource getAttributesResource(M model) {
         throw new ProtocolException("Not supported");
+    }
+
+    /**
+     * Updates the event with an attribute which keeps a reference to the event to be displayed in UI.
+     *
+     * @param event the event
+     * @param id    the event identifier
+     */
+    protected final void updateReference(E event, Object id) {
+        requireNonNull(event);
+        requireNonNull(id);
+        event.add(REFERENCE_ATTR, getReference(ObjectUtils.toString(id)));
+    }
+
+    /**
+     * Returns a reference to an event using a controller path.
+     *
+     * @param id the event identifier
+     * @return the path
+     */
+    protected final String getReference(String id) {
+        requireNotEmpty(id);
+        return getControllerPath() + "#/view/" + id;
     }
 
     /**
@@ -429,11 +463,20 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
         document.setSentAt(event.getSentAt());
         document.setReceivedAt(event.getReceivedAt());
         if (event.getBody() != null) document.setBody(event.getBody().getResource());
-        document.add(Attribute.create(SOURCE_FIELD, event.getSource().getName()).enableAll());
-        if (target != null) document.add(Attribute.create(TARGET_FIELD, target.getName()).enableAll());
-        document.add(Attribute.create(SEVERITY_FIELD, StringUtils.capitalizeWords(event.getSeverity().name())).enableAll());
+        net.microfalx.heimdall.protocol.core.jpa.Address sourceJpa = lookupAddress(event.getSource());
+        document.add(Attribute.create(SOURCE_FIELD, sourceJpa.getName()).enableAll());
+        if (target != null) {
+            net.microfalx.heimdall.protocol.core.jpa.Address targetJpa = lookupAddress(target);
+            document.add(Attribute.create(TARGET_FIELD, targetJpa.getName()).enableAll());
+        }
+        document.add(Attribute.create(SEVERITY_FIELD, capitalizeWords(event.getSeverity().name())).enableAll());
+        net.microfalx.bootstrap.model.Attribute reference = event.get(REFERENCE_ATTR);
+        event.remove(REFERENCE_ATTR);
         for (net.microfalx.bootstrap.model.Attribute attribute : event) {
             document.addIfAbsent(Attribute.create(attribute).enableAll());
+        }
+        if (reference != null) {
+            document.setReference(reference.asString());
         }
         document.setOwner(PROTOCOL);
         updateDocument(event, document);

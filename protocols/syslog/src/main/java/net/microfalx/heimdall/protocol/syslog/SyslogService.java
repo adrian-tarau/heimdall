@@ -25,6 +25,11 @@ public final class SyslogService extends ProtocolService<SyslogMessage, SyslogEv
     }
 
     @Override
+    protected String getControllerPath() {
+        return "/protocol/syslog";
+    }
+
+    @Override
     protected void prepare(SyslogMessage message) {
         lookupAddress(message.getSource());
     }
@@ -39,6 +44,7 @@ public final class SyslogService extends ProtocolService<SyslogMessage, SyslogEv
         syslogEvent.setSentAt(message.getSentAt().toLocalDateTime());
         syslogEvent.setMessage(persistPart(message.getBody()));
         syslogEventRepository.save(syslogEvent);
+        updateReference(message, syslogEvent.getId());
     }
 
     /**

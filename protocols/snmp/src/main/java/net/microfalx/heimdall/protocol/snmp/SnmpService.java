@@ -34,6 +34,11 @@ public final class SnmpService extends ProtocolService<SnmpEvent, net.microfalx.
     }
 
     @Override
+    protected String getControllerPath() {
+        return "/protocol/snmp";
+    }
+
+    @Override
     protected void prepare(SnmpEvent event) {
         lookupAddress(event.getSource());
     }
@@ -56,6 +61,7 @@ public final class SnmpService extends ProtocolService<SnmpEvent, net.microfalx.
         snmpEvent.setBindingPart(persistPart(event.getBody()));
 
         repository.save(snmpEvent);
+        updateReference(event, snmpEvent.getId());
     }
 
     @Override

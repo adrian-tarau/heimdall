@@ -30,6 +30,11 @@ public final class GelfService extends ProtocolService<GelfEvent, net.microfalx.
     }
 
     @Override
+    protected String getControllerPath() {
+        return "/protocol/gelf";
+    }
+
+    @Override
     protected void prepare(GelfEvent event) {
         lookupAddress(event.getSource());
     }
@@ -50,6 +55,7 @@ public final class GelfService extends ProtocolService<GelfEvent, net.microfalx.
         message.addPart(fields);
         gelfEvent.setFields(persistPart(fields));
         gelfEventRepository.save(gelfEvent);
+        updateReference(message, gelfEvent.getId());
     }
 
     @Override

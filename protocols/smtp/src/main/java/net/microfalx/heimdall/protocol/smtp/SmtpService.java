@@ -32,6 +32,11 @@ public final class SmtpService extends ProtocolService<SmtpEvent, net.microfalx.
     }
 
     @Override
+    protected String getControllerPath() {
+        return "/protocol/smtp";
+    }
+
+    @Override
     protected void prepare(SmtpEvent event) {
         net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent jpaSmtpEvent = new net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent();
         updateAddresses(event, jpaSmtpEvent);
@@ -54,6 +59,7 @@ public final class SmtpService extends ProtocolService<SmtpEvent, net.microfalx.
         repository.save(jpaSmtpEvent);
         attachments.forEach(jpaSmtpEvent::addAttachment);
         attachmentRepository.saveAll(attachments);
+        updateReference(smtpEvent, jpaSmtpEvent.getId());
     }
 
     private void updateAddresses(SmtpEvent smptEvent, net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent smtpEvent) {
