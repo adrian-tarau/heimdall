@@ -208,7 +208,7 @@ public class SnmpServer implements CommandResponder {
 
     private void updateBindings(SnmpEvent snmpEvent, VariableBinding variable) {
         String attributeName = variable.getOid().toDottedString();
-        String attributeNameFromOid = mibService.findName(attributeName, false);
+        String attributeNameFromOid = mibService.findName(attributeName, false, false);
         if (attributeNameFromOid != null) attributeName = attributeNameFromOid;
         Variable attributeValue = variable.getVariable();
         if (attributeValue instanceof Integer32) {
@@ -224,7 +224,7 @@ public class SnmpServer implements CommandResponder {
         } else if (attributeValue instanceof UnsignedInteger32) {
             snmpEvent.add(attributeName, attributeValue.toInt());
         } else if (attributeValue instanceof OID) {
-            snmpEvent.add(attributeName, ((OID) attributeValue).toDottedString());
+            snmpEvent.add(attributeName, mibService.findName(((OID) attributeValue).toDottedString(), false, true));
         } else if (attributeValue instanceof IpAddress) {
             snmpEvent.add(attributeName, ((IpAddress) attributeValue).getInetAddress().getHostAddress());
         }

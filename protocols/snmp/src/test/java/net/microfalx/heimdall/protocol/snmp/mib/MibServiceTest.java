@@ -78,6 +78,7 @@ class MibServiceTest extends AbstractBootstrapServiceTestCase {
         assertEquals("DISMAN-EXPRESSION-MIB::sysUpTimeInstance", mibService.findName("1.3.6.1.2.1.1.3.0"));
         assertEquals("RFC1213-MIB::sysUpTime.9", mibService.findName("1.3.6.1.2.1.1.3.9"));
         assertEquals("RFC1213-MIB::sysUpTime.1.2.3", mibService.findName("1.3.6.1.2.1.1.3.1.2.3"));
+        assertEquals("RFC1213-MIB::sysUpTime", mibService.findName("1.3.6.1.2.1.1.3.1.2.3", true, false));
         assertEquals("IF-MIB::ifLastChange", mibService.findName("1.3.6.1.2.1.2.2.1.9"));
         assertEquals("IF-MIB::ifLastChange", mibService.findName("1.3.6.1.2.1.2.2.1.9"));
         assertEquals("IF-MIB::ifMIBObjects", mibService.findName("1.3.6.1.2.1.31.1"));

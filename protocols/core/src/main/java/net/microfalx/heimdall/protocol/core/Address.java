@@ -3,6 +3,7 @@ package net.microfalx.heimdall.protocol.core;
 import net.microfalx.lang.ExceptionUtils;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
 /**
@@ -54,10 +55,20 @@ public interface Address {
     }
 
     /**
+     * Creates an address from a {@link InetSocketAddress}.
+     *
+     * @param value the hostname/IP
+     * @return a non-null instance
+     */
+    static Address host(InetSocketAddress value) {
+        return host(value.getAddress());
+    }
+
+    /**
      * Creates an address from a hostname/IP address.
      *
      * @param value the hostname/IP
-     * @param name  the hostname
+     * @param name  the hostname (can be null)
      * @return a non-null instance
      */
     static Address host(String value, String name) {
@@ -78,18 +89,6 @@ public interface Address {
     }
 
     /**
-     * Creates an address with a name and a value.
-     *
-     * @param type  the address type
-     * @param name  the name
-     * @param value the value
-     * @return a non-null instance
-     */
-    static Address create(Type type, String name, String value) {
-        return new DefaultAddress(type, name, value);
-    }
-
-    /**
      * Creates an address with only a value.
      *
      * @param type  the address type
@@ -97,7 +96,19 @@ public interface Address {
      * @return a non-null instance
      */
     static Address create(Type type, String value) {
-        return new DefaultAddress(type, value, value);
+        return create(type, value, null);
+    }
+
+    /**
+     * Creates an address with a name and a value.
+     *
+     * @param type  the address type
+     * @param value the value
+     * @param name  the name associated with the value (friendly/display name), can be null
+     * @return a non-null instance
+     */
+    static Address create(Type type, String value, String name) {
+        return new DefaultAddress(type, value, name);
     }
 
     /**
@@ -108,7 +119,7 @@ public interface Address {
     Type getType();
 
     /**
-     * Returns the name for the event.
+     * Returns the (friendly) name for the address.
      *
      * @return a non-null instance
      */
@@ -123,6 +134,7 @@ public interface Address {
 
     /**
      * Returns the address as a string suitable for display.
+     *
      * @return a non-null instance
      */
     String toDisplay();

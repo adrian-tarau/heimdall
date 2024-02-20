@@ -106,8 +106,8 @@ public class SyslogServer implements InitializingBean {
         message.setName(abbreviate(removeLineBreaks(originalMessage), MAX_NAME_LENGTH));
         message.setFacility(Facility.fromNumericalCode(event.getFacility()));
         message.setSyslogSeverity(Severity.fromNumericalCode(event.getLevel()));
-        message.setSource(Address.create(Address.Type.HOSTNAME, address.getHostName(), address.getAddress().getHostAddress()));
-        message.addTarget(Address.create(Address.Type.HOSTNAME, event.getHost()));
+        message.setSource(Address.host(address));
+        message.addTarget(Address.host(event.getHost()));
         message.setBody(Body.create(originalMessage));
         message.setCreatedAt(event.getDate().toInstant().atZone(ZoneId.systemDefault()));
         message.setSentAt(message.getCreatedAt());

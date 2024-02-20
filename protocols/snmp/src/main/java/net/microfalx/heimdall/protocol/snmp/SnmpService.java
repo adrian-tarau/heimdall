@@ -1,6 +1,5 @@
 package net.microfalx.heimdall.protocol.snmp;
 
-import net.microfalx.heimdall.protocol.core.Address;
 import net.microfalx.heimdall.protocol.core.Body;
 import net.microfalx.heimdall.protocol.core.Event;
 import net.microfalx.heimdall.protocol.core.ProtocolService;
@@ -36,13 +35,13 @@ public final class SnmpService extends ProtocolService<SnmpEvent, net.microfalx.
 
     @Override
     protected void prepare(SnmpEvent event) {
-        lookupAddress(createAddress(event));
+        lookupAddress(event.getSource());
     }
 
     protected void persist(SnmpEvent event) {
         net.microfalx.heimdall.protocol.snmp.jpa.SnmpEvent snmpEvent = new net.
                 microfalx.heimdall.protocol.snmp.jpa.SnmpEvent();
-        snmpEvent.setAgentAddress(lookupAddress(createAddress(event)));
+        snmpEvent.setAgentAddress(lookupAddress(event.getSource()));
         snmpEvent.setCreatedAt(event.getCreatedAt().toLocalDateTime());
         snmpEvent.setSentAt(event.getSentAt().toLocalDateTime());
         snmpEvent.setReceivedAt(event.getReceivedAt().toLocalDateTime());
@@ -64,7 +63,4 @@ public final class SnmpService extends ProtocolService<SnmpEvent, net.microfalx.
         return ResourceFactory.resolve(model.getBindingPart().getResource()).withMimeType(MimeType.APPLICATION_JSON);
     }
 
-    private Address createAddress(SnmpEvent event) {
-        return Address.create(event.getSource().getType(), event.getSource().getName(), event.getSource().getValue());
-    }
 }

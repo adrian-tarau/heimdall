@@ -122,7 +122,7 @@ public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
         Faker faker = getFaker();
         String firstName = faker.name().firstName();
         String lastName = faker.name().lastName();
-        return Pair.of(firstName + " " + lastName, firstName + "." + lastName + "@company.com");
+        return Pair.of(firstName + "." + lastName + "@microfalx.net", firstName + " " + lastName);
     }
 
     private static final Map<String, MimeType> extensionsToMimeType = new HashMap<>();

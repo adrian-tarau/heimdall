@@ -429,9 +429,9 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
         document.setSentAt(event.getSentAt());
         document.setReceivedAt(event.getReceivedAt());
         if (event.getBody() != null) document.setBody(event.getBody().getResource());
-        document.add(Attribute.create(SOURCE_FIELD, event.getSource().toDisplay()).enableAll());
-        if (target != null) document.add(Attribute.create(TARGET_FIELD, target.toDisplay()).enableAll());
-        document.add(Attribute.create(SEVERITY_FIELD, event.getSeverity().name()).enableAll());
+        document.add(Attribute.create(SOURCE_FIELD, event.getSource().getName()).enableAll());
+        if (target != null) document.add(Attribute.create(TARGET_FIELD, target.getName()).enableAll());
+        document.add(Attribute.create(SEVERITY_FIELD, StringUtils.capitalizeWords(event.getSeverity().name())).enableAll());
         for (net.microfalx.bootstrap.model.Attribute attribute : event) {
             document.addIfAbsent(Attribute.create(attribute).enableAll());
         }

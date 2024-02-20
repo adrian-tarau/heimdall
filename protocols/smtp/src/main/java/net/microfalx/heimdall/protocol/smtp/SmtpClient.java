@@ -43,7 +43,7 @@ public class SmtpClient extends ProtocolClient<SmtpEvent> {
         initializeMailSender();
         mailSender.send(mimeMessage -> {
             MimeMessageHelper message = new MimeMessageHelper(mimeMessage, isMultiPart(event), "UTF-8");
-            message.setFrom(event.getSource().getValue());
+            message.setFrom(event.getSource().getValue(), event.getSource().getName());
             for (Address target : event.getTargets()) {
                 message.addTo(target.getValue(), target.getName());
             }

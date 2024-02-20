@@ -186,7 +186,7 @@ public class MibService implements InitializingBean {
      * @return the name or the object identifier if there is no match
      */
     public String findName(String value) {
-        return findName(value, true);
+        return findName(value, true, true);
     }
 
     /**
@@ -200,7 +200,7 @@ public class MibService implements InitializingBean {
      * @param fullName {@code true} to return full name (module + name), {@code false} otherwie
      * @return the name or the object identifier if there is no match
      */
-    public String findName(String value, boolean fullName) {
+    public String findName(String value, boolean fullName, boolean suffix) {
         requireNonNull(value);
         if (!MibUtils.isOid(value)) throw new IllegalArgumentException("An OID is required, received '" + value + "'");
         OID oid = new OID(value);
@@ -210,11 +210,11 @@ public class MibService implements InitializingBean {
                 int length = symbol.getOid().length();
                 String name = fullName ? symbol.getFullName() : symbol.getName();
                 if (length == value.length()) return name;
-                return name + value.substring(length);
+                return suffix ? name + value.substring(length) : name;
             }
             oid = MibUtils.getParent(oid);
         }
-        return describeOid(value);
+        return value;
     }
 
     /**

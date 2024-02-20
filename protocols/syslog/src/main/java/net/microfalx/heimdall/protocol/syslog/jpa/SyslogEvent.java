@@ -51,11 +51,13 @@ public class SyslogEvent extends Event {
     @Lookup(model = SeverityLookup.class)
     @Position(10)
     @Description("Identify the importance of the Syslog log event")
+    @Filterable(true)
     private Integer severity;
 
     @Column(name = "facility", nullable = false)
     @Lookup(model = FacilityLookup.class)
     @Position(10)
     @Description("Determines which process of the machine created the Syslog log event")
+    @Filterable(true)
     private Integer facility;
 }
