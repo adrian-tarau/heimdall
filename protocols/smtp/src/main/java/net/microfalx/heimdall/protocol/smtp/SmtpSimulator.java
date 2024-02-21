@@ -2,16 +2,15 @@ package net.microfalx.heimdall.protocol.smtp;
 
 import net.datafaker.Faker;
 import net.microfalx.heimdall.protocol.core.*;
+import net.microfalx.resource.ClassPathResource;
 import net.microfalx.resource.MimeType;
+import net.microfalx.resource.Resource;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Component
@@ -73,13 +72,22 @@ public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
         SmtpEvent smtpEvent = new SmtpEvent();
         smtpEvent.setSource(sourceAddress);
         smtpEvent.addTarget(targetAddress);
-        smtpEvent.setBody((Body) Body.create(getRandomText()).setMimeType(random.nextFloat() > 0.5 ? MimeType.TEXT_PLAIN : MimeType.TEXT_HTML));
-        smtpEvent.setName(getSubject());
+        smtpEvent.setBody(createBody());
+        smtpEvent.setName(getSubject(smtpEvent.getBody()));
         smtpEvent.setSentAt(ZonedDateTime.now());
         smtpEvent.setReceivedAt(ZonedDateTime.now());
         smtpEvent.setCreatedAt(ZonedDateTime.now());
         createAttachments(smtpEvent);
         client.send(smtpEvent);
+    }
+
+    private Body createBody() {
+        if (random.nextFloat() > 0.5) {
+            Resource resource = ClassPathResource.file("smtp/" + htmlFiles.get(random.nextInt(htmlFiles.size())));
+            return (Body) Body.create(resource).setMimeType(MimeType.TEXT_HTML);
+        } else {
+            return (Body) Body.create(getRandomText()).setMimeType(MimeType.TEXT_PLAIN);
+        }
     }
 
     private void createAttachments(SmtpEvent smtpEvent) {
@@ -113,9 +121,11 @@ public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
         }
     }
 
-    private String getSubject() {
+    private String getSubject(Body body) {
         Faker faker = getFaker();
-        return faker.book().title();
+        String subject = faker.book().title();
+        if (MimeType.TEXT_HTML.equals(body.getMimeType())) subject += " *";
+        return subject;
     }
 
     private Pair<String, String> geRandomEmail() {
@@ -126,9 +136,17 @@ public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
     }
 
     private static final Map<String, MimeType> extensionsToMimeType = new HashMap<>();
+    private static final List<String> htmlFiles = new ArrayList<>();
 
     static {
         extensionsToMimeType.put("txt", MimeType.TEXT_PLAIN);
         extensionsToMimeType.put("html", MimeType.TEXT_HTML);
+
+        htmlFiles.add("form.html");
+        htmlFiles.add("href.html");
+        htmlFiles.add("lists_and_headings.html");
+        htmlFiles.add("section.html");
+        htmlFiles.add("table.html");
+        htmlFiles.add("text_alignment.html");
     }
 }
