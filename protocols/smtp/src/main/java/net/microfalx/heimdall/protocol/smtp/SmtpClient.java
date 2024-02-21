@@ -11,6 +11,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Properties;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class SmtpClient extends ProtocolClient<SmtpEvent> {
 
@@ -96,7 +97,8 @@ public class SmtpClient extends ProtocolClient<SmtpEvent> {
     }
 
     private boolean isMultiPart(SmtpEvent event) {
-        return !(event.getParts().size() == 1 && MimeType.TEXT.equals(event.getBody().getMimeType()));
+        if (event.getParts().size() > 1) return true;
+        return ThreadLocalRandom.current().nextFloat() > 0.5;
     }
 
     public void initializeMailSender() {

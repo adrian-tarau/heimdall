@@ -89,6 +89,7 @@ public abstract class AbstractPart implements Part {
     public final Part setMimeType(MimeType mimeType) {
         requireNonNull(mimeType);
         this.mimeType = mimeType.getValue();
+        if (this.resource != null) resource = resource.withMimeType(mimeType);
         return this;
     }
 
