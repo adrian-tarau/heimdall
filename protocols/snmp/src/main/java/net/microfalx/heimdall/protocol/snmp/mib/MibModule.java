@@ -5,6 +5,7 @@ import net.microfalx.lang.Descriptable;
 import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.Nameable;
 import net.microfalx.lang.annotation.*;
+import net.microfalx.resource.MimeType;
 import net.microfalx.resource.NullResource;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceFactory;
@@ -242,7 +243,7 @@ public class MibModule implements Identifiable<String>, Nameable, Descriptable {
 
     public void setContent(Resource content) {
         requireNonNull(content);
-        this.content = content;
+        this.content = content.withMimeType(MimeType.TEXT_PLAIN);
         this.fileName = content.getFileName();
     }
 

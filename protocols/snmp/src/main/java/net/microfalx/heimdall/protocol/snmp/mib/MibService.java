@@ -5,6 +5,8 @@ import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.model.Metadata;
 import net.microfalx.bootstrap.model.MetadataService;
 import net.microfalx.bootstrap.resource.ResourceService;
+import net.microfalx.bootstrap.search.Document;
+import net.microfalx.bootstrap.search.IndexService;
 import net.microfalx.heimdall.protocol.snmp.jpa.SnmpMib;
 import net.microfalx.heimdall.protocol.snmp.jpa.SnmpMibRepository;
 import net.microfalx.resource.ClassPathResource;
@@ -54,6 +56,9 @@ public class MibService implements InitializingBean {
 
     @Autowired
     private MetadataService metadataService;
+
+    @Autowired
+    private IndexService indexService;
 
     @Autowired(required = false)
     private AsyncTaskExecutor taskExecutor;
@@ -310,6 +315,20 @@ public class MibService implements InitializingBean {
     }
 
     private void persistMib(MibModule module) {
+        SnmpMib mibJpa = null;
+        try {
+            mibJpa = persistDb(module);
+        } catch (Exception e) {
+            LOGGER.error("Failed to persist MIB '{}'", module.getName(), e);
+        }
+        try {
+            indexMib(module, mibJpa);
+        } catch (Exception e) {
+            LOGGER.error("Failed to index MIB '{}'", module.getName(), e);
+        }
+    }
+
+    private SnmpMib persistDb(MibModule module) {
         SnmpMib snmpMib = snmpMibRepository.findByModuleId(module.getId());
         if (snmpMib == null) {
             snmpMib = new SnmpMib();
@@ -327,6 +346,24 @@ public class MibService implements InitializingBean {
         snmpMib.setModifiedAt(LocalDateTime.now());
         snmpMib.setDescription(abbreviate(removeLineBreaks(module.getDescription()), MAX_DESCRIPTION_LENGTH));
         snmpMibRepository.saveAndFlush(snmpMib);
+        return snmpMib;
+    }
+
+    private void indexMib(MibModule module, SnmpMib snmpMib) {
+        Document document = Document.create("mib_" + module.getId(), module.getName());
+        document.setOwner("snmp");
+        document.setType("mib");
+        document.setDescription(module.getDescription());
+        document.setBody(module.getContent());
+        document.setReference("/admin/protocol/snmp/module#/view/" + module.getId());
+        if (snmpMib != null) {
+            document.setCreatedAt(snmpMib.getCreatedAt());
+            document.setModifiedAt(snmpMib.getModifiedAt());
+        } else {
+            document.setCreatedAt(module.getLastModified());
+            document.setModifiedAt(module.getLastModified());
+        }
+        indexService.index(document);
     }
 
     private void loadModulesFromDatabaseAndResolve() {
