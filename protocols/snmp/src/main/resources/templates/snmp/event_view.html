@@ -43,7 +43,7 @@
                         <tr th:each="attribute : ${attributes}">
                             <td th:text="${attribute.name}"></td>
                             <td>
-                                <a href="#" th:attr="onclick=|Application.Search.joinField('${attribute.name}','${attribute.value}', true)|"><i class="fa-solid fa-filter"></i></a>
+                                <a th:if="${attribute.isSingleLine()}" href="#" th:attr="onclick=|Application.Search.joinField('${attribute.name}','${attribute.value}', true)|"><i class="fa-solid fa-filter"></i></a>
                                 <span class="dataset-text-mono" th:text="${attribute.value}"></span>
                             </td>
                         </tr>

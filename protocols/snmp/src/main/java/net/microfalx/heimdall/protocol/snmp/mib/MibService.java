@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.CountDownLatch;
+import java.util.stream.Collectors;
 
 import static java.lang.String.join;
 import static java.time.Duration.ofSeconds;
@@ -314,56 +315,102 @@ public class MibService implements InitializingBean {
         }
     }
 
-    private void persistMib(MibModule module) {
-        SnmpMib mibJpa = null;
+    private SnmpMib persistMib(MibModule module) {
         try {
-            mibJpa = persistDb(module);
-        } catch (Exception e) {
+            SnmpMib snmpMib = snmpMibRepository.findByModuleId(module.getId());
+            if (snmpMib == null) {
+                snmpMib = new SnmpMib();
+                snmpMib.setType(module.getType());
+                snmpMib.setModuleId(module.getId());
+                snmpMib.setCreatedAt(LocalDateTime.now());
+            }
+            snmpMib.setName(module.getName());
+            snmpMib.setFileName(module.getFileName());
+            try {
+                snmpMib.setContent(module.getContent().loadAsString());
+            } catch (Exception e) {
+                throw new MibException("Fail to read the content of the MIB module " + module.getName(), e);
+            }
+            snmpMib.setModifiedAt(LocalDateTime.now());
+            snmpMib.setDescription(abbreviate(removeLineBreaks(module.getDescription()), MAX_DESCRIPTION_LENGTH));
+            snmpMibRepository.saveAndFlush(snmpMib);
+            return snmpMib;
+        } catch (MibException e) {
             LOGGER.error("Failed to persist MIB '{}'", module.getName(), e);
+            return null;
         }
-        try {
-            indexMib(module, mibJpa);
-        } catch (Exception e) {
-            LOGGER.error("Failed to index MIB '{}'", module.getName(), e);
-        }
-    }
-
-    private SnmpMib persistDb(MibModule module) {
-        SnmpMib snmpMib = snmpMibRepository.findByModuleId(module.getId());
-        if (snmpMib == null) {
-            snmpMib = new SnmpMib();
-            snmpMib.setType(module.getType());
-            snmpMib.setModuleId(module.getId());
-            snmpMib.setCreatedAt(LocalDateTime.now());
-        }
-        snmpMib.setName(module.getName());
-        snmpMib.setFileName(module.getFileName());
-        try {
-            snmpMib.setContent(module.getContent().loadAsString());
-        } catch (Exception e) {
-            throw new MibException("Fail to read the content of the MIB module " + module.getName(), e);
-        }
-        snmpMib.setModifiedAt(LocalDateTime.now());
-        snmpMib.setDescription(abbreviate(removeLineBreaks(module.getDescription()), MAX_DESCRIPTION_LENGTH));
-        snmpMibRepository.saveAndFlush(snmpMib);
-        return snmpMib;
     }
 
     private void indexMib(MibModule module, SnmpMib snmpMib) {
-        Document document = Document.create("mib_" + module.getId(), module.getName());
-        document.setOwner("snmp");
-        document.setType("mib");
-        document.setDescription(module.getDescription());
-        document.setBody(module.getContent());
-        document.setReference("/admin/protocol/snmp/module#/view/" + module.getId());
-        if (snmpMib != null) {
-            document.setCreatedAt(snmpMib.getCreatedAt());
-            document.setModifiedAt(snmpMib.getModifiedAt());
-        } else {
-            document.setCreatedAt(module.getLastModified());
-            document.setModifiedAt(module.getLastModified());
+        try {
+            Document document = Document.create("mib_" + module.getId(), module.getName());
+            document.setOwner("snmp");
+            document.setType("mib");
+            document.setDescription(module.getDescription());
+            document.setBody(module.getContent());
+            document.setReference("/admin/protocol/snmp/module#/view/" + module.getId());
+            if (snmpMib != null) {
+                document.setCreatedAt(snmpMib.getCreatedAt());
+                document.setModifiedAt(snmpMib.getModifiedAt());
+            } else {
+                document.setCreatedAt(module.getLastModified());
+                document.setModifiedAt(module.getLastModified());
+            }
+            document.add("mib_type", module.getType().name().toLowerCase());
+            document.add("organization", module.getOrganization());
+            document.add("enterprise_oid", module.getEnterpriseOid());
+            document.add("imports", module.getImportedModules().stream().map(MibImport::getName)
+                    .collect(Collectors.joining(" ")));
+            indexService.index(document, false);
+        } catch (Exception e) {
+            LOGGER.error("Failed to index module '{}'", module.getName(), e);
         }
-        indexService.index(document);
+    }
+
+    private void indexSymbol(MibSymbol symbol) {
+        try {
+            Document document = Document.create("symbol_" + symbol.getId(), symbol.getName());
+            document.setOwner("snmp");
+            document.setType("symbol");
+            if (symbol.getDescription() != null) {
+                document.setDescription(symbol.getDescription());
+                document.setBody(MemoryResource.create(symbol.getDescription()));
+            }
+            document.setReference("/admin/protocol/snmp/symbol#/view/" + symbol.getId());
+            document.add("oid", symbol.getOid());
+            document.add("symbol_type", symbol.getType().name());
+            document.add("module", symbol.getModule().getName());
+            if (symbol.getPrimitiveType() != null) {
+                document.add("primitive_type", symbol.getPrimitiveType().name());
+            }
+            indexService.index(document, false);
+        } catch (Exception e) {
+            LOGGER.error("Failed to index symbol '{}'", symbol.getName(), e);
+        }
+    }
+
+    private void indexVariable(MibVariable variable) {
+        try {
+            Document document = Document.create("variable_" + variable.getId(), variable.getName());
+            document.setOwner("snmp");
+            document.setType("variable");
+            if (variable.getDescription() != null) {
+                document.setDescription(variable.getDescription());
+                document.setBody(MemoryResource.create(variable.getDescription()));
+            }
+            document.setReference("/admin/protocol/snmp/variable#/view/" + variable.getId());
+            document.add("oid", variable.getOid());
+            document.add("module", variable.getModule().getName());
+            if (variable.getUnits() != null) document.add("units", variable.getUnits());
+            if (variable.getType() != null) document.add("variable_type", variable.getType().name());
+            document.add("is_enum", variable.isEnum());
+            if (variable.isEnum()) document.add("enum_values", variable.getEnumValues().stream()
+                    .map(MibNamedNumber::getName).collect(Collectors.joining(" ")));
+            document.add("is_number", variable.isNumber());
+            indexService.index(document, false);
+        } catch (Exception e) {
+            LOGGER.error("Failed to index variable '{}'", variable.getName(), e);
+        }
     }
 
     private void loadModulesFromDatabaseAndResolve() {
@@ -411,6 +458,20 @@ public class MibService implements InitializingBean {
             }
         }
         this.holder = new MibHolder(newModules, newSymbols, newVariables, newModulesById, newSymbolsById, newVariablesById);
+        getTaskExecutor().submit(this::index);
+    }
+
+    private void index() {
+        for (MibModule module : holder.modules) {
+            indexMib(module, null);
+        }
+        for (MibSymbol symbol : holder.symbols) {
+            indexSymbol(symbol);
+        }
+        for (MibVariable variable : holder.variables) {
+            indexVariable(variable);
+        }
+        indexService.flush();
     }
 
     private void updateModuleOidsInDatabase() {
