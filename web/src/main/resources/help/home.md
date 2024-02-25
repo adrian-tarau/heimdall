@@ -25,6 +25,6 @@ If _Heimdall_ runs in containers, check on which port the above ports (services)
 
 The application [workspace](workspace) is organized in a typical web application: header, navigation on the left and content in the middle. 
 
-### Finding Information
+### Information Searching (Querying)
 
 A [search engine](search) is available to make all the data collected by these mocked services available to be searched by users (developers). Each document is tagged with the _owner_ service and events can be sliced by service or custom attributes. 
