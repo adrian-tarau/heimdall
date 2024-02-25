@@ -87,7 +87,7 @@ public class SmtpClient extends ProtocolClient<SmtpEvent> {
         for (Part part : event.getParts()) {
             if (part instanceof Attachment) {
                 try {
-                    ByteArrayDataSource dataSource = new ByteArrayDataSource(part.getResource().getInputStream(), part.getMimeType());
+                    ByteArrayDataSource dataSource = new ByteArrayDataSource(part.getResource().getInputStream(true), part.getMimeType());
                     message.addAttachment(part.getFileName(), dataSource);
                 } catch (Exception e) {
                     throw new ProtocolException("Something went wrong on the client side");

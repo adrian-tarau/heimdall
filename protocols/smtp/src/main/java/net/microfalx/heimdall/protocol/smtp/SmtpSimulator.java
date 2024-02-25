@@ -8,10 +8,14 @@ import net.microfalx.resource.Resource;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.zip.GZIPOutputStream;
 
 @Component
 public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
@@ -97,17 +101,19 @@ public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
             attachmentCount = 1 + random.nextInt(2);
         }
         for (int i = 0; i < attachmentCount; i++) {
+            boolean compresses = true;//random.nextFloat() > 0.5;
             String fileName = random.nextFloat() > 0.5 ? faker.code().isbn13() : faker.commerce().productName();
             String extension = faker.file().extension();
+            if (compresses) extension += ".gz";
             MimeType mimeType = extensionsToMimeType.getOrDefault(extension.toLowerCase(), MimeType.APPLICATION_OCTET_STREAM);
-            Attachment attachment = createAttachment(mimeType);
+            Attachment attachment = createAttachment(mimeType, compresses);
             attachment.setFileName(fileName + "." + extension);
             attachment.setMimeType(mimeType);
             smtpEvent.addPart(attachment);
         }
     }
 
-    private Attachment createAttachment(MimeType mimeType) {
+    private Attachment createAttachment(MimeType mimeType, boolean compresses) {
         if (mimeType == MimeType.APPLICATION_OCTET_STREAM) {
             int maximumPartLength = getProperties().getMaximumPartLength();
             if ((COUNTER.get() % 100) == 0) {
@@ -115,9 +121,23 @@ public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
             } else if ((COUNTER.get() % 500) == 0) {
                 maximumPartLength = 100 * maximumPartLength;
             }
-            return Attachment.create(getRandomBytes(getProperties().getMinimumPartLength(), maximumPartLength));
+            return Attachment.create(getRandomBytes(getProperties().getMinimumPartLength(), maximumPartLength, compresses));
         } else {
-            return Attachment.create(getRandomText());
+            String randomText = getRandomText();
+            if (compresses) {
+                try {
+                    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                    OutputStream outputStream = new GZIPOutputStream(buffer);
+                    OutputStreamWriter writer = new OutputStreamWriter(outputStream);
+                    writer.write(randomText);
+                    writer.close();
+                    return Attachment.create(buffer.toByteArray());
+                } catch (IOException e) {
+                    return Attachment.create(randomText);
+                }
+            } else {
+                return Attachment.create(randomText);
+            }
         }
     }
 

@@ -6,13 +6,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.zip.GZIPOutputStream;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
@@ -258,11 +261,36 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
     /**
      * Returns the next body of random data.
      *
+     * @param min the minimum number of bytes
+     * @param min the maximum number of bytes
      * @return a non-null instance
      */
     protected final byte[] getRandomBytes(int min, int max) {
+        return getRandomBytes(min, max, false);
+    }
+
+    /**
+     * Returns the next body of random data.
+     *
+     * @param min        the minimum number of bytes
+     * @param min        the maximum number of bytes
+     * @param compresses {@code true} to compress data,  {@code false} otherwise
+     * @return a non-null instance
+     */
+    protected final byte[] getRandomBytes(int min, int max, boolean compresses) {
         byte[] data = new byte[min + random.nextInt(Math.abs(max - min))];
         random.nextBytes(data);
+        if (compresses) {
+            try {
+                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                OutputStream outputStream = new GZIPOutputStream(buffer);
+                outputStream.write(data);
+                outputStream.close();
+                data = buffer.toByteArray();
+            } catch (IOException e) {
+                return data;
+            }
+        }
         return data;
     }
 

@@ -47,7 +47,7 @@ public abstract class ProtocolController<E extends Event> extends DataSetControl
         if (!resource.exists()) return ResponseEntity.notFound().build();
         return ResponseEntity.ok().contentType(MediaType.parseMediaType(resource.getMimeType()))
                 .header("Content-Disposition", "attachment; filename=\"" + resource.getName() + "\"")
-                .body(new InputStreamResource(resource.getInputStream()));
+                .body(new InputStreamResource(resource.getInputStream(true)));
     }
 
     private Resource findResource(int partId) {
