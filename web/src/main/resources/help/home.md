@@ -23,8 +23,10 @@ If _Heimdall_ runs in containers, check on which port the above ports (services)
 
 ### Workspace
 
-The application [workspace](workspace) is organized in a typical web application: header, navigation on the left and content in the middle. 
+The application [workspace](workspace) is organized in a typical web application layout: header, navigation and content area. 
 
 ### Information Searching (Querying)
 
 A [search engine](search) is available to make all the data collected by these mocked services available to be searched by users (developers). Each document is tagged with the _owner_ service and events can be sliced by service or custom attributes. 
+
+Outside the _search engine_ dashboards, most dashboards expose a toolbar for various actions and filters and a data grid (or multiple panels with widgets) for [data exploration](dataset/dashboard). 
