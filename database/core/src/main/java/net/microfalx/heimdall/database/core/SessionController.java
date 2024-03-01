@@ -4,7 +4,7 @@ import net.microfalx.bootstrap.web.controller.UnderConstructionController;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-@Controller
+@Controller("heimdallDatabaseSessionController")
 @RequestMapping("/database/connection")
-public abstract class DatabaseConnectionController extends UnderConstructionController {
+public abstract class SessionController extends UnderConstructionController {
 }

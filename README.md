@@ -62,7 +62,8 @@ and a user for application access (change the database & user if desired):
 ```sql
 CREATE USER 'heimdall'@'%' IDENTIFIED BY '7Ry4j2Y5j1Of'; 
 CREATE DATABASE heimdall CHARACTER SET utf8 COLLATE utf8_bin; 
-GRANT ALL ON heimdall.* TO 'heimdall'@'%'; 
+GRANT ALL ON heimdall.* TO 'heimdall'@'%';
+GRANT SELECT ON mysql.* TO heimdall;
 FLUSH PRIVILEGES; 
 ```
 

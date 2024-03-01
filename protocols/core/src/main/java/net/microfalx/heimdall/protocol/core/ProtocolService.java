@@ -12,7 +12,7 @@ import net.microfalx.heimdall.protocol.core.jpa.AddressRepository;
 import net.microfalx.heimdall.protocol.core.jpa.PartRepository;
 import net.microfalx.lang.ObjectUtils;
 import net.microfalx.lang.StringUtils;
-import net.microfalx.lang.TimeUtils;
+import net.microfalx.metrics.Metrics;
 import net.microfalx.resource.MimeType;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceFactory;
@@ -41,8 +41,9 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-import static java.lang.System.currentTimeMillis;
 import static net.microfalx.bootstrap.search.Document.*;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
@@ -65,8 +66,7 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
 
     private static final LocalDateTime STARTUP = LocalDateTime.now();
     private final Map<String, net.microfalx.heimdall.protocol.core.jpa.Address> addressCache = new ConcurrentHashMap<>();
-    private final AtomicInteger eventCount = new AtomicInteger();
-    private volatile long lastStats = currentTimeMillis();
+    private volatile Metrics metrics;
 
     public ProtocolService() {
         LOGGER = LoggerFactory.getLogger(getClass());
@@ -366,29 +366,76 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
     }
 
     /**
+     * Times a protocol operation.
+     *
+     * @param name     the name
+     * @param supplier the supplier
+     * @param <T>      the return type
+     * @return the return value
+     */
+    protected final <T> T time(String name, Supplier<T> supplier) {
+        Metrics metrics = getMetrics();
+        return metrics.time(name, supplier);
+    }
+
+    /**
+     * Times a protocol operation.
+     *
+     * @param name     the name
+     * @param consumer the consumer
+     * @param <T>      the return type
+     */
+    protected final <T> void time(String name, Consumer<T> consumer) {
+        Metrics metrics = getMetrics();
+        metrics.time(name, consumer, null);
+    }
+
+    /**
+     * Counts a protocol operation.
+     *
+     * @param name the name
+     */
+    protected final void count(String name) {
+        Metrics metrics = getMetrics();
+        metrics.count(name);
+    }
+
+    /**
+     * Returns the metrics associated with this protocol.
+     *
+     * @return a non-null instance
+     */
+    protected final Metrics getMetrics() {
+        if (metrics == null) metrics = Metrics.of("Protocol").withGroup(getEventType().name());
+        return metrics;
+    }
+
+    /**
      * Persists the event part in the database.
      *
      * @param part the part
      * @return the JPA part
      */
     protected final net.microfalx.heimdall.protocol.core.jpa.Part persistPart(Part part) {
-        net.microfalx.heimdall.protocol.core.jpa.Part partJpa = new net.microfalx.heimdall.protocol.core.jpa.Part();
-        partJpa.setType(part.getType());
-        if (!NA_STRING.equals(part.getName())) partJpa.setName(part.getName());
-        partJpa.setFileName(part.getFileName());
-        if (part instanceof AbstractPart apart) {
-            apart.resource = upload(apart.resource);
-        }
-        try {
-            partJpa.setLength((int) part.getResource().length());
-        } catch (IOException e) {
-            partJpa.setLength(-1);
-        }
-        partJpa.setMimeType(MimeType.get(part.getMimeType()));
-        partJpa.setResource(part.getResource().toURI().toASCIIString());
-        partJpa.setCreatedAt(part.getEvent().getCreatedAt().toLocalDateTime());
-        partRepository.save(partJpa);
-        return partJpa;
+        return time("Persist Part", () -> {
+            net.microfalx.heimdall.protocol.core.jpa.Part partJpa = new net.microfalx.heimdall.protocol.core.jpa.Part();
+            partJpa.setType(part.getType());
+            if (!NA_STRING.equals(part.getName())) partJpa.setName(part.getName());
+            partJpa.setFileName(part.getFileName());
+            if (part instanceof AbstractPart apart) {
+                apart.resource = upload(apart.resource);
+            }
+            try {
+                partJpa.setLength((int) part.getResource().length());
+            } catch (IOException e) {
+                partJpa.setLength(-1);
+            }
+            partJpa.setMimeType(MimeType.get(part.getMimeType()));
+            partJpa.setResource(part.getResource().toURI().toASCIIString());
+            partJpa.setCreatedAt(part.getEvent().getCreatedAt().toLocalDateTime());
+            partRepository.save(partJpa);
+            return partJpa;
+        });
     }
 
     @Override
@@ -457,55 +504,47 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
     }
 
     private Document index(E event, Address target) {
-        Document document = Document.create(event.getId(), event.getName());
-        document.setType(event.getType().name().toLowerCase());
-        document.setCreatedAt(event.getCreatedAt());
-        document.setSentAt(event.getSentAt());
-        document.setReceivedAt(event.getReceivedAt());
-        if (event.getBody() != null) document.setBody(event.getBody().getResource());
-        net.microfalx.heimdall.protocol.core.jpa.Address sourceJpa = lookupAddress(event.getSource());
-        document.add(Attribute.create(SOURCE_FIELD, sourceJpa.getName()).enableAll());
-        if (target != null) {
-            net.microfalx.heimdall.protocol.core.jpa.Address targetJpa = lookupAddress(target);
-            document.add(Attribute.create(TARGET_FIELD, targetJpa.getName()).enableAll());
-        }
-        document.add(Attribute.create(SEVERITY_FIELD, capitalizeWords(event.getSeverity().name())).enableAll());
-        net.microfalx.bootstrap.model.Attribute reference = event.get(REFERENCE_ATTR);
-        event.remove(REFERENCE_ATTR);
-        for (net.microfalx.bootstrap.model.Attribute attribute : event) {
-            document.addIfAbsent(Attribute.create(attribute).enableAll());
-        }
-        if (reference != null) {
-            document.setReference(reference.asString());
-        }
-        document.setOwner(PROTOCOL);
-        updateDocument(event, document);
-        return document;
+        return time("Index", () -> {
+            Document document = create(event.getId(), event.getName());
+            document.setType(event.getType().name().toLowerCase());
+            document.setCreatedAt(event.getCreatedAt());
+            document.setSentAt(event.getSentAt());
+            document.setReceivedAt(event.getReceivedAt());
+            if (event.getBody() != null) document.setBody(event.getBody().getResource());
+            net.microfalx.heimdall.protocol.core.jpa.Address sourceJpa = lookupAddress(event.getSource());
+            document.add(Attribute.create(SOURCE_FIELD, sourceJpa.getName()).enableAll());
+            if (target != null) {
+                net.microfalx.heimdall.protocol.core.jpa.Address targetJpa = lookupAddress(target);
+                document.add(Attribute.create(TARGET_FIELD, targetJpa.getName()).enableAll());
+            }
+            document.add(Attribute.create(SEVERITY_FIELD, capitalizeWords(event.getSeverity().name())).enableAll());
+            net.microfalx.bootstrap.model.Attribute reference = event.get(REFERENCE_ATTR);
+            event.remove(REFERENCE_ATTR);
+            for (net.microfalx.bootstrap.model.Attribute attribute : event) {
+                document.addIfAbsent(Attribute.create(attribute).enableAll());
+            }
+            if (reference != null) {
+                document.setReference(reference.asString());
+            }
+            document.setOwner(PROTOCOL);
+            updateDocument(event, document);
+            return document;
+        });
     }
 
     private void flush() {
         Collection<E> events = new ArrayList<>();
         queue.drainTo(events);
-        eventCount.addAndGet(events.size());
         if (!events.isEmpty()) {
             prepare(events);
             persist(events);
             index(events);
         }
-        printStats();
-    }
-
-    private void printStats() {
-        if (TimeUtils.millisSince(lastStats) < STATS_INTERVAL) return;
-        int currentCount = eventCount.getAndSet(0);
-        if (currentCount > 0) {
-            LOGGER.info("Processed " + currentCount + " events of type " + getEventType().name());
-        }
-        lastStats = currentTimeMillis();
     }
 
     private void prepare(Collection<E> events) {
         for (E event : events) {
+            count("Events");
             try {
                 prepare(event);
             } catch (Exception e) {
@@ -519,7 +558,7 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
         transactionTemplate.execute(status -> {
             for (E event : events) {
                 try {
-                    persist(event);
+                    time("Persist", (t) -> persist(event));
                 } catch (Exception e) {
                     LOGGER.error("Failed to persist event" + event, e);
                 }
