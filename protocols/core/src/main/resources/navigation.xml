@@ -2,7 +2,7 @@
 <navigations xmlns="https://net.microfalx/xsd/navigation-1.0.xsd">
     <menu id="left">
         <menu id="protocols" text="Protocols" position="10" icon="fa-solid fa-network-wired"/>
-        <menu id="protocols_admin" text="Protocols" position="50" parent="administration" action="/admin/broker" icon="fa-solid fa-network-wired">
+        <menu id="protocols_admin" text="Protocols" position="50" parent="administration" action="/admin/protocol" icon="fa-solid fa-network-wired">
             <item id="address" text="Addresses" action="/admin/protocol/address" icon="fa-solid fa-address-book"/>
         </menu>
     </menu>

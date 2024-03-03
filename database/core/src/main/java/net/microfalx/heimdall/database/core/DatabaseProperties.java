@@ -9,7 +9,7 @@ import java.time.Duration;
 @ConfigurationProperties("heimdall.database")
 public class DatabaseProperties {
 
-    private Duration interval = Duration.ofSeconds(30);
+    private Duration interval = Duration.ofSeconds(20);
 
     public Duration getInterval() {
         return interval;

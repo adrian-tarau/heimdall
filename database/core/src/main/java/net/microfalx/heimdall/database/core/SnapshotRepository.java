@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @Transactional
-public interface DatabaseManageRepository extends JpaRepository<DatabaseManage, Integer>, JpaSpecificationExecutor<DatabaseManage> {
+public interface SnapshotRepository extends JpaRepository<Snapshot, Integer>, JpaSpecificationExecutor<Snapshot> {
 }

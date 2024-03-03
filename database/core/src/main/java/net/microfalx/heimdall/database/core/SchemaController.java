@@ -11,18 +11,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping(value = "/admin/database")
-@DataSet(model = DatabaseManage.class)
+@DataSet(model = Schema.class)
 @Help("admin/database")
-public class DatabaseManageController extends DataSetController<DatabaseManage, Integer> {
+public class SchemaController extends DataSetController<Schema, Integer> {
 
     @Autowired
-    private DatabaseManageRepository databaseManageRepository;
+    private SchemaRepository schemaRepository;
 
     @Autowired
     private DatabaseService databaseService;
 
     @Override
-    protected void afterPersist(net.microfalx.bootstrap.dataset.DataSet<DatabaseManage, Field<DatabaseManage>, Integer> dataSet, DatabaseManage model, State state) {
+    protected void afterPersist(net.microfalx.bootstrap.dataset.DataSet<Schema, Field<Schema>, Integer> dataSet, Schema model, State state) {
         super.afterPersist(dataSet, model, state);
         databaseService.reload();
     }

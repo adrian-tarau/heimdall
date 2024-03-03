@@ -17,7 +17,7 @@ import net.microfalx.lang.annotation.*;
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString(callSuper = true)
-public class DatabaseManage extends NamedTimestampAware {
+public class Schema extends NamedTimestampAware {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,6 +41,7 @@ public class DatabaseManage extends NamedTimestampAware {
     @Column(name = "username", length = 100)
     @Position(30)
     @Description("The user name used to connect to the database")
+    @Label("User Name")
     private String username;
 
     @Column(name = "password", length = 100)
@@ -49,6 +50,11 @@ public class DatabaseManage extends NamedTimestampAware {
     @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})
     @Component(Component.Type.PASSWORD)
     private String password;
+
+    @Column(name = "time_zone", length = 100)
+    @Position(32)
+    @Description("The time zone of the database")
+    private String timeZone;
 
     @Column(name = "mappings", length = 2000)
     @Position(40)
