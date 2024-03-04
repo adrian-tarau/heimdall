@@ -54,6 +54,7 @@
         <module>protocols</module>
         <module>database</module>
         <module>broker</module>
+        <module>rest</module>
         <module>other</module>
         <module>web</module>
         <module>deploy</module>
@@ -73,6 +74,7 @@
         <spring.boot.version>3.2.2</spring.boot.version>
         <bootstrap.version>1.0.0-SNAPSHOT</bootstrap.version>
         <apache.tika.version>2.9.1</apache.tika.version>
+        <apache.jmeter.version>5.6.3</apache.jmeter.version>
         <subethasmtp.version>7.0.1</subethasmtp.version>
         <datafaker.version>2.1.0</datafaker.version>
         <syslog4j.version>0.9.61</syslog4j.version>
@@ -223,6 +225,21 @@
                 <groupId>com.github.seancfoley</groupId>
                 <artifactId>ipaddress</artifactId>
                 <version>${ipaddress.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.jmeter</groupId>
+                <artifactId>ApacheJMeter_bom</artifactId>
+                <version>${apache.jmeter.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.jmeter</groupId>
+                <artifactId>ApacheJMeter_bom-thirdparty</artifactId>
+                <version>${apache.jmeter.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             <!-- Tests -->

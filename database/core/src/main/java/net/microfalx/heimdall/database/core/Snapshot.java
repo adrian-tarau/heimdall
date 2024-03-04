@@ -107,6 +107,7 @@ public class Snapshot {
     @Position(110)
     @Description("The timestamp when the {name} was created")
     @OrderBy(OrderBy.Direction.DESC)
+    @Timestamp
     private LocalDateTime createdAt;
 
     @Column(name = "resource")

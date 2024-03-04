@@ -3,13 +3,13 @@
     <menu id="left">
         <menu id="brokers" text="Brokers" position="20" icon="fa-regular fa-message">
             <item id="consumer" text="Consumers" action="/broker/consumer" icon="fa-solid fa-arrow-right-to-bracket"/>
-            <!--item id="producer" text="Producers" action="/broker/producer" icon="fa-solid fa-arrow-right-from-bracket"/-->
+            <item id="producer" text="Producers" action="/broker/producer" icon="fa-solid fa-arrow-right-from-bracket"/>
             <item id="session" text="Sessions" action="/broker/session" icon="fa-solid fa-timeline"/>
         </menu>
         <menu id="brokers_admin" text="Brokers" position="30" parent="administration" action="/admin/broker"
               icon="fa-regular fa-message">
             <item id="manage" text="Manage" action="/admin/broker/manage" icon="fa-solid fa-server"/>
-            <item id="destination" text="Destinations" action="/admin/broker/destination" icon="fa-solid fa-comments"/>
+            <item id="topic" text="Topics" action="/admin/broker/topic" icon="fa-solid fa-comments"/>
         </menu>
 
     </menu>

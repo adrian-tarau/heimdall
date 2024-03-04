@@ -24,22 +24,28 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>net.microfalx.heimdall</groupId>
-    <artifactId>heimdall-other-rest</artifactId>
+    <artifactId>heimdall-rest-core</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 
     <parent>
         <groupId>net.microfalx.heimdall</groupId>
-        <artifactId>heimdall-other</artifactId>
+        <artifactId>heimdall-rest</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <name>Heimdall - Database - Core</name>
+    <name>Heimdall - Rest - Core</name>
 
     <dependencies>
 
         <dependency>
             <groupId>net.microfalx.heimdall</groupId>
             <artifactId>heimdall-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.microfalx.heimdall</groupId>
+            <artifactId>heimdall-rest-core</artifactId>
             <version>${project.version}</version>
         </dependency>
 

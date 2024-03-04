@@ -4,6 +4,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/broker/session")
-public class BrokerSessionController extends AbstractBrokerController {
+@RequestMapping("/admin/broker/topic")
+public class BrokerTopicController extends AbstractBrokerController {
 }

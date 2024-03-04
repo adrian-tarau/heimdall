@@ -106,7 +106,13 @@
 
         <dependency>
             <groupId>net.microfalx.heimdall</groupId>
-            <artifactId>heimdall-other-rest</artifactId>
+            <artifactId>heimdall-rest-jmeter</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.microfalx.heimdall</groupId>
+            <artifactId>heimdall-rest-k6</artifactId>
             <version>${project.version}</version>
         </dependency>
 
