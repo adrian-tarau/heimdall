@@ -44,12 +44,6 @@
         </dependency>
 
         <dependency>
-            <groupId>net.microfalx.heimdall</groupId>
-            <artifactId>heimdall-rest-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>net.microfalx.bootstrap</groupId>
             <artifactId>bootstrap-web</artifactId>
         </dependency>

@@ -50,19 +50,9 @@
         </dependency>
 
         <dependency>
-            <groupId>net.microfalx.bootstrap</groupId>
-            <artifactId>bootstrap-web</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.apache.jmeter</groupId>
             <artifactId>ApacheJMeter_core</artifactId>
             <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>net.datafaker</groupId>
-            <artifactId>datafaker</artifactId>
         </dependency>
 
     </dependencies>
