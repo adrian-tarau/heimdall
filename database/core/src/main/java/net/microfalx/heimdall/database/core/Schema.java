@@ -8,6 +8,7 @@ import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Component;
 import net.microfalx.bootstrap.jdbc.entity.NamedTimestampAware;
+import net.microfalx.bootstrap.jdbc.jpa.EncryptAttributeConverter;
 import net.microfalx.lang.annotation.*;
 
 @Entity
@@ -23,7 +24,7 @@ public class Schema extends NamedTimestampAware {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     @EqualsAndHashCode.Include
-    private Long id;
+    private Integer id;
 
     @Column(name = "type", length = 500)
     @Position(10)
@@ -49,6 +50,7 @@ public class Schema extends NamedTimestampAware {
     @Description("The password used to connect to the database")
     @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})
     @Component(Component.Type.PASSWORD)
+    @Convert(converter = EncryptAttributeConverter.class)
     private String password;
 
     @Column(name = "time_zone", length = 100)
@@ -62,5 +64,4 @@ public class Schema extends NamedTimestampAware {
     @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.ADD, Visible.Mode.EDIT})
     @Component(Component.Type.TEXT_AREA)
     private String mappings;
-
 }

@@ -10,9 +10,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping(value = "/admin/database")
+@RequestMapping(value = "/admin/database/manage")
 @DataSet(model = Schema.class)
-@Help("admin/database")
+@Help("admin/database/manage")
 public class SchemaController extends DataSetController<Schema, Integer> {
 
     @Autowired

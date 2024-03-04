@@ -32,8 +32,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static net.microfalx.bootstrap.jdbc.support.DatabaseUtils.AVAILABILITY_INTERVAL;
+import static net.microfalx.bootstrap.jdbc.support.DatabaseUtils.CONNECT_TIMEOUT;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
+import static net.microfalx.lang.StringUtils.toIdentifier;
 
 @Service("heimdallDatabaseService")
 public class DatabaseService implements InitializingBean {
@@ -65,6 +68,7 @@ public class DatabaseService implements InitializingBean {
     private TaskScheduler taskScheduler;
 
     private final Map<String, Schema> schemaCache = new ConcurrentHashMap<>();
+    private final Map<Integer, String> schemaIdCache = new ConcurrentHashMap<>();
     private final Map<String, User> userCache = new ConcurrentHashMap<>();
     private final Set<String> persistedStatements = new ConcurrentSkipListSet<>();
     private Resource snapshotsResource;
@@ -89,6 +93,25 @@ public class DatabaseService implements InitializingBean {
 
     SnapshotRepository getDatabaseSnapshotRepository() {
         return snapshotRepository;
+    }
+
+    /**
+     * Finds a database instance from a registered schema.
+     *
+     * @param schema the schema
+     * @return the database, null if it does not exist
+     */
+    Database findDatabase(Schema schema) {
+        requireNonNull(schema);
+        String databaseId = schemaIdCache.get(schema.getId());
+        if (databaseId != null) {
+            try {
+                return databaseService.getDatabase(databaseId);
+            } catch (DatabaseNotFoundException e) {
+                // in such cases, just report "I do not know"
+            }
+        }
+        return null;
     }
 
     /**
@@ -209,7 +232,8 @@ public class DatabaseService implements InitializingBean {
     public void reload() {
         LOGGER.info("Register databases (schemas)");
         for (Schema schema : schemaRepository.findAll()) {
-            String id = StringUtils.toIdentifier(schema.getName() + "_" + schema.getType());
+            String id = toIdentifier(schema.getName() + "_" + schema.getType());
+            schemaIdCache.put(schema.getId(), id);
             try {
                 DataSource dataSource = create(id, schema.getName(), schema.getUrl(), schema.getUsername(),
                         schema.getPassword());
@@ -282,6 +306,8 @@ public class DatabaseService implements InitializingBean {
         config.setJdbcUrl(url);
         config.setUsername(userName);
         config.setPassword(password);
+        config.setConnectionTimeout(CONNECT_TIMEOUT.toMillis());
+        config.setIdleTimeout(AVAILABILITY_INTERVAL.multipliedBy(2).toMillis());
         HikariDataSource hikariDataSource = new HikariDataSource(config);
         return DataSource.create(id, name, hikariDataSource).withUri(URI.create(url))
                 .withUserName(userName)
