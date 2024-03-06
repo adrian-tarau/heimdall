@@ -104,11 +104,11 @@
             <version>${project.version}</version>
         </dependency>
 
-        <dependency>
+        <!--dependency>
             <groupId>net.microfalx.heimdall</groupId>
             <artifactId>heimdall-rest-jmeter</artifactId>
             <version>${project.version}</version>
-        </dependency>
+        </dependency-->
 
         <dependency>
             <groupId>net.microfalx.heimdall</groupId>

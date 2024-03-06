@@ -17,7 +17,7 @@ import java.net.URI;
 
 @Controller
 @RequestMapping(value = "/database/statement")
-@DataSet(model = Statement.class)
+@DataSet(model = Statement.class, viewTemplate = "database/statement_view", viewClasses = "modal-lg")
 @Help("database/statement")
 public class StatementController extends DataSetController<Statement, Integer> {
 
@@ -25,17 +25,25 @@ public class StatementController extends DataSetController<Statement, Integer> {
     private StatementRepository statementRepository;
 
     @Override
+    protected void beforeView(net.microfalx.bootstrap.dataset.DataSet<Statement, Field<Statement>, Integer> dataSet, Model controllerModel, Statement dataSetModel) {
+        super.beforeView(dataSet, controllerModel, dataSetModel);
+        loadContent(dataSetModel, Integer.MAX_VALUE);
+    }
+
+    @Override
     protected void beforeBrowse(net.microfalx.bootstrap.dataset.DataSet<Statement, Field<Statement>, Integer> dataSet, Model controllerModel, Statement dataSetModel) {
         super.beforeBrowse(dataSet, controllerModel, dataSetModel);
-        if (dataSetModel != null) {
-            Resource resource = ResourceFactory.resolve(URI.create(dataSetModel.getResource()));
-            try {
-                if (resource.exists()) {
-                    dataSetModel.setContent(StringUtils.abbreviate(resource.loadAsString(), 80));
-                }
-            } catch (IOException e) {
-                dataSetModel.setContent(net.microfalx.lang.StringUtils.NA_STRING);
+        if (dataSetModel != null) loadContent(dataSetModel, 70);
+    }
+
+    private void loadContent(Statement dataSetModel, int limit) {
+        Resource resource = ResourceFactory.resolve(URI.create(dataSetModel.getResource()));
+        try {
+            if (resource.exists()) {
+                dataSetModel.setContent(StringUtils.abbreviate(resource.loadAsString(), limit));
             }
+        } catch (IOException e) {
+            dataSetModel.setContent(net.microfalx.lang.StringUtils.NA_STRING);
         }
     }
 }

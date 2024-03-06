@@ -58,7 +58,7 @@ class SnapshotsTask implements Runnable {
         List<Session> sessions = snapshot.getSessions().stream().filter(session -> session.getStatement() != null).toList();
         for (Session session : sessions) {
             try {
-                databaseService.persistStatement(schema, session, session.getStatement());
+                databaseService.persistStatement(schema, session.getStatement());
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
             }

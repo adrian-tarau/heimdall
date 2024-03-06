@@ -2,6 +2,7 @@
 <navigations xmlns="https://net.microfalx/xsd/navigation-1.0.xsd">
     <menu id="left">
         <menu id="brokers" text="Brokers" position="20" icon="fa-regular fa-message">
+            <item id="snapshot" text="Snapshots" action="/broker/snapshot" icon="fa-solid fa-heart-pulse"/>
             <item id="consumer" text="Consumers" action="/broker/consumer" icon="fa-solid fa-arrow-right-to-bracket"/>
             <item id="producer" text="Producers" action="/broker/producer" icon="fa-solid fa-arrow-right-from-bracket"/>
             <item id="session" text="Sessions" action="/broker/session" icon="fa-solid fa-timeline"/>

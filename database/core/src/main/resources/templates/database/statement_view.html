@@ -1,0 +1,23 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="fields">
+    <div class="container-fluid">
+        <div class="row border rounded bg-body-secondary mb-3 p-3 fs-6">
+            <div class="row">
+                <div class="col-md-4"><span class="fw-bold">Database: </span><span class="fst-italic" th:text="${model.schema.name}"></span></div>
+                <div class="col-md-4"><span class="fw-bold">Database Type: </span><span class="fst-italic" th:text="${model.databaseType}"></span></div>
+            </div>
+            <div class="row">
+                <div class="col-md-4"><span class="fw-bold">User: </span><span class="fst-italic" th:text="${model.user.name}"></span></div>
+                <div class="col-md-4"><span class="fw-bold">Statement Type: </span><span class="fst-italic" th:text="${model.type}"></span></div>
+                <div class="col-md-4"><span class="fw-bold">Length: </span><span class="fst-italic" th:text="${model.length}"></span></div>
+            </div>
+        </div>
+        <div class="row border rounded p-3 mt-2">
+            <p class="dataset-text-mono" th:text="${model.content}"></p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

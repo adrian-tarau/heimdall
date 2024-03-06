@@ -6,8 +6,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.dataset.annotation.OrderBy;
-import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.annotation.*;
 import net.microfalx.resource.Resource;
 import org.hibernate.annotations.NaturalId;
@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.StringUtils.toIdentifier;
 
 @Entity
 @Table(name = "database_statements")
@@ -31,7 +32,7 @@ public class Statement {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     @EqualsAndHashCode.Include
-    private String id;
+    private int id;
 
     @ManyToOne
     @JoinColumn(name = "schema_id", nullable = false)
@@ -76,12 +77,14 @@ public class Statement {
     @Column(name = "length")
     @Position(11)
     @Description("The statement type")
+    @Visible(value = false)
     private long length;
 
     @Column(name = "execution_count")
     @Position(20)
     @Label("Executions")
     @Description("The number of times this statement was executed (might be estimated by sampling sessions)")
+    @Formattable(counter = true)
     private long executionCount;
 
     @Column(name = "total_duration")
@@ -89,38 +92,29 @@ public class Statement {
     @Label(value = "Total", group = "Duration")
     @Description("The total duration of the execution time (might be estimated by sampling sessions)")
     @OrderBy(OrderBy.Direction.DESC)
+    @Formattable(duration = true)
     private float totalDuration;
 
     @Column(name = "avg_duration")
     @Position(22)
     @Label(value = "Average", group = "Duration")
     @Description("The average duration of the execution time (might be estimated by sampling sessions)")
+    @Formattable(duration = true)
     private float avgDuration;
 
     @Column(name = "min_duration")
     @Position(23)
     @Label(value = "Minimum", group = "Duration")
     @Description("The total duration of the execution time (might be estimated by sampling sessions)")
+    @Formattable(duration = true)
     private float minDuration;
 
     @Column(name = "max_duration")
     @Position(24)
     @Label(value = "Maximum", group = "Duration")
     @Description("The total duration of the execution time (might be estimated by sampling sessions)")
+    @Formattable(duration = true)
     private float maxDuration;
-
-    @Column(name = "std_dev_duration")
-    @Position(24)
-    @Label(value = "Std. Dev.", group = "Duration")
-    @Description("The standard deviation in execution time (might be estimated by sampling sessions)")
-    private float stdDevDuration;
-
-    @Column(name = "variance_duration")
-    @Position(24)
-    @Label(value = "Variance", group = "Duration")
-    @Description("The variance in execution time (might be estimated by sampling sessions)")
-    @Visible(value = false)
-    private float varianceDuration;
 
     @Column(name = "resource")
     @Position(100)
@@ -131,13 +125,18 @@ public class Statement {
     @Position(100)
     @Visible(modes = {Visible.Mode.BROWSE, Visible.Mode.VIEW})
     @Description("The timestamp when the {name} was created")
-    @OrderBy(OrderBy.Direction.DESC)
     private LocalDateTime createdAt;
+
+    @Column(name = "modified_at")
+    @Position(101)
+    @Visible(modes = {Visible.Mode.BROWSE, Visible.Mode.VIEW})
+    @Description("The timestamp when the {name} was updated last time (executed)")
+    private LocalDateTime modifiedAt;
 
     public static String getStatementId(net.microfalx.bootstrap.jdbc.support.Statement statement, String userName) {
         requireNonNull(statement);
         requireNonNull(userName);
-        return StringUtils.toIdentifier(userName + "_" + statement.getId());
+        return toIdentifier(userName + "_" + statement.getId());
     }
 
     public static Statement from(Schema schema, User user, net.microfalx.bootstrap.jdbc.support.Statement statement,

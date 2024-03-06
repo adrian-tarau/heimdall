@@ -27,13 +27,17 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.time.Duration.ofMinutes;
 import static net.microfalx.bootstrap.jdbc.support.DatabaseUtils.AVAILABILITY_INTERVAL;
 import static net.microfalx.bootstrap.jdbc.support.DatabaseUtils.CONNECT_TIMEOUT;
+import static net.microfalx.heimdall.database.core.Statement.getStatementId;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
 import static net.microfalx.lang.StringUtils.toIdentifier;
@@ -65,14 +69,18 @@ public class DatabaseService implements InitializingBean {
     private StatementRepository statementRepository;
 
     @Autowired
+    private StatementStatisticsRepository statementStatisticsRepository;
+
+    @Autowired
     private TaskScheduler taskScheduler;
 
     private final Map<String, Schema> schemaCache = new ConcurrentHashMap<>();
     private final Map<Integer, String> schemaIdCache = new ConcurrentHashMap<>();
     private final Map<String, User> userCache = new ConcurrentHashMap<>();
-    private final Set<String> persistedStatements = new ConcurrentSkipListSet<>();
+    private final Map<String, Integer> persistedStatements = new ConcurrentHashMap<>();
     private Resource snapshotsResource;
     private Resource statementsResource;
+    private volatile LocalDateTime statementCollectionThreshold = LocalDateTime.now().minusMinutes(1);
 
     private static final DateTimeFormatter DIRECTORY_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
     private static final String FILE_NAME_FORMAT = "%09d";
@@ -93,6 +101,26 @@ public class DatabaseService implements InitializingBean {
 
     SnapshotRepository getDatabaseSnapshotRepository() {
         return snapshotRepository;
+    }
+
+    SnapshotRepository getSnapshotRepository() {
+        return snapshotRepository;
+    }
+
+    StatementRepository getStatementRepository() {
+        return statementRepository;
+    }
+
+    StatementStatisticsRepository getStatementStatisticsRepository() {
+        return statementStatisticsRepository;
+    }
+
+    LocalDateTime getStatementCollectionThreshold() {
+        return statementCollectionThreshold;
+    }
+
+    void setStatementCollectionThreshold(LocalDateTime statementCollectionThreshold) {
+        this.statementCollectionThreshold = statementCollectionThreshold;
     }
 
     /**
@@ -171,24 +199,30 @@ public class DatabaseService implements InitializingBean {
      * Persists a snapshot in database and resource.
      *
      * @param statement the statement
+     * @return the statement primary key
      */
-    void persistStatement(Schema schema, Session session, net.microfalx.bootstrap.jdbc.support.Statement statement) {
+    int persistStatement(Schema schema, net.microfalx.bootstrap.jdbc.support.Statement statement) {
         requireNonNull(statement);
-        if (persistedStatements.contains(statement.getId())) return;
-        User user = findUser(schema, session.getUserName());
-        Optional<Statement> result = statementRepository.findByStatementId(Statement.getStatementId(statement, user.getName()));
+        Integer key = persistedStatements.get(statement.getId());
+        if (key != null) return key;
+        User user = findUser(schema, statement.getUserName());
+        Optional<Statement> result = statementRepository.findByStatementId(getStatementId(statement, statement.getUserName()));
         if (result.isEmpty()) {
             try {
                 Resource resource = writeStatement(statement);
                 Statement databaseStatement = Statement.from(schema, user, statement, resource);
                 statementRepository.saveAndFlush(databaseStatement);
-                persistedStatements.add(statement.getId());
+                persistedStatements.put(statement.getId(), databaseStatement.getId());
+                return databaseStatement.getId();
             } catch (DataIntegrityViolationException e) {
-                // already there, just ignore
+                result = statementRepository.findByStatementId(getStatementId(statement, statement.getUserName()));
+                return result.orElseThrow().getId();
             } catch (Exception e) {
                 throw new DatabaseException("Statement '" + org.apache.commons.lang3.StringUtils.abbreviate(statement.getContent(),
                         50) + "' cannot be stored in resource", e);
             }
+        } else {
+            return result.get().getId();
         }
     }
 
@@ -249,6 +283,7 @@ public class DatabaseService implements InitializingBean {
 
     private void scheduleTasks() {
         taskScheduler.schedule(new SnapshotsTask(this), new PeriodicTrigger(databaseProperties.getInterval()));
+        taskScheduler.schedule(new StatementTask(this), new PeriodicTrigger(ofMinutes(1)));
     }
 
     private Resource getSharedResource() {
