@@ -252,7 +252,7 @@ public class BrokerService implements InitializingBean {
         @Override
         public void run() {
             for (BrokerTopic topic : getActiveTopics()) {
-                if (topic.isActive()) executor.submit(new BrokerSessionTask(BrokerService.this, topic,
+                executor.submit(new BrokerSessionTask(BrokerService.this, topic,
                         contentService, indexService));
             }
         }
