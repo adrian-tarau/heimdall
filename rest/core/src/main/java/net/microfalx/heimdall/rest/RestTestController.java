@@ -5,6 +5,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/admin/rest/test")
+@RequestMapping("/system/rest/test")
 public class RestTestController extends UnderConstructionController {
 }

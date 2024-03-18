@@ -15,7 +15,7 @@
             </div>
         </div>
         <div class="row border rounded p-3 mt-2">
-            <p class="dataset-text-mono" th:text="${model.content}"></p>
+            <iframe class="w-100 p-3" style="height:400px" loading="lazy" th:src="${#content.getViewUri(content)}"></iframe>
         </div>
     </div>
 </div>

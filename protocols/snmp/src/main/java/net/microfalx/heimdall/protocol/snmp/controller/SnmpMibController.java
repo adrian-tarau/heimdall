@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import static net.microfalx.heimdall.protocol.snmp.controller.MibControllerUtilities.updateContext;
 
 @Controller
-@RequestMapping("/admin/protocol/snmp/mib")
+@RequestMapping("/system/protocol/snmp/mib")
 @DataSet(model = SnmpMib.class, defaultQuery = "type = User",
         canAdd = false, canUpload = true, canDownload = true,
         viewTemplate = "snmp/mib_view", viewClasses = "modal-xl")

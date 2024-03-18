@@ -14,13 +14,13 @@ import net.microfalx.bootstrap.jdbc.entity.NamedTimestampAware;
 import net.microfalx.lang.annotation.*;
 
 @Entity
-@Table(name = "broker_clusters")
-@Name("Brokers")
+@Table(name = "broker_topics")
+@Name("Topics")
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString(callSuper = true)
-public class Broker extends NamedTimestampAware {
+public class BrokerTopic extends NamedTimestampAware {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,23 +28,41 @@ public class Broker extends NamedTimestampAware {
     @EqualsAndHashCode.Include
     private Integer id;
 
-    @Column(name = "type", length = 500)
+    @ManyToOne
+    @JoinColumn(name = "cluster_id", nullable = false)
+    @Position(2)
+    @Label(value = "Name", group = "Broker")
+    @Description("The broker which owns the topic")
+    private Broker broker;
+
+    @Column(name = "type")
     @Position(6)
     @Enumerated(EnumType.STRING)
     @Width(min = "50")
     @Description("The type of broker")
     @NotNull
+    @Visible(modes = {Visible.Mode.BROWSE})
     private net.microfalx.bootstrap.broker.Broker.Type type;
 
-    @Column(name = "time_zone", length = 100)
+    @Column(name = "active")
     @Position(10)
-    @Description("The time zone of the database")
-    @NotBlank
-    private String timeZone;
+    @Description("Indicates whether the topic is active (events will be pulled)")
+    private boolean active;
 
-    @Column(name = "parameters", length = 100)
+    @Column(name = "sample_size")
+    @Position(11)
+    @Description("The size of the event sample (1 in N events")
+    private Integer sampleSize;
+
+    @Column(name = "mime_type")
+    @Position(12)
+    @Description("The mime type of the event (how it is the event encoded)")
+    @Visible(modes = {Visible.Mode.BROWSE})
+    private String mimeType;
+
+    @Column(name = "parameters")
     @Position(20)
-    @Description("The parameters used to create a broker client (and producers/consumers)")
+    @Description("The parameters used to create a producers/consumers, on top of broker parameters (additional parameters specific to a topic)")
     @Component(Component.Type.TEXT_AREA)
     @Filterable
     @NotBlank

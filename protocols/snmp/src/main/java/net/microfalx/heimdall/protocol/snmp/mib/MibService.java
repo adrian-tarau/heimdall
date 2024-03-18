@@ -348,7 +348,7 @@ public class MibService implements InitializingBean {
             document.setType("mib");
             document.setDescription(module.getDescription());
             document.setBody(module.getContent());
-            document.setReference("/admin/protocol/snmp/module#/view/" + module.getId());
+            document.setReference("/system/protocol/snmp/module#/view/" + module.getId());
             if (snmpMib != null) {
                 document.setCreatedAt(snmpMib.getCreatedAt());
                 document.setModifiedAt(snmpMib.getModifiedAt());
@@ -376,7 +376,7 @@ public class MibService implements InitializingBean {
                 document.setDescription(symbol.getDescription());
                 document.setBody(MemoryResource.create(symbol.getDescription()));
             }
-            document.setReference("/admin/protocol/snmp/symbol#/view/" + symbol.getId());
+            document.setReference("/system/protocol/snmp/symbol#/view/" + symbol.getId());
             document.add("oid", symbol.getOid());
             document.add("symbol_type", symbol.getType().name());
             document.add("module", symbol.getModule().getName());
@@ -398,7 +398,7 @@ public class MibService implements InitializingBean {
                 document.setDescription(variable.getDescription());
                 document.setBody(MemoryResource.create(variable.getDescription()));
             }
-            document.setReference("/admin/protocol/snmp/variable#/view/" + variable.getId());
+            document.setReference("/system/protocol/snmp/variable#/view/" + variable.getId());
             document.add("oid", variable.getOid());
             document.add("module", variable.getModule().getName());
             if (variable.getUnits() != null) document.add("units", variable.getUnits());

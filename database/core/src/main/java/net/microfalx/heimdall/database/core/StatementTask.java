@@ -9,6 +9,7 @@ import net.microfalx.bootstrap.metrics.util.SimpleStatisticalSummary;
 import net.microfalx.lang.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -56,17 +57,24 @@ public class StatementTask implements Runnable {
         for (Map.Entry<Database, List<Statement>> entry : statementsByDatabase.entrySet()) {
             Schema schema = databaseService.findSchema(entry.getKey());
             for (List<Statement> statements : statementsByDatabase.values()) {
-                for (Statement statement : statements) {
-                    int key = databaseService.persistStatement(schema, statement);
-                    try {
-                        DatabaseUtils.METRICS.time("Statement Stats - Updated", (t) -> updateStats(statement, key));
-                    } catch (Exception e) {
-                        DatabaseUtils.METRICS.count("Statement Stats - Failed");
-                        LOGGER.debug("Failed to update statistics for statement {}, root cause: {}", key, ExceptionUtils.getStackTrace(e));
-                    }
-                }
+                TransactionTemplate transactionTemplate = databaseService.newTransaction();
+                transactionTemplate.execute(status -> {
+                    persistStatements(schema, statements);
+                    return null;
+                });
             }
+        }
+    }
 
+    private void persistStatements(Schema schema, List<Statement> statements) {
+        for (Statement statement : statements) {
+            int key = databaseService.persistStatement(schema, statement);
+            try {
+                DatabaseUtils.METRICS.time("Statement Stats - Updated", (t) -> updateStats(statement, key));
+            } catch (Exception e) {
+                DatabaseUtils.METRICS.count("Statement Stats - Failed");
+                LOGGER.debug("Failed to update statistics for statement {}, root cause: {}", key, ExceptionUtils.getStackTrace(e));
+            }
         }
     }
 

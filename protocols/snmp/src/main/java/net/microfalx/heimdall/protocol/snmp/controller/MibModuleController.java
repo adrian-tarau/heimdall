@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import static net.microfalx.heimdall.protocol.snmp.controller.MibControllerUtilities.updateContext;
 
 @Controller
-@RequestMapping("/admin/protocol/snmp/module")
+@RequestMapping("/system/protocol/snmp/module")
 @DataSet(model = MibModule.class,viewTemplate = "snmp/module_view", viewClasses = "modal-xl")
 @Help("protocol/snmp/module")
 public class MibModuleController extends DataSetController<MibModule, String>  {

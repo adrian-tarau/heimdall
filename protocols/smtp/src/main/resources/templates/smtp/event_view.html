@@ -24,10 +24,10 @@
             </div>
         </div>
         <div class="row border rounded p-3 mt-2" th:if="${bodyText}">
-            <p class="dataset-text-mono" th:text="${#resources.load(bodyText)}"></p>
+            <iframe class="w-100 p-3" style="height:500px" loading="lazy" th:src="${#content.getViewUri(bodyText)}"></iframe>
         </div>
-        <div class="row border rounded p-3 mt-2" th:if="${bodyHtmlPartId}">
-            <iframe class="w-100 p-3" style="height:500px" th:src="@{'/protocol/smtp/part/'+${bodyHtmlPartId}+'/view'}"></iframe>
+        <div class="row border rounded p-3 mt-2" th:if="${bodyHtml}">
+            <iframe class="w-100 p-3" style="height:500px" loading="lazy" th:src="${#content.getViewUri(bodyHtml)}"></iframe>
         </div>
     </div>
 </div>

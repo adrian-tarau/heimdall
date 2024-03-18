@@ -2,9 +2,9 @@
 <navigations xmlns="https://net.microfalx/xsd/navigation-1.0.xsd">
     <menu id="left">
         <item id="snmp" parent="protocols" text="SNMP" position="10" action="/protocol/snmp" icon="fa-solid fa-network-wired"/>
-        <item id="mib" text="SNMP / MIBs" parent="protocols_admin" action="/admin/protocol/snmp/mib" icon="fa-solid fa-sitemap"/>
-        <item id="module" text="SNMP / Modules" parent="protocols_admin" action="/admin/protocol/snmp/module" icon="fa-solid fa-book"/>
-        <item id="symbol" text="SNMP / Symbols" parent="protocols_admin" action="/admin/protocol/snmp/symbol" icon="fa-solid fa-wave-square"/>
-        <item id="variable" text="SNMP / Variables" parent="protocols_admin" action="/admin/protocol/snmp/variable" icon="fa-regular fa-rectangle-list"/>
+        <item id="mib" text="SNMP / MIBs" parent="protocols_admin" action="/system/protocol/snmp/mib" icon="fa-solid fa-sitemap"/>
+        <item id="module" text="SNMP / Modules" parent="protocols_admin" action="/system/protocol/snmp/module" icon="fa-solid fa-book"/>
+        <item id="symbol" text="SNMP / Symbols" parent="protocols_admin" action="/system/protocol/snmp/symbol" icon="fa-solid fa-wave-square"/>
+        <item id="variable" text="SNMP / Variables" parent="protocols_admin" action="/system/protocol/snmp/variable" icon="fa-regular fa-rectangle-list"/>
     </menu>
 </navigations>

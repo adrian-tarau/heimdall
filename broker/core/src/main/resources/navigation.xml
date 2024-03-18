@@ -2,15 +2,17 @@
 <navigations xmlns="https://net.microfalx/xsd/navigation-1.0.xsd">
     <menu id="left">
         <menu id="brokers" text="Brokers" position="20" icon="fa-regular fa-message">
-            <item id="snapshot" text="Snapshots" action="/broker/snapshot" icon="fa-solid fa-heart-pulse"/>
+            <item id="session" text="Sessions" action="/broker/session" icon="fa-solid fa-timeline"/>
+            <item id="event" text="Events" action="/broker/event" icon="fa-solid fa-envelope-open"/>
             <item id="consumer" text="Consumers" action="/broker/consumer" icon="fa-solid fa-arrow-right-to-bracket"/>
             <item id="producer" text="Producers" action="/broker/producer" icon="fa-solid fa-arrow-right-from-bracket"/>
-            <item id="session" text="Sessions" action="/broker/session" icon="fa-solid fa-timeline"/>
         </menu>
-        <menu id="brokers_admin" text="Brokers" position="30" parent="administration" action="/admin/broker"
+        <menu id="brokers_admin" text="Brokers" position="30" parent="system" action="/system/broker"
               icon="fa-regular fa-message">
-            <item id="manage" text="Manage" action="/admin/broker/manage" icon="fa-solid fa-server"/>
-            <item id="topic" text="Topics" action="/admin/broker/topic" icon="fa-solid fa-comments"/>
+            <item id="manage" text="Manage" action="/system/broker/manage" icon="fa-solid fa-server"/>
+            <item id="topic" text="Topics" action="/system/broker/topic" icon="fa-solid fa-comments"/>
+            <item id="consumer" text="Consumers" action="/system/broker/consumer" icon="fa-solid fa-arrow-right-to-bracket"/>
+            <item id="producer" text="Producers" action="/system/broker/producer" icon="fa-solid fa-arrow-right-from-bracket"/>
         </menu>
 
     </menu>

@@ -25,7 +25,7 @@
             </div>
         </div>
         <div class="row border rounded p-3 mt-2" th:unless="${complex}">
-            <p class="dataset-text-mono" th:text="${#resources.load(model.shortMessage.resource)}"></p>
+            <p class="dataset-text-mono" th:text="${#resources.load(model.shortMessage.resource)}" style="height:500px"></p>
         </div>
         <div class="row mb-3 p-3 fs-6" th:if="${complex}">
             <ul class="nav nav-tabs" role="tablist">
@@ -41,13 +41,13 @@
             </ul>
             <div class="tab-content h-100 overflow-auto">
                 <div class="tab-pane fade show active" id="short_message" >
-                    <p class="dataset-text-mono" th:text="${#resources.load(model.shortMessage.resource)}"></p>
+                    <p class="dataset-text-mono" th:text="${#resources.load(model.shortMessage.resource)}" style="height:500px"></p>
                 </div>
                 <div class="tab-pane fade" id="long_message" th:if="${model.longMessage}">
-                    <p class="dataset-text-mono" th:text="${#resources.load(model.longMessage.resource)}"></p>
+                    <p class="dataset-text-mono" th:text="${#resources.load(model.longMessage.resource)}" style="height:500px"></p>
                 </div>
                 <div class="tab-pane fade" id="fields" th:if="${fields.hasAttributes()}">
-                    <table class="table">
+                    <table class="table" style="height:500px">
                         <thead class="thead-dark">
                         <tr>
                             <th scope="col">Name</th>

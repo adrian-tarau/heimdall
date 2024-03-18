@@ -19,6 +19,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.PeriodicTrigger;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -47,6 +49,11 @@ public class DatabaseService implements InitializingBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseService.class);
 
+    private static final DateTimeFormatter DIRECTORY_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
+    private static final String FILE_NAME_FORMAT = "%09d";
+    private static final LocalDateTime STARTUP = LocalDateTime.now();
+    private static final Map<LocalDate, AtomicInteger> resourceSequences = new ConcurrentHashMap<>();
+
     @Autowired
     private net.microfalx.bootstrap.jdbc.support.DatabaseService databaseService;
 
@@ -72,6 +79,9 @@ public class DatabaseService implements InitializingBean {
     private StatementStatisticsRepository statementStatisticsRepository;
 
     @Autowired
+    private PlatformTransactionManager transactionManager;
+
+    @Autowired
     private TaskScheduler taskScheduler;
 
     private final Map<String, Schema> schemaCache = new ConcurrentHashMap<>();
@@ -81,11 +91,6 @@ public class DatabaseService implements InitializingBean {
     private Resource snapshotsResource;
     private Resource statementsResource;
     private volatile LocalDateTime statementCollectionThreshold = LocalDateTime.now().minusMinutes(1);
-
-    private static final DateTimeFormatter DIRECTORY_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
-    private static final String FILE_NAME_FORMAT = "%09d";
-    private static final LocalDateTime STARTUP = LocalDateTime.now();
-    private static final Map<LocalDate, AtomicInteger> resourceSequences = new ConcurrentHashMap<>();
 
     net.microfalx.bootstrap.jdbc.support.DatabaseService getDatabaseService() {
         return databaseService;
@@ -113,6 +118,10 @@ public class DatabaseService implements InitializingBean {
 
     StatementStatisticsRepository getStatementStatisticsRepository() {
         return statementStatisticsRepository;
+    }
+
+    TransactionTemplate newTransaction() {
+        return new TransactionTemplate(transactionManager);
     }
 
     LocalDateTime getStatementCollectionThreshold() {
@@ -298,7 +307,7 @@ public class DatabaseService implements InitializingBean {
             try {
                 dbSnapshotsResource.create();
             } catch (IOException e) {
-                LOGGER.error("Failed to initialize parts store", e);
+                LOGGER.error("Failed to initialize snapshot store", e);
                 System.exit(10);
             }
             ResourceFactory.registerSymlink("db/snapshots", dbSnapshotsResource);
@@ -313,7 +322,7 @@ public class DatabaseService implements InitializingBean {
             try {
                 dbStatementsResource.create();
             } catch (IOException e) {
-                LOGGER.error("Failed to initialize parts store", e);
+                LOGGER.error("Failed to initialize statement store", e);
                 System.exit(10);
             }
             ResourceFactory.registerSymlink("db/statements", dbStatementsResource);

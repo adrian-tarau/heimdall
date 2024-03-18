@@ -1,9 +1,11 @@
 package net.microfalx.heimdall.database.core;
 
+import net.microfalx.bootstrap.content.Content;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.web.dataset.DataSetController;
+import net.microfalx.resource.MimeType;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -27,20 +29,25 @@ public class StatementController extends DataSetController<Statement, Integer> {
     @Override
     protected void beforeView(net.microfalx.bootstrap.dataset.DataSet<Statement, Field<Statement>, Integer> dataSet, Model controllerModel, Statement dataSetModel) {
         super.beforeView(dataSet, controllerModel, dataSetModel);
-        loadContent(dataSetModel, Integer.MAX_VALUE);
+        Content content = Content.create(getResource(dataSetModel));
+        controllerModel.addAttribute("content", content);
     }
 
     @Override
     protected void beforeBrowse(net.microfalx.bootstrap.dataset.DataSet<Statement, Field<Statement>, Integer> dataSet, Model controllerModel, Statement dataSetModel) {
         super.beforeBrowse(dataSet, controllerModel, dataSetModel);
-        if (dataSetModel != null) loadContent(dataSetModel, 70);
+        if (dataSetModel != null) loadContent(dataSetModel);
     }
 
-    private void loadContent(Statement dataSetModel, int limit) {
-        Resource resource = ResourceFactory.resolve(URI.create(dataSetModel.getResource()));
+    private Resource getResource(Statement dataSetModel) {
+        return ResourceFactory.resolve(URI.create(dataSetModel.getResource())).withMimeType(MimeType.APPLICATION_SQL);
+    }
+
+    private void loadContent(Statement dataSetModel) {
+        Resource resource = getResource(dataSetModel);
         try {
             if (resource.exists()) {
-                dataSetModel.setContent(StringUtils.abbreviate(resource.loadAsString(), limit));
+                dataSetModel.setContent(StringUtils.abbreviate(resource.loadAsString(), 70));
             }
         } catch (IOException e) {
             dataSetModel.setContent(net.microfalx.lang.StringUtils.NA_STRING);

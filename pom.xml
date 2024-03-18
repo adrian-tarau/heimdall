@@ -127,6 +127,12 @@
 
             <dependency>
                 <groupId>net.microfalx.bootstrap</groupId>
+                <artifactId>bootstrap-broker</artifactId>
+                <version>${bootstrap.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>net.microfalx.bootstrap</groupId>
                 <artifactId>bootstrap-search</artifactId>
                 <version>${bootstrap.version}</version>
             </dependency>

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/admin/protocol/snmp/symbol")
+@RequestMapping("/system/protocol/snmp/symbol")
 @DataSet(model = MibSymbol.class)
 @Help("protocol/snmp/symbol")
 public class MibSymbolController extends DataSetController<MibSymbol, String> {
