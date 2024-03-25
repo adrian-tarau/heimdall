@@ -87,26 +87,30 @@ public class BrokerSession {
     @Column(name = "total_event_count")
     @Label(value = "Total", group = "Event Count")
     @Position(600)
-    @Formattable(counter = true)
+    @Formattable(unit = Formattable.Unit.COUNT)
     private int totalEventCount;
 
     @Column(name = "sampled_event_count")
     @Label(value = "Sampled", group = "Event Count")
     @Position(601)
-    @Formattable(counter = true)
+    @Formattable(unit = Formattable.Unit.COUNT)
     private int sampledEventCount;
 
     @Column(name = "total_event_size")
     @Label(value = "Total", group = "Event Size")
     @Position(602)
-    @Formattable(bytes = true)
+    @Formattable(unit = Formattable.Unit.BYTES)
     private long totalEventSize;
 
     @Column(name = "sampled_event_size")
     @Label(value = "Sampled", group = "Event Size")
     @Position(603)
-    @Formattable(bytes = true)
+    @Formattable(unit = Formattable.Unit.BYTES)
     private long sampledEventSize;
+
+    @Column(name = "failure_message")
+    @Position(700)
+    private String failureMessage;
 
     @Column(name = "resource")
     @Position(602)

@@ -7,6 +7,7 @@ import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.web.dataset.DataSetController;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,6 +27,12 @@ public class BrokerEventController extends DataSetController<BrokerEvent, Intege
 
     @Autowired
     private ContentService contentService;
+
+    @Override
+    protected void beforeBrowse(net.microfalx.bootstrap.dataset.DataSet<BrokerEvent, Field<BrokerEvent>, Integer> dataSet, Model controllerModel, BrokerEvent dataSetModel) {
+        super.beforeBrowse(dataSet, controllerModel, dataSetModel);
+        dataSetModel.setEventName(StringUtils.abbreviate(net.microfalx.lang.StringUtils.removeLineBreaks(dataSetModel.getEventName()), 50));
+    }
 
     @Override
     protected void beforeView(net.microfalx.bootstrap.dataset.DataSet<BrokerEvent, Field<BrokerEvent>, Integer> dataSet, Model controllerModel, BrokerEvent dataSetModel) {

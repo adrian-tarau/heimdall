@@ -12,17 +12,19 @@ create table broker_clusters
 
 create table broker_topics
 (
-    id          integer                                         not null auto_increment primary key,
-    cluster_id  integer                                         not null,
-    name        varchar(100)                                    not null,
-    type        enum ('KAFKA', 'PULSAR', 'RABBITMQ')            not null,
-    active      boolean      default true                       not null,
-    sample_size int,
-    parameters  mediumtext,
-    mime_type   varchar(100) default 'application/octet-stream' not null,
-    created_at  datetime                                        not null,
-    modified_at datetime,
-    description varchar(1000),
+    id                     integer                                         not null auto_increment primary key,
+    cluster_id             integer                                         not null,
+    name                   varchar(100)                                    not null,
+    type                   enum ('KAFKA', 'PULSAR', 'RABBITMQ')            not null,
+    active                 boolean      default true                       not null,
+    sample_size            int,
+    parameters             mediumtext,
+    mime_type              varchar(100) default 'application/octet-stream' not null,
+    name_expression        varchar(1000),
+    description_expression varchar(1000),
+    created_at             datetime                                        not null,
+    modified_at            datetime,
+    description            varchar(1000),
     constraint fk$broker_topics$cluster foreign key (cluster_id) references broker_clusters (id)
 ) ENGINE = InnoDB;
 
@@ -40,6 +42,7 @@ create table broker_sessions
     total_event_size    bigint                               not null,
     sampled_event_count int                                  not null,
     sampled_event_size  bigint                               not null,
+    failure_message     varchar(4000),
     resource            varchar(1000),
     constraint fk$broker_sessions$cluster foreign key (cluster_id) references broker_clusters (id),
     constraint fk$broker_sessions$topic foreign key (topic_id) references broker_topics (id)
@@ -55,6 +58,7 @@ create table broker_events
     session_id  bigint                               not null,
     type        ENUM ('KAFKA', 'PULSAR', 'RABBITMQ') not null,
     event_id    varchar(100)                         not null,
+    event_name  varchar(200),
     created_at  datetime                             not null,
     received_at datetime                             not null,
     constraint fk$broker_events$cluster foreign key (cluster_id) references broker_clusters (id),

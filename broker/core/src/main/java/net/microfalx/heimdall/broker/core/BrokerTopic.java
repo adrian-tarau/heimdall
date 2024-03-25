@@ -60,8 +60,18 @@ public class BrokerTopic extends NamedTimestampAware {
     @Visible(modes = {Visible.Mode.BROWSE})
     private String mimeType;
 
-    @Column(name = "parameters")
+    @Column(name = "name_expression")
     @Position(20)
+    @Description("An expression used to extract the event name from event attributes")
+    private String nameExpression;
+
+    @Column(name = "description_expression")
+    @Position(20)
+    @Description("An expression used to extract the event description from event attributes")
+    private String descriptionExpression;
+
+    @Column(name = "parameters")
+    @Position(100)
     @Description("The parameters used to create a producers/consumers, on top of broker parameters (additional parameters specific to a topic)")
     @Component(Component.Type.TEXT_AREA)
     @Filterable

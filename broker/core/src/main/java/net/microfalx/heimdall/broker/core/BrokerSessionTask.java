@@ -8,10 +8,7 @@ import net.microfalx.bootstrap.content.ContentService;
 import net.microfalx.bootstrap.search.Attribute;
 import net.microfalx.bootstrap.search.Document;
 import net.microfalx.bootstrap.search.IndexService;
-import net.microfalx.lang.IOUtils;
-import net.microfalx.lang.ObjectUtils;
-import net.microfalx.lang.StringUtils;
-import net.microfalx.lang.TimeUtils;
+import net.microfalx.lang.*;
 import net.microfalx.metrics.Metrics;
 import net.microfalx.resource.FileResource;
 import net.microfalx.resource.MemoryResource;
@@ -95,7 +92,7 @@ class BrokerSessionTask implements Runnable {
             } catch (Exception e) {
                 brokerService.releaseConsumer(this.realTopic);
                 LOGGER.error("Failed to collect events from " + BrokerUtils.describe(this.realTopic), e);
-                persistSession(BrokerSession.Status.FAILED, new BrokerTopicSnapshot(), null);
+                persistSession(BrokerSession.Status.FAILED, new BrokerTopicSnapshot(), null, ExceptionUtils.getRootCauseMessage(e));
             }
         }
     }
@@ -160,7 +157,7 @@ class BrokerSessionTask implements Runnable {
         Resource resource = brokerService.writeSnapshot(FileResource.file(zipFile));
         TransactionTemplate transactionTemplate = brokerService.newTransaction();
         return transactionTemplate.execute(status -> {
-            BrokerSession session = persistSession(BrokerSession.Status.SUCCESSFUL, snapshot, resource);
+            BrokerSession session = persistSession(BrokerSession.Status.SUCCESSFUL, snapshot, resource, null);
             for (BrokerTopicSnapshot.Event event : snapshot.getEvents()) {
                 indexEvent(session, event);
                 persistEvent(session, event);
@@ -195,7 +192,7 @@ class BrokerSessionTask implements Runnable {
         document.setMimeType(mediaType);
         document.setCreatedAt(TimeUtils.toLocalDateTime(event.getTimestamp()));
         document.setReceivedAt(LocalDateTime.now());
-        indexService.index(document);
+        indexService.index(document, false);
     }
 
     private void persistEvent(BrokerSession session, BrokerTopicSnapshot.Event event) {
@@ -207,10 +204,11 @@ class BrokerSessionTask implements Runnable {
         brokerEvent.setCreatedAt(TimeUtils.toLocalDateTime(event.getTimestamp()));
         brokerEvent.setReceivedAt(startTime);
         brokerEvent.setEventId(event.getId());
+        brokerEvent.setEventName(event.getName());
         brokerService.getEventRepository().save(brokerEvent);
     }
 
-    private BrokerSession persistSession(BrokerSession.Status status, BrokerTopicSnapshot snapshot, Resource resource) {
+    private BrokerSession persistSession(BrokerSession.Status status, BrokerTopicSnapshot snapshot, Resource resource, String failureMessage) {
         endTime = LocalDateTime.now();
         BrokerSession session = new BrokerSession();
         session.setBroker(topic.getBroker());
@@ -224,6 +222,7 @@ class BrokerSessionTask implements Runnable {
         session.setEndedAt(endTime);
         session.setDuration(Duration.between(startTime, endTime));
         session.setStatus(status);
+        session.setFailureMessage(failureMessage);
         session.setResource(resource != null ? resource.toURI().toASCIIString() : null);
         brokerService.getSessionRepository().saveAndFlush(session);
         return session;

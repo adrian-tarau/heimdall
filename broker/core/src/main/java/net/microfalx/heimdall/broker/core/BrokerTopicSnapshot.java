@@ -134,6 +134,7 @@ public class BrokerTopicSnapshot {
 
         private String id;
         private String partition;
+        private String name;
         private byte[] key;
         private byte[] value;
         private long timestamp;

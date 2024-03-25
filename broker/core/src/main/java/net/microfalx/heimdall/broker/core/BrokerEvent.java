@@ -68,6 +68,14 @@ public class BrokerEvent {
     @Filterable()
     private String eventId;
 
+    @Column(name = "event_name")
+    @Position(21)
+    @Description("The name associated with the event (message/description)")
+    @Name
+    @NotNull
+    @Filterable()
+    private String eventName;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     @NotNull
     @Position(500)

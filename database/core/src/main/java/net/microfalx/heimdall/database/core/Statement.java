@@ -84,7 +84,7 @@ public class Statement {
     @Position(20)
     @Label("Executions")
     @Description("The number of times this statement was executed (might be estimated by sampling sessions)")
-    @Formattable(counter = true)
+    @Formattable(unit = Formattable.Unit.COUNT)
     private long executionCount;
 
     @Column(name = "total_duration")
@@ -92,28 +92,28 @@ public class Statement {
     @Label(value = "Total", group = "Duration")
     @Description("The total duration of the execution time (might be estimated by sampling sessions)")
     @OrderBy(OrderBy.Direction.DESC)
-    @Formattable(duration = true)
+    @Formattable(unit = Formattable.Unit.MILLI_SECOND)
     private float totalDuration;
 
     @Column(name = "avg_duration")
     @Position(22)
     @Label(value = "Average", group = "Duration")
     @Description("The average duration of the execution time (might be estimated by sampling sessions)")
-    @Formattable(duration = true)
+    @Formattable(unit = Formattable.Unit.MILLI_SECOND)
     private float avgDuration;
 
     @Column(name = "min_duration")
     @Position(23)
     @Label(value = "Minimum", group = "Duration")
     @Description("The total duration of the execution time (might be estimated by sampling sessions)")
-    @Formattable(duration = true)
+    @Formattable(unit = Formattable.Unit.MILLI_SECOND)
     private float minDuration;
 
     @Column(name = "max_duration")
     @Position(24)
     @Label(value = "Maximum", group = "Duration")
     @Description("The total duration of the execution time (might be estimated by sampling sessions)")
-    @Formattable(duration = true)
+    @Formattable(unit = Formattable.Unit.MILLI_SECOND)
     private float maxDuration;
 
     @Column(name = "resource")

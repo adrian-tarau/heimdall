@@ -35,6 +35,11 @@ public class BrokerContentResolver implements ContentResolver {
     }
 
     @Override
+    public Content intercept(Content content) throws IOException {
+        return ContentResolver.super.intercept(content);
+    }
+
+    @Override
     public boolean supports(ContentLocator locator) {
         return locator.getUri().toASCIIString().startsWith("shared:/broker/session");
     }
