@@ -131,6 +131,7 @@ class BrokerSessionTask implements Runnable {
         this.realTopic = brokerService.getTopic(topic);
         LOGGER.debug("Collect events from " + BrokerUtils.describe(realTopic));
         int iteration = 0;
+        BrokerUtils.METRICS.withGroup("Sessions").count(topic.getName());
         while (iteration++ < MAX_ITERATIONS) {
             try {
                 BrokerTopicSnapshot snapshot = METRICS.timeCallable("Collect", this::doCollectEvents);
@@ -139,6 +140,7 @@ class BrokerSessionTask implements Runnable {
                 boolean hasMore = snapshot.getCount() > realTopic.getMaximumPollRecords();
                 if (!hasMore) break;
             } catch (Exception e) {
+                BrokerUtils.METRICS.withGroup("Failure").count(topic.getName());
                 brokerService.releaseConsumer(this.realTopic);
                 LOGGER.error("Failed to collect events from " + BrokerUtils.describe(this.realTopic), e);
                 persistSession(BrokerSession.Status.FAILED, new BrokerTopicSnapshot(), null, ExceptionUtils.getRootCauseMessage(e));
@@ -180,7 +182,7 @@ class BrokerSessionTask implements Runnable {
             }
             if (snapshot.getCount() >= MAX_EVENT_COUNT || totalSize >= MAX_EVENT_SIZE) break;
         }
-        BrokerUtils.METRICS.count(topic.getName(), snapshot.getTotalCount());
+        BrokerUtils.METRICS.withGroup("Events").count(topic.getName(), snapshot.getTotalCount());
         return snapshot;
     }
 
