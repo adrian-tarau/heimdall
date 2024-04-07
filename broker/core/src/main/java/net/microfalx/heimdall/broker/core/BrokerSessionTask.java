@@ -311,7 +311,7 @@ class BrokerSessionTask implements Runnable {
         brokerEvent.setCreatedAt(TimeUtils.toLocalDateTime(event.getTimestamp()));
         brokerEvent.setReceivedAt(startTime);
         brokerEvent.setEventId(event.getId());
-        brokerEvent.setEventName(event.getName());
+        brokerEvent.setEventName(org.apache.commons.lang3.StringUtils.abbreviate(event.getName(), 190));
         brokerService.getEventRepository().save(brokerEvent);
     }
 
