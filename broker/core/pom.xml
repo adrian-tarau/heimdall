@@ -54,6 +54,11 @@
         </dependency>
 
         <dependency>
+            <groupId>net.microfalx.bootstrap</groupId>
+            <artifactId>bootstrap-template</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>net.datafaker</groupId>
             <artifactId>datafaker</artifactId>
         </dependency>

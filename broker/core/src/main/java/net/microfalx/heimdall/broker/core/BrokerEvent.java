@@ -80,13 +80,13 @@ public class BrokerEvent {
     @NotNull
     @Position(500)
     @Description("The timestamp when the {name} was created")
-    @net.microfalx.bootstrap.dataset.annotation.OrderBy(OrderBy.Direction.DESC)
-    @Timestamp
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "received_at")
     @NotNull
     @Position(501)
     @Description("The timestamp when the {name} was last time modified")
+    @net.microfalx.bootstrap.dataset.annotation.OrderBy(OrderBy.Direction.DESC)
+    @Timestamp
     private LocalDateTime receivedAt;
 }

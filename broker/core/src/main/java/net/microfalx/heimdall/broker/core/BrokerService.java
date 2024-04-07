@@ -7,7 +7,10 @@ import net.microfalx.bootstrap.content.ContentService;
 import net.microfalx.bootstrap.core.async.TaskExecutorFactory;
 import net.microfalx.bootstrap.resource.ResourceService;
 import net.microfalx.bootstrap.search.IndexService;
+import net.microfalx.bootstrap.template.Template;
+import net.microfalx.bootstrap.template.TemplateService;
 import net.microfalx.lang.ObjectUtils;
+import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.TimeUtils;
 import net.microfalx.resource.FileResource;
 import net.microfalx.resource.Resource;
@@ -38,7 +41,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import static java.time.Duration.ofMinutes;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
-import static net.microfalx.lang.StringUtils.toIdentifier;
+import static net.microfalx.lang.StringUtils.*;
 
 /**
  * A service which manages a collection of brokers.
@@ -62,6 +65,9 @@ public class BrokerService implements InitializingBean {
 
     @Autowired
     private ContentService contentService;
+
+    @Autowired
+    private TemplateService templateService;
 
     @Autowired
     private IndexService indexService;
@@ -129,6 +135,7 @@ public class BrokerService implements InitializingBean {
         net.microfalx.bootstrap.broker.Broker broker = getBroker(topic.getBroker());
         return Topic.create(broker, topic.getName()).withFormat(Topic.Format.RAW).withSubscription("heimdall")
                 .withAutoCommit(false)
+                .withMaximumPollRecords(50)
                 .withClientId(BrokerUtils.createClientId("heimdall"));
     }
 
@@ -247,13 +254,47 @@ public class BrokerService implements InitializingBean {
         }).getAndIncrement();
     }
 
+    private Template compile(String expression) {
+        if (StringUtils.isEmpty(expression)) {
+            return null;
+        } else {
+            return templateService.getTemplate(Template.Type.MVEL, expression);
+        }
+    }
+
+    private void updateTemplates(BrokerTopic topic, BrokerSessionTask task) {
+        Template nameTemplate = compile(topic.getNameExpression());
+        Template descriptionTemplate = compile(topic.getDescriptionExpression());
+        task.setNameTemplate(nameTemplate)
+                .setDescriptionTemplate(descriptionTemplate)
+                .setTemplateContext(templateService.createContext());
+    }
+
+    private void updateAttributeFilters(BrokerTopic topic, BrokerSessionTask task) {
+        String[] inclusions = split(defaultIfNull(topic.getAttributeInclusions(), EMPTY_STRING), ",", true);
+        for (String inclusion : inclusions) {
+            task.addAttributeInclusion(inclusion);
+        }
+        String[] exclusions = split(defaultIfNull(topic.getAttributeExclusions(), EMPTY_STRING), ",", true);
+        for (String exclusion : exclusions) {
+            task.addAttributeExclusion(exclusion);
+        }
+        String[] prefixes = split(defaultIfNull(topic.getAttributePrefixes(), EMPTY_STRING), ",", true);
+        for (String prefix : prefixes) {
+            task.addAttributePrefix(prefix);
+        }
+    }
+
     class SessionSchedulerTask implements Runnable {
 
         @Override
         public void run() {
             for (BrokerTopic topic : getActiveTopics()) {
-                executor.submit(new BrokerSessionTask(BrokerService.this, topic,
-                        contentService, indexService));
+                BrokerSessionTask task = new BrokerSessionTask(BrokerService.this, topic,
+                        contentService, indexService);
+                updateTemplates(topic, task);
+                updateAttributeFilters(topic, task);
+                executor.submit(task);
             }
         }
     }

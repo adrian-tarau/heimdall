@@ -139,6 +139,12 @@
 
             <dependency>
                 <groupId>net.microfalx.bootstrap</groupId>
+                <artifactId>bootstrap-template</artifactId>
+                <version>${bootstrap.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>net.microfalx.bootstrap</groupId>
                 <artifactId>bootstrap-security</artifactId>
                 <version>${bootstrap.version}</version>
             </dependency>

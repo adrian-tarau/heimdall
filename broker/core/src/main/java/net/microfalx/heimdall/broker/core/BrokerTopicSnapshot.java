@@ -3,7 +3,7 @@ package net.microfalx.heimdall.broker.core;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -15,6 +15,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
@@ -127,17 +128,21 @@ public class BrokerTopicSnapshot {
      */
     @Setter
     @Getter
-    @Data
+    @EqualsAndHashCode
     public static class Event implements Identifiable<String> {
 
         private static final int OVERHEAD = 40;
 
+        @EqualsAndHashCode.Include
         private String id;
         private String partition;
         private String name;
+        private String description;
         private byte[] key;
         private byte[] value;
         private long timestamp;
+
+        private Map<String, Object> attributes;
 
         public Event() {
             this(StringUtils.NA_STRING);

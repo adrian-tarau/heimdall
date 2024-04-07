@@ -43,6 +43,7 @@ import static net.microfalx.heimdall.database.core.Statement.getStatementId;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
 import static net.microfalx.lang.StringUtils.toIdentifier;
+import static net.microfalx.lang.TimeUtils.FIVE_MINUTE;
 
 @Service("heimdallDatabaseService")
 public class DatabaseService implements InitializingBean {
@@ -350,8 +351,12 @@ public class DatabaseService implements InitializingBean {
         config.setJdbcUrl(url);
         config.setUsername(userName);
         config.setPassword(password);
+        config.setMinimumIdle(0);
+        config.setMaximumPoolSize(10);
         config.setConnectionTimeout(CONNECT_TIMEOUT.toMillis());
         config.setIdleTimeout(AVAILABILITY_INTERVAL.multipliedBy(2).toMillis());
+        config.setIdleTimeout(FIVE_MINUTE);
+        config.setInitializationFailTimeout(-1);
         HikariDataSource hikariDataSource = new HikariDataSource(config);
         return DataSource.create(id, name, hikariDataSource).withUri(URI.create(url))
                 .withUserName(userName)

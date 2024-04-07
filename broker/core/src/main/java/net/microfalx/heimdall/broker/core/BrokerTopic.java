@@ -62,13 +62,38 @@ public class BrokerTopic extends NamedTimestampAware {
 
     @Column(name = "name_expression")
     @Position(20)
-    @Description("An expression used to extract the event name from event attributes")
+    @Description("An MVEL expression used to extract the event name from event attributes")
+    @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})
+    @Component(Component.Type.TEXT_AREA)
     private String nameExpression;
 
     @Column(name = "description_expression")
     @Position(20)
-    @Description("An expression used to extract the event description from event attributes")
+    @Description("An MVEL expression used to extract the event description from event attributes")
+    @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})
+    @Component(Component.Type.TEXT_AREA)
     private String descriptionExpression;
+
+    @Column(name = "attribute_inclusions")
+    @Position(30)
+    @Description("An comma separate list of regular expressions used to select which event attributes to be indexed (if empty all will be included)")
+    @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})
+    @Component(Component.Type.TEXT_AREA)
+    private String attributeInclusions;
+
+    @Column(name = "attribute_exclusions")
+    @Position(31)
+    @Description("An comma separate list of regular expressions used to select which event attributes to be excluded (not indexed)")
+    @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})
+    @Component(Component.Type.TEXT_AREA)
+    private String attributeExclusions;
+
+    @Column(name = "attribute_prefixes")
+    @Position(32)
+    @Description("An comma separate list of attribute prefixes to be removed")
+    @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})
+    @Component(Component.Type.TEXT_AREA)
+    private String attributePrefixes;
 
     @Column(name = "parameters")
     @Position(100)

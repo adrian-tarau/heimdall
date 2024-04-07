@@ -3,6 +3,7 @@ package net.microfalx.heimdall.broker.core;
 import net.microfalx.bootstrap.content.Content;
 import net.microfalx.bootstrap.content.ContentLocator;
 import net.microfalx.bootstrap.content.ContentResolver;
+import net.microfalx.bootstrap.model.Attributes;
 import net.microfalx.lang.ExceptionUtils;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.annotation.Provider;
@@ -22,14 +23,17 @@ public class BrokerContentResolver implements ContentResolver {
         if (StringUtils.isNotEmpty(resource.getFragment())) {
             resource = ArchiveResource.create(resource);
             Resource eventResource;
+            Attributes<?> attributes = null;
             try {
                 BrokerTopicSnapshot.Event event = BrokerTopicSnapshot.Event.deserialize(resource.getInputStream());
+                attributes = Attributes.create().copyFrom(event.getAttributes());
                 eventResource = MemoryResource.create(event.getValue()).copyPropertiesFrom(resource);
                 eventResource = eventResource.withMimeType(eventResource.detectMimeType());
             } catch (Exception e) {
                 eventResource = MemoryResource.create("#Error: " + ExceptionUtils.getRootCauseMessage(e));
             }
-            return Content.create(eventResource);
+            Content content = Content.create(locator, eventResource);
+            return content.withAttributes(attributes);
         }
         return Content.create(locator, resource);
     }

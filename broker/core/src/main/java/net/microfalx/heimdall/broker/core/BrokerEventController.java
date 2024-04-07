@@ -5,6 +5,7 @@ import net.microfalx.bootstrap.content.ContentLocator;
 import net.microfalx.bootstrap.content.ContentService;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
+import net.microfalx.bootstrap.model.Attributes;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.web.dataset.DataSetController;
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +15,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.net.URI;
-import java.util.Collections;
 
 @Controller
 @RequestMapping("/broker/event")
@@ -31,7 +31,9 @@ public class BrokerEventController extends DataSetController<BrokerEvent, Intege
     @Override
     protected void beforeBrowse(net.microfalx.bootstrap.dataset.DataSet<BrokerEvent, Field<BrokerEvent>, Integer> dataSet, Model controllerModel, BrokerEvent dataSetModel) {
         super.beforeBrowse(dataSet, controllerModel, dataSetModel);
-        dataSetModel.setEventName(StringUtils.abbreviate(net.microfalx.lang.StringUtils.removeLineBreaks(dataSetModel.getEventName()), 50));
+        if (dataSetModel != null) {
+            dataSetModel.setEventName(StringUtils.abbreviate(net.microfalx.lang.StringUtils.removeLineBreaks(dataSetModel.getEventName()), 50));
+        }
     }
 
     @Override
@@ -39,10 +41,11 @@ public class BrokerEventController extends DataSetController<BrokerEvent, Intege
         super.beforeView(dataSet, controllerModel, dataSetModel);
 
         Content content = getContent(dataSetModel);
+        Attributes<?> externalAttributes = content.getExternalAttributes();
         controllerModel.addAttribute("content", content);
         controllerModel.addAttribute("mimeType", content.getMimeType());
-        controllerModel.addAttribute("badges", Collections.emptyList());
-        controllerModel.addAttribute("fields", Collections.emptyList());
+        controllerModel.addAttribute("badges", externalAttributes);
+        controllerModel.addAttribute("fields", content.getAttributes());
     }
 
     private Content getContent(BrokerEvent dataSetModel) {

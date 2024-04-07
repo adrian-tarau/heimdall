@@ -20,8 +20,11 @@ create table broker_topics
     sample_size            int,
     parameters             mediumtext,
     mime_type              varchar(100) default 'application/octet-stream' not null,
-    name_expression        varchar(1000),
-    description_expression varchar(1000),
+    name_expression        varchar(2000),
+    description_expression varchar(2000),
+    attribute_inclusions   varchar(1000),
+    attribute_exclusions   varchar(1000),
+    attribute_prefixes     varchar(1000),
     created_at             datetime                                        not null,
     modified_at            datetime,
     description            varchar(1000),
@@ -66,4 +69,4 @@ create table broker_events
     constraint fk$broker_events$session foreign key (session_id) references broker_sessions (id)
 ) ENGINE = InnoDB;
 
-create index ix$broker_events$created_at on broker_events (created_at);
+create index ix$broker_events$received_at on broker_events (received_at);

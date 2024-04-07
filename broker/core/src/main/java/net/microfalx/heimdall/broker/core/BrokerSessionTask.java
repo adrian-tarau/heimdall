@@ -4,10 +4,14 @@ import net.microfalx.bootstrap.broker.BrokerConsumer;
 import net.microfalx.bootstrap.broker.BrokerUtils;
 import net.microfalx.bootstrap.broker.Event;
 import net.microfalx.bootstrap.broker.Topic;
+import net.microfalx.bootstrap.content.Content;
 import net.microfalx.bootstrap.content.ContentService;
 import net.microfalx.bootstrap.search.Attribute;
 import net.microfalx.bootstrap.search.Document;
 import net.microfalx.bootstrap.search.IndexService;
+import net.microfalx.bootstrap.search.SearchUtils;
+import net.microfalx.bootstrap.template.Template;
+import net.microfalx.bootstrap.template.TemplateContext;
 import net.microfalx.lang.*;
 import net.microfalx.metrics.Metrics;
 import net.microfalx.resource.FileResource;
@@ -23,15 +27,20 @@ import java.io.IOException;
 import java.net.URI;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipOutputStream;
 
 import static java.time.Duration.ofSeconds;
 import static net.microfalx.bootstrap.search.Document.SOURCE_FIELD;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
-import static net.microfalx.lang.StringUtils.toIdentifier;
+import static net.microfalx.lang.StringUtils.*;
 
 class BrokerSessionTask implements Runnable {
 
@@ -41,14 +50,24 @@ class BrokerSessionTask implements Runnable {
 
     private static final int MAX_EMPTY_ITERATIONS = 3;
     private static final int MAX_ITERATIONS = 20;
-    private static final int MAX_EVENT_COUNT = 5_000;
+    private static final int MAX_EVENT_COUNT = 1_000;
     private static final int MAX_EVENT_SIZE = 5_000_000;
+    private static final int MAX_ATTRIBUTE_LENGTH = 50;
     private static final Duration MAX_DURATION = ofSeconds(10);
 
     private final BrokerService brokerService;
     private final ContentService contentService;
     private final IndexService indexService;
     private final BrokerTopic topic;
+
+    private Template nameTemplate;
+    private Template descriptionTemplate;
+    private TemplateContext templateContext;
+
+    private Collection<Pattern> attributeInclusions = new ArrayList<>();
+    private Collection<Pattern> attributeExclusions = new ArrayList<>();
+    private Collection<String> attributePrefixes = new ArrayList<>();
+
     private Topic realTopic;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
@@ -66,6 +85,36 @@ class BrokerSessionTask implements Runnable {
         this.topic = topic;
     }
 
+    BrokerSessionTask setNameTemplate(Template nameTemplate) {
+        this.nameTemplate = nameTemplate;
+        return this;
+    }
+
+    BrokerSessionTask setDescriptionTemplate(Template descriptionTemplate) {
+        this.descriptionTemplate = descriptionTemplate;
+        return this;
+    }
+
+    BrokerSessionTask setTemplateContext(TemplateContext templateContext) {
+        this.templateContext = templateContext;
+        return this;
+    }
+
+    void addAttributeInclusion(String pattern) {
+        if (StringUtils.isEmpty(pattern)) return;
+        attributeInclusions.add(Pattern.compile(pattern, Pattern.CASE_INSENSITIVE));
+    }
+
+    void addAttributeExclusion(String pattern) {
+        if (StringUtils.isEmpty(pattern)) return;
+        attributeExclusions.add(Pattern.compile(pattern, Pattern.CASE_INSENSITIVE));
+    }
+
+    void addAttributePrefix(String prefix) {
+        if (StringUtils.isEmpty(prefix)) return;
+        attributePrefixes.add(prefix.toLowerCase());
+    }
+
     @Override
     public void run() {
         Lock lock = brokerService.getLock(topic);
@@ -80,7 +129,7 @@ class BrokerSessionTask implements Runnable {
 
     private void collectEvents() {
         this.realTopic = brokerService.getTopic(topic);
-        LOGGER.info("Collect events from " + BrokerUtils.describe(realTopic));
+        LOGGER.debug("Collect events from " + BrokerUtils.describe(realTopic));
         int iteration = 0;
         while (iteration++ < MAX_ITERATIONS) {
             try {
@@ -120,15 +169,16 @@ class BrokerSessionTask implements Runnable {
                         .setPartition(ObjectUtils.toString(event.getOffset().getPartition().getValue()));
                 boolean acceptEvent = !shouldSample || sampleCount == 0;
                 if (acceptEvent) {
+                    extractNameAndDescription(brokerEvent);
                     totalSize += brokerEvent.getSize();
-                    snapshot.add(brokerEvent);
                     writeEvent(brokerEvent);
+                    snapshot.add(brokerEvent);
                 }
                 snapshot.add(brokerEvent.getSize());
                 if (sampleCount == 0) sampleCount = getSampleCounter(topic);
                 sampleCount--;
             }
-            if (snapshot.getCount() >= MAX_EVENT_COUNT || totalSize > MAX_EVENT_SIZE) break;
+            if (snapshot.getCount() >= MAX_EVENT_COUNT || totalSize >= MAX_EVENT_SIZE) break;
         }
         BrokerUtils.METRICS.count(topic.getName(), snapshot.getTotalCount());
         return snapshot;
@@ -146,13 +196,40 @@ class BrokerSessionTask implements Runnable {
     private void writeEvent(BrokerTopicSnapshot.Event event) throws IOException {
         ZipOutputStream zipOutputStream = getZipOutputStream();
         ZipEntry entry = new ZipEntry(StringUtils.toIdentifier(event.getId()));
-        zipOutputStream.putNextEntry(entry);
+        try {
+            zipOutputStream.putNextEntry(entry);
+        } catch (ZipException e) {
+            String message = defaultIfNull(e.getMessage(), EMPTY_STRING);
+            if (message.startsWith("duplicate entry:")) return;
+            ExceptionUtils.throwException(e);
+        }
         event.serialize(IOUtils.getUnclosableOutputStream(zipOutputStream));
         zipOutputStream.closeEntry();
     }
 
+    private void extractNameAndDescription(BrokerTopicSnapshot.Event event) throws IOException {
+        Map<String, Object> attributes = new HashMap<>();
+        event.setAttributes(attributes);
+        Content content = contentService.extract(MemoryResource.create(event.getValue()), true);
+        if (nameTemplate != null) {
+            event.setName(nameTemplate.evaluate(templateContext.withAttributes(content.getAttributes())));
+        }
+        if (isEmpty(event.getName())) {
+            event.setName(realTopic.getBroker().getName() + " / " + realTopic.getName() + " / " + event.getId());
+        }
+        if (descriptionTemplate != null) {
+            event.setDescription(descriptionTemplate.evaluate(templateContext.withAttributes(content.getAttributes())));
+        }
+        content.getAttributes().forEach(attribute -> {
+            if (acceptAttribute(attribute)) {
+                String name = renameAttribute(attribute.getName());
+                attributes.put(name, attribute.getValue());
+            }
+        });
+    }
+
     private BrokerSession persistSession(BrokerTopicSnapshot snapshot) throws IOException {
-        zipOutputStream.close();
+        IOUtils.closeQuietly(zipOutputStream);
         zipOutputStream = null;
         Resource resource = brokerService.writeSnapshot(FileResource.file(zipFile));
         TransactionTemplate transactionTemplate = brokerService.newTransaction();
@@ -180,19 +257,49 @@ class BrokerSessionTask implements Runnable {
         if (MimeType.APPLICATION_OCTET_STREAM.equals(mediaType)) return;
         URI uri = net.microfalx.heimdall.broker.core.BrokerUtils.getEventUri(session.getResource(), event.getId());
         Document document = Document.create(toIdentifier(realTopic.getId() + "_" + event.getId()),
-                realTopic.getBroker().getName() + " / " + realTopic.getName() + " / " + event.getId());
+                event.getName());
+        document.setDescription(event.getDescription());
         document.setOwner("broker");
         document.setType("event");
         document.setLength(event.getSize());
-        document.add(Attribute.create("broker", realTopic.getBroker().getName()).enableAll());
-        document.add(Attribute.create("partition", event.getPartition()));
-        document.add(Attribute.create(SOURCE_FIELD, realTopic.getName()).enableAll());
         document.setBody(resource);
         document.setBodyUri(uri);
         document.setMimeType(mediaType);
         document.setCreatedAt(TimeUtils.toLocalDateTime(event.getTimestamp()));
         document.setReceivedAt(LocalDateTime.now());
+        document.setModifiedAt(LocalDateTime.now());
+        event.getAttributes().forEach((k, v) -> {
+            document.add(Attribute.create(k, v).enableAll());
+        });
+        document.add(Attribute.create("broker", realTopic.getBroker().getName()).enableAll());
+        document.add(Attribute.create("partition", event.getPartition()));
+        document.add(Attribute.create(SOURCE_FIELD, realTopic.getName()).enableAll());
         indexService.index(document, false);
+    }
+
+    private String renameAttribute(String name) {
+        for (String attributePrefix : attributePrefixes) {
+            if (name.toLowerCase().startsWith(attributePrefix) && name.length() > attributePrefix.length()) {
+                return uncapitalizeFirst(name.substring(attributePrefix.length()));
+            }
+        }
+        return name;
+    }
+
+    private boolean acceptAttribute(net.microfalx.bootstrap.model.Attribute attribute) {
+        String value = attribute.asString();
+        if (StringUtils.isEmpty(value) || SearchUtils.isStandardFieldName(attribute.getName())
+                || "null".equalsIgnoreCase(value)) {
+            return false;
+        }
+        for (Pattern pattern : attributeInclusions) {
+            if (pattern.matcher(attribute.getName()).matches()) return true;
+        }
+        if (containsNewLines(value) || value.length() > MAX_ATTRIBUTE_LENGTH) return false;
+        for (Pattern pattern : attributeExclusions) {
+            if (pattern.matcher(attribute.getName()).matches()) return false;
+        }
+        return attributeInclusions.isEmpty();
     }
 
     private void persistEvent(BrokerSession session, BrokerTopicSnapshot.Event event) {
