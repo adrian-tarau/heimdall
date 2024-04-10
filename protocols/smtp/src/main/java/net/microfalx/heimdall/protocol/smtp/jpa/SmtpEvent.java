@@ -51,7 +51,7 @@ public class SmtpEvent extends Event {
     private Address to;
 
     @Column(name = "attachment_count", nullable = false)
-    @Label(value = "", icon = "fa-solid fa-paperclip")
+    @Label(value = "-", icon = "fa-solid fa-paperclip")
     @Position(10)
     @Description("The number of attachments in the email")
     private int attachmentCount;

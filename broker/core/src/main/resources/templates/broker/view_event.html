@@ -50,7 +50,7 @@
                         <tr th:each="field : ${fields}">
                             <td th:text="${field.name}"></td>
                             <td>
-                                <a th:if="${field.isSingleLine()}" href="#" th:attr="onclick=|Application.Search.joinField('${field.name}','${field.value}')|"><i class="fa-solid fa-filter"></i></a>
+                                <a th:if="${field.isSingleLine()}" href="#" th:attr="onclick=|Application.Search.joinField('${field.name}','${field.value}', true)|"><i class="fa-solid fa-filter"></i></a>
                                 <span class="dataset-text-mono" th:text="${field.value}"></span>
                             </td>
                         </tr>

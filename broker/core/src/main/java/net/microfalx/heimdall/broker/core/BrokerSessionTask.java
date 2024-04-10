@@ -131,13 +131,12 @@ class BrokerSessionTask implements Runnable {
         this.realTopic = brokerService.getTopic(topic);
         LOGGER.debug("Collect events from " + BrokerUtils.describe(realTopic));
         int iteration = 0;
-        BrokerUtils.METRICS.withGroup("Sessions").count(topic.getName());
         while (iteration++ < MAX_ITERATIONS) {
             try {
                 BrokerTopicSnapshot snapshot = METRICS.timeCallable("Collect", this::doCollectEvents);
                 METRICS.timeCallable("Persist", () -> persistSession(snapshot));
                 METRICS.time("Commit", (t) -> commitConsumer());
-                boolean hasMore = snapshot.getCount() > realTopic.getMaximumPollRecords();
+                boolean hasMore = snapshot.getCount() >= realTopic.getMaximumPollRecords();
                 if (!hasMore) break;
             } catch (Exception e) {
                 BrokerUtils.METRICS.withGroup("Failure").count(topic.getName());
@@ -145,6 +144,7 @@ class BrokerSessionTask implements Runnable {
                 LOGGER.error("Failed to collect events from " + BrokerUtils.describe(this.realTopic), e);
                 persistSession(BrokerSession.Status.FAILED, new BrokerTopicSnapshot(), null, ExceptionUtils.getRootCauseMessage(e));
             }
+            BrokerUtils.METRICS.withGroup("Sessions").count(topic.getName());
         }
     }
 
@@ -233,7 +233,7 @@ class BrokerSessionTask implements Runnable {
     private BrokerSession persistSession(BrokerTopicSnapshot snapshot) throws IOException {
         IOUtils.closeQuietly(zipOutputStream);
         zipOutputStream = null;
-        Resource resource = brokerService.writeSnapshot(FileResource.file(zipFile));
+        Resource resource = zipFile != null ? brokerService.writeSnapshot(FileResource.file(zipFile)) : null;
         TransactionTemplate transactionTemplate = brokerService.newTransaction();
         return transactionTemplate.execute(status -> {
             BrokerSession session = persistSession(BrokerSession.Status.SUCCESSFUL, snapshot, resource, null);
