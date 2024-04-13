@@ -63,7 +63,6 @@ public class BrokerEvent {
     @Column(name = "event_id")
     @Position(20)
     @Description("The event identifier")
-    @Name
     @NotNull
     @Filterable()
     private String eventId;

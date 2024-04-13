@@ -267,7 +267,7 @@ class BrokerSessionTask implements Runnable {
         document.setBody(resource);
         document.setBodyUri(uri);
         document.setMimeType(mediaType);
-        document.setCreatedAt(TimeUtils.toLocalDateTime(event.getTimestamp()));
+        document.setCreatedAt(event.getTimestampAsDateTime());
         document.setReceivedAt(LocalDateTime.now());
         document.setModifiedAt(LocalDateTime.now());
         event.getAttributes().forEach((k, v) -> {
@@ -310,7 +310,7 @@ class BrokerSessionTask implements Runnable {
         brokerEvent.setTopic(topic);
         brokerEvent.setType(topic.getBroker().getType());
         brokerEvent.setSession(session);
-        brokerEvent.setCreatedAt(TimeUtils.toLocalDateTime(event.getTimestamp()));
+        brokerEvent.setCreatedAt(event.getTimestampAsDateTime());
         brokerEvent.setReceivedAt(startTime);
         brokerEvent.setEventId(event.getId());
         brokerEvent.setEventName(org.apache.commons.lang3.StringUtils.abbreviate(event.getName(), 190));
@@ -319,6 +319,9 @@ class BrokerSessionTask implements Runnable {
 
     private BrokerSession persistSession(BrokerSession.Status status, BrokerTopicSnapshot snapshot, Resource resource, String failureMessage) {
         endTime = LocalDateTime.now();
+        if (status == BrokerSession.Status.SUCCESSFUL && snapshot.getTotalCount() == 0) {
+            status = BrokerSession.Status.CANCELED;
+        }
         BrokerSession session = new BrokerSession();
         session.setBroker(topic.getBroker());
         session.setTopic(topic);

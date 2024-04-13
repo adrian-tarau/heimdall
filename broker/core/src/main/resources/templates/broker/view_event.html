@@ -8,13 +8,13 @@
                 <div class="col-md-8"><span class="fw-bold">Event Id: </span>
                     <span class="fst-italic"  th:text="${model.eventId}"></span>
                 </div>
-                <div class="col-md-4"><span class="fw-bold">Created At: </span><span class="fst-italic" th:text="${#temporals.format(model.createdAt)}"></span></div>
+                <div class="col-md-4"><span class="fw-bold">Created At: </span><span class="fst-italic" th:text="${#formats.format(model.createdAt)}"></span></div>
             </div>
             <div class="row">
                 <div class="col-md-2"><span class="fw-bold">Session: </span><span class="fst-italic" th:text="${model.session.id}"></span></div>
                 <div class="col-md-2"><span class="fw-bold">Broker: </span><span class="fst-italic" th:text="${model.broker.name}"></span></div>
                 <div class="col-md-4"><span class="fw-bold">Mime Type: </span><span class="fst-italic" th:text="${mimeType}"></span></div>
-                <div class="col-md-4"><span class="fw-bold">Received At: </span><span class="fst-italic" th:text="${#temporals.format(model.receivedAt)}"></span></div>
+                <div class="col-md-4"><span class="fw-bold">Received At: </span><span class="fst-italic" th:text="${#formats.format(model.receivedAt)}"></span></div>
             </div>
         </div>
         <div th:unless="${badges.isEmpty()}" class="row border rounded bg-body-secondary mb-3 p-3 fs-6 dataset-attributes">
@@ -50,7 +50,7 @@
                         <tr th:each="field : ${fields}">
                             <td th:text="${field.name}"></td>
                             <td>
-                                <a th:if="${field.isSingleLine()}" href="#" th:attr="onclick=|Application.Search.joinField('${field.name}','${field.value}', true)|"><i class="fa-solid fa-filter"></i></a>
+                                <a th:if="${field.isSingleLine()}" href="#" th:attr="onclick=|Application.Search.queryField('${field.name}','${field.value}', true, true)|"><i class="fa-solid fa-filter"></i></a>
                                 <span class="dataset-text-mono" th:text="${field.value}"></span>
                             </td>
                         </tr>

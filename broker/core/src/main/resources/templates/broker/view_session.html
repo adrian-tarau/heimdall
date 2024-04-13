@@ -1,0 +1,78 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="fields">
+    <div class="container-fluid">
+        <div class="row border rounded bg-body-secondary mb-3 p-3 fs-6">
+            <div class="row">
+                <div class="col-md-6"><span class="fw-bold">Session Id: </span>
+                    <span class="fst-italic"  th:text="${model.id}"></span>
+                </div>
+                <div class="col-md-4"><span class="fw-bold">Started At: </span><span class="fst-italic" th:text="${#formats.format(model.startedAt)}"></span></div>
+            </div>
+            <div class="row">
+                <div class="col-md-2"><span class="fw-bold">Broker: </span><span class="fst-italic" th:text="${model.broker.name}"></span></div>
+                <div class="col-md-2"><span class="fw-bold">Broker Type: </span><span class="fst-italic" th:text="${#formats.format(model.broker.type)}"></span></div>
+                <div class="col-md-2"><span class="fw-bold">Topic: </span><span class="fst-italic" th:text="${model.topic.name}"></span></div>
+                <div class="col-md-4"><span class="fw-bold">Ended At: </span><span class="fst-italic" th:text="${#formats.format(model.endedAt)}"></span></div>
+            </div>
+        </div>
+        <div class="row mb-3 p-3 fs-6">
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item active">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#event" type="button">Events</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#fields" type="button">Fields</button>
+                </li>
+            </ul>
+            <div class="tab-content h-100 overflow-auto">
+                <div class="tab-pane fade show active" id="event" >
+                    <table class="table" style="height:400px">
+                        <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Id</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Timestamp</th>
+                            <th scope="col">Size</th>
+                            <th scope="col">Fields</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="event : ${events}">
+                            <td th:text="${event.id}"></td>
+                            <td th:text="${event.name}"></td>
+                            <td th:text="${#formats.format(event.timestampAsDateTime)}"></td>
+                            <td th:text="${event.size}"></td>
+                            <td th:text="${event.attributes.size()}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="tab-pane fade" id="fields">
+                    <table class="table" style="height:400px">
+                        <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Values</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="field : ${fields}">
+                            <td th:text="${field.name}"></td>
+                            <td>
+                                <a th:each="value : ${field.values}" class="mx-1" href="#" th:attr="onclick=|Application.Search.queryField('${field.name}','${value}', true, true)|">
+                                    <span th:text="${value}"></span>
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</body>
+</html>

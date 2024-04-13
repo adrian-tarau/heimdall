@@ -30,8 +30,9 @@ public class BrokerSession {
     @Column(name = "id")
     @EqualsAndHashCode.Include
     @Name
-    @Visible(true)
+    @Visible
     @Position(1)
+    @Formattable(prettyPrint = false)
     private Integer id;
 
     @ManyToOne
@@ -86,25 +87,25 @@ public class BrokerSession {
 
     @Column(name = "total_event_count")
     @Label(value = "Total", group = "Event Count")
-    @Position(600)
+    @Position(601)
     @Formattable(unit = Formattable.Unit.COUNT)
     private int totalEventCount;
 
     @Column(name = "sampled_event_count")
     @Label(value = "Sampled", group = "Event Count")
-    @Position(601)
+    @Position(602)
     @Formattable(unit = Formattable.Unit.COUNT)
     private int sampledEventCount;
 
     @Column(name = "total_event_size")
     @Label(value = "Total", group = "Event Size")
-    @Position(602)
+    @Position(603)
     @Formattable(unit = Formattable.Unit.BYTES)
     private long totalEventSize;
 
     @Column(name = "sampled_event_size")
     @Label(value = "Sampled", group = "Event Size")
-    @Position(603)
+    @Position(604)
     @Formattable(unit = Formattable.Unit.BYTES)
     private long sampledEventSize;
 
@@ -122,6 +123,7 @@ public class BrokerSession {
      */
     public enum Status {
         SUCCESSFUL,
-        FAILED
+        FAILED,
+        CANCELED,
     }
 }

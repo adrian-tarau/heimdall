@@ -9,9 +9,11 @@ import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.StringUtils;
+import net.microfalx.lang.TimeUtils;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -135,9 +137,9 @@ public class BrokerTopicSnapshot {
 
         @EqualsAndHashCode.Include
         private String id;
-        private String partition;
         private String name;
         private String description;
+        private String partition;
         private byte[] key;
         private byte[] value;
         private long timestamp;
@@ -160,6 +162,15 @@ public class BrokerTopicSnapshot {
          */
         public int getSize() {
             return (key != null ? key.length : 0) + (value != null ? value.length : 0) + OVERHEAD;
+        }
+
+        /**
+         * Returns the timestamp as a local date time.
+         *
+         * @return a non-null instance
+         */
+        public LocalDateTime getTimestampAsDateTime() {
+            return TimeUtils.toLocalDateTime(timestamp);
         }
 
         /**
