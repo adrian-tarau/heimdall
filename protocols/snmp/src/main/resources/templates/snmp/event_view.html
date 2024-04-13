@@ -7,12 +7,12 @@
             <div class="row">
                 <div class="col-md-4"><span class="fw-bold">From: </span><span class="fst-italic" th:text="${model.agentAddress.name}"></span></div>
                 <div class="col-md-4"><span class="fw-bold">Trap Type: </span><span class="fst-italic" th:text="${#dataset.getDisplayValue(model, 'trapType')}"></span></div>
-                <div class="col-md-4"><span class="fw-bold">Received At: </span><span class="fst-italic" th:text="${#temporals.format(model.receivedAt)}"></span></div>
+                <div class="col-md-4"><span class="fw-bold">Received At: </span><span class="fst-italic" th:text="${#formats.format(model.receivedAt)}"></span></div>
             </div>
             <div class="row">
                 <div class="col-md-4"><span class="fw-bold">Enterprise: </span><span class="fst-italic" th:text="${model.enterprise}"></span></div>
                 <div class="col-md-4"><span class="fw-bold">Version: </span><span class="fst-italic" th:text="${model.version}"></span></div>
-                <div class="col-md-4"><span class="fw-bold">Send At: </span><span class="fst-italic" th:text="${#temporals.format(model.createdAt)}"></span></div>
+                <div class="col-md-4"><span class="fw-bold">Send At: </span><span class="fst-italic" th:text="${#formats.format(model.createdAt)}"></span></div>
             </div>
             <div class="row">
                 <div class="col-md-12"><span class="fw-bold">Community String: </span><span class="fst-italic" th:text="${model.communityString}"></span></div>
@@ -43,7 +43,7 @@
                         <tr th:each="attribute : ${attributes}">
                             <td th:text="${attribute.name}"></td>
                             <td>
-                                <a th:if="${attribute.isSingleLine()}" href="#" th:attr="onclick=|Application.Search.joinField('${attribute.name}','${attribute.value}', true)|"><i class="fa-solid fa-filter"></i></a>
+                                <a th:if="${attribute.isSingleLine()}" href="#" th:attr="onclick=|Application.Search.queryField('${attribute.name}','${attribute.value}', true, true)|"><i class="fa-solid fa-filter"></i></a>
                                 <span class="dataset-text-mono" th:text="${attribute.value}"></span>
                             </td>
                         </tr>

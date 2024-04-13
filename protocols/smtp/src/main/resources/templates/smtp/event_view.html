@@ -9,11 +9,11 @@
             </div>
             <div class="row">
                 <div class="col-md-8"><span class="fw-bold">From: </span><span class="fst-italic" th:text="${model.from.name}"></span></div>
-                <div class="col-md-4"><span class="fw-bold">Received at: </span><span class="fst-italic" th:text="${#temporals.format(model.receivedAt)}"></span></div>
+                <div class="col-md-4"><span class="fw-bold">Received at: </span><span class="fst-italic" th:text="${#formats.format(model.receivedAt)}"></span></div>
             </div>
             <div class="row">
                 <div class="col-md-8"><span class="fw-bold">To: </span><span class="fst-italic" th:text="${model.to.name}"></span></div>
-                <div class="col-md-4"><span class="fw-bold">Sent at: </span><span class="fst-italic" th:text="${#temporals.format(model.sentAt)}"></span></div>
+                <div class="col-md-4"><span class="fw-bold">Sent at: </span><span class="fst-italic" th:text="${#formats.format(model.sentAt)}"></span></div>
             </div>
             <div class="flex-row m-4 p-2" th:unless="${attachments.isEmpty()}">
                 <div th:each="attachment: ${attachments}" th:remove="tag">
