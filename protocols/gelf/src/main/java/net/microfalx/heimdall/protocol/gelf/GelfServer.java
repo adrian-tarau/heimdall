@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PreDestroy;
 import net.microfalx.heimdall.protocol.core.*;
+import net.microfalx.lang.EnumUtils;
 import net.microfalx.lang.IOUtils;
+import net.microfalx.lang.StringUtils;
 import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.Resource;
 import org.apache.commons.compress.compressors.CompressorException;
@@ -142,7 +144,7 @@ public class GelfServer implements InitializingBean, ProtocolServerHandler {
         String fullMessage = getRequiredField(jsonNode, "full_message");
         String host = net.microfalx.lang.StringUtils.defaultIfNull(getField(jsonNode, "host"), "0.0.0.0");
         GelfEvent message = new GelfEvent();
-        message.setFacility(Facility.fromLabel(getRequiredField(jsonNode, "facility")));
+        message.setFacility(parseFacility(getField(jsonNode, "facility")));
         message.setName(abbreviate(removeLineBreaks(shortMessage), MAX_NAME_LENGTH));
         message.setReceivedAt(ZonedDateTime.now());
         message.setSource(Address.create(Address.Type.HOSTNAME, host));
@@ -153,6 +155,11 @@ public class GelfServer implements InitializingBean, ProtocolServerHandler {
         message.setGelfSeverity(Severity.fromNumericalCode(getRequiredIntField(jsonNode, "level")));
         addAllJsonFields(message, jsonNode);
         gelfService.accept(message);
+    }
+
+    private Facility parseFacility(String name) {
+        if (StringUtils.isEmpty(name)) return Facility.USER;
+        return EnumUtils.fromName(Facility.class, name, Facility.USER);
     }
 
     private void addAllJsonFields(GelfEvent gelfEvent, JsonNode jsonNode) {

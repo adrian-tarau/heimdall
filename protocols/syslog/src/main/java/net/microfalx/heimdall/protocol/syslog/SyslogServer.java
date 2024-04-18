@@ -98,7 +98,7 @@ public class SyslogServer implements InitializingBean {
             structuredEvent = (StructuredSyslogServerEvent) event;
         }
         String originalMessage = event.getMessage();
-        StructuredSyslogMessage structuredMessage = structuredEvent.getStructuredMessage();
+        StructuredSyslogMessage structuredMessage = structuredEvent != null ? structuredEvent.getStructuredMessage() : null;
         if (structuredMessage != null) {
             originalMessage = structuredMessage.getMessage();
         }
