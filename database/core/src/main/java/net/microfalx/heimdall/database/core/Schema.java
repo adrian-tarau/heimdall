@@ -9,6 +9,7 @@ import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Component;
 import net.microfalx.bootstrap.jdbc.entity.NamedTimestampAware;
 import net.microfalx.bootstrap.jdbc.jpa.EncryptAttributeConverter;
+import net.microfalx.bootstrap.jdbc.support.Node;
 import net.microfalx.lang.annotation.*;
 
 @Entity
@@ -58,10 +59,21 @@ public class Schema extends NamedTimestampAware {
     @Description("The time zone of the database")
     private String timeZone;
 
+    @Position(40)
+    @Label("State")
+    @Description("The state of the database")
+    @Transient
+    private Node.State state = Node.State.UNKNOWN;
+
     @Column(name = "mappings", length = 2000)
     @Position(40)
     @Description("The mappings used to translate IPs or any additional database specific features")
     @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.ADD, Visible.Mode.EDIT})
     @Component(Component.Type.TEXT_AREA)
     private String mappings;
+
+    @Position(2000)
+    @Description("The description of the validation failure")
+    @Transient
+    private String validationError;
 }
