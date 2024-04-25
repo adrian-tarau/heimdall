@@ -6,11 +6,18 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.microfalx.bootstrap.dataset.Alert;
 import net.microfalx.bootstrap.dataset.annotation.Component;
+import net.microfalx.bootstrap.dataset.annotation.Formattable;
+import net.microfalx.bootstrap.dataset.annotation.Lookup;
+import net.microfalx.bootstrap.dataset.lookup.TimeZoneLookup;
 import net.microfalx.bootstrap.jdbc.entity.NamedTimestampAware;
 import net.microfalx.bootstrap.jdbc.jpa.EncryptAttributeConverter;
 import net.microfalx.bootstrap.jdbc.support.Node;
+import net.microfalx.bootstrap.model.Field;
 import net.microfalx.lang.annotation.*;
+
+import java.time.ZoneId;
 
 @Entity
 @Table(name = "database_schemas")
@@ -57,11 +64,14 @@ public class Schema extends NamedTimestampAware {
     @Column(name = "time_zone", length = 100)
     @Position(32)
     @Description("The time zone of the database")
-    private String timeZone;
+    @Lookup(model = TimeZoneLookup.class)
+    private String timeZone = ZoneId.systemDefault().getId();
 
     @Position(40)
     @Label("State")
     @Description("The state of the database")
+    @Visible(modes = Visible.Mode.BROWSE)
+    @Formattable(alert = AlertProvider.class)
     @Transient
     private Node.State state = Node.State.UNKNOWN;
 
@@ -73,7 +83,21 @@ public class Schema extends NamedTimestampAware {
     private String mappings;
 
     @Position(2000)
-    @Description("The description of the validation failure")
+    @Visible(value = false)
     @Transient
     private String validationError;
+
+    public static class AlertProvider implements Formattable.AlertProvider<Schema, Field<Schema>, Node.State> {
+
+        @Override
+        public Alert provide(Node.State value, Field<Schema> field, Schema model) {
+            Alert.Type type = switch (value) {
+                case UP -> Alert.Type.SUCCESS;
+                case DOWN -> Alert.Type.DANGER;
+                case STANDBY, RECOVERING -> Alert.Type.SECONDARY;
+                case UNKNOWN -> Alert.Type.LIGHT;
+            };
+            return Alert.builder().type(type).message(model.getValidationError()).build();
+        }
+    }
 }

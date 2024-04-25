@@ -1,17 +1,16 @@
 package net.microfalx.heimdall.protocol.syslog.jpa;
 
+import com.cloudbees.syslog.Facility;
+import com.cloudbees.syslog.Severity;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Filterable;
-import net.microfalx.bootstrap.dataset.annotation.Lookup;
 import net.microfalx.heimdall.protocol.core.jpa.Address;
 import net.microfalx.heimdall.protocol.core.jpa.Event;
 import net.microfalx.heimdall.protocol.core.jpa.Part;
-import net.microfalx.heimdall.protocol.syslog.lookup.FacilityLookup;
-import net.microfalx.heimdall.protocol.syslog.lookup.SeverityLookup;
 import net.microfalx.lang.annotation.Description;
 import net.microfalx.lang.annotation.Name;
 import net.microfalx.lang.annotation.Position;
@@ -48,16 +47,14 @@ public class SyslogEvent extends Event {
     private Part message;
 
     @Column(name = "severity", nullable = false)
-    @Lookup(model = SeverityLookup.class)
     @Position(10)
     @Description("Identify the importance of the Syslog log event")
     @Filterable(true)
-    private Integer severity;
+    private Severity severity;
 
     @Column(name = "facility", nullable = false)
-    @Lookup(model = FacilityLookup.class)
     @Position(10)
     @Description("Determines which process of the machine created the Syslog log event")
     @Filterable(true)
-    private Integer facility;
+    private Facility facility;
 }

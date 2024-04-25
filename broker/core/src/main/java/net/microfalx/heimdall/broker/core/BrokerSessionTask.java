@@ -139,13 +139,19 @@ class BrokerSessionTask implements Runnable {
                 boolean hasMore = snapshot.getCount() >= realTopic.getMaximumPollRecords();
                 if (!hasMore) break;
             } catch (Exception e) {
-                BrokerUtils.METRICS.withGroup("Failure").count(topic.getName());
-                brokerService.releaseConsumer(this.realTopic);
-                LOGGER.error("Failed to collect events from " + BrokerUtils.describe(this.realTopic), e);
-                persistSession(BrokerSession.Status.FAILED, new BrokerTopicSnapshot(), null, ExceptionUtils.getRootCauseMessage(e));
+                if (!getConsumer().isClosed()) {
+                    BrokerUtils.METRICS.withGroup("Failure").count(topic.getName());
+                    brokerService.releaseConsumer(this.realTopic);
+                    LOGGER.error("Failed to collect events from " + BrokerUtils.describe(this.realTopic), e);
+                    persistSession(BrokerSession.Status.FAILED, new BrokerTopicSnapshot(), null, ExceptionUtils.getRootCauseMessage(e));
+                }
             }
             BrokerUtils.METRICS.withGroup("Sessions").count(topic.getName());
         }
+    }
+
+    private BrokerConsumer<byte[], byte[]> getConsumer() {
+        return brokerService.getConsumer(brokerService.getTopic(topic));
     }
 
     private BrokerTopicSnapshot doCollectEvents() throws IOException {
@@ -154,7 +160,7 @@ class BrokerSessionTask implements Runnable {
         BrokerTopicSnapshot snapshot = new BrokerTopicSnapshot();
         boolean shouldSample = topic.getSampleSize() != null;
         int totalSize = 0;
-        BrokerConsumer<byte[], byte[]> consumer = brokerService.getConsumer(brokerService.getTopic(topic));
+        BrokerConsumer<byte[], byte[]> consumer = getConsumer();
         int emptyCounter = 0;
         int sampleCount = getSampleCounter(topic);
         while (emptyCounter <= MAX_EMPTY_ITERATIONS && LocalDateTime.now().isBefore(endTime)) {

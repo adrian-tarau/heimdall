@@ -273,21 +273,25 @@ public class DatabaseService implements InitializingBean {
         initResources();
     }
 
+    public void reload(Schema schema) {
+        String id = toIdentifier(schema.getName() + "_" + schema.getType());
+        schemaIdCache.put(schema.getId(), id);
+        try {
+            DataSource dataSource = create(id, schema.getName(), schema.getUrl(), schema.getUsername(),
+                    schema.getPassword());
+            dataSource = dataSource.withProperties(loadProperties(schema))
+                    .withZoneId(ZoneId.of(schema.getTimeZone()))
+                    .withDescription(schema.getDescription());
+            databaseService.registerDataSource(dataSource);
+        } catch (Exception e) {
+            LOGGER.error("Failed to register data source for database " + schema.getName(), e);
+        }
+    }
+
     public void reload() {
         LOGGER.info("Register databases (schemas)");
         for (Schema schema : schemaRepository.findAll()) {
-            String id = toIdentifier(schema.getName() + "_" + schema.getType());
-            schemaIdCache.put(schema.getId(), id);
-            try {
-                DataSource dataSource = create(id, schema.getName(), schema.getUrl(), schema.getUsername(),
-                        schema.getPassword());
-                dataSource = dataSource.withProperties(loadProperties(schema))
-                        .withZoneId(ZoneId.of(schema.getTimeZone()))
-                        .withDescription(schema.getDescription());
-                databaseService.registerDataSource(dataSource);
-            } catch (Exception e) {
-                LOGGER.error("Failed to register data source for database " + schema.getName(), e);
-            }
+            reload(schema);
         }
     }
 

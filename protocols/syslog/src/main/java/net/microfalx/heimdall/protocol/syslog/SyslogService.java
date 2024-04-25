@@ -36,8 +36,8 @@ public final class SyslogService extends ProtocolService<SyslogMessage, SyslogEv
 
     protected void persist(SyslogMessage message) {
         SyslogEvent syslogEvent = new SyslogEvent();
-        syslogEvent.setFacility(message.getFacility().numericalCode());
-        syslogEvent.setSeverity(message.getSyslogSeverity().numericalCode());
+        syslogEvent.setFacility(message.getFacility());
+        syslogEvent.setSeverity(message.getSyslogSeverity());
         syslogEvent.setAddress(lookupAddress(message.getSource()));
         syslogEvent.setCreatedAt(message.getCreatedAt().toLocalDateTime());
         syslogEvent.setReceivedAt(message.getReceivedAt().toLocalDateTime());

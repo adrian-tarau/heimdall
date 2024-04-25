@@ -9,6 +9,7 @@ import net.microfalx.bootstrap.resource.ResourceService;
 import net.microfalx.bootstrap.search.IndexService;
 import net.microfalx.bootstrap.template.Template;
 import net.microfalx.bootstrap.template.TemplateService;
+import net.microfalx.lang.ExceptionUtils;
 import net.microfalx.lang.ObjectUtils;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.TimeUtils;
@@ -89,6 +90,7 @@ public class BrokerService implements InitializingBean {
 
     @Autowired
     private TaskScheduler taskScheduler;
+
     private AsyncTaskExecutor executor;
     private final Map<Integer, Lock> brokerLocks = new ConcurrentHashMap<>();
     private final Map<Integer, Lock> topicLocks = new ConcurrentHashMap<>();
@@ -162,6 +164,18 @@ public class BrokerService implements InitializingBean {
     }
 
     /**
+     * Updates the topic with status information
+     *
+     * @param topic the topic model
+     */
+    void updateStatus(BrokerTopic topic) {
+        requireNonNull(topic);
+        Topic realTopic = getTopic(topic);
+        topic.setStatus(brokerService.getStatus(realTopic));
+        topic.setLastError(brokerService.getLastError(realTopic));
+    }
+
+    /**
      * Stores a collection of events collected during a session as serialized in an external resource.
      *
      * @param resource the snapshot, as a ZIP with events serialized as files
@@ -194,19 +208,42 @@ public class BrokerService implements InitializingBean {
         scheduleTasks();
     }
 
+    public void reload(Broker broker) {
+        requireNonNull(broker);
+        try {
+            broker = brokerRepository.findById(broker.getId()).orElseThrow();
+            brokerCache.put(broker.getId(), broker);
+            String id = toIdentifier(broker.getName() + "_" + broker.getType());
+            net.microfalx.bootstrap.broker.Broker.Builder builder = net.microfalx.bootstrap.broker.Broker.builder(broker.getType(), id)
+                    .name(broker.getName()).timeZone(ZoneId.of(broker.getTimeZone()));
+            builder.parameters(load(broker.getParameters()));
+            net.microfalx.bootstrap.broker.Broker realBroker = builder.build();
+            brokerService.registerBroker(realBroker);
+            closeConsumers(realBroker);
+        } catch (Exception e) {
+            LOGGER.error("Failed to register broker " + broker.getName(), e);
+        }
+        lastTopicCacheRefresh = TimeUtils.oneHourAgo();
+        if (executor != null) executor.submit(new SessionSchedulerTask());
+    }
+
     public void reload() {
         LOGGER.info("Register brokers");
         for (Broker broker : brokerRepository.findAll()) {
-            brokerCache.put(broker.getId(), broker);
-            String id = toIdentifier(broker.getName() + "_" + broker.getType());
+            reload(broker);
+        }
+    }
+
+    private void closeConsumers(net.microfalx.bootstrap.broker.Broker broker) {
+        for (Map.Entry<String, BrokerConsumer<byte[], byte[]>> entry : consumers.entrySet()) {
+            BrokerConsumer<byte[], byte[]> consumer = entry.getValue();
+            if (!consumer.getTopic().getBroker().equals(broker)) continue;
             try {
-                net.microfalx.bootstrap.broker.Broker.Builder builder = net.microfalx.bootstrap.broker.Broker.builder(broker.getType(), id)
-                        .name(broker.getName()).timeZone(ZoneId.of(broker.getTimeZone()));
-                builder.parameters(load(broker.getParameters()));
-                brokerService.registerBroker(builder.build());
+                consumer.close();
             } catch (Exception e) {
-                LOGGER.error("Failed to register broker " + broker.getName(), e);
+                LOGGER.warn("Failed to close consumer '" + consumer.getTopic().getName() + ", root cause: " + ExceptionUtils.getRootCauseName(e));
             }
+            consumers.remove(entry.getKey());
         }
     }
 

@@ -10,8 +10,12 @@ import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Component;
 import net.microfalx.bootstrap.dataset.annotation.Filterable;
+import net.microfalx.bootstrap.dataset.annotation.Lookup;
+import net.microfalx.bootstrap.dataset.lookup.TimeZoneLookup;
 import net.microfalx.bootstrap.jdbc.entity.NamedTimestampAware;
 import net.microfalx.lang.annotation.*;
+
+import java.time.ZoneId;
 
 @Entity
 @Table(name = "broker_clusters")
@@ -40,7 +44,15 @@ public class Broker extends NamedTimestampAware {
     @Position(10)
     @Description("The time zone of the database")
     @NotBlank
-    private String timeZone;
+    @Lookup(model = TimeZoneLookup.class)
+    private String timeZone = ZoneId.systemDefault().getId();
+
+    @Label("End Points")
+    @Transient
+    @Position(20)
+    @Filterable
+    @Visible(modes = Visible.Mode.BROWSE)
+    private String endPoints;
 
     @Column(name = "parameters", length = 100)
     @Position(20)

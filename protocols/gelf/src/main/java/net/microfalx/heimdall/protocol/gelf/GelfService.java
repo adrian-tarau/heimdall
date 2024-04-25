@@ -41,8 +41,8 @@ public final class GelfService extends ProtocolService<GelfEvent, net.microfalx.
 
     protected void persist(GelfEvent message) {
         net.microfalx.heimdall.protocol.gelf.jpa.GelfEvent gelfEvent = new net.microfalx.heimdall.protocol.gelf.jpa.GelfEvent();
-        gelfEvent.setFacility(message.getFacility().numericalCode());
-        gelfEvent.setLevel(message.getSeverity().getLevel());
+        gelfEvent.setFacility(message.getFacility());
+        gelfEvent.setSeverity(message.getGelfSeverity());
         gelfEvent.setVersion(message.getVersion());
         gelfEvent.setAddress(lookupAddress(message.getSource()));
         gelfEvent.setCreatedAt(message.getCreatedAt().toLocalDateTime());

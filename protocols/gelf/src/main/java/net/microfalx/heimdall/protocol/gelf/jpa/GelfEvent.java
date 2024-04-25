@@ -1,5 +1,7 @@
 package net.microfalx.heimdall.protocol.gelf.jpa;
 
+import com.cloudbees.syslog.Facility;
+import com.cloudbees.syslog.Severity;
 import jakarta.persistence.Id;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -9,12 +11,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Filterable;
-import net.microfalx.bootstrap.dataset.annotation.Lookup;
 import net.microfalx.heimdall.protocol.core.jpa.Address;
 import net.microfalx.heimdall.protocol.core.jpa.Event;
 import net.microfalx.heimdall.protocol.core.jpa.Part;
-import net.microfalx.heimdall.protocol.gelf.lookup.FacilityLookup;
-import net.microfalx.heimdall.protocol.gelf.lookup.SeverityLookup;
 import net.microfalx.lang.annotation.*;
 
 @Entity
@@ -73,16 +72,14 @@ public class GelfEvent extends Event {
 
     @Column(name = "level", nullable = false)
     @Position(25)
-    @Lookup(model = SeverityLookup.class)
     @Filterable
     @Description("Identify the importance of the Gelf log event")
-    private int level;
+    private Severity severity;
 
     @Column(name = "facility", nullable = false)
     @Position(30)
-    @Lookup(model = FacilityLookup.class)
     @Filterable
     @Description("Determines which process of the machine created the Gelf log event")
-    private int facility;
+    private Facility facility;
 
 }
