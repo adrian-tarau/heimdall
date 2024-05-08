@@ -47,7 +47,7 @@ public final class SmtpService extends ProtocolService<SmtpEvent, net.microfalx.
         jpaSmtpEvent.setCreatedAt(smtpEvent.getCreatedAt().toLocalDateTime());
         jpaSmtpEvent.setSentAt(smtpEvent.getSentAt().toLocalDateTime());
         jpaSmtpEvent.setReceivedAt(smtpEvent.getReceivedAt().toLocalDateTime());
-        jpaSmtpEvent.setSubject(smtpEvent.getName());
+        jpaSmtpEvent.setSubject(org.apache.commons.lang3.StringUtils.abbreviate(smtpEvent.getName(), 490));
         updateAddresses(smtpEvent, jpaSmtpEvent);
         List<SmtpAttachment> attachments = smtpEvent.getParts().stream().map(part -> {
             SmtpAttachment attachment = new SmtpAttachment();

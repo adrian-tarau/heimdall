@@ -420,7 +420,9 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
         return time("Persist Part", () -> {
             net.microfalx.heimdall.protocol.core.jpa.Part partJpa = new net.microfalx.heimdall.protocol.core.jpa.Part();
             partJpa.setType(part.getType());
-            if (!NA_STRING.equals(part.getName())) partJpa.setName(part.getName());
+            if (!NA_STRING.equals(part.getName())) {
+                partJpa.setName(org.apache.commons.lang3.StringUtils.abbreviate(part.getName(), 90));
+            }
             partJpa.setFileName(part.getFileName());
             if (part instanceof AbstractPart apart) {
                 apart.resource = upload(apart.resource);
