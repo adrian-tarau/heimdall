@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:component="https://net.microfalx/component">
 <body>
 <div th:fragment="fields">
     <div class="container-fluid">
@@ -18,7 +18,7 @@
             <div class="flex-row m-4 p-2" th:unless="${attachments.isEmpty()}">
                 <div th:each="attachment: ${attachments}" th:remove="tag">
                     <a th:href="@{'/protocol/smtp/part/'+${attachment.part.id}+'/download'}" class="icon-link p-2">
-                        <span class="badge rounded-pill text-bg-primary"><i class="fa-solid fa-paperclip"></i><span class="ms-1" th:text="${attachment.part.fileName}"></span></span>
+                        <span class="badge rounded-pill text-bg-primary"><i class="fa-solid fa-paperclip"></i><span class="ms-1" th:text="${#strings.abbreviate(attachment.part.fileName, 50)}" component:tooltip="${attachment.part.fileName}"></span></span>
                     </a>
                 </div>
             </div>
