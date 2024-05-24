@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/system/broker/topic")
-@DataSet(model = BrokerTopic.class)
+@DataSet(model = BrokerTopic.class, timeFilter = false)
 @Help("system/broker/topic")
 public class BrokerTopicController extends DataSetController<BrokerTopic, Integer> {
 

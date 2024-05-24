@@ -20,7 +20,7 @@ import static net.microfalx.heimdall.protocol.snmp.controller.MibControllerUtili
 
 @Controller
 @RequestMapping("/system/protocol/snmp/mib")
-@DataSet(model = SnmpMib.class, defaultQuery = "type = User",
+@DataSet(model = SnmpMib.class, timeFilter = false, defaultQuery = "type = User",
         canAdd = false, canUpload = true, canDownload = true,
         viewTemplate = "snmp/mib_view", viewClasses = "modal-xl")
 @Help("protocol/snmp/mib")

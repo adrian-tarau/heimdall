@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping(value = "/system/database/manage")
-@DataSet(model = Schema.class)
+@DataSet(model = Schema.class, timeFilter = false)
 @Help("admin/database/manage")
 public class SchemaController extends DataSetController<Schema, Integer> {
 

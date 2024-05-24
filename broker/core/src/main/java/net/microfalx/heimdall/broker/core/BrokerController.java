@@ -18,7 +18,7 @@ import java.util.Properties;
 
 @Controller
 @RequestMapping("/system/broker/manage")
-@DataSet(model = Broker.class)
+@DataSet(model = Broker.class, timeFilter = false)
 @Help("system/broker/manage")
 public class BrokerController extends DataSetController<Broker, Integer> {
 

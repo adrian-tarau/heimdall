@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller("databaseUserController")
 @RequestMapping(value = "/database/user")
-@DataSet(model = User.class)
+@DataSet(model = User.class, timeFilter = false)
 @Help("database/user")
 public class UserController extends DataSetController<User, Integer> {
 
