@@ -117,6 +117,12 @@
         </dependency>
 
         <dependency>
+            <groupId>net.microfalx.heimdall</groupId>
+            <artifactId>heimdall-infrastructure-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>net.microfalx.bootstrap</groupId>
             <artifactId>bootstrap-security</artifactId>
         </dependency>

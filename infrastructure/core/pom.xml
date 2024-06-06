@@ -24,24 +24,20 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>net.microfalx.heimdall</groupId>
-    <artifactId>heimdall-broker-core</artifactId>
+    <artifactId>heimdall-infrastructure-core</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 
     <parent>
         <groupId>net.microfalx.heimdall</groupId>
-        <artifactId>heimdall-broker</artifactId>
+        <artifactId>heimdall-infrastructure</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <name>Heimdall - Broker - Core</name>
+    <name>Heimdall - Infrastructure - Core</name>
 
     <dependencies>
 
-        <dependency>
-            <groupId>net.microfalx.heimdall</groupId>
-            <artifactId>heimdall-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+        <!-- Runtime -->
 
         <dependency>
             <groupId>net.microfalx.heimdall</groupId>
@@ -51,23 +47,15 @@
 
         <dependency>
             <groupId>net.microfalx.bootstrap</groupId>
-            <artifactId>bootstrap-broker</artifactId>
+            <artifactId>bootstrap-jdbc</artifactId>
         </dependency>
+
 
         <dependency>
             <groupId>net.microfalx.bootstrap</groupId>
             <artifactId>bootstrap-web</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>net.microfalx.bootstrap</groupId>
-            <artifactId>bootstrap-template</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>net.datafaker</groupId>
-            <artifactId>datafaker</artifactId>
-        </dependency>
 
     </dependencies>
 

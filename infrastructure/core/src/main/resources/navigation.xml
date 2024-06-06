@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<navigations xmlns="https://net.microfalx/xsd/navigation-1.0.xsd">
+    <menu id="left">
+        <menu id="infrastructure" text="Infrastructure" parent="system" position="30" icon="fa-regular fa-map">
+            <item id="environment" text="Environments" action="/system/infrastructure/environment" icon="fa-solid fa-seedling"/>
+            <item id="cluster" text="Clusters" action="/system/infrastructure/cluster" icon="fa-solid fa-diagram-project"/>
+            <item id="server" text="Servers" action="/system/infrastructure/server" icon="fa-solid fa-server"/>
+            <item id="service" text="Service" action="/system/infrastructure/service" icon="fa-solid fa-box"/>
+        </menu>
+    </menu>
+</navigations>
