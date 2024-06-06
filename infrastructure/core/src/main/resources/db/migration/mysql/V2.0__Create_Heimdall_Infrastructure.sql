@@ -34,19 +34,22 @@ create table infrastructure_server
 
 create table infrastructure_service
 (
-    id          integer                                          not null auto_increment primary key,
-    natural_id  varchar(500)                                     not null,
-    name        varchar(100)                                     not null,
-    `type`      ENUM ('ICMP', 'HTTP','HTTPS','SSH', 'TCP','UDP') not null,
-    port        integer                                          not null,
-    path        varchar(500)                                     null,
-    auth_type   ENUM ('NONE', 'BASIC','BEARER','API_KEY')        not null,
-    username    varchar(100),
-    password    varchar(100),
-    token       varchar(5000),
-    created_at  datetime                                         not null,
-    modified_at datetime,
-    description varchar(1000)
+    id                      integer                                          not null auto_increment primary key,
+    natural_id              varchar(500)                                     not null,
+    name                    varchar(100)                                     not null,
+    `type`                  ENUM ('ICMP', 'HTTP','HTTPS','SSH', 'TCP','UDP') not null,
+    port                    integer                                          not null,
+    path                    varchar(500)                                     null,
+    connection_timeout      int                                              not null,
+    read_timeout            int                                              not null,
+    write_timeout           int                                              not null,
+    auth_type               ENUM ('NONE', 'BASIC','BEARER','API_KEY')        not null,
+    username                varchar(100),
+    password                varchar(100),
+    token                   varchar(5000),
+    created_at              datetime                                         not null,
+    modified_at             datetime,
+    description             varchar(1000)
 ) ENGINE = InnoDB;
 
 create table infrastructure_server_to_service
