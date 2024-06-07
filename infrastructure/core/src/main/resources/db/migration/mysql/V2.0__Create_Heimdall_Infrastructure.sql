@@ -1,5 +1,6 @@
 drop table if exists infrastructure_environment_to_cluster;
 drop table if exists infrastructure_environment_to_server;
+drop table if exists infrastructure_server_to_service;
 drop table if exists infrastructure_environment;
 drop table if exists infrastructure_server;
 drop table if exists infrastructure_cluster;
@@ -14,7 +15,8 @@ create table infrastructure_cluster
     time_zone   varchar(100) default 'America/New_York' not null,
     created_at  datetime                                not null,
     modified_at datetime,
-    description varchar(1000)
+    description varchar(1000),
+    constraint nk$infrastructure_cluster$natural_id unique key (natural_id)
 ) ENGINE = InnoDB;
 
 create table infrastructure_server
@@ -29,27 +31,29 @@ create table infrastructure_server
     created_at  datetime                     not null,
     modified_at datetime,
     description varchar(1000),
-    constraint fk$infrastructure_server$cluster foreign key (cluster_id) references infrastructure_cluster (id)
+    constraint fk$infrastructure_server$cluster foreign key (cluster_id) references infrastructure_cluster (id),
+    constraint nk$infrastructure_server$natural_id unique key (natural_id)
 ) ENGINE = InnoDB;
 
 create table infrastructure_service
 (
-    id                      integer                                          not null auto_increment primary key,
-    natural_id              varchar(500)                                     not null,
-    name                    varchar(100)                                     not null,
-    `type`                  ENUM ('ICMP', 'HTTP','HTTPS','SSH', 'TCP','UDP') not null,
-    port                    integer                                          not null,
-    path                    varchar(500)                                     null,
-    connection_timeout      int                                              not null,
-    read_timeout            int                                              not null,
-    write_timeout           int                                              not null,
-    auth_type               ENUM ('NONE', 'BASIC','BEARER','API_KEY')        not null,
-    username                varchar(100),
-    password                varchar(100),
-    token                   varchar(5000),
-    created_at              datetime                                         not null,
-    modified_at             datetime,
-    description             varchar(1000)
+    id                 integer                                          not null auto_increment primary key,
+    natural_id         varchar(500)                                     not null,
+    name               varchar(100)                                     not null,
+    `type`             ENUM ('ICMP', 'HTTP','HTTPS','SSH', 'TCP','UDP') not null,
+    port               integer                                          not null,
+    path               varchar(500)                                     null,
+    auth_type          ENUM ('NONE', 'BASIC','BEARER','API_KEY')        not null,
+    username           varchar(100),
+    password           varchar(100),
+    token              varchar(5000),
+    connection_timeout int default 5000                                 not null,
+    read_timeout       int default 5000                                 not null,
+    write_timeout      int default 5000                                 not null,
+    created_at         datetime                                         not null,
+    modified_at        datetime,
+    description        varchar(1000),
+    constraint nk$infrastructure_service$natural_id unique key (natural_id)
 ) ENGINE = InnoDB;
 
 create table infrastructure_server_to_service
@@ -69,7 +73,8 @@ create table infrastructure_environment
     attributes  varchar(20000),
     created_at  datetime     not null,
     modified_at datetime,
-    description varchar(1000)
+    description varchar(1000),
+    constraint nk$infrastructure_environment$natural_id unique key (natural_id)
 ) ENGINE = InnoDB;
 
 create table infrastructure_environment_to_cluster

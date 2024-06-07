@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,9 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
     @Autowired
     private AsyncTaskExecutor taskExecutor;
 
+    @Autowired
+    private ApplicationContext applicationContext;
+
     private volatile Holder holder = new Holder();
     private final InfrastructureJpaManager infrastructureJpaManager = new InfrastructureJpaManager();
     private final Collection<InfrastructureListener> listeners = new CopyOnWriteArrayList<>();
@@ -43,6 +48,7 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
     @Override
     public void registerServer(Server server) {
         requireNonNull(server);
+        infrastructureJpaManager.execute(server, null);
     }
 
     @Override
@@ -53,6 +59,7 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
     @Override
     public void registerCluster(Cluster cluster) {
         requireNonNull(cluster);
+        infrastructureJpaManager.execute(cluster);
     }
 
     @Override
@@ -63,6 +70,7 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
     @Override
     public void registerService(net.microfalx.heimdall.infrastructure.api.Service service) {
         requireNonNull(service);
+        infrastructureJpaManager.execute(service);
     }
 
     @Override
@@ -73,6 +81,7 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
     @Override
     public void registerEnvironment(Environment environment) {
         requireNonNull(environment);
+        infrastructureJpaManager.execute(environment);
     }
 
     @Override
@@ -103,6 +112,9 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
         Collection<InfrastructureListener> infrastructureListeners = ClassUtils.resolveProviderInstances(InfrastructureListener.class);
         for (InfrastructureListener infrastructureListener : infrastructureListeners) {
             LOGGER.info(" - " + ClassUtils.getName(infrastructureListener));
+            if (infrastructureListener instanceof ApplicationContextAware) {
+                ((ApplicationContextAware) infrastructureListener).setApplicationContext(applicationContext);
+            }
             this.listeners.add(infrastructureListener);
         }
     }

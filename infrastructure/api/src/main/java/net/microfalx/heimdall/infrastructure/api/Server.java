@@ -5,6 +5,7 @@ import net.microfalx.lang.IdentifiableNameAware;
 import net.microfalx.lang.IdentityAware;
 import net.microfalx.lang.StringUtils;
 
+import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -22,6 +23,7 @@ public class Server extends IdentifiableNameAware<String> {
     private Type type;
     private Set<Service> services = new HashSet<>();
     private boolean icmp;
+    private ZoneId zoneId;
 
     /**
      * Returns the hostname of the server
@@ -50,6 +52,15 @@ public class Server extends IdentifiableNameAware<String> {
      */
     public boolean isIcmp() {
         return icmp;
+    }
+
+    /**
+     * Returns the zone of the cluster.
+     *
+     * @return a non-null instance
+     */
+    public ZoneId getZoneId() {
+        return zoneId;
     }
 
     /**
@@ -99,6 +110,7 @@ public class Server extends IdentifiableNameAware<String> {
         private Type type = Type.VIRTUAL;
         private boolean icmp = true;
         private final Set<Service> services = new HashSet<>();
+        private ZoneId zoneId;
 
         public Builder(String id) {
             super(id);
@@ -114,6 +126,12 @@ public class Server extends IdentifiableNameAware<String> {
 
         public Builder icmp(boolean icmp) {
             this.icmp = icmp;
+            return this;
+        }
+
+        public Builder zoneId(ZoneId zoneId) {
+            requireNonNull(zoneId);
+            this.zoneId = zoneId;
             return this;
         }
 
@@ -136,7 +154,7 @@ public class Server extends IdentifiableNameAware<String> {
 
         @Override
         protected String updateId() {
-            return hostname;
+            return StringUtils.toIdentifier(hostname);
         }
 
         private void updateServer(Server server) {
@@ -151,6 +169,8 @@ public class Server extends IdentifiableNameAware<String> {
             Server server = (Server) super.build();
             server.hostname = hostname;
             server.type = type;
+            server.icmp = icmp;
+            server.zoneId = zoneId;
             server.services = services;
             updateServer(server);
             return server;

@@ -20,11 +20,13 @@ class InfrastructureJpaManager extends ApplicationContextSupport {
 
     Cluster execute(net.microfalx.heimdall.infrastructure.api.Cluster cluster) {
         NaturalIdEntityUpdater<Cluster, Integer> updater = getUpdater(ClusterRepository.class);
-        Cluster jpaServer = new Cluster();
-        jpaServer.setNaturalId(cluster.getId());
-        jpaServer.setName(cluster.getName());
-        jpaServer.setDescription(cluster.getDescription());
-        return updater.findByNaturalIdAndUpdate(jpaServer);
+        Cluster jpaCluster = new Cluster();
+        jpaCluster.setNaturalId(cluster.getId());
+        jpaCluster.setName(cluster.getName());
+        jpaCluster.setTimeZone(cluster.getZoneId().getId());
+        jpaCluster.setType(cluster.getType());
+        jpaCluster.setDescription(cluster.getDescription());
+        return updater.findByNaturalIdAndUpdate(jpaCluster);
     }
 
     void execute(net.microfalx.heimdall.infrastructure.api.Server server, net.microfalx.heimdall.infrastructure.api.Cluster cluster) {
@@ -34,6 +36,11 @@ class InfrastructureJpaManager extends ApplicationContextSupport {
         jpaServer.setName(server.getName());
         jpaServer.setDescription(server.getDescription());
         jpaServer.setHostname(server.getHostname());
+        jpaServer.setIcmp(server.isIcmp());
+        if (cluster != null) {
+            Cluster jpaCluster = execute(cluster);
+            jpaServer.setCluster(jpaCluster);
+        }
         updater.findByNaturalIdAndUpdate(jpaServer);
     }
 

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.jdbc.entity.NamedTimestampAware;
+import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.annotation.Description;
 import net.microfalx.lang.annotation.Name;
 import net.microfalx.lang.annotation.Position;
@@ -54,5 +55,10 @@ public class Server extends NamedTimestampAware {
     @Position(40)
     @Description("Indicates whether the server could be pinged using ICMP protocol")
     private boolean icmp;
+
+    public static String toNaturalId(Server server) {
+        if (server == null) return  null;
+        return StringUtils.toIdentifier(server.getHostname());
+    }
 
 }

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/system/infrastructure/environment")
-@DataSet(model = Environment.class)
+@DataSet(model = Environment.class, timeFilter = false)
 @Help("infrastructure/environment")
 public class EnvironmentController extends DataSetController<Environment, Integer> {
 }

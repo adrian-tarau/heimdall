@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/system/infrastructure/cluster")
-@DataSet(model = Cluster.class)
+@DataSet(model = Cluster.class, timeFilter = false)
 @Help("infrastructure/cluster")
 public class ClusterController extends DataSetController<Cluster, Integer> {
 }
