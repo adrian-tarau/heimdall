@@ -7,6 +7,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.jdbc.entity.NamedTimestampAware;
+import net.microfalx.heimdall.infrastructure.core.Environment;
+import net.microfalx.heimdall.infrastructure.core.Server;
+import net.microfalx.heimdall.infrastructure.core.Service;
 import net.microfalx.lang.annotation.Description;
 import net.microfalx.lang.annotation.Label;
 import net.microfalx.lang.annotation.Position;
@@ -29,17 +32,17 @@ public class Ping extends NamedTimestampAware {
     @Column(name = "service_id", nullable = false)
     @JoinColumn(name = "service_id")
     @Visible(value = false)
-    private Integer serviceId;
+    private Service service;
 
     @Column(name = "server_id", nullable = false)
     @JoinColumn(name = "server_id")
     @Visible(value = false)
-    private Integer serverId;
+    private Server server;
 
     @Column(name = "environment_id", nullable = false)
     @JoinColumn(name = "environment_id")
     @Visible(value = false)
-    private Integer environmentId;
+    private Environment environment;
 
     @Column(name = "hoops")
     @Position(10)

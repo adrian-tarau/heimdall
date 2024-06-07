@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.jdbc.entity.NamedTimestampAware;
+import net.microfalx.heimdall.infrastructure.core.Environment;
+import net.microfalx.heimdall.infrastructure.core.Server;
+import net.microfalx.heimdall.infrastructure.core.Service;
 import net.microfalx.lang.annotation.Description;
 import net.microfalx.lang.annotation.Position;
 import net.microfalx.lang.annotation.Visible;
@@ -30,7 +33,22 @@ public class PingResult extends NamedTimestampAware {
     @Column(name = "ping_id", nullable = false)
     @JoinColumn(name = "ping_id")
     @Visible(value = false)
-    private Integer pingId;
+    private Integer ping;
+
+    @Column(name = "service_id", nullable = false)
+    @JoinColumn(name = "service_id")
+    @Visible(value = false)
+    private Service service;
+
+    @Column(name = "server_id", nullable = false)
+    @JoinColumn(name = "server_id")
+    @Visible(value = false)
+    private Server server;
+
+    @Column(name = "environment_id", nullable = false)
+    @JoinColumn(name = "environment_id")
+    @Visible(value = false)
+    private Environment environment;
 
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
