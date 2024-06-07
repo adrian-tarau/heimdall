@@ -1,4 +1,4 @@
-package jpa;
+package net.microfalx.heimdall.infrastructure.ping;
 
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;

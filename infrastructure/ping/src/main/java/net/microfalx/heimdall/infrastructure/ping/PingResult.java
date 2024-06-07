@@ -1,33 +1,40 @@
-package jpa;
-
+package net.microfalx.heimdall.infrastructure.ping;
 
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.jdbc.entity.NamedTimestampAware;
 import net.microfalx.heimdall.infrastructure.core.Environment;
 import net.microfalx.heimdall.infrastructure.core.Server;
 import net.microfalx.heimdall.infrastructure.core.Service;
 import net.microfalx.lang.annotation.Description;
-import net.microfalx.lang.annotation.Label;
 import net.microfalx.lang.annotation.Position;
 import net.microfalx.lang.annotation.Visible;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 @Entity
-@Table(name = "infrastructure_ping")
+@Table(name = "infrastructure_ping_result")
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString(callSuper = true)
-public class Ping extends NamedTimestampAware {
+public class PingResult extends NamedTimestampAware {
 
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private Integer id;
+
+    @Column(name = "ping_id", nullable = false)
+    @JoinColumn(name = "ping_id")
+    @Visible(value = false)
+    private Ping ping;
 
     @Column(name = "service_id", nullable = false)
     @JoinColumn(name = "service_id")
@@ -44,31 +51,39 @@ public class Ping extends NamedTimestampAware {
     @Visible(value = false)
     private Environment environment;
 
-    @Column(name = "hoops")
+    @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Description("The status of the ping")
     @Position(10)
-    @Description("The number of routers/host the ping must pass though to reach the destination host")
-    private Integer hoops;
+    private Status status;
 
-    @Column(name = "connection_timeout")
-    @Position(15)
-    @Label("Connection Timeout")
-    @Description("The amount of time to wait if the ping did not reach the destination host")
-    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT, Visible.Mode.ADD})
-    private Integer connectionTimeOut;
+    @Column(name = "error_code")
+    @Description("The status of the ping for an application service")
+    @Position(20)
+    private Integer errorCode;
 
-    @Column(name = "read_timeout")
-    @Position(16)
-    @Label("Read Timeout")
-    @Description("The amount of time to wait if the ping is not read by the destination host")
-    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT, Visible.Mode.ADD})
-    private Integer readTimeOut;
+    @Column(name = "error_message")
+    @Description("The error message for the ping")
+    @Position(21)
+    private String errorMessage;
 
-    @Column(name = "write_timeout")
-    @Position(17)
-    @Label("Write Timeout")
-    @Description("The amount of time to wait if the ping is not created by the host")
-    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT, Visible.Mode.ADD})
-    private Integer writeTimeOut;
+    @Column(name = "started_at", nullable = false)
+    @Position(30)
+    private LocalDateTime startedAt;
 
+    @Column(name = "ended_at", nullable = false)
+    @Position(31)
+    private LocalDateTime endedAt;
+
+    @Column(name = "duration", nullable = false)
+    @Formattable()
+    @Position(32)
+    private Duration duration;
+
+    public enum Status {
+        SUCCESS,
+        FAILURE,
+        TIMEOUT
+    }
 
 }
