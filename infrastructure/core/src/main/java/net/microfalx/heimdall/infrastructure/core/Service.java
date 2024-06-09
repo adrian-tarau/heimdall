@@ -20,6 +20,8 @@ import org.hibernate.annotations.NaturalId;
 @ToString(callSuper = true)
 public class Service extends NamedTimestampAware {
 
+    private static final int DEFAULT_TIMEOUT = 5000;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -78,21 +80,21 @@ public class Service extends NamedTimestampAware {
     @Label("Connection Timeout")
     @Description("The amount of time to wait to establish a connect to the service")
     @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT, Visible.Mode.ADD})
-    private Integer connectionTimeOut;
+    private int connectionTimeOut = DEFAULT_TIMEOUT;
 
     @Column(name = "read_timeout")
     @Position(71)
     @Label("Read Timeout")
     @Description("The amount of time to wait to read a response from the service")
     @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT, Visible.Mode.ADD})
-    private Integer readTimeOut;
+    private int readTimeOut = DEFAULT_TIMEOUT;
 
     @Column(name = "write_timeout")
     @Position(72)
     @Label("Write Timeout")
     @Description("The amount of time to wait to write a request to the service")
     @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT, Visible.Mode.ADD})
-    private Integer writeTimeOut;
+    private int writeTimeOut = DEFAULT_TIMEOUT;
 
     public static String toNaturalId(Service service) {
         if (service == null) return null;

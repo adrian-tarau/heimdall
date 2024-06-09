@@ -34,11 +34,13 @@ public class Service extends IdentifiableNameAware<String> {
     public static Service create(Service.Type type) {
         Builder builder = new Builder().type(type);
         switch (type) {
-            case HTTP -> builder.name("Home").description("The home page of the web server over HTTP");
-            case HTTPS -> builder.name("Home").description("The home page of the web server over HTTPs");
-            case SSH -> builder.name("Shell").description("The secure shell for the server");
-            case ICMP ->
-                    builder.name("Ping").description("The ICMP protocol used to check if the server is available in the network (and latency)");
+            case HTTPS -> builder.name("Web Server")
+                    .description("The home page of the web server over HTTPs");
+            case SSH -> builder.name("Shell")
+                    .description("The secure shell for the server");
+            case ICMP -> builder.name("Ping")
+                    .description("The ICMP protocol used to check if the server is available in the network (and latency)");
+            default -> throw new InfrastructureException("Unsupported type: " + type);
         }
         return builder.build();
     }

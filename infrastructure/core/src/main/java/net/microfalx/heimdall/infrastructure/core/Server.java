@@ -35,7 +35,7 @@ public class Server extends NamedTimestampAware {
     private String naturalId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cluster_id", nullable = false)
+    @JoinColumn(name = "cluster_id")
     @Position(20)
     @Description("The cluster which owns the server")
     private Cluster cluster;

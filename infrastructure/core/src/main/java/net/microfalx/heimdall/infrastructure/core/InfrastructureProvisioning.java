@@ -26,7 +26,6 @@ class InfrastructureProvisioning {
     }
 
     private void provisionServices() {
-        jpaManager.execute(Service.create(Service.Type.HTTP));
         jpaManager.execute(Service.create(Service.Type.HTTPS));
         jpaManager.execute(Service.create(Service.Type.SSH));
         jpaManager.execute(Service.create(Service.Type.ICMP));
