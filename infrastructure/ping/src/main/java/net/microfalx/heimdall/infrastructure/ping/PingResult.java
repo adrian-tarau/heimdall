@@ -7,15 +7,14 @@ import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.jdbc.entity.NamedTimestampAware;
-import net.microfalx.heimdall.infrastructure.core.Environment;
 import net.microfalx.heimdall.infrastructure.core.Server;
 import net.microfalx.heimdall.infrastructure.core.Service;
 import net.microfalx.lang.annotation.Description;
+import net.microfalx.lang.annotation.Name;
 import net.microfalx.lang.annotation.Position;
-import net.microfalx.lang.annotation.Visible;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Entity
 @Table(name = "infrastructure_ping_result")
@@ -23,7 +22,7 @@ import java.time.LocalDateTime;
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString(callSuper = true)
-public class PingResult extends NamedTimestampAware {
+public class PingResult extends NamedTimestampAware implements net.microfalx.heimdall.infrastructure.api.Ping {
 
     @Id
     @Column(name = "id", nullable = false)
@@ -33,23 +32,16 @@ public class PingResult extends NamedTimestampAware {
 
     @Column(name = "ping_id", nullable = false)
     @JoinColumn(name = "ping_id")
-    @Visible(value = false)
+    @Name
     private Ping ping;
 
     @Column(name = "service_id", nullable = false)
     @JoinColumn(name = "service_id")
-    @Visible(value = false)
     private Service service;
 
     @Column(name = "server_id", nullable = false)
     @JoinColumn(name = "server_id")
-    @Visible(value = false)
     private Server server;
-
-    @Column(name = "environment_id", nullable = false)
-    @JoinColumn(name = "environment_id")
-    @Visible(value = false)
-    private Environment environment;
 
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -69,21 +61,15 @@ public class PingResult extends NamedTimestampAware {
 
     @Column(name = "started_at", nullable = false)
     @Position(30)
-    private LocalDateTime startedAt;
+    private ZonedDateTime startedAt;
 
     @Column(name = "ended_at", nullable = false)
     @Position(31)
-    private LocalDateTime endedAt;
+    private ZonedDateTime endedAt;
 
     @Column(name = "duration", nullable = false)
     @Formattable()
     @Position(32)
     private Duration duration;
-
-    public enum Status {
-        SUCCESS,
-        FAILURE,
-        TIMEOUT
-    }
 
 }

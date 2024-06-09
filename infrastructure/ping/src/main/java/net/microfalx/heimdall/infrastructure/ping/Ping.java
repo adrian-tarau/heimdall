@@ -8,7 +8,6 @@ import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.jdbc.entity.NamedTimestampAware;
-import net.microfalx.heimdall.infrastructure.core.Environment;
 import net.microfalx.heimdall.infrastructure.core.Server;
 import net.microfalx.heimdall.infrastructure.core.Service;
 import net.microfalx.lang.annotation.Description;
@@ -28,31 +27,38 @@ public class Ping extends NamedTimestampAware {
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
+    @Visible(value = false)
     private Integer id;
 
-    @Column(name = "service_id", nullable = false)
-    @JoinColumn(name = "service_id")
-    @Visible(value = false)
+    @JoinColumn(name = "service_id", nullable = false)
+    @ManyToOne
+    @Position(10)
     private Service service;
 
-    @Column(name = "server_id", nullable = false)
-    @JoinColumn(name = "server_id")
-    @Visible(value = false)
+    @JoinColumn(name = "server_id", nullable = false)
+    @ManyToOne
+    @Position(11)
     private Server server;
 
-    @Column(name = "environment_id", nullable = false)
-    @JoinColumn(name = "environment_id")
-    @Visible(value = false)
-    private Environment environment;
+    @Column(name = "active")
+    @Position(15)
+    @Description("Indicates whether the ping is active")
+    private boolean active;
+
+    @Column(name = "interval")
+    @Position(16)
+    @Description("The interval between pings")
+    private int interval;
 
     @Column(name = "hoops")
-    @Position(10)
+    @Position(20)
     @Description("The number of routers/host the ping must pass though to reach the destination host")
+    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT, Visible.Mode.ADD})
     private Integer hoops;
 
     @Column(name = "connection_timeout")
     @Formattable()
-    @Position(15)
+    @Position(30)
     @Label("Connection Timeout")
     @Description("The amount of time to wait if the ping did not reach the destination host")
     @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT, Visible.Mode.ADD})
@@ -60,7 +66,7 @@ public class Ping extends NamedTimestampAware {
 
     @Column(name = "read_timeout")
     @Formattable()
-    @Position(16)
+    @Position(31)
     @Label("Read Timeout")
     @Description("The amount of time to wait if the ping is not read by the destination host")
     @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT, Visible.Mode.ADD})
@@ -68,7 +74,7 @@ public class Ping extends NamedTimestampAware {
 
     @Column(name = "write_timeout")
     @Formattable()
-    @Position(17)
+    @Position(32)
     @Label("Write Timeout")
     @Description("The amount of time to wait if the ping is not created by the host")
     @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT, Visible.Mode.ADD})
