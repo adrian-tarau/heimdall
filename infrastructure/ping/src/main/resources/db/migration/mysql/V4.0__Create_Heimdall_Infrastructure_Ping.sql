@@ -31,7 +31,7 @@ create table infrastructure_ping_result
     started_at             datetime                             not null,
     ended_at               datetime                             not null,
     duration               int                                  not null,
-    status                 ENUM('SUCCESS','FAILURE','TIMEOUT')  not null,
+    status                 ENUM('SUCCESS','FAILURE','TIMEOUT','CANCEL')  not null,
     error_code             int,
     error_message          varchar(1000),
     constraint fk$infrastructure_ping_result$ping foreign key (ping_id) references infrastructure_ping (id),

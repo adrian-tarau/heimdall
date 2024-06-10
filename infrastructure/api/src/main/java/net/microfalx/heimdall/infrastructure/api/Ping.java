@@ -51,6 +51,13 @@ public interface Ping {
     Status getStatus();
 
     /**
+     * Returns the error code.
+     *
+     * @return {@code the code} if there is an error code,  null otherwise
+     */
+    Integer getErrorCode();
+
+    /**
      * Returns an error message.
      * <p>
      * The error message is present only when the ping fails.
@@ -77,7 +84,12 @@ public interface Ping {
         /**
          * The ping failed with a timeout.
          */
-        TIMEOUT
+        TIMEOUT,
+
+        /**
+         * The ping is canceled
+         */
+        CANCEL
     }
 
 }

@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
-import net.microfalx.bootstrap.jdbc.entity.NamedTimestampAware;
 import net.microfalx.heimdall.infrastructure.core.Server;
 import net.microfalx.heimdall.infrastructure.core.Service;
 import net.microfalx.lang.annotation.Description;
@@ -22,7 +21,7 @@ import java.time.ZonedDateTime;
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString(callSuper = true)
-public class PingResult extends NamedTimestampAware implements net.microfalx.heimdall.infrastructure.api.Ping {
+public class PingResult implements net.microfalx.heimdall.infrastructure.api.Ping {
 
     @Id
     @Column(name = "id", nullable = false)

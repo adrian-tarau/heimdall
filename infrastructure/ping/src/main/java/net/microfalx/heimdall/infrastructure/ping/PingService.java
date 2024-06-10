@@ -57,7 +57,8 @@ public class PingService implements InitializingBean {
      * @return the result of the ping
      */
     public Ping ping(net.microfalx.heimdall.infrastructure.api.Service service, Server server) {
-        PingExecutor executor = new PingExecutor(service, server, persistence);
+        net.microfalx.heimdall.infrastructure.ping.Ping ping = cache.find(service, server);
+        PingExecutor executor = new PingExecutor(ping, service, server, persistence);
         return executor.execute();
     }
 
