@@ -47,20 +47,39 @@ public class Environment extends IdentifiableNameAware<String> {
     }
 
     /**
-     * Replaces the variables present in this environment.
+     * Replaces the variables in the given text.
      * <p>
-     * Variables can be accessed by using the placeholder <code>${name}</code>. Parameters are case-insensitive
+     * Variables can be accessed by using the placeholder <code>${name}</code>. Parameters are case-insensitive.
      *
      * @param text the text with variables
      * @return the text with all variables replaced
      */
     public String replaceVariables(String text) {
-        if (text == null || !text.contains("${")) return text;
-        for (String parameterName : attributes.getNames()) {
-            String value = attributes.get(parameterName).asString();
-            text = StringUtils.replaceAll(text, "${" + parameterName.toLowerCase() + "}", value);
+        return attributes.replaceVariables(text);
+    }
+
+    /**
+     * Returns whether the environment uses a given server.
+     *
+     * @param server the server
+     * @return {@code true} if the server is used, {@code false} otherwise
+     */
+    public boolean hasServer(Server server) {
+        requireNonNull(server);
+        for (Cluster cluster : clusters) {
+            if (cluster.hasServer(server)) return true;
         }
-        return text;
+        for (Server registeredServer : servers) {
+            if (registeredServer.equals(server)) return true;
+        }
+        return false;
+    }
+
+    private static void updateDefaultAttributes(Attributes<?> attributes) {
+        attributes.add(InfrastructureConstants.USERNAME_VARIABLE, StringUtils.EMPTY_STRING);
+        attributes.add(InfrastructureConstants.PASSWORD_VARIABLE, StringUtils.EMPTY_STRING);
+        attributes.add(InfrastructureConstants.BEARER_VARIABLE, StringUtils.EMPTY_STRING);
+        attributes.add(InfrastructureConstants.API_KEY_VARIABLE, StringUtils.EMPTY_STRING);
     }
 
     /**
@@ -71,6 +90,15 @@ public class Environment extends IdentifiableNameAware<String> {
         private final Attributes<?> attributes = Attributes.create();
         private final Set<Cluster> clusters = new HashSet<>();
         private final Set<Server> servers = new HashSet<>();
+
+        public Builder(String id) {
+            super(id);
+            updateDefaultAttributes(attributes);
+        }
+
+        public Builder() {
+            updateDefaultAttributes(attributes);
+        }
 
         @Override
         protected IdentityAware<String> create() {
@@ -93,7 +121,6 @@ public class Environment extends IdentifiableNameAware<String> {
             this.servers.add(server);
             return this;
         }
-
 
         @Override
         public Environment build() {

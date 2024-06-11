@@ -7,6 +7,7 @@ import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.UriUtils;
 
 import java.net.URI;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -24,6 +25,10 @@ public class Service extends IdentifiableNameAware<String> {
     private String userName;
     private String password;
     private String token;
+
+    private Duration connectionTimeout;
+    private Duration readTimeout;
+    private Duration writeTimeout;
 
     /**
      * Creates common service types.
@@ -111,6 +116,33 @@ public class Service extends IdentifiableNameAware<String> {
     }
 
     /**
+     * Returns the timeout used to establish connections with the service.
+     *
+     * @return a non-null instance
+     */
+    public Duration getConnectionTimeout() {
+        return connectionTimeout;
+    }
+
+    /**
+     * Returns the timeout used to read data from the service.
+     *
+     * @return a non-null instance
+     */
+    public Duration getReadTimeout() {
+        return readTimeout;
+    }
+
+    /**
+     * Returns the timeout used to write data to the service.
+     *
+     * @return a non-null instance
+     */
+    public Duration getWriteTimeout() {
+        return writeTimeout;
+    }
+
+    /**
      * Returns the URI to access the service deployed on a given server within an environment.
      *
      * @param environment the environment
@@ -124,6 +156,21 @@ public class Service extends IdentifiableNameAware<String> {
         builder.append(type.getProtocol()).append("://").append(server.getHostname());
         if (path != null) builder.append(path);
         return UriUtils.parseUri(builder.toString());
+    }
+
+    /**
+     * Creates a new instance of the service with variables replaces from a given environment.
+     *
+     * @param environment the environment
+     * @return a new instance
+     */
+    public Service as(Environment environment) {
+        Service copy = (Service) copy();
+        copy.path = environment.replaceVariables(path);
+        copy.userName = environment.replaceVariables(userName);
+        copy.password = environment.replaceVariables(password);
+        copy.token = environment.replaceVariables(token);
+        return copy;
     }
 
     @Override
@@ -249,6 +296,10 @@ public class Service extends IdentifiableNameAware<String> {
         private String password;
         private String token;
 
+        private Duration connectionTimeout = Duration.ofSeconds(5);
+        private Duration readTimeout = connectionTimeout;
+        private Duration writeTimeout = connectionTimeout;
+
         public Builder(String id) {
             super(id);
         }
@@ -308,6 +359,24 @@ public class Service extends IdentifiableNameAware<String> {
             return this;
         }
 
+        public Builder connectionTimeout(Duration connectionTimeout) {
+            requireNonNull(connectionTimeout);
+            this.connectionTimeout = connectionTimeout;
+            return this;
+        }
+
+        public Builder readTimeout(Duration readTimeout) {
+            requireNonNull(readTimeout);
+            this.readTimeout = readTimeout;
+            return this;
+        }
+
+        public Builder writeTimeout(Duration writeTimeout) {
+            requireNonNull(writeTimeout);
+            this.writeTimeout = writeTimeout;
+            return this;
+        }
+
         @Override
         protected IdentityAware<String> create() {
             return new Service();
@@ -336,6 +405,9 @@ public class Service extends IdentifiableNameAware<String> {
             service.userName = userName;
             service.password = password;
             service.token = token;
+            service.connectionTimeout = connectionTimeout;
+            service.readTimeout = readTimeout;
+            service.writeTimeout = writeTimeout;
             return service;
         }
     }

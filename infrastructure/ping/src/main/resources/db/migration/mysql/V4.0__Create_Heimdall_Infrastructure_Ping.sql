@@ -1,22 +1,21 @@
-drop table if exists infrastructure_ping;
 drop table if exists infrastructure_ping_result;
-
+drop table if exists infrastructure_ping;
 
 create table infrastructure_ping
 (
-    id                     int                            not null auto_increment primary key,
-    service_id             int                            not null,
-    server_id              int                            not null,
-    name                   varchar(100)                   not null,
-    active                 bool                           default true not null,
-    interval               int not null,
-    hoops                  int,
-    connection_timeout     int,
-    read_timeout           int,
-    write_timeout          int,
-    created_at             datetime                       not null,
-    modified_at            datetime,
-    description            varchar(1000),
+    id                 int               not null auto_increment primary key,
+    service_id         int               not null,
+    server_id          int               not null,
+    name               varchar(100)      not null,
+    active             bool default true not null,
+    `interval`         int               not null,
+    hoops              int,
+    connection_timeout int,
+    read_timeout       int,
+    write_timeout      int,
+    created_at         datetime          not null,
+    modified_at        datetime,
+    description        varchar(1000),
     constraint fk$infrastructure_ping$service foreign key (service_id) references infrastructure_service (id),
     constraint fk$infrastructure_ping$server foreign key (server_id) references infrastructure_server (id)
 

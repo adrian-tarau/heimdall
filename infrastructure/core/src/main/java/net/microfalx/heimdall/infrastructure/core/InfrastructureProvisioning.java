@@ -10,9 +10,9 @@ class InfrastructureProvisioning {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InfrastructureProvisioning.class);
 
-    private final InfrastructureJpaManager jpaManager;
+    private final InfrastructurePersistence jpaManager;
 
-    public InfrastructureProvisioning(InfrastructureJpaManager jpaManager) {
+    public InfrastructureProvisioning(InfrastructurePersistence jpaManager) {
         requireNonNull(jpaManager);
         this.jpaManager = jpaManager;
     }

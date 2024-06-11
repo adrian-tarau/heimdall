@@ -18,8 +18,6 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static java.util.Collections.unmodifiableCollection;
@@ -36,57 +34,83 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
     @Autowired
     private ApplicationContext applicationContext;
 
-    private volatile Holder holder = new Holder();
-    private final InfrastructureJpaManager infrastructureJpaManager = new InfrastructureJpaManager();
+    private volatile InfrastructureCache cache = new InfrastructureCache();
+    private final InfrastructurePersistence infrastructurePersistence = new InfrastructurePersistence();
     private final Collection<InfrastructureListener> listeners = new CopyOnWriteArrayList<>();
 
     @Override
     public Collection<Server> getServers() {
-        return unmodifiableCollection(holder.servers.values());
+        return unmodifiableCollection(cache.getServers().values());
+    }
+
+    @Override
+    public Server getServer(String id) {
+        return cache.getServer(id);
     }
 
     @Override
     public void registerServer(Server server) {
         requireNonNull(server);
-        infrastructureJpaManager.execute(server, null);
+        infrastructurePersistence.execute(server, null);
     }
 
     @Override
-    public Collection<Server> getClusters() {
-        return unmodifiableCollection(holder.servers.values());
+    public Collection<Cluster> getClusters() {
+        return unmodifiableCollection(cache.getClusters().values());
+    }
+
+    @Override
+    public Cluster getCluster(String id) {
+        return cache.getCluster(id);
     }
 
     @Override
     public void registerCluster(Cluster cluster) {
         requireNonNull(cluster);
-        infrastructureJpaManager.execute(cluster);
+        infrastructurePersistence.execute(cluster);
     }
 
     @Override
     public Collection<net.microfalx.heimdall.infrastructure.api.Service> getServices() {
-        return unmodifiableCollection(holder.services.values());
+        return unmodifiableCollection(cache.getServices().values());
+    }
+
+    @Override
+    public net.microfalx.heimdall.infrastructure.api.Service getService(String id) {
+        return cache.getService(id);
     }
 
     @Override
     public void registerService(net.microfalx.heimdall.infrastructure.api.Service service) {
         requireNonNull(service);
-        infrastructureJpaManager.execute(service);
+        infrastructurePersistence.execute(service);
     }
 
     @Override
     public Collection<Environment> getEnvironments() {
-        return unmodifiableCollection(holder.environments.values());
+        return unmodifiableCollection(cache.getEnvironments().values());
+    }
+
+    @Override
+    public Environment getEnvironment(String id) {
+        return cache.getEnvironment(id);
     }
 
     @Override
     public void registerEnvironment(Environment environment) {
         requireNonNull(environment);
-        infrastructureJpaManager.execute(environment);
+        infrastructurePersistence.execute(environment);
+    }
+
+    @Override
+    public Collection<Environment> find(Server server) {
+        return cache.find(server);
     }
 
     @Override
     public void reload() {
-
+        InfrastructureLoader infrastructureLoader = new InfrastructureLoader();
+        this.cache = infrastructureLoader.load();
     }
 
     @Override
@@ -96,14 +120,14 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        infrastructureJpaManager.setApplicationContext(getApplicationContext());
+        infrastructurePersistence.setApplicationContext(getApplicationContext());
         provisionInfrastructure();
         initializeListeners();
     }
 
     private void provisionInfrastructure() {
         taskExecutor.submit(() -> {
-            new InfrastructureProvisioning(infrastructureJpaManager).execute();
+            new InfrastructureProvisioning(infrastructurePersistence).execute();
         });
     }
 
@@ -125,11 +149,4 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
         }
     }
 
-    private static class Holder {
-
-        private final Map<String, Server> servers = new HashMap<>();
-        private final Map<String, Cluster> clusters = new HashMap<>();
-        private final Map<String, net.microfalx.heimdall.infrastructure.api.Service> services = new HashMap<>();
-        private final Map<String, Environment> environments = new HashMap<>();
-    }
 }

@@ -41,6 +41,20 @@ public class Cluster extends IdentifiableNameAware<String> {
     }
 
     /**
+     * Returns whether the environment uses a given server.
+     *
+     * @param server the server
+     * @return {@code true} if the server is used, {@code false} otherwise
+     */
+    public boolean hasServer(Server server) {
+        requireNonNull(server);
+        for (Server registered : servers) {
+            if (registered.equals(server)) return true;
+        }
+        return false;
+    }
+
+    /**
      * Returns the zone of the cluster.
      *
      * @return a non-null instance

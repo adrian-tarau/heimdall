@@ -21,7 +21,7 @@ import java.time.ZonedDateTime;
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString(callSuper = true)
-public class PingResult implements net.microfalx.heimdall.infrastructure.api.Ping {
+public class PingResult {
 
     @Id
     @Column(name = "id", nullable = false)
@@ -46,7 +46,7 @@ public class PingResult implements net.microfalx.heimdall.infrastructure.api.Pin
     @Enumerated(EnumType.STRING)
     @Description("The status of the ping")
     @Position(10)
-    private Status status;
+    private net.microfalx.heimdall.infrastructure.api.Ping.Status status;
 
     @Column(name = "error_code")
     @Description("The status of the ping for an application service")

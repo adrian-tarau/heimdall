@@ -6,7 +6,7 @@ import net.microfalx.bootstrap.jdbc.jpa.NaturalJpaRepository;
 import net.microfalx.bootstrap.model.MetadataService;
 import net.microfalx.lang.ExceptionUtils;
 
-class InfrastructureJpaManager extends ApplicationContextSupport {
+class InfrastructurePersistence extends ApplicationContextSupport {
 
     void execute(net.microfalx.heimdall.infrastructure.api.Environment environment) {
         NaturalIdEntityUpdater<Environment, Integer> updater = getUpdater(EnvironmentRepository.class);
@@ -57,6 +57,9 @@ class InfrastructureJpaManager extends ApplicationContextSupport {
         jpaService.setUsername(service.getUserName());
         jpaService.setPassword(service.getPassword());
         jpaService.setToken(service.getToken());
+        jpaService.setConnectionTimeOut((int) service.getConnectionTimeout().toMillis());
+        jpaService.setReadTimeOut((int) service.getReadTimeout().toMillis());
+        jpaService.setWriteTimeOut((int) service.getWriteTimeout().toMillis());
         updater.findByNaturalIdAndUpdate(jpaService);
     }
 
