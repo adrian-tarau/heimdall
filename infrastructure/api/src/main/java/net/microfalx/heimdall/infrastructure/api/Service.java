@@ -144,17 +144,20 @@ public class Service extends IdentifiableNameAware<String> {
 
     /**
      * Returns the URI to access the service deployed on a given server within an environment.
+     * <p>
+     * If an environment is available, the environment variables will be applied against the service.
      *
-     * @param environment the environment
      * @param server      the server
+     * @param environment the environment, optional
      * @return a non-null instance
      */
-    public URI getUri(Environment environment, Server server) {
-        requireNonNull(environment);
+    public URI getUri(Server server, Environment environment) {
         requireNonNull(server);
+        Service newService = this;
+        if (environment != null) newService = as(environment);
         StringBuilder builder = new StringBuilder();
-        builder.append(type.getProtocol()).append("://").append(server.getHostname());
-        if (path != null) builder.append(path);
+        builder.append(newService.getType().getProtocol()).append("://").append(server.getHostname());
+        if (newService.getPath() != null) builder.append(StringUtils.addStartSlash(newService.getPath()));
         return UriUtils.parseUri(builder.toString());
     }
 
