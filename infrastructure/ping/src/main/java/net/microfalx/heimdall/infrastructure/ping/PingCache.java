@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.Collections.unmodifiableList;
 
@@ -19,6 +21,7 @@ class PingCache implements InfrastructureListener {
     private PingRepository repository;
 
     private volatile List<Ping> pings = Collections.emptyList();
+    private final Map<String, Ping> cachePingsByServiceAndServer = new ConcurrentHashMap<>();
 
     /**
      * Returns the active pings.
@@ -37,14 +40,17 @@ class PingCache implements InfrastructureListener {
      * @return the ping
      */
     Ping find(Service service, Server server) {
-        Ping jpaPing=null;
-        for (Ping ping:pings){
+        String cacheKey = service.getId() + "_" + server.getId();
+        Ping jpaPing = cachePingsByServiceAndServer.get(cacheKey);
+        if (jpaPing != null) return jpaPing;
+        for (Ping ping : pings) {
             if (ping.getServer().getNaturalId().equals(server.getId()) &&
-                    ping.getService().getNaturalId().equals(service.getId())){
-                jpaPing=ping;
+                    ping.getService().getNaturalId().equals(service.getId())) {
+                jpaPing = ping;
                 break;
             }
         }
+        if (jpaPing != null) cachePingsByServiceAndServer.put(cacheKey, jpaPing);
         return jpaPing;
     }
 
@@ -52,7 +58,8 @@ class PingCache implements InfrastructureListener {
      * Invoked when there is a need to reload the cache from database.
      */
     void reload() {
-        pings = repository.findAll();
+        pings = repository.findByActive(true);
+        cachePingsByServiceAndServer.clear();
     }
 
     @Override

@@ -52,6 +52,10 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
         this.infrastructureService = infrastructureService;
     }
 
+     Ping getPing() {
+        return ping;
+    }
+
     net.microfalx.heimdall.infrastructure.api.Ping execute() {
         start = ZonedDateTime.now();
         try {
