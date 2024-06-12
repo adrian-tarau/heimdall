@@ -11,6 +11,7 @@ import java.net.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.net.http.HttpTimeoutException;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Base64;
@@ -56,7 +57,6 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
         try {
             doPing();
         } catch (Exception e) {
-            e.printStackTrace(System.err);
             status = Status.FAILURE;
             errorMessage = getRootCauseMessage(e);
         } finally {
@@ -136,8 +136,12 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
                     .followRedirects(HttpClient.Redirect.ALWAYS).build();
             HttpResponse<String> response = client.send(builder.build(), HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() != 200) errorCode = response.statusCode();
+        } catch (HttpTimeoutException e) {
+            status = Status.TIMEOUT;
+            errorMessage = abbreviate(e.getMessage(), MAX_MESSAGE_WIDTH);
         } catch (Exception e) {
             status = Status.FAILURE;
+            errorCode=500;
             errorMessage = abbreviate(e.getMessage(), MAX_MESSAGE_WIDTH);
         }
     }
@@ -157,7 +161,7 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
 
     private URI createHttpUri() {
         Environment environment = infrastructureService.find(server).stream().findFirst().orElse(null);
-        return service.getUri(environment, server);
+        return service.getUri(server, environment);
     }
 
     private void doPingTcp() {

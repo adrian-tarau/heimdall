@@ -156,7 +156,8 @@ public class Service extends IdentifiableNameAware<String> {
         Service newService = this;
         if (environment != null) newService = as(environment);
         StringBuilder builder = new StringBuilder();
-        builder.append(newService.getType().getProtocol()).append("://").append(server.getHostname());
+        builder.append(newService.getType().getProtocol()).append("://").append(server.getHostname())
+                .append(':').append(newService.getPort());
         if (newService.getPath() != null) builder.append(StringUtils.addStartSlash(newService.getPath()));
         return UriUtils.parseUri(builder.toString());
     }
