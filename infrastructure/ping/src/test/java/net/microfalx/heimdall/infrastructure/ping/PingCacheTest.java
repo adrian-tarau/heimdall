@@ -94,8 +94,8 @@ class PingCacheTest {
 
     private void createPings() {
         pingList = new ArrayList<>();
-        pingList.add(createPing("host1", true, 60));
-        pingList.add(createPing("host2", false, 90));
-        pingList.add(createPing("host3", true, 234));
+        pingList.add(createPing("host1", true, 80));
+        pingList.add(createPing("host2", false, 80));
+        pingList.add(createPing("host3", true, 80));
     }
 }
