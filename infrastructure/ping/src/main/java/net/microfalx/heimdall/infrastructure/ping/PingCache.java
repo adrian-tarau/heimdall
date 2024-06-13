@@ -1,6 +1,7 @@
 package net.microfalx.heimdall.infrastructure.ping;
 
 import net.microfalx.heimdall.infrastructure.api.*;
+import net.microfalx.lang.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -44,8 +45,8 @@ class PingCache implements InfrastructureListener {
         Ping jpaPing = cachePingsByServiceAndServer.get(cacheKey);
         if (jpaPing != null) return jpaPing;
         for (Ping ping : pings) {
-            if (ping.getServer().getNaturalId().equals(server.getId()) &&
-                    ping.getService().getNaturalId().equals(service.getId())) {
+            if (ObjectUtils.equals(ping.getServer().getNaturalId(), server.getId()) &&
+                    ObjectUtils.equals(ping.getService().getNaturalId(), service.getId())) {
                 jpaPing = ping;
                 break;
             }
