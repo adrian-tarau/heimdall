@@ -3,7 +3,6 @@ package net.microfalx.heimdall.infrastructure.ping;
 import net.microfalx.heimdall.infrastructure.api.InfrastructureService;
 import net.microfalx.heimdall.infrastructure.api.Server;
 import net.microfalx.heimdall.infrastructure.api.Service;
-import net.microfalx.lang.TimeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +15,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.FormatterUtils.formatDuration;
+import static net.microfalx.lang.TimeUtils.millisSince;
 
 /**
  * A class which handles scheduling pings.
@@ -54,13 +55,14 @@ class PingScheduler implements Runnable {
     public void run() {
         LOGGER.info("Schedule pings");
         for (Ping ping : cache.getPings()) {
-            LOGGER.info(" - " + ping.getName() + ", interval " + TimeUtils.fromMillis(ping.getInterval()));
+            LOGGER.info(" - " + ping.getName() + ", interval " + formatDuration(ping.getInterval()));
             schedule(ping);
         }
     }
 
     /**
      * Schedule a ping to be executed
+     *
      * @param ping the ping to be schedule for running
      */
     private void schedule(Ping ping) {
@@ -69,14 +71,15 @@ class PingScheduler implements Runnable {
             Server server = infrastructureService.getServer(ping.getServer().getNaturalId());
             PingExecutor pingExecutor = new PingExecutor(ping, service, server, pingPersistence, infrastructureService);
             lastScheduledTime.put(ping.getId(), LocalDateTime.now());
-            taskExecutor.submit(new PingRunnable(pingExecutor));
+            taskExecutor.execute(new PingRunnable(pingExecutor));
         }
     }
 
     /**
      * See if the ping is currently running
+     *
      * @param ping the ping to check to see if it is still running
-     * @return true if the ping is currently running, otherwise false
+     * @return @{code true} if the ping is currently running, otherwise @{code false}
      */
     private AtomicBoolean getRunning(Ping ping) {
         return pingRunning.computeIfAbsent(ping.getId(), v -> new AtomicBoolean());
@@ -84,6 +87,7 @@ class PingScheduler implements Runnable {
 
     /**
      * Check if the ping should be schedule.
+     *
      * @param ping the ping to check if it is supposed to be schedule for running
      * @return false if the ping is not supposed to be schedule, otherwise true
      */
@@ -94,7 +98,7 @@ class PingScheduler implements Runnable {
         // check if it is time to schedule again
         LocalDateTime lastScheduleTime = lastScheduledTime.get(ping.getId());
         if (lastScheduleTime == null) return true;
-        return TimeUtils.millisSince(lastScheduleTime) >= ping.getInterval();
+        return millisSince(lastScheduleTime) >= ping.getInterval();
     }
 
     /**

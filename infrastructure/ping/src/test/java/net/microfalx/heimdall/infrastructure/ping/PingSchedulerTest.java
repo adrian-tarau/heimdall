@@ -9,12 +9,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.core.task.AsyncTaskExecutor;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static net.microfalx.lang.ThreadUtils.sleepSeconds;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -58,13 +61,33 @@ class PingSchedulerTest {
     void allPingsScheduled() {
         pingScheduler.run();
         verify(cache).getPings();
-        verify(taskExecutor, times(3)).submit(any(Runnable.class));
+        verify(taskExecutor, times(3)).execute(any(Runnable.class));
     }
 
     @Test
-    void runPingSchedule() {
+    void nothingScheduledAfterFirstRun() {
         pingScheduler.run();
+        pingScheduler.run();
+        verify(taskExecutor, times(3)).execute(any(Runnable.class));
+    }
 
+    @Test
+    void oneScheduledAfterInitialSchedule() {
+        pingScheduler.run();
+        sleepSeconds(3);
+        pingScheduler.run();
+        verify(taskExecutor, times(4)).execute(any(Runnable.class));
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void executeRealPings() {
+        PingExecutor pingExecutor = mock(PingExecutor.class);
+        PingScheduler.PingRunnable runnable = pingScheduler.new PingRunnable(pingExecutor);
+        Ping ping = createPing("host1", true, 80, 1000);
+        when(pingExecutor.getPing()).thenReturn(ping);
+        runnable.run();
+        verify(pingExecutor).execute();
     }
 
     private net.microfalx.heimdall.infrastructure.ping.Ping createPing(String hostName, boolean icmp,
@@ -87,6 +110,7 @@ class PingSchedulerTest {
         jpaService.setToken("");
 
         net.microfalx.heimdall.infrastructure.ping.Ping jpaPing = new Ping();
+        jpaPing.setName(service.getName() + " " + server.getName());
         jpaPing.setId(idGenerator.getAndIncrement());
         jpaPing.setService(jpaService);
         jpaPing.setServer(jpaServer);
@@ -99,8 +123,10 @@ class PingSchedulerTest {
     }
 
     private void setupInfrastructure() {
-        service = new net.microfalx.heimdall.infrastructure.api.Service.Builder().port(80).build();
-        server = new net.microfalx.heimdall.infrastructure.api.Server.Builder().hostname("host1").icmp(true).build();
+        service = (net.microfalx.heimdall.infrastructure.api.Service) new net.microfalx.heimdall.infrastructure.api.Service.Builder().port(80).name("HTTP").build();
+        server = (net.microfalx.heimdall.infrastructure.api.Server) new net.microfalx.heimdall.infrastructure.api.Server.Builder().hostname("host1").icmp(true).name("Host 1").build();
+        when(infrastructureService.getService(anyString())).thenReturn(service);
+        when(infrastructureService.getServer(anyString())).thenReturn(server);
     }
 
     private void createPings() {
