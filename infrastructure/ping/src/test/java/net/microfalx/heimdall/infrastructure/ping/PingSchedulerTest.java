@@ -8,15 +8,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.task.AsyncTaskExecutor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.mockito.Mockito.*;
-
 
 @ExtendWith(MockitoExtension.class)
 class PingSchedulerTest {
@@ -46,12 +45,13 @@ class PingSchedulerTest {
     private net.microfalx.heimdall.infrastructure.api.Server server;
     private List<net.microfalx.heimdall.infrastructure.ping.Ping> pings;
 
+    private static final AtomicInteger idGenerator = new AtomicInteger(1);
+
     @BeforeEach
     void setUp() {
         setupInfrastructure();
-        setupCache();
         createPings();
-        pingScheduler = new PingScheduler(cache, taskExecutor, infrastructureService, pingPersistence);
+        setupCache();
     }
 
     @Test
@@ -70,11 +70,14 @@ class PingSchedulerTest {
     private net.microfalx.heimdall.infrastructure.ping.Ping createPing(String hostName, boolean icmp,
                                                                        int port, int interval) {
         Server jpaServer = new Server();
+        jpaServer.setId(idGenerator.getAndIncrement());
         jpaServer.setName("Server");
         jpaServer.setNaturalId(hostName);
         jpaServer.setHostname(hostName);
         jpaServer.setIcmp(icmp);
+
         Service jpaService = new Service();
+        jpaService.setId(idGenerator.getAndIncrement());
         jpaService.setName("Service");
         jpaService.setNaturalId(service.getId());
         jpaService.setType(service.getType());
@@ -82,7 +85,9 @@ class PingSchedulerTest {
         jpaService.setUsername("");
         jpaService.setPassword("");
         jpaService.setToken("");
+
         net.microfalx.heimdall.infrastructure.ping.Ping jpaPing = new Ping();
+        jpaPing.setId(idGenerator.getAndIncrement());
         jpaPing.setService(jpaService);
         jpaPing.setServer(jpaServer);
         jpaPing.setInterval(interval);
@@ -90,9 +95,7 @@ class PingSchedulerTest {
     }
 
     private void setupCache() {
-        cache = Mockito.mock(PingCache.class);
         when(cache.getPings()).thenReturn(pings);
-        pingPersistence = Mockito.mock(PingPersistence.class);
     }
 
     private void setupInfrastructure() {
