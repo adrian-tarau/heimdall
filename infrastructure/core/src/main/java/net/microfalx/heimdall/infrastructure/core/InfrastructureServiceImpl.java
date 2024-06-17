@@ -38,6 +38,8 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
     private final InfrastructurePersistence infrastructurePersistence = new InfrastructurePersistence();
     private final Collection<InfrastructureListener> listeners = new CopyOnWriteArrayList<>();
 
+    private volatile boolean started;
+
     @Override
     public Collection<Server> getServers() {
         return unmodifiableCollection(cache.getServers().values());
@@ -51,7 +53,8 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
     @Override
     public void registerServer(Server server) {
         requireNonNull(server);
-        infrastructurePersistence.execute(server, null);
+        cache.registerServer(server);
+        infrastructurePersistence.execute(server, null, null);
     }
 
     @Override
@@ -67,6 +70,7 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
     @Override
     public void registerCluster(Cluster cluster) {
         requireNonNull(cluster);
+        cache.registerCluster(cluster);
         infrastructurePersistence.execute(cluster);
     }
 
@@ -83,6 +87,7 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
     @Override
     public void registerService(net.microfalx.heimdall.infrastructure.api.Service service) {
         requireNonNull(service);
+        cache.registerService(service);
         infrastructurePersistence.execute(service);
     }
 
@@ -99,6 +104,7 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
     @Override
     public void registerEnvironment(Environment environment) {
         requireNonNull(environment);
+        cache.registerEnvironment(environment);
         infrastructurePersistence.execute(environment);
     }
 
@@ -109,8 +115,9 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
 
     @Override
     public void reload() {
-        InfrastructureLoader infrastructureLoader = new InfrastructureLoader();
-        this.cache = infrastructureLoader.load();
+        InfrastructureCache cache = new InfrastructureCache();
+        cache.load();
+        this.cache = cache;
     }
 
     @Override
@@ -123,17 +130,21 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
         infrastructurePersistence.setApplicationContext(getApplicationContext());
         provisionInfrastructure();
         initializeListeners();
+        reload();
+        started = true;
     }
 
     private void provisionInfrastructure() {
-        taskExecutor.submit(() -> {
-            new InfrastructureProvisioning(infrastructurePersistence).execute();
-        });
+        taskExecutor.submit(new InfrastructureProvisioning(this));
     }
 
     private void initializeListeners() {
         LOGGER.info("Initialize listeners:");
-        Collection<InfrastructureListener> infrastructureListeners = ClassUtils.resolveProviderInstances(InfrastructureListener.class);
+        initializeListeners(ClassUtils.resolveProviderInstances(InfrastructureListener.class));
+        initializeListeners(applicationContext.getBeansOfType(InfrastructureListener.class).values());
+    }
+
+    private void initializeListeners(Collection<InfrastructureListener> infrastructureListeners) {
         for (InfrastructureListener infrastructureListener : infrastructureListeners) {
             LOGGER.info(" - " + ClassUtils.getName(infrastructureListener));
             if (infrastructureListener instanceof ApplicationContextAware) {
@@ -145,7 +156,7 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
 
     private void fireInitializedEvent() {
         for (InfrastructureListener listener : listeners) {
-            listener.onInitialization();
+            listener.onInfrastructureInitialization();
         }
     }
 

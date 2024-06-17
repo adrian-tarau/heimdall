@@ -6,6 +6,18 @@ drop table if exists infrastructure_server;
 drop table if exists infrastructure_cluster;
 drop table if exists infrastructure_service;
 
+create table infrastructure_dns
+(
+    id          integer      not null auto_increment primary key,
+    natural_id  varchar(100) not null,
+    hostname    varchar(100) not null,
+    domain      varchar(500) not null,
+    created_at  datetime     not null,
+    modified_at datetime,
+    description varchar(1000),
+    constraint nk$infrastructure_dns$natural_id unique key (natural_id)
+) ENGINE = InnoDB;
+
 create table infrastructure_cluster
 (
     id          integer                                 not null auto_increment primary key,

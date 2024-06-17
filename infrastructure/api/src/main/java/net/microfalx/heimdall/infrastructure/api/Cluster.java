@@ -13,7 +13,7 @@ import static java.util.Collections.unmodifiableSet;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
 @ToString
-public class Cluster extends IdentifiableNameAware<String> {
+public class Cluster extends IdentifiableNameAware<String> implements InfrastructureElement {
 
     private ZoneId zoneId;
     private Set<Server> servers;

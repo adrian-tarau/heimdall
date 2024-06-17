@@ -13,7 +13,7 @@ import static java.util.Collections.unmodifiableSet;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
 @ToString
-public class Environment extends IdentifiableNameAware<String> {
+public class Environment extends IdentifiableNameAware<String> implements InfrastructureElement {
 
     private Attributes<?> attributes;
     private Set<Cluster> clusters;

@@ -5,6 +5,7 @@ import net.microfalx.heimdall.infrastructure.api.Environment;
 import net.microfalx.heimdall.infrastructure.api.Server;
 import net.microfalx.heimdall.infrastructure.api.Service;
 import net.microfalx.heimdall.infrastructure.api.*;
+import net.microfalx.lang.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,6 +26,10 @@ class InfrastructureCache {
         return servers;
     }
 
+    void registerServer(Server server) {
+        servers.put(StringUtils.toIdentifier(server.getId()), server);
+    }
+
     Server getServer(String id) {
         requireNonNull(id);
         Server server = servers.get(toIdentifier(id));
@@ -32,6 +37,13 @@ class InfrastructureCache {
             throw new InfrastructureNotFoundException("A server with identifier '" + id + "' is not registered");
         }
         return server;
+    }
+
+    void registerCluster(Cluster cluster) {
+        clusters.put(StringUtils.toIdentifier(cluster.getId()), cluster);
+        for (Server server : cluster.getServers()) {
+            registerServer(server);
+        }
     }
 
     Map<String, Cluster> getClusters() {
@@ -47,6 +59,10 @@ class InfrastructureCache {
         return cluster;
     }
 
+    void registerService(Service service) {
+        services.put(StringUtils.toIdentifier(service.getId()), service);
+    }
+
     Map<String, Service> getServices() {
         return services;
     }
@@ -58,6 +74,10 @@ class InfrastructureCache {
             throw new InfrastructureNotFoundException("A service with identifier '" + id + "' is not registered");
         }
         return service;
+    }
+
+    void registerEnvironment(Environment environment) {
+        environments.put(StringUtils.toIdentifier(environment.getId()), environment);
     }
 
     Map<String, Environment> getEnvironments() {
@@ -80,5 +100,9 @@ class InfrastructureCache {
             if (environment.hasServer(server)) foundEnvironments.add(environment);
         }
         return foundEnvironments;
+    }
+
+    void load() {
+
     }
 }

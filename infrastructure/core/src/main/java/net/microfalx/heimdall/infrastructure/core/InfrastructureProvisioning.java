@@ -1,23 +1,25 @@
 package net.microfalx.heimdall.infrastructure.core;
 
+import net.microfalx.heimdall.infrastructure.api.InfrastructureService;
 import net.microfalx.heimdall.infrastructure.api.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
-class InfrastructureProvisioning {
+class InfrastructureProvisioning implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InfrastructureProvisioning.class);
 
-    private final InfrastructurePersistence jpaManager;
+    private final InfrastructureService infrastructureService;
 
-    public InfrastructureProvisioning(InfrastructurePersistence jpaManager) {
-        requireNonNull(jpaManager);
-        this.jpaManager = jpaManager;
+    public InfrastructureProvisioning(InfrastructureService infrastructureService) {
+        requireNonNull(infrastructureService);
+        this.infrastructureService = infrastructureService;
     }
 
-    void execute() {
+    @Override
+    public void run() {
         try {
             provisionServices();
         } catch (Exception e) {
@@ -26,9 +28,9 @@ class InfrastructureProvisioning {
     }
 
     private void provisionServices() {
-        jpaManager.execute(Service.create(Service.Type.HTTPS));
-        jpaManager.execute(Service.create(Service.Type.SSH));
-        jpaManager.execute(Service.create(Service.Type.ICMP));
+        infrastructureService.registerService(Service.create(Service.Type.HTTPS));
+        infrastructureService.registerService(Service.create(Service.Type.SSH));
+        infrastructureService.registerService(Service.create(Service.Type.ICMP));
     }
 
     private void provisionService() {

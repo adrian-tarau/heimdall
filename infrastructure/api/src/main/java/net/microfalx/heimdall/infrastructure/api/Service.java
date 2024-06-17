@@ -15,7 +15,7 @@ import static net.microfalx.lang.ArgumentUtils.requireBounded;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
 @ToString
-public class Service extends IdentifiableNameAware<String> {
+public class Service extends IdentifiableNameAware<String> implements InfrastructureElement {
 
     private int port;
     private String path;

@@ -17,7 +17,7 @@ import static net.microfalx.lang.ArgumentUtils.requireNonNull;
  * A class used to provide a server within the infrastructure.
  */
 @ToString
-public class Server extends IdentifiableNameAware<String> {
+public class Server extends IdentifiableNameAware<String> implements InfrastructureElement {
 
     private String hostname;
     private Type type;

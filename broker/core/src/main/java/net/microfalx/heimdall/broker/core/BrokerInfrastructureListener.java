@@ -8,7 +8,6 @@ import net.microfalx.lang.annotation.Provider;
 public class BrokerInfrastructureListener extends ApplicationContextSupport implements InfrastructureListener {
 
     @Override
-    public void onInitialization() {
-        InfrastructureListener.super.onInitialization();
+    public void onInfrastructureInitialization() {
     }
 }

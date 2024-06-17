@@ -16,19 +16,21 @@ import java.util.Collection;
 public class DatabaseInfrastructureListener extends ApplicationContextSupport implements InfrastructureListener {
 
     @Override
-    public void onInitialization() {
+    public void onInfrastructureInitialization() {
         InfrastructureService infrastructureService = getBean(InfrastructureService.class);
         Collection<Database> databases = getBean(DatabaseService.class).getDatabases();
         for (Database database : databases) {
-            Cluster cluster = (Cluster) new Cluster.Builder("db_" + database.getId())
-                    .zoneId(database.getZoneId()).name(database.getName()).description(database.getDescription())
-                    .build();
-            infrastructureService.registerCluster(cluster);
+            Cluster.Builder clusterBuilder = null;
+            if (database.getNodes().size() > 2) {
+                clusterBuilder = (Cluster.Builder) new Cluster.Builder("db_" + database.getId())
+                        .zoneId(database.getZoneId()).name(database.getName()).description(database.getDescription());
+            }
             for (Node node : database.getNodes()) {
-                Server server = (Server) new Server.Builder().hostname(node.getHostname()).name(node.getName())
-                        .build();
+                Server server = (Server) new Server.Builder().hostname(node.getHostname()).name(node.getName()).build();
+                if (clusterBuilder != null) clusterBuilder.server(server);
                 infrastructureService.registerServer(server);
             }
+            if (clusterBuilder != null) infrastructureService.registerCluster(clusterBuilder.build());
         }
     }
 }

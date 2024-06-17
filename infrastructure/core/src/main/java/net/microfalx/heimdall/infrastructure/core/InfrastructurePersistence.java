@@ -26,19 +26,24 @@ class InfrastructurePersistence extends ApplicationContextSupport {
         jpaCluster.setTimeZone(cluster.getZoneId().getId());
         jpaCluster.setType(cluster.getType());
         jpaCluster.setDescription(cluster.getDescription());
-        return updater.findByNaturalIdAndUpdate(jpaCluster);
+        jpaCluster = updater.findByNaturalIdAndUpdate(jpaCluster);
+        for (net.microfalx.heimdall.infrastructure.api.Server server : cluster.getServers()) {
+            execute(server, null, jpaCluster);
+        }
+        return jpaCluster;
     }
 
-    void execute(net.microfalx.heimdall.infrastructure.api.Server server, net.microfalx.heimdall.infrastructure.api.Cluster cluster) {
+    void execute(net.microfalx.heimdall.infrastructure.api.Server server, net.microfalx.heimdall.infrastructure.api.Cluster cluster, Cluster jpaCluster) {
         NaturalIdEntityUpdater<Server, Integer> updater = getUpdater(ServerRepository.class);
         Server jpaServer = new Server();
         jpaServer.setNaturalId(server.getId());
-        jpaServer.setName(server.getName());
         jpaServer.setDescription(server.getDescription());
         jpaServer.setHostname(server.getHostname());
         jpaServer.setIcmp(server.isIcmp());
-        if (cluster != null) {
-            Cluster jpaCluster = execute(cluster);
+        if (jpaCluster != null) {
+            jpaServer.setCluster(jpaCluster);
+        } else if (cluster != null) {
+            jpaCluster = execute(cluster);
             jpaServer.setCluster(jpaCluster);
         }
         updater.findByNaturalIdAndUpdate(jpaServer);

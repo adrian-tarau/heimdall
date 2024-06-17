@@ -9,30 +9,16 @@ import org.atteo.classindex.IndexSubclasses;
 public interface InfrastructureListener {
 
     /**
-     * Invoked when an environment is added, changed or removed.
+     * Invoked when an infrastructure element is added, changed or removed.
      */
-    default void onEnvironmentChanged(Environment environment) {
+    default void onInfrastructureEvent(InfrastructureEvent event) {
         // empty by default
     }
 
     /**
-     * Invoked when a cluster is added, changed or removed.
+     * Invoked when the infrastructure was initialized.
      */
-    default void onClusterChanged(Cluster cluster) {
-        // empty by default
-    }
-
-    /**
-     * Invoked when a service is added, changed or removed.
-     */
-    default void onServiceChanged(Service service) {
-        // empty by default
-    }
-
-    /**
-     * Invoked when
-     */
-    default void onInitialization() {
+    default void onInfrastructureInitialization() {
         // empty by default
     }
 }
