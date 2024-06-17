@@ -1,6 +1,7 @@
 package net.microfalx.heimdall.infrastructure.ping;
 
-import net.microfalx.heimdall.infrastructure.api.*;
+import net.microfalx.heimdall.infrastructure.api.Server;
+import net.microfalx.heimdall.infrastructure.api.Service;
 import net.microfalx.lang.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,7 +17,7 @@ import static java.util.Collections.unmodifiableList;
  * Loads ping related data from the database.
  */
 @Component
-class PingCache implements InfrastructureListener {
+class PingCache {
 
     @Autowired
     private PingRepository repository;
@@ -61,20 +62,5 @@ class PingCache implements InfrastructureListener {
     void reload() {
         pings = repository.findByActive(true);
         cachePingsByServiceAndServer.clear();
-    }
-
-    @Override
-    public void onEnvironmentChanged(Environment environment) {
-        reload();
-    }
-
-    @Override
-    public void onClusterChanged(Cluster cluster) {
-        reload();
-    }
-
-    @Override
-    public void onServiceChanged(Service service) {
-        reload();
     }
 }

@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.infrastructure.ping;
 
+import jakarta.persistence.Id;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -8,9 +9,7 @@ import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.heimdall.infrastructure.core.Server;
 import net.microfalx.heimdall.infrastructure.core.Service;
-import net.microfalx.lang.annotation.Description;
-import net.microfalx.lang.annotation.Name;
-import net.microfalx.lang.annotation.Position;
+import net.microfalx.lang.annotation.*;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -27,19 +26,24 @@ public class PingResult {
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
+    @Visible(value = false)
     private Integer id;
 
     @Column(name = "ping_id", nullable = false)
     @JoinColumn(name = "ping_id")
     @Name
+    @Label("Name")
+    @Position(1)
     private Ping ping;
 
     @Column(name = "service_id", nullable = false)
     @JoinColumn(name = "service_id")
+    @Position(2)
     private Service service;
 
     @Column(name = "server_id", nullable = false)
     @JoinColumn(name = "server_id")
+    @Position(3)
     private Server server;
 
     @Column(name = "status", nullable = false)

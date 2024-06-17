@@ -11,5 +11,5 @@ import org.springframework.context.annotation.Configuration;
 @Setter
 public class PingProperties {
 
-    private int threads = 10;
+    private int threads = 20;
 }

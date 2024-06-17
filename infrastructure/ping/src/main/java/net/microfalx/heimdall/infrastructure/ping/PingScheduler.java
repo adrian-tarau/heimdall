@@ -5,9 +5,7 @@ import net.microfalx.heimdall.infrastructure.api.Server;
 import net.microfalx.heimdall.infrastructure.api.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -21,29 +19,24 @@ import static net.microfalx.lang.TimeUtils.millisSince;
 /**
  * A class which handles scheduling pings.
  */
-@Component
 class PingScheduler implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PingScheduler.class);
 
-    @Autowired
     private final PingCache cache;
-    @Autowired
     private final InfrastructureService infrastructureService;
-    @Autowired
     private final PingPersistence pingPersistence;
-    @Autowired
     private final AsyncTaskExecutor taskExecutor;
 
     private final Map<Integer, LocalDateTime> lastScheduledTime = new ConcurrentHashMap<>();
     private final Map<Integer, AtomicBoolean> pingRunning = new ConcurrentHashMap<>();
 
-    PingScheduler(PingCache cache, AsyncTaskExecutor taskExecutor, InfrastructureService infrastructureService,
-                  PingPersistence pingPersistence) {
+    PingScheduler(PingCache cache, InfrastructureService infrastructureService,
+                  PingPersistence pingPersistence, AsyncTaskExecutor taskExecutor) {
         requireNonNull(cache);
-        requireNonNull(taskExecutor);
         requireNonNull(infrastructureService);
         requireNonNull(pingPersistence);
+        requireNonNull(taskExecutor);
         this.cache = cache;
         this.taskExecutor = taskExecutor;
         this.infrastructureService = infrastructureService;
@@ -53,9 +46,9 @@ class PingScheduler implements Runnable {
 
     @Override
     public void run() {
-        LOGGER.info("Schedule pings");
+        LOGGER.debug("Schedule " + cache.getPings().size() + " pings");
         for (Ping ping : cache.getPings()) {
-            LOGGER.info(" - " + ping.getName() + ", interval " + formatDuration(ping.getInterval()));
+            LOGGER.debug(" - " + ping.getName() + ", interval " + formatDuration(ping.getInterval()));
             schedule(ping);
         }
     }
