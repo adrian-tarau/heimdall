@@ -5,7 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import net.microfalx.bootstrap.jdbc.entity.NamedTimestampAware;
+import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedTimestampAware;
 import net.microfalx.heimdall.infrastructure.api.Server;
 import net.microfalx.lang.annotation.Description;
 import net.microfalx.lang.annotation.Name;
@@ -20,7 +20,7 @@ import org.hibernate.annotations.NaturalId;
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString(callSuper = true)
-public class Cluster extends NamedTimestampAware {
+public class Cluster extends NamedAndTaggedTimestampAware {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

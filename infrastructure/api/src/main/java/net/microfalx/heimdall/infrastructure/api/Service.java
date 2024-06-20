@@ -1,8 +1,8 @@
 package net.microfalx.heimdall.infrastructure.api;
 
 import lombok.ToString;
-import net.microfalx.lang.IdentifiableNameAware;
 import net.microfalx.lang.IdentityAware;
+import net.microfalx.lang.NamedAndTaggedIdentifyAware;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.UriUtils;
 
@@ -15,7 +15,7 @@ import static net.microfalx.lang.ArgumentUtils.requireBounded;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
 @ToString
-public class Service extends IdentifiableNameAware<String> implements InfrastructureElement {
+public class Service extends NamedAndTaggedIdentifyAware<String> implements InfrastructureElement {
 
     private int port;
     private String path;
@@ -289,7 +289,7 @@ public class Service extends IdentifiableNameAware<String> implements Infrastruc
     /**
      * A builder class.
      */
-    public static class Builder extends IdentifiableNameAware.Builder<String> {
+    public static class Builder extends NamedAndTaggedIdentifyAware.Builder<String> {
 
         private int port;
         private String path;

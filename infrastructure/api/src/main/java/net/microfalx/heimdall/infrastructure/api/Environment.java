@@ -2,8 +2,8 @@ package net.microfalx.heimdall.infrastructure.api;
 
 import lombok.ToString;
 import net.microfalx.bootstrap.model.Attributes;
-import net.microfalx.lang.IdentifiableNameAware;
 import net.microfalx.lang.IdentityAware;
+import net.microfalx.lang.NamedAndTaggedIdentifyAware;
 import net.microfalx.lang.StringUtils;
 
 import java.util.HashSet;
@@ -13,7 +13,7 @@ import static java.util.Collections.unmodifiableSet;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
 @ToString
-public class Environment extends IdentifiableNameAware<String> implements InfrastructureElement {
+public class Environment extends NamedAndTaggedIdentifyAware<String> implements InfrastructureElement {
 
     private Attributes<?> attributes;
     private Set<Cluster> clusters;
@@ -85,7 +85,7 @@ public class Environment extends IdentifiableNameAware<String> implements Infras
     /**
      * A builder class.
      */
-    public static class Builder extends IdentifiableNameAware.Builder<String> {
+    public static class Builder extends NamedAndTaggedIdentifyAware.Builder<String> {
 
         private final Attributes<?> attributes = Attributes.create();
         private final Set<Cluster> clusters = new HashSet<>();

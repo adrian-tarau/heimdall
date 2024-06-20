@@ -10,17 +10,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import static net.microfalx.bootstrap.core.utils.HostnameUtils.isHostname;
+
 @Controller
-@RequestMapping("/system/infrastructure/cluster")
-@DataSet(model = Cluster.class, timeFilter = false)
-@Help("infrastructure/cluster")
-public class ClusterController extends DataSetController<Cluster, Integer> {
+@RequestMapping("/system/infrastructure/dns")
+@DataSet(model = Dns.class, timeFilter = false)
+@Help("infrastructure/dns")
+public class DnsController extends DataSetController<Dns, Integer> {
 
     @Autowired
     private InfrastructureService infrastructureService;
 
     @Override
-    protected void afterPersist(net.microfalx.bootstrap.dataset.DataSet<Cluster, Field<Cluster>, Integer> dataSet, Cluster model, State state) {
+    protected boolean beforePersist(net.microfalx.bootstrap.dataset.DataSet<Dns, Field<Dns>, Integer> dataSet, Dns model, State state) {
+        model.setValid(isHostname(model.getHostname()) && isHostname(model.getDomain()));
+        return super.beforePersist(dataSet, model, state);
+    }
+
+    @Override
+    protected void afterPersist(net.microfalx.bootstrap.dataset.DataSet<Dns, Field<Dns>, Integer> dataSet, Dns model, State state) {
         super.afterPersist(dataSet, model, state);
         infrastructureService.reload();
     }

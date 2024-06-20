@@ -9,6 +9,7 @@ create table infrastructure_ping
     name               varchar(100)      not null,
     active             bool default true not null,
     `interval`         int               not null,
+    tags               varchar(500),
     hoops              int,
     connection_timeout int,
     read_timeout       int,

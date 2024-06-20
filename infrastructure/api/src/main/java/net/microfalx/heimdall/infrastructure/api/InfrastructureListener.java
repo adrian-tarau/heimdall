@@ -21,4 +21,26 @@ public interface InfrastructureListener {
     default void onInfrastructureInitialization() {
         // empty by default
     }
+
+    /**
+     * Queries for the status of a service.
+     *
+     * @param service the service
+     * @param server  the server where the server runs
+     * @return the status, null if the listener cannot provide a status
+     */
+    default Status getStatus(Service service, Server server) {
+        return null;
+    }
+
+    /**
+     * Queries for the health of a service.
+     *
+     * @param service the service
+     * @param server  the server where the server runs
+     * @return the health, null if the listener cannot provide a health
+     */
+    default Health getHealth(Service service, Server server) {
+        return null;
+    }
 }

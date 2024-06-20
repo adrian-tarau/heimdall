@@ -50,12 +50,15 @@
             <artifactId>bootstrap-jdbc</artifactId>
         </dependency>
 
-
         <dependency>
             <groupId>net.microfalx.bootstrap</groupId>
             <artifactId>bootstrap-web</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.seancfoley</groupId>
+            <artifactId>ipaddress</artifactId>
+        </dependency>
 
     </dependencies>
 

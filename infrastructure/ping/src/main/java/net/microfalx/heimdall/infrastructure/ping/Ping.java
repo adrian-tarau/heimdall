@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
-import net.microfalx.bootstrap.jdbc.entity.NamedTimestampAware;
+import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedTimestampAware;
 import net.microfalx.heimdall.infrastructure.core.Server;
 import net.microfalx.heimdall.infrastructure.core.Service;
 import net.microfalx.lang.annotation.Description;
@@ -21,7 +21,7 @@ import net.microfalx.lang.annotation.Visible;
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString(callSuper = true)
-public class Ping extends NamedTimestampAware {
+public class Ping extends NamedAndTaggedTimestampAware {
 
     @Id
     @Column(name = "id", nullable = false)

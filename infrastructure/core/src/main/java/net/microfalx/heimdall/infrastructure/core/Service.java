@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
-import net.microfalx.bootstrap.jdbc.entity.NamedTimestampAware;
+import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedTimestampAware;
 import net.microfalx.lang.annotation.*;
 import org.hibernate.annotations.NaturalId;
 
@@ -18,7 +18,7 @@ import org.hibernate.annotations.NaturalId;
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString(callSuper = true)
-public class Service extends NamedTimestampAware {
+public class Service extends NamedAndTaggedTimestampAware {
 
     private static final int DEFAULT_TIMEOUT = 5000;
 

@@ -50,6 +50,13 @@ class InfrastructureCache {
         return clusters;
     }
 
+    Cluster findByName(String name) {
+        for (Cluster cluster : clusters.values()) {
+            if (cluster.getName().equalsIgnoreCase(name)) return cluster;
+        }
+        return null;
+    }
+
     Cluster getCluster(String id) {
         requireNonNull(id);
         Cluster cluster = clusters.get(toIdentifier(id));

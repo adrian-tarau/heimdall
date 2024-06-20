@@ -1,6 +1,7 @@
 drop table if exists infrastructure_environment_to_cluster;
 drop table if exists infrastructure_environment_to_server;
 drop table if exists infrastructure_server_to_service;
+drop table if exists infrastructure_dns;
 drop table if exists infrastructure_environment;
 drop table if exists infrastructure_server;
 drop table if exists infrastructure_cluster;
@@ -8,11 +9,15 @@ drop table if exists infrastructure_service;
 
 create table infrastructure_dns
 (
-    id          integer      not null auto_increment primary key,
-    natural_id  varchar(100) not null,
-    hostname    varchar(100) not null,
-    domain      varchar(500) not null,
-    created_at  datetime     not null,
+    id          integer               not null auto_increment primary key,
+    natural_id  varchar(100)          not null,
+    name        varchar(500)          not null,
+    hostname    varchar(100)          not null,
+    domain      varchar(500),
+    ip          varchar(100)          not null,
+    valid       boolean default false not null,
+    tags        varchar(500),
+    created_at  datetime              not null,
     modified_at datetime,
     description varchar(1000),
     constraint nk$infrastructure_dns$natural_id unique key (natural_id)
@@ -25,6 +30,7 @@ create table infrastructure_cluster
     name        varchar(500)                            not null,
     `type`      ENUM ('PHYSICAL', 'VIRTUAL')            not null,
     time_zone   varchar(100) default 'America/New_York' not null,
+    tags        varchar(500),
     created_at  datetime                                not null,
     modified_at datetime,
     description varchar(1000),
@@ -40,6 +46,7 @@ create table infrastructure_server
     hostname    varchar(200)                 not null,
     `type`      ENUM ('PHYSICAL', 'VIRTUAL') not null,
     icmp        boolean default true         not null,
+    tags        varchar(500),
     created_at  datetime                     not null,
     modified_at datetime,
     description varchar(1000),
@@ -59,6 +66,7 @@ create table infrastructure_service
     username           varchar(100),
     password           varchar(100),
     token              varchar(5000),
+    tags               varchar(500),
     connection_timeout int default 5000                                 not null,
     read_timeout       int default 5000                                 not null,
     write_timeout      int default 5000                                 not null,
@@ -82,10 +90,11 @@ create table infrastructure_environment
     id          integer      not null auto_increment primary key,
     natural_id  varchar(500) not null,
     name        varchar(100) not null,
-    attributes  varchar(20000),
+    tags        varchar(500),
     created_at  datetime     not null,
     modified_at datetime,
     description varchar(1000),
+    attributes  mediumtext,
     constraint nk$infrastructure_environment$natural_id unique key (natural_id)
 ) ENGINE = InnoDB;
 

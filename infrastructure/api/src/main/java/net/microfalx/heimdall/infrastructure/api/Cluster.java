@@ -1,8 +1,8 @@
 package net.microfalx.heimdall.infrastructure.api;
 
 import lombok.ToString;
-import net.microfalx.lang.IdentifiableNameAware;
 import net.microfalx.lang.IdentityAware;
+import net.microfalx.lang.NamedAndTaggedIdentifyAware;
 
 import java.time.ZoneId;
 import java.util.Collection;
@@ -13,7 +13,7 @@ import static java.util.Collections.unmodifiableSet;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
 @ToString
-public class Cluster extends IdentifiableNameAware<String> implements InfrastructureElement {
+public class Cluster extends NamedAndTaggedIdentifyAware<String> implements InfrastructureElement {
 
     private ZoneId zoneId;
     private Set<Server> servers;
@@ -66,7 +66,7 @@ public class Cluster extends IdentifiableNameAware<String> implements Infrastruc
     /**
      * A builder class.
      */
-    public static class Builder extends IdentifiableNameAware.Builder<String> {
+    public static class Builder extends NamedAndTaggedIdentifyAware.Builder<String> {
 
         private final Set<Server> servers = new HashSet<>();
         private ZoneId zoneId = ZoneId.systemDefault();
@@ -84,15 +84,15 @@ public class Cluster extends IdentifiableNameAware<String> implements Infrastruc
             return this;
         }
 
-        public Builder zoneId(ZoneId zoneId) {
-            requireNonNull(zoneId);
-            this.zoneId = zoneId;
-            return this;
-        }
-
         public Builder servers(Collection<Server> servers) {
             requireNonNull(servers);
             this.servers.addAll(servers);
+            return this;
+        }
+
+        public Builder zoneId(ZoneId zoneId) {
+            requireNonNull(zoneId);
+            this.zoneId = zoneId;
             return this;
         }
 

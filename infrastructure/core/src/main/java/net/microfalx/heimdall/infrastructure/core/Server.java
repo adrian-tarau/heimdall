@@ -1,16 +1,14 @@
 package net.microfalx.heimdall.infrastructure.core;
 
+import jakarta.persistence.Id;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import net.microfalx.bootstrap.jdbc.entity.NamedTimestampAware;
+import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedTimestampAware;
 import net.microfalx.lang.StringUtils;
-import net.microfalx.lang.annotation.Description;
-import net.microfalx.lang.annotation.Name;
-import net.microfalx.lang.annotation.Position;
-import net.microfalx.lang.annotation.Visible;
+import net.microfalx.lang.annotation.*;
 import org.hibernate.annotations.NaturalId;
 
 @Entity
@@ -20,7 +18,7 @@ import org.hibernate.annotations.NaturalId;
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString(callSuper = true)
-public class Server extends NamedTimestampAware {
+public class Server extends NamedAndTaggedTimestampAware {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -54,6 +52,7 @@ public class Server extends NamedTimestampAware {
     @Column(name = "icmp", nullable = false)
     @Position(40)
     @Description("Indicates whether the server could be pinged using ICMP protocol")
+    @Label("ICMP")
     private boolean icmp;
 
     public static String toNaturalId(Server server) {

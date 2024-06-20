@@ -1,8 +1,8 @@
 package net.microfalx.heimdall.infrastructure.api;
 
 import lombok.ToString;
-import net.microfalx.lang.IdentifiableNameAware;
 import net.microfalx.lang.IdentityAware;
+import net.microfalx.lang.NamedAndTaggedIdentifyAware;
 import net.microfalx.lang.StringUtils;
 
 import java.time.ZoneId;
@@ -17,7 +17,7 @@ import static net.microfalx.lang.ArgumentUtils.requireNonNull;
  * A class used to provide a server within the infrastructure.
  */
 @ToString
-public class Server extends IdentifiableNameAware<String> implements InfrastructureElement {
+public class Server extends NamedAndTaggedIdentifyAware<String> implements InfrastructureElement {
 
     private String hostname;
     private Type type;
@@ -72,6 +72,19 @@ public class Server extends IdentifiableNameAware<String> implements Infrastruct
         return unmodifiableSet(services);
     }
 
+    /**
+     * Returns a new server instance with a different hostname.
+     *
+     * @param hostname the hostname
+     * @return a new instance
+     */
+    public Server withHostname(String hostname) {
+        requireNonNull(hostname);
+        Server copy = (Server) copy();
+        copy.hostname = hostname;
+        return copy;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -104,7 +117,7 @@ public class Server extends IdentifiableNameAware<String> implements Infrastruct
     /**
      * A builder class.
      */
-    public static class Builder extends IdentifiableNameAware.Builder<String> {
+    public static class Builder extends NamedAndTaggedIdentifyAware.Builder<String> {
 
         private String hostname;
         private Type type = Type.VIRTUAL;

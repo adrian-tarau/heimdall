@@ -108,6 +108,32 @@ public interface InfrastructureService {
     Collection<Environment> find(Server server);
 
     /**
+     * Returns the status of a service running within a server.
+     *
+     * @param service the service
+     * @param server  the server
+     * @return a non-null instance
+     */
+    Status getStatus(Service service, Server server);
+
+    /**
+     * Returns the health of a service running within a server.
+     *
+     * @param service the service
+     * @param server  the server
+     * @return a non-null instance
+     */
+    Health getHealth(Service service, Server server);
+
+    /**
+     * Resolves the DNS for a given server.
+     *
+     * @param server the server
+     * @return the DNS entry
+     */
+    Dns resolve(Server server);
+
+    /**
      * Reloads the infrastructure.
      */
     void reload();

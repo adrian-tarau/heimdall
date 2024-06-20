@@ -8,6 +8,7 @@
             <item id="cluster" text="Clusters" action="/system/infrastructure/cluster" icon="fa-solid fa-diagram-project"/>
             <item id="server" text="Servers" action="/system/infrastructure/server" icon="fa-solid fa-server"/>
             <item id="service" text="Service" action="/system/infrastructure/service" icon="fa-solid fa-box"/>
+            <item id="dns" text="DNS" action="/system/infrastructure/dns" icon="fa-solid fa-fingerprint"/>
         </menu>
     </menu>
 </navigations>

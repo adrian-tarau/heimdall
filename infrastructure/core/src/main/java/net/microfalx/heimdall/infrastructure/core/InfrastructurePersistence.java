@@ -6,6 +6,8 @@ import net.microfalx.bootstrap.jdbc.jpa.NaturalJpaRepository;
 import net.microfalx.bootstrap.model.MetadataService;
 import net.microfalx.lang.ExceptionUtils;
 
+import static net.microfalx.lang.CollectionUtils.setToString;
+
 class InfrastructurePersistence extends ApplicationContextSupport {
 
     void execute(net.microfalx.heimdall.infrastructure.api.Environment environment) {
@@ -13,6 +15,7 @@ class InfrastructurePersistence extends ApplicationContextSupport {
         Environment jpaEnvironment = new Environment();
         jpaEnvironment.setNaturalId(environment.getId());
         jpaEnvironment.setName(environment.getName());
+        jpaEnvironment.setTags(setToString(environment.getTags()));
         jpaEnvironment.setDescription(environment.getDescription());
         jpaEnvironment.setAttributes(ExceptionUtils.doAndRethrow(() -> environment.getAttributes().toJson().loadAsString()));
         updater.findByNaturalIdAndUpdate(jpaEnvironment);
@@ -26,10 +29,8 @@ class InfrastructurePersistence extends ApplicationContextSupport {
         jpaCluster.setTimeZone(cluster.getZoneId().getId());
         jpaCluster.setType(cluster.getType());
         jpaCluster.setDescription(cluster.getDescription());
+        jpaCluster.setTags(setToString(cluster.getTags()));
         jpaCluster = updater.findByNaturalIdAndUpdate(jpaCluster);
-        for (net.microfalx.heimdall.infrastructure.api.Server server : cluster.getServers()) {
-            execute(server, null, jpaCluster);
-        }
         return jpaCluster;
     }
 
@@ -37,9 +38,11 @@ class InfrastructurePersistence extends ApplicationContextSupport {
         NaturalIdEntityUpdater<Server, Integer> updater = getUpdater(ServerRepository.class);
         Server jpaServer = new Server();
         jpaServer.setNaturalId(server.getId());
-        jpaServer.setDescription(server.getDescription());
+        jpaServer.setName(server.getName());
         jpaServer.setHostname(server.getHostname());
+        jpaServer.setTags(setToString(server.getTags()));
         jpaServer.setIcmp(server.isIcmp());
+        jpaServer.setDescription(server.getDescription());
         if (jpaCluster != null) {
             jpaServer.setCluster(jpaCluster);
         } else if (cluster != null) {
@@ -62,6 +65,7 @@ class InfrastructurePersistence extends ApplicationContextSupport {
         jpaService.setUsername(service.getUserName());
         jpaService.setPassword(service.getPassword());
         jpaService.setToken(service.getToken());
+        jpaService.setTags(setToString(service.getTags()));
         jpaService.setConnectionTimeOut((int) service.getConnectionTimeout().toMillis());
         jpaService.setReadTimeOut((int) service.getReadTimeout().toMillis());
         jpaService.setWriteTimeOut((int) service.getWriteTimeout().toMillis());
