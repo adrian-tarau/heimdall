@@ -12,6 +12,7 @@ import java.util.Set;
 
 import static java.util.Collections.unmodifiableSet;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.StringUtils.toIdentifier;
 
 /**
  * A class used to provide a server within the infrastructure.
@@ -82,6 +83,7 @@ public class Server extends NamedAndTaggedIdentifyAware<String> implements Infra
         requireNonNull(hostname);
         Server copy = (Server) copy();
         copy.hostname = hostname;
+        copy.setId(toIdentifier(hostname));
         return copy;
     }
 
@@ -167,7 +169,7 @@ public class Server extends NamedAndTaggedIdentifyAware<String> implements Infra
 
         @Override
         protected String updateId() {
-            return StringUtils.toIdentifier(hostname);
+            return toIdentifier(hostname);
         }
 
         private void updateServer(Server server) {

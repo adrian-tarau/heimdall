@@ -157,8 +157,10 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
     @Override
     public void reload() {
         InfrastructureCache cache = new InfrastructureCache();
+        cache.setApplicationContext(getApplicationContext());
         cache.load();
         this.cache = cache;
+        dns.load();
     }
 
     @Override
@@ -171,13 +173,13 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
         initializeApplicationContext();
         provisionInfrastructure();
         initializeListeners();
-        reload();
+        this.reload();
         started = true;
     }
 
     private void doRegisterServer(Server server, Cluster cluster) {
-        cache.registerServer(server);
         server = dns.register(server);
+        cache.registerServer(server);
         if (isHostname(server.getHostname())) {
             infrastructurePersistence.execute(server, cluster, null);
         } else {
@@ -191,6 +193,7 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
 
     private void initializeApplicationContext() {
         infrastructurePersistence.setApplicationContext(getApplicationContext());
+        cache.setApplicationContext(getApplicationContext());
         dns.setApplicationContext(getApplicationContext());
         dns.setExecutor(taskExecutor);
     }

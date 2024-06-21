@@ -9,10 +9,13 @@ import net.microfalx.heimdall.infrastructure.api.Server;
 import net.microfalx.lang.CollectionUtils;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.TimeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.task.AsyncTaskExecutor;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -24,6 +27,8 @@ import static net.microfalx.lang.TimeUtils.millisSince;
 import static net.microfalx.lang.TimeUtils.oneHourAgo;
 
 public class InfrastructureDns extends ApplicationContextSupport {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(InfrastructureDns.class);
 
     private static final long DNS_UPDATE = TimeUtils.FIVE_MINUTE;
 
@@ -44,7 +49,11 @@ public class InfrastructureDns extends ApplicationContextSupport {
         String id = getId(server);
         Dns dns = dnss.get(id);
         if (dns == null || shouldUpdateDns(id)) {
-            dns = resolveDns(server);
+            Dns newDns = resolveDns(server);
+            if (newDns.isValid()) {
+                dnss.put(newDns.getId(), newDns);
+                dns = newDns;
+            }
         }
         return dns;
     }
@@ -53,9 +62,25 @@ public class InfrastructureDns extends ApplicationContextSupport {
         doUpdate(server);
         Dns dns = getDns(server);
         if (isIp(server.getHostname()) && dns.isValid() && !dns.getFqdn().equalsIgnoreCase(server.getHostname())) {
-            server = server.withHostname(dns.getFqdn());
+            server = (Server) server.withHostname(dns.getFqdn()).withName(dns.getName());
         }
         return server;
+    }
+
+    void load() {
+        try {
+            List<net.microfalx.heimdall.infrastructure.core.Dns> dnsJpas = getBean(DnsRepository.class).findAll();
+            for (net.microfalx.heimdall.infrastructure.core.Dns dnsJpa : dnsJpas) {
+                Dns.Builder builder = new Dns.Builder(dnsJpa.getNaturalId());
+                builder.domain(dnsJpa.getDomain()).hostname(dnsJpa.getHostname()).ip(dnsJpa.getIp()).valid(dnsJpa.isValid());
+                builder.tags(CollectionUtils.setFromString(dnsJpa.getTags()))
+                        .name(dnsJpa.getName()).description(dnsJpa.getDescription());
+                Dns dns = builder.build();
+                dnss.put(dns.getId(), dns);
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to load DNS", e);
+        }
     }
 
     private String getId(Server server) {

@@ -1,21 +1,26 @@
 package net.microfalx.heimdall.infrastructure.core;
 
+import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
 import net.microfalx.heimdall.infrastructure.api.Cluster;
 import net.microfalx.heimdall.infrastructure.api.Environment;
 import net.microfalx.heimdall.infrastructure.api.Server;
 import net.microfalx.heimdall.infrastructure.api.Service;
 import net.microfalx.heimdall.infrastructure.api.*;
 import net.microfalx.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.ZoneId;
+import java.util.*;
 
+import static java.time.Duration.ofMillis;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.CollectionUtils.setFromString;
 import static net.microfalx.lang.StringUtils.toIdentifier;
 
-class InfrastructureCache {
+class InfrastructureCache extends ApplicationContextSupport {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(InfrastructureCache.class);
 
     private final Map<String, Server> servers = new HashMap<>();
     private final Map<String, Cluster> clusters = new HashMap<>();
@@ -110,6 +115,74 @@ class InfrastructureCache {
     }
 
     void load() {
+        try {
+            loadServices();
+        } catch (Exception e) {
+            LOGGER.error("Failed to load services", e);
+        }
+        try {
+            Map<Integer, Set<Server>> serversByCluster = loadServers();
+            loadClusters(serversByCluster);
+        } catch (Exception e) {
+            LOGGER.error("Failed to load servers & clusters", e);
+        }
+        try {
+            loadEnvironment();
+        } catch (Exception e) {
+            LOGGER.error("Failed to load environments", e);
+        }
+    }
+
+    private void loadServices() {
+        List<net.microfalx.heimdall.infrastructure.core.Service> serviceJpas = getBean(ServiceRepository.class).findAll();
+        for (net.microfalx.heimdall.infrastructure.core.Service serviceJpa : serviceJpas) {
+            Service.Builder builder = new Service.Builder(serviceJpa.getNaturalId())
+                    .path(serviceJpa.getPath()).port(serviceJpa.getPort()).type(serviceJpa.getType());
+            if (StringUtils.isNotEmpty(serviceJpa.getUsername())) {
+                builder.user(serviceJpa.getUsername(), serviceJpa.getPassword());
+            }
+            if (StringUtils.isNotEmpty(serviceJpa.getToken())) {
+                builder.token(serviceJpa.getToken());
+            }
+            builder.authType(serviceJpa.getAuthType()).connectionTimeout(ofMillis(serviceJpa.getConnectionTimeOut()))
+                    .readTimeout(ofMillis(serviceJpa.getReadTimeOut())).writeTimeout(ofMillis(serviceJpa.getWriteTimeOut()));
+            builder.tags(setFromString(serviceJpa.getTags())).name(serviceJpa.getName()).description(serviceJpa.getDescription());
+            registerService(builder.build());
+        }
+    }
+
+    private Map<Integer, Set<Server>> loadServers() {
+        Map<Integer, Set<Server>> serversByCluster = new HashMap<>();
+        List<net.microfalx.heimdall.infrastructure.core.Server> serversJpas = getBean(ServerRepository.class).findAll();
+        for (net.microfalx.heimdall.infrastructure.core.Server serversJpa : serversJpas) {
+            net.microfalx.heimdall.infrastructure.core.Cluster clusterJpa = serversJpa.getCluster();
+            Server.Builder builder = new Server.Builder(serversJpa.getNaturalId()).type(serversJpa.getType())
+                    .icmp(serversJpa.isIcmp()).hostname(serversJpa.getHostname());
+            if (clusterJpa != null) {
+                builder.zoneId(ZoneId.of(clusterJpa.getTimeZone()));
+            }
+            builder.tags(setFromString(serversJpa.getTags())).name(serversJpa.getName()).description(serversJpa.getDescription());
+            Server server = builder.build();
+            registerServer(server);
+            if (clusterJpa != null) {
+                serversByCluster.computeIfAbsent(clusterJpa.getId(), integer -> new HashSet<>()).add(server);
+            }
+        }
+        return serversByCluster;
+    }
+
+    private void loadClusters(Map<Integer, Set<Server>> serversByCluster) {
+        List<net.microfalx.heimdall.infrastructure.core.Cluster> clusterJpas = getBean(ClusterRepository.class).findAll();
+        for (net.microfalx.heimdall.infrastructure.core.Cluster clusterJpa : clusterJpas) {
+            Cluster.Builder builder = new Cluster.Builder(clusterJpa.getNaturalId()).zoneId(ZoneId.of(clusterJpa.getTimeZone()));
+            builder.tags(setFromString(clusterJpa.getTags())).name(clusterJpa.getName()).description(clusterJpa.getDescription());
+            Set<Server> servers = serversByCluster.getOrDefault(clusterJpa.getId(), Collections.emptySet());
+            builder.servers(servers);
+            registerCluster(builder.build());
+        }
+    }
+
+    private void loadEnvironment() {
 
     }
 }

@@ -5,6 +5,8 @@ import net.microfalx.lang.IdentityAware;
 import net.microfalx.lang.NamedAndTaggedIdentifyAware;
 import net.microfalx.lang.StringUtils;
 
+import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
+
 @ToString
 public class Dns extends NamedAndTaggedIdentifyAware<String> {
 
@@ -80,6 +82,7 @@ public class Dns extends NamedAndTaggedIdentifyAware<String> {
         }
 
         public Builder hostname(String hostname) {
+            requireNotEmpty(hostname);
             this.hostname = hostname;
             return this;
         }
@@ -90,6 +93,7 @@ public class Dns extends NamedAndTaggedIdentifyAware<String> {
         }
 
         public Builder ip(String ip) {
+            requireNotEmpty(ip);
             this.ip = ip;
             return this;
         }
@@ -111,6 +115,8 @@ public class Dns extends NamedAndTaggedIdentifyAware<String> {
 
         @Override
         public Dns build() {
+            if (StringUtils.isEmpty(ip)) throw new IllegalArgumentException("An IP is required");
+            if (StringUtils.isEmpty(hostname)) throw new IllegalArgumentException("A hostname is required");
             Dns dns = (Dns) super.build();
             dns.ip = ip;
             dns.hostname = hostname;

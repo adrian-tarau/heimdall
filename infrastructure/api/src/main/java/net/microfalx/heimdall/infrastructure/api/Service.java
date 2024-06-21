@@ -312,7 +312,7 @@ public class Service extends NamedAndTaggedIdentifyAware<String> implements Infr
         }
 
         public Builder port(int port) {
-            requireBounded(port, 1, 65535);
+            if (port != -1) requireBounded(port, 1, 65535);
             this.port = port;
             updateId();
             return this;
@@ -337,15 +337,10 @@ public class Service extends NamedAndTaggedIdentifyAware<String> implements Infr
             return this;
         }
 
-        public Builder userName(String userName) {
+        public Builder user(String userName, String password) {
             requireNonNull(userName);
             this.authType = AuthType.BASIC;
             this.userName = userName;
-            return this;
-        }
-
-        public Builder password(String password) {
-            this.password = password;
             return this;
         }
 
