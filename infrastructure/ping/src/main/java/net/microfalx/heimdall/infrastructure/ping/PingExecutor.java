@@ -26,6 +26,7 @@ import static org.apache.commons.lang3.StringUtils.abbreviate;
 class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
 
     public static final int MAX_MESSAGE_WIDTH = 1000;
+    private final String id;
     private final Ping ping;
     private final Service service;
     private final Server server;
@@ -45,6 +46,7 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
         requireNonNull(server);
         requireNonNull(persistence);
         requireNonNull(infrastructureService);
+        this.id = service.getId() + "_" + server.getId();
         this.ping = ping;
         this.persistence = persistence;
         this.service = service;
@@ -52,7 +54,17 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
         this.infrastructureService = infrastructureService;
     }
 
-     Ping getPing() {
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public String getName() {
+        return server.getName() + "(" + service.getName() + ")";
+    }
+
+    Ping getPing() {
         return ping;
     }
 

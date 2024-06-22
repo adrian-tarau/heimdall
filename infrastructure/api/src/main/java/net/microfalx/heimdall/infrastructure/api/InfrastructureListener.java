@@ -30,7 +30,7 @@ public interface InfrastructureListener {
      * @return the status, null if the listener cannot provide a status
      */
     default Status getStatus(Service service, Server server) {
-        return null;
+        return Status.NA;
     }
 
     /**
@@ -41,6 +41,6 @@ public interface InfrastructureListener {
      * @return the health, null if the listener cannot provide a health
      */
     default Health getHealth(Service service, Server server) {
-        return null;
+        return Health.NA;
     }
 }

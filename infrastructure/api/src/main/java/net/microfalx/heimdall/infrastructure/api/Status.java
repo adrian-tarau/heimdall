@@ -12,12 +12,17 @@ public enum Status {
     /**
      * The health check failed at transport layer ("Connection refused" type of errors).
      */
-    L4CON(0, true),
+    L3CON(0, true),
+
+    /**
+     * The health check failed at transport layer ("Connection refused" type of errors).
+     */
+    L4CON(10, true),
 
     /**
      * The health check failed at transport layer due to a timeout.
      */
-    L4TOUT(10, true),
+    L4TOUT(20, true),
 
     /**
      * The health check failed at application layer due to a timeout.

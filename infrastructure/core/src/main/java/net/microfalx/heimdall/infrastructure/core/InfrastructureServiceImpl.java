@@ -165,6 +165,7 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
 
     @Override
     public void onApplicationEvent(ApplicationStartedEvent event) {
+        initializeListeners();
         taskExecutor.submit(this::fireInitializedEvent);
     }
 
@@ -172,7 +173,6 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
     public void afterPropertiesSet() throws Exception {
         initializeApplicationContext();
         provisionInfrastructure();
-        initializeListeners();
         this.reload();
         started = true;
     }

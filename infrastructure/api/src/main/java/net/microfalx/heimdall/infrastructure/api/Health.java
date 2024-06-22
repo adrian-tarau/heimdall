@@ -5,7 +5,7 @@ import java.util.StringJoiner;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
 /**
- * An enum for the health of a service
+ * An enum for the health of a service.
  */
 public enum Health {
 
@@ -14,7 +14,6 @@ public enum Health {
      * thrown while executing the health check.
      */
     UNHEALTHY(0),
-
 
     /**
      * Indicates that the health check determined that the service was in a degraded state.

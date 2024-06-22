@@ -45,6 +45,9 @@ public class PingService implements InitializingBean, InfrastructureListener {
     @Autowired
     private PingRepository pingRepository;
 
+    @Autowired
+    private PingHealth health;
+
     private PingScheduler scheduler;
     private AsyncTaskExecutor taskExecutor;
 
@@ -90,6 +93,16 @@ public class PingService implements InitializingBean, InfrastructureListener {
     public void onInfrastructureEvent(InfrastructureEvent event) {
         provisionPings();
         reload();
+    }
+
+    @Override
+    public Status getStatus(net.microfalx.heimdall.infrastructure.api.Service service, Server server) {
+        return health.getStatus(service, server);
+    }
+
+    @Override
+    public Health getHealth(net.microfalx.heimdall.infrastructure.api.Service service, Server server) {
+        return health.getHealth(service, server);
     }
 
     @Override
