@@ -25,6 +25,7 @@ class PingScheduler implements Runnable {
 
     private final PingCache cache;
     private final InfrastructureService infrastructureService;
+    private final PingHealth health;
     private final PingPersistence pingPersistence;
     private final AsyncTaskExecutor taskExecutor;
 
@@ -32,13 +33,15 @@ class PingScheduler implements Runnable {
     private final Map<Integer, AtomicBoolean> pingRunning = new ConcurrentHashMap<>();
 
     PingScheduler(PingCache cache, InfrastructureService infrastructureService,
-                  PingPersistence pingPersistence, AsyncTaskExecutor taskExecutor) {
+                  PingPersistence pingPersistence, PingHealth health, AsyncTaskExecutor taskExecutor) {
         requireNonNull(cache);
         requireNonNull(infrastructureService);
         requireNonNull(pingPersistence);
+        requireNonNull(health);
         requireNonNull(taskExecutor);
         this.cache = cache;
         this.taskExecutor = taskExecutor;
+        this.health = health;
         this.infrastructureService = infrastructureService;
         this.pingPersistence = pingPersistence;
 
@@ -62,7 +65,7 @@ class PingScheduler implements Runnable {
         if (shouldBeScheduled(ping)) {
             Service service = infrastructureService.getService(ping.getService().getNaturalId());
             Server server = infrastructureService.getServer(ping.getServer().getNaturalId());
-            PingExecutor pingExecutor = new PingExecutor(ping, service, server, pingPersistence, infrastructureService);
+            PingExecutor pingExecutor = new PingExecutor(ping, service, server, pingPersistence, infrastructureService, health);
             lastScheduledTime.put(ping.getId(), LocalDateTime.now());
             taskExecutor.execute(new PingRunnable(pingExecutor));
         }

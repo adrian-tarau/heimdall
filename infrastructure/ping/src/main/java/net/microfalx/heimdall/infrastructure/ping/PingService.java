@@ -67,7 +67,7 @@ public class PingService implements InitializingBean, InfrastructureListener {
      */
     public Ping ping(net.microfalx.heimdall.infrastructure.api.Service service, Server server) {
         net.microfalx.heimdall.infrastructure.ping.Ping ping = cache.find(service, server);
-        PingExecutor executor = new PingExecutor(ping, service, server, persistence, infrastructureService);
+        PingExecutor executor = new PingExecutor(ping, service, server, persistence, infrastructureService, health);
         return executor.execute();
     }
 
@@ -124,7 +124,7 @@ public class PingService implements InitializingBean, InfrastructureListener {
     }
 
     private void initializeScheduler() {
-        scheduler = new PingScheduler(cache, infrastructureService, persistence, taskExecutor);
+        scheduler = new PingScheduler(cache, infrastructureService, persistence, health, taskExecutor);
     }
 
     private void startScheduler() {

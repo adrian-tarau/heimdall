@@ -39,6 +39,8 @@ class PingExecutorTest {
     private Service service;
     private Server server;
     @Mock
+    private PingHealth health;
+    @Mock
     private InfrastructureService infrastructureService;
     @Mock
     private PingRepository pingRepository;
@@ -64,7 +66,7 @@ class PingExecutorTest {
 
     @Test
     void executePingOverICMPWithIcmpEnabled() {
-        pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
+        createExecutor();
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
         assertEquals(Status.L3OK, result.getStatus());
@@ -73,10 +75,14 @@ class PingExecutorTest {
         assertNotNull(result.getEndedAt());
     }
 
+    private void createExecutor() {
+        pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService, health);
+    }
+
     @Test
     void executePingOverICMPWithIcmpDisable() {
         server = new Server.Builder().hostname("localhost").icmp(false).build();
-        pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
+        createExecutor();
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
         assertEquals(Status.NA, result.getStatus());
@@ -91,7 +97,7 @@ class PingExecutorTest {
         service = new Service.Builder().type(Service.Type.TCP).port(port).build();
         ServerSocket serverSocket = new ServerSocket();
         serverSocket.bind(new InetSocketAddress(service.getPort()));
-        pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
+        createExecutor();
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         serverSocket.accept();
         assertNotNull(result);
@@ -105,7 +111,7 @@ class PingExecutorTest {
     void executePingTCPWithFailure() {
         int port = 49000 + random.nextInt(10000);
         service = new Service.Builder().type(Service.Type.TCP).port(port).build();
-        pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
+        createExecutor();
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
         assertEquals(Status.L4CON, result.getStatus());
@@ -119,7 +125,7 @@ class PingExecutorTest {
         service = new Service.Builder().type(Service.Type.HTTP)
                 .path("/ping/http_service").port(getNextPort()).build();
         createHttpServer(new OkHandler());
-        pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
+        createExecutor();
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
         assertEquals(Status.L7OK, result.getStatus());
@@ -133,7 +139,7 @@ class PingExecutorTest {
         service = new Service.Builder().type(Service.Type.HTTP).authType(Service.AuthType.NONE)
                 .path("/ping/http_service").port(getNextPort()).build();
         createHttpServer(new OkHandler());
-        pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
+        createExecutor();
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
         assertEquals(Status.L7OK, result.getStatus());
@@ -147,7 +153,7 @@ class PingExecutorTest {
         service = new Service.Builder().type(Service.Type.HTTP).authType(Service.AuthType.BASIC)
                 .path("/ping/http_service").port(getNextPort()).build();
         createHttpServer(new OkHandler());
-        pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
+        createExecutor();
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
         assertEquals(Status.L7OK, result.getStatus());
@@ -161,7 +167,7 @@ class PingExecutorTest {
         service = new Service.Builder().type(Service.Type.HTTP).authType(Service.AuthType.BEARER)
                 .user("alex","alex123").path("/ping/http_service").port(getNextPort()).build();
         createHttpServer(new OkHandler());
-        pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
+        createExecutor();
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
         assertEquals(Status.L7OK, result.getStatus());
@@ -175,7 +181,7 @@ class PingExecutorTest {
         service = new Service.Builder().type(Service.Type.HTTP).authType(Service.AuthType.API_KEY)
                 .apiKey("d73b0d68-191c-445f-a48f-b605c3cadafd").path("/ping/http_service").port(getNextPort()).build();
         createHttpServer(new OkHandler());
-        pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
+        createExecutor();
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
         assertEquals(Status.L7OK, result.getStatus());
@@ -189,7 +195,7 @@ class PingExecutorTest {
         service = new Service.Builder().type(Service.Type.HTTP)
                 .path("/ping/http_service").port(getNextPort()).build();
         createHttpServer(new TimeoutHandler());
-        pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
+        createExecutor();
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
         assertEquals(Status.L7TOUT, result.getStatus());
@@ -204,7 +210,7 @@ class PingExecutorTest {
         service = new Service.Builder().type(Service.Type.HTTP).authType(Service.AuthType.NONE)
                 .path("/ping/http_service").port(getNextPort()).build();
         createHttpServer(new TimeoutHandler());
-        pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
+        createExecutor();
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
         assertEquals(Status.L7TOUT, result.getStatus());
@@ -218,7 +224,7 @@ class PingExecutorTest {
         service = new Service.Builder().type(Service.Type.HTTP).authType(Service.AuthType.BASIC).user("alex",
                 "alex123").path("/ping/http_service").port(getNextPort()).build();
         createHttpServer(new TimeoutHandler());
-        pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
+        createExecutor();
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
         assertEquals(Status.L7TOUT, result.getStatus());
@@ -232,7 +238,7 @@ class PingExecutorTest {
         service = new Service.Builder().type(Service.Type.HTTP).authType(Service.AuthType.BEARER).token("12345")
                 .path("/ping/http_service").port(getNextPort()).build();
         createHttpServer(new TimeoutHandler());
-        pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
+        createExecutor();
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
         assertEquals(Status.L7TOUT, result.getStatus());
@@ -247,7 +253,7 @@ class PingExecutorTest {
                 .apiKey("d73b0d68-191c-445f-a48f-b605c3cadafd").path("/ping/http_service")
                 .port(getNextPort()).build();
         createHttpServer(new TimeoutHandler());
-        pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
+        createExecutor();
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
         assertEquals(Status.L7TOUT, result.getStatus());
@@ -262,7 +268,7 @@ class PingExecutorTest {
         service = new Service.Builder().type(Service.Type.HTTP)
                 .path("/ping/http_service").port(port).build();
         createHttpServer(new FailureHandler());
-        pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
+        createExecutor();
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
         assertEquals(Status.L7STS, result.getStatus());
@@ -278,7 +284,7 @@ class PingExecutorTest {
         service = new Service.Builder().type(Service.Type.HTTP).authType(Service.AuthType.NONE)
                 .path("/ping/http_service").port(port).build();
         createHttpServer(new FailureHandler());
-        pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
+        createExecutor();
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
         assertEquals(Status.L7STS, result.getStatus());
@@ -294,7 +300,7 @@ class PingExecutorTest {
         service = new Service.Builder().type(Service.Type.HTTP)
                 .authType(Service.AuthType.BASIC).path("/ping/http_service").port(port).build();
         createHttpServer(new FailureHandler());
-        pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
+        createExecutor();
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
         assertEquals(Status.L7STS, result.getStatus());
@@ -311,7 +317,7 @@ class PingExecutorTest {
         service = new Service.Builder().type(Service.Type.HTTP).authType(Service.AuthType.BEARER)
                 .path("/ping/http_service").port(port).build();
         createHttpServer(new FailureHandler());
-        pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
+        createExecutor();
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
         assertEquals(Status.L7STS, result.getStatus());
@@ -328,7 +334,7 @@ class PingExecutorTest {
                 .authType(Service.AuthType.API_KEY).path("/ping/http_service").port(port)
                 .apiKey("d73b0d68-191c-445f-a48f-b605c3cadafd").build();
         createHttpServer(new FailureHandler());
-        pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
+        createExecutor();
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
         assertEquals(Status.L7STS, result.getStatus());
