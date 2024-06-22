@@ -69,30 +69,5 @@ public interface Ping extends Identifiable<String>, Nameable {
      */
     String getErrorMessage();
 
-    /**
-     * An enum which carries the ping status.
-     */
-    enum Status {
-
-        /**
-         * The ping is successful.
-         */
-        SUCCESS,
-
-        /**
-         * The ping failed.
-         */
-        FAILURE,
-
-        /**
-         * The ping failed with a timeout.
-         */
-        TIMEOUT,
-
-        /**
-         * The ping is canceled
-         */
-        CANCEL
-    }
 
 }

@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
+import net.microfalx.heimdall.infrastructure.api.Status;
 import net.microfalx.heimdall.infrastructure.core.Server;
 import net.microfalx.heimdall.infrastructure.core.Service;
 import net.microfalx.lang.annotation.*;
@@ -50,7 +51,7 @@ public class PingResult {
     @Enumerated(EnumType.STRING)
     @Description("The status of the ping")
     @Position(10)
-    private net.microfalx.heimdall.infrastructure.api.Ping.Status status;
+    private Status status;
 
     @Column(name = "error_code")
     @Description("The status of the ping for an application service")

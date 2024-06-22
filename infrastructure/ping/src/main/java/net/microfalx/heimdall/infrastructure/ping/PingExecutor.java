@@ -1,9 +1,6 @@
 package net.microfalx.heimdall.infrastructure.ping;
 
-import net.microfalx.heimdall.infrastructure.api.Environment;
-import net.microfalx.heimdall.infrastructure.api.InfrastructureService;
-import net.microfalx.heimdall.infrastructure.api.Server;
-import net.microfalx.heimdall.infrastructure.api.Service;
+import net.microfalx.heimdall.infrastructure.api.*;
 import net.microfalx.lang.ObjectUtils;
 
 import java.io.IOException;
@@ -33,7 +30,7 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
     private final PingPersistence persistence;
     private final InfrastructureService infrastructureService;
 
-    private Status status = Status.SUCCESS;
+    private Status status = Status.NA;
     private ZonedDateTime start;
     private ZonedDateTime end;
     private Integer errorCode;
@@ -73,7 +70,6 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
         try {
             doPing();
         } catch (Exception e) {
-            status = Status.FAILURE;
             errorMessage = getRootCauseMessage(e);
         } finally {
             end = ZonedDateTime.now();
@@ -136,9 +132,10 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
         if (server.isIcmp()) {
             boolean isServerPing = InetAddress.getByName(server.getHostname())
                     .isReachable((int) service.getConnectionTimeout().toMillis());
-            if (!isServerPing) status = Status.FAILURE;
+            if (!isServerPing) status = Status.L3CON;
+            status=Status.L3OK;
         } else {
-            status = Status.CANCEL;
+            status = Status.NA;
         }
     }
 
@@ -152,11 +149,12 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
                     .followRedirects(HttpClient.Redirect.ALWAYS).build();
             HttpResponse<String> response = client.send(builder.build(), HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() != 200) errorCode = response.statusCode();
+            status=Status.L7OK;
         } catch (HttpTimeoutException e) {
-            status = Status.TIMEOUT;
+            status = Status.L7TOUT;
             errorMessage = abbreviate(e.getMessage(), MAX_MESSAGE_WIDTH);
         } catch (Exception e) {
-            status = Status.FAILURE;
+            status = Status.L7STS;
             errorCode=500;
             errorMessage = abbreviate(e.getMessage(), MAX_MESSAGE_WIDTH);
         }
@@ -182,11 +180,13 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
 
     private void doPingTcp() {
         try (Socket socket = new Socket()) {
-            socket.connect(new InetSocketAddress(InetAddress.getByName(server.getHostname()), service.getPort()), getConnectionTimeout());
+            socket.connect(new InetSocketAddress(InetAddress.getByName(server.getHostname()), service.getPort()),
+                    getConnectionTimeout());
+            status=Status.L4OK;
         } catch (SocketTimeoutException e) {
-            status = Status.TIMEOUT;
+            status = Status.L4TOUT;
         } catch (Exception e) {
-            status = Status.FAILURE;
+            status = Status.L4CON;
             errorMessage = abbreviate(e.getMessage(), MAX_MESSAGE_WIDTH);
         }
     }
@@ -195,8 +195,9 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
         try (DatagramSocket socket = new DatagramSocket(service.getPort())) {
             socket.connect(new InetSocketAddress(service.getPort()));
             socket.setSoTimeout(ping.getConnectionTimeOut());
+            status=Status.L4OK;
         } catch (Exception e) {
-            status = Status.FAILURE;
+            status = Status.L4CON;
             errorMessage = abbreviate(e.getMessage(), MAX_MESSAGE_WIDTH);
         }
     }

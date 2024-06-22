@@ -10,7 +10,7 @@ import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 public enum Status {
 
     /**
-     * The health check failed at transport layer ("Connection refused" type of errors).
+     * The health check failed at network layer.
      */
     L3CON(0, true),
 

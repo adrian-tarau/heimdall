@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import net.microfalx.heimdall.infrastructure.api.InfrastructureService;
 import net.microfalx.heimdall.infrastructure.api.Server;
 import net.microfalx.heimdall.infrastructure.api.Service;
+import net.microfalx.heimdall.infrastructure.api.Status;
 import net.microfalx.lang.ExceptionUtils;
 import net.microfalx.lang.IOUtils;
 import net.microfalx.lang.ThreadUtils;
@@ -66,7 +67,7 @@ class PingExecutorTest {
         pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
-        assertEquals(net.microfalx.heimdall.infrastructure.api.Ping.Status.SUCCESS, result.getStatus());
+        assertEquals(Status.L3OK, result.getStatus());
         assertNotNull(result.getDuration());
         assertNotNull(result.getStartedAt());
         assertNotNull(result.getEndedAt());
@@ -78,7 +79,7 @@ class PingExecutorTest {
         pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
-        assertEquals(net.microfalx.heimdall.infrastructure.api.Ping.Status.CANCEL, result.getStatus());
+        assertEquals(Status.NA, result.getStatus());
         assertNotNull(result.getDuration());
         assertNotNull(result.getStartedAt());
         assertNotNull(result.getEndedAt());
@@ -94,7 +95,7 @@ class PingExecutorTest {
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         serverSocket.accept();
         assertNotNull(result);
-        assertEquals(net.microfalx.heimdall.infrastructure.api.Ping.Status.SUCCESS, result.getStatus());
+        assertEquals(Status.L4OK, result.getStatus());
         assertNotNull(result.getDuration());
         assertNotNull(result.getStartedAt());
         assertNotNull(result.getEndedAt());
@@ -107,7 +108,7 @@ class PingExecutorTest {
         pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
-        assertEquals(net.microfalx.heimdall.infrastructure.api.Ping.Status.FAILURE, result.getStatus());
+        assertEquals(Status.L4CON, result.getStatus());
         assertNotNull(result.getDuration());
         assertNotNull(result.getStartedAt());
         assertNotNull(result.getEndedAt());
@@ -121,7 +122,7 @@ class PingExecutorTest {
         pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
-        assertEquals(net.microfalx.heimdall.infrastructure.api.Ping.Status.SUCCESS, result.getStatus());
+        assertEquals(Status.L7OK, result.getStatus());
         assertNotNull(result.getDuration());
         assertNotNull(result.getStartedAt());
         assertNotNull(result.getEndedAt());
@@ -135,7 +136,7 @@ class PingExecutorTest {
         pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
-        assertEquals(net.microfalx.heimdall.infrastructure.api.Ping.Status.SUCCESS, result.getStatus());
+        assertEquals(Status.L7OK, result.getStatus());
         assertNotNull(result.getDuration());
         assertNotNull(result.getStartedAt());
         assertNotNull(result.getEndedAt());
@@ -149,7 +150,7 @@ class PingExecutorTest {
         pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
-        assertEquals(net.microfalx.heimdall.infrastructure.api.Ping.Status.SUCCESS, result.getStatus());
+        assertEquals(Status.L7OK, result.getStatus());
         assertNotNull(result.getDuration());
         assertNotNull(result.getStartedAt());
         assertNotNull(result.getEndedAt());
@@ -158,12 +159,12 @@ class PingExecutorTest {
     @Test
     void executePingWithHTTPAndSuccessBearerAuthentication() {
         service = new Service.Builder().type(Service.Type.HTTP).authType(Service.AuthType.BEARER)
-                .userName("alex").password("alex123").path("/ping/http_service").port(getNextPort()).build();
+                .user("alex","alex123").path("/ping/http_service").port(getNextPort()).build();
         createHttpServer(new OkHandler());
         pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
-        assertEquals(net.microfalx.heimdall.infrastructure.api.Ping.Status.SUCCESS, result.getStatus());
+        assertEquals(Status.L7OK, result.getStatus());
         assertNotNull(result.getDuration());
         assertNotNull(result.getStartedAt());
         assertNotNull(result.getEndedAt());
@@ -177,7 +178,7 @@ class PingExecutorTest {
         pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
-        assertEquals(net.microfalx.heimdall.infrastructure.api.Ping.Status.SUCCESS, result.getStatus());
+        assertEquals(Status.L7OK, result.getStatus());
         assertNotNull(result.getDuration());
         assertNotNull(result.getStartedAt());
         assertNotNull(result.getEndedAt());
@@ -191,7 +192,7 @@ class PingExecutorTest {
         pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
-        assertEquals(net.microfalx.heimdall.infrastructure.api.Ping.Status.TIMEOUT, result.getStatus());
+        assertEquals(Status.L7TOUT, result.getStatus());
         assertNotNull(result.getDuration());
         assertNotNull(result.getStartedAt());
         assertNotNull(result.getEndedAt());
@@ -206,7 +207,7 @@ class PingExecutorTest {
         pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
-        assertEquals(net.microfalx.heimdall.infrastructure.api.Ping.Status.TIMEOUT, result.getStatus());
+        assertEquals(Status.L7TOUT, result.getStatus());
         assertNotNull(result.getDuration());
         assertNotNull(result.getStartedAt());
         assertNotNull(result.getEndedAt());
@@ -214,13 +215,13 @@ class PingExecutorTest {
 
     @Test
     void executePingWithHTTPAndTimeOutBasicAuthentication() {
-        service = new Service.Builder().type(Service.Type.HTTP).authType(Service.AuthType.BASIC).userName("alex")
-                .password("alex123").path("/ping/http_service").port(getNextPort()).build();
+        service = new Service.Builder().type(Service.Type.HTTP).authType(Service.AuthType.BASIC).user("alex",
+                "alex123").path("/ping/http_service").port(getNextPort()).build();
         createHttpServer(new TimeoutHandler());
         pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
-        assertEquals(net.microfalx.heimdall.infrastructure.api.Ping.Status.TIMEOUT, result.getStatus());
+        assertEquals(Status.L7TOUT, result.getStatus());
         assertNotNull(result.getDuration());
         assertNotNull(result.getStartedAt());
         assertNotNull(result.getEndedAt());
@@ -234,7 +235,7 @@ class PingExecutorTest {
         pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
-        assertEquals(net.microfalx.heimdall.infrastructure.api.Ping.Status.TIMEOUT, result.getStatus());
+        assertEquals(Status.L7TOUT, result.getStatus());
         assertNotNull(result.getDuration());
         assertNotNull(result.getStartedAt());
         assertNotNull(result.getEndedAt());
@@ -249,7 +250,7 @@ class PingExecutorTest {
         pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
-        assertEquals(net.microfalx.heimdall.infrastructure.api.Ping.Status.TIMEOUT, result.getStatus());
+        assertEquals(Status.L7TOUT, result.getStatus());
         assertNotNull(result.getDuration());
         assertNotNull(result.getStartedAt());
         assertNotNull(result.getEndedAt());
@@ -264,7 +265,7 @@ class PingExecutorTest {
         pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
-        assertEquals(net.microfalx.heimdall.infrastructure.api.Ping.Status.FAILURE, result.getStatus());
+        assertEquals(Status.L7STS, result.getStatus());
         assertNotNull(result.getDuration());
         assertNotNull(result.getStartedAt());
         assertNotNull(result.getEndedAt());
@@ -280,7 +281,7 @@ class PingExecutorTest {
         pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
-        assertEquals(net.microfalx.heimdall.infrastructure.api.Ping.Status.FAILURE, result.getStatus());
+        assertEquals(Status.L7STS, result.getStatus());
         assertNotNull(result.getDuration());
         assertNotNull(result.getStartedAt());
         assertNotNull(result.getEndedAt());
@@ -296,7 +297,7 @@ class PingExecutorTest {
         pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
-        assertEquals(net.microfalx.heimdall.infrastructure.api.Ping.Status.FAILURE, result.getStatus());
+        assertEquals(Status.L7STS, result.getStatus());
         assertNotNull(result.getDuration());
         assertNotNull(result.getStartedAt());
         assertNotNull(result.getEndedAt());
@@ -313,7 +314,7 @@ class PingExecutorTest {
         pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
-        assertEquals(net.microfalx.heimdall.infrastructure.api.Ping.Status.FAILURE, result.getStatus());
+        assertEquals(Status.L7STS, result.getStatus());
         assertNotNull(result.getDuration());
         assertNotNull(result.getStartedAt());
         assertNotNull(result.getEndedAt());
@@ -330,7 +331,7 @@ class PingExecutorTest {
         pingExecutor = new PingExecutor(ping, service, server, persistence, infrastructureService);
         net.microfalx.heimdall.infrastructure.api.Ping result = pingExecutor.execute();
         assertNotNull(result);
-        assertEquals(net.microfalx.heimdall.infrastructure.api.Ping.Status.FAILURE, result.getStatus());
+        assertEquals(Status.L7STS, result.getStatus());
         assertNotNull(result.getDuration());
         assertNotNull(result.getStartedAt());
         assertNotNull(result.getEndedAt());
