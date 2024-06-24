@@ -5,6 +5,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.microfalx.bootstrap.dataset.annotation.Lookup;
+import net.microfalx.bootstrap.dataset.lookup.TimeZoneLookup;
 import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedTimestampAware;
 import net.microfalx.heimdall.infrastructure.api.Server;
 import net.microfalx.lang.annotation.Description;
@@ -43,5 +45,6 @@ public class Cluster extends NamedAndTaggedTimestampAware {
     @Column(name = "time_zone", nullable = false)
     @Position(20)
     @Description("The timezone where the cluster is deployed")
+    @Lookup(model = TimeZoneLookup.class)
     private String timeZone;
 }

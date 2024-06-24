@@ -38,12 +38,12 @@ public class Service extends NamedAndTaggedTimestampAware {
     @Enumerated(EnumType.STRING)
     @Position(20)
     @Description("The type of the service")
-    private net.microfalx.heimdall.infrastructure.api.Service.Type type = net.microfalx.heimdall.infrastructure.api.Service.Type.HTTPS;
+    private net.microfalx.heimdall.infrastructure.api.Service.Type type = net.microfalx.heimdall.infrastructure.api.Service.Type.HTTP;
 
     @Column(name = "port", nullable = false)
     @Position(30)
     @Description("The port where the service can be accessed")
-    @Formattable(negativeValue = Formattable.NA)
+    @Formattable(negativeValue = Formattable.NA, prettyPrint = false)
     private int port;
 
     @Column(name = "path", nullable = false)
@@ -77,23 +77,23 @@ public class Service extends NamedAndTaggedTimestampAware {
 
     @Column(name = "connection_timeout")
     @Position(70)
-    @Label("Connection Timeout")
+    @Label(group = "Timeout", value = "Connection")
     @Description("The amount of time to wait to establish a connect to the service")
-    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT, Visible.Mode.ADD})
+    @Formattable(unit = Formattable.Unit.MILLI_SECOND)
     private int connectionTimeOut = DEFAULT_TIMEOUT;
 
     @Column(name = "read_timeout")
     @Position(71)
-    @Label("Read Timeout")
+    @Label(group = "Timeout", value = "Read")
     @Description("The amount of time to wait to read a response from the service")
-    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT, Visible.Mode.ADD})
+    @Formattable(unit = Formattable.Unit.MILLI_SECOND)
     private int readTimeOut = DEFAULT_TIMEOUT;
 
     @Column(name = "write_timeout")
     @Position(72)
-    @Label("Write Timeout")
+    @Label(group = "Timeout", value = "Write")
     @Description("The amount of time to wait to write a request to the service")
-    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT, Visible.Mode.ADD})
+    @Formattable(unit = Formattable.Unit.MILLI_SECOND)
     private int writeTimeOut = DEFAULT_TIMEOUT;
 
     public static String toNaturalId(Service service) {

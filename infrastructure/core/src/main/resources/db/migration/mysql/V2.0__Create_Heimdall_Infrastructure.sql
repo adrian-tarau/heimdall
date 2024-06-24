@@ -59,7 +59,7 @@ create table infrastructure_service
     id                 integer                                          not null auto_increment primary key,
     natural_id         varchar(500)                                     not null,
     name               varchar(100)                                     not null,
-    `type`             ENUM ('ICMP', 'HTTP','HTTPS','SSH', 'TCP','UDP') not null,
+    `type`             ENUM ('ICMP', 'HTTP','SSH', 'TCP','UDP') not null,
     port               integer                                          not null,
     path               varchar(500)                                     null,
     auth_type          ENUM ('NONE', 'BASIC','BEARER','API_KEY')        not null,

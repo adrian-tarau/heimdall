@@ -39,7 +39,7 @@ public class Service extends NamedAndTaggedIdentifyAware<String> implements Infr
     public static Service create(Service.Type type) {
         Builder builder = new Builder().type(type);
         switch (type) {
-            case HTTPS -> builder.name("Web Server")
+            case HTTP -> builder.name("Web Server")
                     .description("The home page of the web server over HTTPs");
             case SSH -> builder.name("Shell")
                     .description("The secure shell for the server");
@@ -227,14 +227,9 @@ public class Service extends NamedAndTaggedIdentifyAware<String> implements Infr
         ICMP("icmp", -1),
 
         /**
-         * A service accessed over HTTP.
-         */
-        HTTP("http", 80),
-
-        /**
          * A service accessed over HTTPs.
          */
-        HTTPS("https", 443),
+        HTTP("http", 443),
 
         /**
          * A service accessed over SSH.
@@ -300,7 +295,7 @@ public class Service extends NamedAndTaggedIdentifyAware<String> implements Infr
         private String password;
         private String token;
 
-        private Duration connectionTimeout = Duration.ofSeconds(5);
+        private Duration connectionTimeout = Duration.ofSeconds(2);
         private Duration readTimeout = connectionTimeout;
         private Duration writeTimeout = connectionTimeout;
 
@@ -314,13 +309,11 @@ public class Service extends NamedAndTaggedIdentifyAware<String> implements Infr
         public Builder port(int port) {
             if (port != -1) requireBounded(port, 1, 65535);
             this.port = port;
-            updateId();
             return this;
         }
 
         public Builder path(String path) {
             this.path = path;
-            updateId();
             return this;
         }
 

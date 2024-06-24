@@ -138,6 +138,21 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
     }
 
     @Override
+    public Health getHealth(Environment environment) {
+        return Health.NA;
+    }
+
+    @Override
+    public Health getHealth(net.microfalx.heimdall.infrastructure.api.Service service) {
+        return Health.NA;
+    }
+
+    @Override
+    public Health getHealth(Server server) {
+        return Health.NA;
+    }
+
+    @Override
     public Health getHealth(net.microfalx.heimdall.infrastructure.api.Service service, Server server) {
         requireNonNull(service);
         requireNonNull(server);

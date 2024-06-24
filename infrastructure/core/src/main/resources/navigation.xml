@@ -2,6 +2,9 @@
 <navigations xmlns="https://net.microfalx/xsd/navigation-1.0.xsd">
     <menu id="left">
         <menu id="infrastructure" text="Infrastructure" position="5" icon="fa-regular fa-map">
+            <item id="topology" text="Topology" action="/infrastructure/topology" icon="fa-solid fa-diagram-project"/>
+            <item id="server" text="Servers" action="/infrastructure/server" icon="fa-solid fa-server"/>
+            <item id="service" text="Services" action="/infrastructure/service" icon="fa-solid fa-box"/>
         </menu>
         <menu id="infrastructure_system" text="Infrastructure" parent="system" position="30" icon="fa-regular fa-map">
             <item id="environment" text="Environments" action="/system/infrastructure/environment" icon="fa-solid fa-seedling"/>

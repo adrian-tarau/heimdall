@@ -119,6 +119,30 @@ public interface InfrastructureService {
     /**
      * Returns the health of a service running within a server.
      *
+     * @param environment the environment
+     * @return a non-null instance
+     */
+    Health getHealth(Environment environment);
+
+    /**
+     * Returns the health of a service running within a server.
+     *
+     * @param service the service
+     * @return a non-null instance
+     */
+    Health getHealth(Service service);
+
+    /**
+     * Returns the health of a service running within a server.
+     *
+     * @param server the server
+     * @return a non-null instance
+     */
+    Health getHealth(Server server);
+
+    /**
+     * Returns the health of a service running within a server.
+     *
      * @param service the service
      * @param server  the server
      * @return a non-null instance

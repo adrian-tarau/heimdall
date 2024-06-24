@@ -16,6 +16,7 @@ import java.util.*;
 import static java.time.Duration.ofMillis;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.CollectionUtils.setFromString;
+import static net.microfalx.lang.StringUtils.isNotEmpty;
 import static net.microfalx.lang.StringUtils.toIdentifier;
 
 class InfrastructureCache extends ApplicationContextSupport {
@@ -115,6 +116,7 @@ class InfrastructureCache extends ApplicationContextSupport {
     }
 
     void load() {
+        LOGGER.info("Load infrastructure");
         try {
             loadServices();
         } catch (Exception e) {
@@ -131,6 +133,8 @@ class InfrastructureCache extends ApplicationContextSupport {
         } catch (Exception e) {
             LOGGER.error("Failed to load environments", e);
         }
+        LOGGER.info("Infrastructure loaded, environment: {}, clusters: {}, servers: {}, services: {}",
+                environments.size(), clusters.size(), servers.size(), services.size());
     }
 
     private void loadServices() {
@@ -138,12 +142,8 @@ class InfrastructureCache extends ApplicationContextSupport {
         for (net.microfalx.heimdall.infrastructure.core.Service serviceJpa : serviceJpas) {
             Service.Builder builder = new Service.Builder(serviceJpa.getNaturalId())
                     .path(serviceJpa.getPath()).port(serviceJpa.getPort()).type(serviceJpa.getType());
-            if (StringUtils.isNotEmpty(serviceJpa.getUsername())) {
-                builder.user(serviceJpa.getUsername(), serviceJpa.getPassword());
-            }
-            if (StringUtils.isNotEmpty(serviceJpa.getToken())) {
-                builder.token(serviceJpa.getToken());
-            }
+            if (isNotEmpty(serviceJpa.getUsername())) builder.user(serviceJpa.getUsername(), serviceJpa.getPassword());
+            if (isNotEmpty(serviceJpa.getToken())) builder.token(serviceJpa.getToken());
             builder.authType(serviceJpa.getAuthType()).connectionTimeout(ofMillis(serviceJpa.getConnectionTimeOut()))
                     .readTimeout(ofMillis(serviceJpa.getReadTimeOut())).writeTimeout(ofMillis(serviceJpa.getWriteTimeOut()));
             builder.tags(setFromString(serviceJpa.getTags())).name(serviceJpa.getName()).description(serviceJpa.getDescription());

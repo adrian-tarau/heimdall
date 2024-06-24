@@ -1,5 +1,7 @@
 package net.microfalx.heimdall.infrastructure.api;
 
+import net.microfalx.lang.annotation.Name;
+
 import java.util.StringJoiner;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
@@ -28,6 +30,7 @@ public enum Health {
     /**
      * Indicates that the health check did not run.
      */
+    @Name("N/A")
     NA(100);
 
     private int priority;

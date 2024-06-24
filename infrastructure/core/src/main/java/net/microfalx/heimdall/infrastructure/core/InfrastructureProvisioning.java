@@ -28,7 +28,7 @@ class InfrastructureProvisioning implements Runnable {
     }
 
     private void provisionServices() {
-        infrastructureService.registerService(Service.create(Service.Type.HTTPS));
+        infrastructureService.registerService(Service.create(Service.Type.HTTP));
         infrastructureService.registerService(Service.create(Service.Type.SSH));
         infrastructureService.registerService(Service.create(Service.Type.ICMP));
     }
