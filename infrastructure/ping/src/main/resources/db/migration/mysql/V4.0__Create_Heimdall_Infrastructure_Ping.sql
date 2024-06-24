@@ -18,7 +18,8 @@ create table infrastructure_ping
     modified_at        datetime,
     description        varchar(1000),
     constraint fk$infrastructure_ping$service foreign key (service_id) references infrastructure_service (id),
-    constraint fk$infrastructure_ping$server foreign key (server_id) references infrastructure_server (id)
+    constraint fk$infrastructure_ping$server foreign key (server_id) references infrastructure_server (id),
+    constraint nk$infrastructure_ping$service_server unique key (service_id, server_id)
 
 ) ENGINE = InnoDB;
 
@@ -39,3 +40,5 @@ create table infrastructure_ping_result
     constraint fk$infrastructure_ping_result$server foreign key (server_id) references infrastructure_server (id)
 
 ) ENGINE = InnoDB;
+
+create index ix$infrastructure_ping_result$started_at on infrastructure_ping_result (started_at);

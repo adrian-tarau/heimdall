@@ -67,26 +67,38 @@ public class PingService implements InitializingBean, InfrastructureListener {
      */
     public Ping ping(net.microfalx.heimdall.infrastructure.api.Service service, Server server) {
         net.microfalx.heimdall.infrastructure.ping.Ping ping = cache.find(service, server);
-        PingExecutor executor = new PingExecutor(ping, service, server, persistence, infrastructureService, health);
-        return executor.execute();
+        if (ping != null) {
+            PingExecutor executor = new PingExecutor(ping, service, server, persistence, infrastructureService, health);
+            executor.setPersist(false);
+            return executor.execute();
+        } else {
+            CompletablePing completablePing = new CompletablePing(service, server);
+            return completablePing;
+        }
     }
 
     /**
      * Registers a ping.
+     * <p>
+     * If a ping is already registered, the request is ignored.
      *
-     * @param service  the service
-     * @param server   the server
-     * @param interval the interval
+     * @param name        the name for the ping
+     * @param description an optional description associated with a ping
+     * @param service     the service
+     * @param server      the server
+     * @param interval    the interval
+     * @return {@code true} if the ping was registered, {@code false} otherwise
      */
-    public void registerPing(net.microfalx.heimdall.infrastructure.api.Service service, Server server, Duration interval) {
-        persistence.registerPing(service, server, interval);
+    public boolean registerPing(String name, String description,
+                                net.microfalx.heimdall.infrastructure.api.Service service, Server server,
+                                Duration interval) {
+        return persistence.registerPing(name, service, server, interval, description);
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
         initializeExecutor();
         initializeScheduler();
-        reload();
     }
 
     @Override
@@ -108,11 +120,12 @@ public class PingService implements InitializingBean, InfrastructureListener {
     @Override
     public void onInfrastructureInitialization() {
         provisionPings();
+        reload();
         startScheduler();
     }
 
     private void provisionPings() {
-        this.taskExecutor.submit(new PingProvisioning(this, infrastructureService, pingRepository));
+        this.taskExecutor.submit(new PingProvisioning(this, infrastructureService));
     }
 
     private void initializeExecutor() {

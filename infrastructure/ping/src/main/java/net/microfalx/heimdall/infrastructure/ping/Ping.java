@@ -1,6 +1,7 @@
 package net.microfalx.heimdall.infrastructure.ping;
 
 
+import jakarta.persistence.Id;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -10,10 +11,7 @@ import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedTimestampAware;
 import net.microfalx.heimdall.infrastructure.core.Server;
 import net.microfalx.heimdall.infrastructure.core.Service;
-import net.microfalx.lang.annotation.Description;
-import net.microfalx.lang.annotation.Label;
-import net.microfalx.lang.annotation.Position;
-import net.microfalx.lang.annotation.Visible;
+import net.microfalx.lang.annotation.*;
 
 @Entity
 @Table(name = "infrastructure_ping")
@@ -21,6 +19,7 @@ import net.microfalx.lang.annotation.Visible;
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString(callSuper = true)
+@Name("Health Check")
 public class Ping extends NamedAndTaggedTimestampAware {
 
     @Id
@@ -30,15 +29,17 @@ public class Ping extends NamedAndTaggedTimestampAware {
     @Visible(value = false)
     private Integer id;
 
-    @JoinColumn(name = "service_id", nullable = false)
     @ManyToOne
-    @Position(10)
-    private Service service;
-
     @JoinColumn(name = "server_id", nullable = false)
-    @ManyToOne
-    @Position(11)
+    @Position(10)
+    @Width("150")
     private Server server;
+
+    @ManyToOne
+    @JoinColumn(name = "service_id", nullable = false)
+    @Position(11)
+    @Width("150")
+    private Service service;
 
     @Column(name = "active")
     @Position(15)
@@ -48,36 +49,37 @@ public class Ping extends NamedAndTaggedTimestampAware {
     @Column(name = "interval")
     @Position(16)
     @Description("The interval between pings")
+    @Formattable(unit = Formattable.Unit.MILLI_SECOND)
+    @Width("90")
     private int interval;
 
     @Column(name = "hoops")
     @Position(20)
     @Description("The number of routers/host the ping must pass though to reach the destination host")
     @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT, Visible.Mode.ADD})
+    @Width("100")
     private Integer hoops;
 
     @Column(name = "connection_timeout")
-    @Formattable()
     @Position(30)
-    @Label("Connection Timeout")
+    @Label(group = "Timeout", value = "Connection")
     @Description("The amount of time to wait if the ping did not reach the destination host")
-    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT, Visible.Mode.ADD})
+    @Formattable(unit = Formattable.Unit.MILLI_SECOND)
     private Integer connectionTimeOut;
 
     @Column(name = "read_timeout")
-    @Formattable()
     @Position(31)
-    @Label("Read Timeout")
+    @Label(group = "Timeout", value = "Read")
     @Description("The amount of time to wait if the ping is not read by the destination host")
-    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT, Visible.Mode.ADD})
+    @Formattable(unit = Formattable.Unit.MILLI_SECOND)
     private Integer readTimeOut;
 
     @Column(name = "write_timeout")
-    @Formattable()
     @Position(32)
-    @Label("Write Timeout")
+    @Width("100")
+    @Label(group = "Timeout", value = "Write")
     @Description("The amount of time to wait if the ping is not created by the host")
-    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT, Visible.Mode.ADD})
+    @Formattable(unit = Formattable.Unit.MILLI_SECOND)
     private Integer writeTimeOut;
 
 

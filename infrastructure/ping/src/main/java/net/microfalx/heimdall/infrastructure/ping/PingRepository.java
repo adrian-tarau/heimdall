@@ -28,10 +28,10 @@ public interface PingRepository extends JpaRepository<Ping, Integer>, JpaSpecifi
      * @return {@code true} if a ping is registered, {@code false} otherwise
      */
     @Query(value = """
-            SELECT count(*) > 0 ping_exists FROM infrastructure_ping ip
+            SELECT count(*) ping_count FROM infrastructure_ping ip
             left join infrastructure_server iserver on ip.server_id = iserver.id
             left join infrastructure_service iservice on ip.service_id = iservice.id
             WHERE iserver.natural_id = ?1 and iservice.natural_id = ?2""",
             nativeQuery = true)
-    boolean hasPing(String serverId, String serviceId);
+    int countPings(String serverId, String serviceId);
 }

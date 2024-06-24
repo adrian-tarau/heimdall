@@ -42,7 +42,7 @@ class PingCache {
      * @return the ping
      */
     Ping find(Service service, Server server) {
-        String cacheKey = service.getId() + "_" + server.getId();
+        String cacheKey = PingUtils.getId(service, server);
         Ping jpaPing = cachePingsByServiceAndServer.get(cacheKey);
         if (jpaPing != null) return jpaPing;
         for (Ping ping : pings) {

@@ -45,18 +45,25 @@ class PingPersistence {
     /**
      * Registers a ping.
      *
-     * @param service  the service
-     * @param server   the server
-     * @param interval the interval
+     * @param name        the name of the ping
+     * @param service     the service
+     * @param server      the server
+     * @param interval    the interval
+     * @param description an optional description associated with a ping
+     * @return {@code true} if the ping was registered, {@code false} otherwise
      */
-    public void registerPing(net.microfalx.heimdall.infrastructure.api.Service service, Server server, Duration interval) {
-        if (pingRepository.hasPing(server.getId(), service.getId())) return;
+    public boolean registerPing(String name, net.microfalx.heimdall.infrastructure.api.Service service, Server server,
+                                Duration interval, String description) {
+        if (pingRepository.countPings(server.getId(), service.getId()) > 0) return false;
         net.microfalx.heimdall.infrastructure.ping.Ping ping = new net.microfalx.heimdall.infrastructure.ping.Ping();
-        ping.setActive(true);
+        ping.setName(name);
+        ping.setDescription(description);
         ping.setServer(serverRepository.findByNaturalId(server.getId()).orElseThrow());
         ping.setService(serviceRepository.findByNaturalId(service.getId()).orElseThrow());
         ping.setInterval((int) interval.toMillis());
+        ping.setActive(true);
         pingRepository.saveAndFlush(ping);
+        return true;
     }
 
 }

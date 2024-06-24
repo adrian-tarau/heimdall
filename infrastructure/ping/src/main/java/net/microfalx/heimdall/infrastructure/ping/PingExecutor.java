@@ -5,10 +5,7 @@ import net.microfalx.lang.ObjectUtils;
 
 import java.io.IOException;
 import java.net.*;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.net.http.HttpTimeoutException;
+import java.net.http.*;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Base64;
@@ -31,6 +28,7 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
     private final InfrastructureService infrastructureService;
     private final PingHealth health;
 
+    private boolean persist = true;
     private Status status = Status.NA;
     private ZonedDateTime start;
     private ZonedDateTime end;
@@ -52,6 +50,10 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
         this.server = server;
         this.infrastructureService = infrastructureService;
         this.health = health;
+    }
+
+    public void setPersist(boolean persist) {
+        this.persist = persist;
     }
 
     @Override
@@ -77,8 +79,10 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
         } finally {
             end = ZonedDateTime.now();
         }
-        health.registerPing(this);
-        doPersistPing();
+        if (persist) {
+            health.registerPing(this);
+            doPersistPing();
+        } ;
         return this;
     }
 
@@ -104,7 +108,7 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
 
     @Override
     public Duration getDuration() {
-        return Duration.between(getEndedAt(), getStartedAt());
+        return Duration.between(getStartedAt(), getEndedAt());
     }
 
     @Override
@@ -125,7 +129,7 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
     private void doPing() throws IOException {
         switch (service.getType()) {
             case ICMP -> doPingIcmp();
-            case HTTP, HTTPS -> doPingHttpAndHttps();
+            case HTTP -> doPingHttp();
             case TCP -> doPingTcp();
             case UDP -> doPingUdp();
         }
@@ -136,14 +140,13 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
         if (server.isIcmp()) {
             boolean isServerPing = InetAddress.getByName(server.getHostname())
                     .isReachable((int) service.getConnectionTimeout().toMillis());
-            if (!isServerPing) status = Status.L3CON;
-            status = Status.L3OK;
+            status = isServerPing ? Status.L3OK : Status.L3CON;
         } else {
             status = Status.NA;
         }
     }
 
-    private void doPingHttpAndHttps() {
+    private void doPingHttp() {
         try {
             HttpRequest.Builder builder = HttpRequest.newBuilder().uri(createHttpUri())
                     .version(HttpClient.Version.HTTP_2).timeout(Duration.ofMillis(getReadTimeout())).GET();
@@ -152,8 +155,21 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
                     .connectTimeout(Duration.ofMillis(getConnectionTimeout()))
                     .followRedirects(HttpClient.Redirect.ALWAYS).build();
             HttpResponse<String> response = client.send(builder.build(), HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() != 200) errorCode = response.statusCode();
-            status = Status.L7OK;
+            if (response.statusCode() >= 500) {
+                errorCode = response.statusCode();
+                if (response.statusCode() == 503) {
+                    status = Status.L7TOUT;
+                } else {
+                    status = Status.L7STS;
+                }
+            } else if (response.statusCode() >= 400) {
+                errorCode = response.statusCode();
+                status = Status.L7STS;
+            } else {
+                status = Status.L7OK;
+            }
+        } catch (HttpConnectTimeoutException e) {
+            status = Status.L4TOUT;
         } catch (HttpTimeoutException e) {
             status = Status.L7TOUT;
             errorMessage = abbreviate(e.getMessage(), MAX_MESSAGE_WIDTH);
@@ -170,7 +186,7 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
             builder.header("Authorization", "Basic " + Base64.getEncoder().
                     encodeToString(valueToEncode.getBytes()));
         } else if (service.getAuthType() == Service.AuthType.BEARER) {
-            builder.header("Authorization", service.getToken());
+            builder.header("Authorization", "Bearer " + service.getToken());
         } else if (service.getAuthType() == Service.AuthType.API_KEY) {
             builder.header("X-API-KEY", service.getToken());
         }

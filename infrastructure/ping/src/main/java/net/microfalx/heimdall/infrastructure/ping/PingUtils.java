@@ -10,9 +10,20 @@ public class PingUtils {
      *
      * @param service the service
      * @param server  the server
-     * @return a non-emtpy String
+     * @return a non-empty String
      */
     public static String getId(Service service, Server server) {
         return service.getId() + "_" + server.getId();
+    }
+
+    /**
+     * Returns a name for a service and server tuple.
+     *
+     * @param service the service
+     * @param server  the server
+     * @return a non-empty String
+     */
+    public static String getName(Service service, Server server) {
+        return service.getName() + " / " + server.getName();
     }
 }

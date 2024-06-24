@@ -1,13 +1,14 @@
 package net.microfalx.heimdall.infrastructure.ping;
 
+import net.microfalx.heimdall.infrastructure.api.InfrastructureNotFoundException;
 import net.microfalx.heimdall.infrastructure.api.InfrastructureService;
 import net.microfalx.heimdall.infrastructure.api.Server;
 import net.microfalx.heimdall.infrastructure.api.Service;
+import net.microfalx.lang.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.task.AsyncTaskExecutor;
 
-import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -29,7 +30,7 @@ class PingScheduler implements Runnable {
     private final PingPersistence pingPersistence;
     private final AsyncTaskExecutor taskExecutor;
 
-    private final Map<Integer, LocalDateTime> lastScheduledTime = new ConcurrentHashMap<>();
+    private final Map<Integer, Long> lastScheduledTime = new ConcurrentHashMap<>();
     private final Map<Integer, AtomicBoolean> pingRunning = new ConcurrentHashMap<>();
 
     PingScheduler(PingCache cache, InfrastructureService infrastructureService,
@@ -52,7 +53,13 @@ class PingScheduler implements Runnable {
         LOGGER.debug("Schedule " + cache.getPings().size() + " pings");
         for (Ping ping : cache.getPings()) {
             LOGGER.debug(" - " + ping.getName() + ", interval " + formatDuration(ping.getInterval()));
-            schedule(ping);
+            try {
+                schedule(ping);
+            } catch (InfrastructureNotFoundException e) {
+                LOGGER.error("Failed to schedule '" + ping.getName() + "', root cause: " + ExceptionUtils.getRootCauseMessage(e));
+            } catch (Exception e) {
+                LOGGER.error("Failed to schedule '" + ping.getName() + "'", e);
+            }
         }
     }
 
@@ -66,7 +73,7 @@ class PingScheduler implements Runnable {
             Service service = infrastructureService.getService(ping.getService().getNaturalId());
             Server server = infrastructureService.getServer(ping.getServer().getNaturalId());
             PingExecutor pingExecutor = new PingExecutor(ping, service, server, pingPersistence, infrastructureService, health);
-            lastScheduledTime.put(ping.getId(), LocalDateTime.now());
+            lastScheduledTime.put(ping.getId(), System.currentTimeMillis());
             taskExecutor.execute(new PingRunnable(pingExecutor));
         }
     }
@@ -92,7 +99,7 @@ class PingScheduler implements Runnable {
         AtomicBoolean running = getRunning(ping);
         if (running.get()) return false;
         // check if it is time to schedule again
-        LocalDateTime lastScheduleTime = lastScheduledTime.get(ping.getId());
+        Long lastScheduleTime = lastScheduledTime.get(ping.getId());
         if (lastScheduleTime == null) return true;
         return millisSince(lastScheduleTime) >= ping.getInterval();
     }
