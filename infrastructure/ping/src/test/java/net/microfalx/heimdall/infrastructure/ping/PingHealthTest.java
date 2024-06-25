@@ -60,12 +60,10 @@ class PingHealthTest {
     @MockitoSettings(strictness = Strictness.LENIENT)
     void withPingRegistrationWithFullHealthyStatus() {
         when(ping.getStatus()).thenReturn(Status.L3OK);
-        for (int i = 0; i < 100; i++) {
-            health.registerPing(ping);
-        }
+        registerFullWindowPings();
         mockPing(Status.L4OK);
         health.registerPing(ping);
-        assertEquals(20, health.getPings().values().iterator().next().size());
+        assertEquals(properties.getWindowSize(), health.getPings().values().iterator().next().size());
         assertEquals(Status.L4OK, health.getStatus(service, server));
         assertEquals(Health.HEALTHY, health.getHealth(service, server));
     }
@@ -85,10 +83,10 @@ class PingHealthTest {
     @MockitoSettings(strictness = Strictness.LENIENT)
     void withPingRegistrationWithFullAndDegradedStatus() {
         when(ping.getStatus()).thenReturn(Status.L3OK);
-        registerGoodPings();
+        registerFullWindowPings();
         mockPing(Status.L3CON);
         health.registerPing(ping);
-        assertEquals(20, health.getPings().values().iterator().next().size());
+        assertEquals(properties.getWindowSize(), health.getPings().values().iterator().next().size());
         assertEquals(Status.L3CON, health.getStatus(service, server));
         assertEquals(Health.DEGRADED, health.getHealth(service, server));
     }
@@ -97,18 +95,18 @@ class PingHealthTest {
     @MockitoSettings(strictness = Strictness.LENIENT)
     void withPingRegistrationWithFullAndUnhealthyStatus() {
         when(ping.getStatus()).thenReturn(Status.L4TOUT);
-        registerGoodPings();
+        registerFullWindowPings();
         mockPing(Status.L7TOUT);
         health.registerPing(ping);
         mockPing(Status.L3CON);
         health.registerPing(ping);
-        assertEquals(20, health.getPings().values().iterator().next().size());
+        assertEquals(properties.getWindowSize(), health.getPings().values().iterator().next().size());
         assertEquals(Status.L3CON, health.getStatus(service, server));
         assertEquals(Health.UNHEALTHY, health.getHealth(service, server));
     }
 
-    private void registerGoodPings() {
-        for (int i = 0; i < 100; i++) {
+    private void registerFullWindowPings() {
+        for (int i = 0; i < properties.getWindowSize(); i++) {
             health.registerPing(ping);
         }
     }

@@ -46,8 +46,10 @@ public class PingHealth {
      */
     void registerPing(Ping ping) {
         Queue<Ping> queue = pings.computeIfAbsent(ping.getId(), pings -> new ArrayBlockingQueue<>(properties.getWindowSize()));
-        if (queue.offer(ping)) queue.remove();
-        queue.offer(ping);
+        if (!queue.offer(ping)) {
+            queue.remove();
+            queue.offer(ping);
+        }
         lastPings.put(ping.getId(), ping);
     }
 
@@ -68,7 +70,6 @@ public class PingHealth {
         if (queue.isEmpty()) return Health.NA;
         int numberOfFailPings = 0;
         for (Ping ping : queue) {
-            System.out.println("Ping hash: "+ping.hashCode()+", status: "+ping.getStatus());
             if (ping.getStatus().isFailure()) numberOfFailPings++;
         }
         if (queue.size() != properties.getWindowSize()) {
