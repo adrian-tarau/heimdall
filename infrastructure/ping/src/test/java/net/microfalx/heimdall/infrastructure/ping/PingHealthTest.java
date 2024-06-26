@@ -47,7 +47,6 @@ class PingHealthTest {
     }
 
     @Test
-    @MockitoSettings(strictness = Strictness.LENIENT)
     void withPingRegistrationWithOneSuccessStatus() {
         when(ping.getStatus()).thenReturn(Status.L3OK);
         health.registerPing(ping);
@@ -57,7 +56,6 @@ class PingHealthTest {
     }
 
     @Test
-    @MockitoSettings(strictness = Strictness.LENIENT)
     void withPingRegistrationWithFullHealthyStatus() {
         when(ping.getStatus()).thenReturn(Status.L3OK);
         registerFullWindowPings();
@@ -70,7 +68,6 @@ class PingHealthTest {
 
 
     @Test
-    @MockitoSettings(strictness = Strictness.LENIENT)
     void withPingRegistrationWithOneFailureStatus() {
         when(ping.getStatus()).thenReturn(Status.L3CON);
         health.registerPing(ping);
@@ -80,7 +77,6 @@ class PingHealthTest {
     }
 
     @Test
-    @MockitoSettings(strictness = Strictness.LENIENT)
     void withPingRegistrationWithFullAndDegradedStatus() {
         when(ping.getStatus()).thenReturn(Status.L3OK);
         registerFullWindowPings();
@@ -92,7 +88,6 @@ class PingHealthTest {
     }
 
     @Test
-    @MockitoSettings(strictness = Strictness.LENIENT)
     void withPingRegistrationWithFullAndUnhealthyStatus() {
         when(ping.getStatus()).thenReturn(Status.L4TOUT);
         registerFullWindowPings();

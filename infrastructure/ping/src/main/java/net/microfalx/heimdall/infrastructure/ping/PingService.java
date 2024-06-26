@@ -4,6 +4,8 @@ import net.microfalx.bootstrap.core.async.AsynchronousProperties;
 import net.microfalx.bootstrap.core.async.TaskExecutorFactory;
 import net.microfalx.heimdall.infrastructure.api.Ping;
 import net.microfalx.heimdall.infrastructure.api.*;
+import net.microfalx.heimdall.infrastructure.core.ServerRepository;
+import net.microfalx.heimdall.infrastructure.core.ServiceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -25,6 +27,18 @@ public class PingService implements InitializingBean, InfrastructureListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(PingService.class);
 
     @Autowired
+    private ServiceRepository serviceRepository;
+
+    @Autowired
+    private ServerRepository serverRepository;
+
+    @Autowired
+    private PingRepository pingRepository;
+
+    @Autowired
+    private PingResultRepository pingResultRepository;
+
+    @Autowired
     private PingPersistence persistence;
 
     @Autowired
@@ -41,9 +55,6 @@ public class PingService implements InitializingBean, InfrastructureListener {
 
     @Autowired
     private ApplicationContext applicationContext;
-
-    @Autowired
-    private PingRepository pingRepository;
 
     @Autowired
     private PingHealth health;
@@ -72,8 +83,7 @@ public class PingService implements InitializingBean, InfrastructureListener {
             executor.setPersist(false);
             return executor.execute();
         } else {
-            CompletablePing completablePing = new CompletablePing(service, server);
-            return completablePing;
+            return new CompletablePing(service, server);
         }
     }
 

@@ -82,7 +82,7 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
         if (persist) {
             health.registerPing(this);
             doPersistPing();
-        } ;
+        }
         return this;
     }
 
