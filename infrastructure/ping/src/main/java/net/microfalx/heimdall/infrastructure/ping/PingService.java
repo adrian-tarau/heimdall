@@ -4,13 +4,10 @@ import net.microfalx.bootstrap.core.async.AsynchronousProperties;
 import net.microfalx.bootstrap.core.async.TaskExecutorFactory;
 import net.microfalx.heimdall.infrastructure.api.Ping;
 import net.microfalx.heimdall.infrastructure.api.*;
-import net.microfalx.heimdall.infrastructure.core.ServerRepository;
-import net.microfalx.heimdall.infrastructure.core.ServiceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
@@ -27,18 +24,6 @@ public class PingService implements InitializingBean, InfrastructureListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(PingService.class);
 
     @Autowired
-    private ServiceRepository serviceRepository;
-
-    @Autowired
-    private ServerRepository serverRepository;
-
-    @Autowired
-    private PingRepository pingRepository;
-
-    @Autowired
-    private PingResultRepository pingResultRepository;
-
-    @Autowired
     private PingPersistence persistence;
 
     @Autowired
@@ -52,9 +37,6 @@ public class PingService implements InitializingBean, InfrastructureListener {
 
     @Autowired
     private InfrastructureService infrastructureService;
-
-    @Autowired
-    private ApplicationContext applicationContext;
 
     @Autowired
     private PingHealth health;
