@@ -1,8 +1,6 @@
 package net.microfalx.heimdall.protocol.smtp.jpa;
 
-import jakarta.persistence.Id;
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -22,15 +20,8 @@ import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 @ReadOnly
 @Getter
 @Setter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString(callSuper = true, exclude = "attachments")
 public class SmtpEvent extends Event {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    @EqualsAndHashCode.Include
-    private Long id;
 
     @Column(name = "subject", length = 500)
     @Name

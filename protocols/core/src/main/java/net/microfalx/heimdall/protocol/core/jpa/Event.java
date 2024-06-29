@@ -6,5 +6,5 @@ import jakarta.persistence.MappedSuperclass;
  * Base class for all protocol events.
  */
 @MappedSuperclass
-public class Event extends TimestampAware {
+public abstract class Event extends TimestampAware {
 }

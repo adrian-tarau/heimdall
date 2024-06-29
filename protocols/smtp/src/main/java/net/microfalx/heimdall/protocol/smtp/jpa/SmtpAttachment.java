@@ -1,10 +1,10 @@
 package net.microfalx.heimdall.protocol.smtp.jpa;
 
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.microfalx.bootstrap.jdbc.entity.IdentityAware;
 import net.microfalx.heimdall.protocol.core.jpa.Part;
 import net.microfalx.lang.annotation.Description;
 import net.microfalx.lang.annotation.Position;
@@ -13,15 +13,8 @@ import net.microfalx.lang.annotation.Position;
 @Table(name = "protocol_smtp_attachments")
 @Getter
 @Setter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString
-public class SmtpAttachment {
-
-    @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Include
-    private Long id;
+public class SmtpAttachment extends IdentityAware<Long> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "smtp_event_id", nullable = false)

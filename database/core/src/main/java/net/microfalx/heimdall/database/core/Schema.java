@@ -1,8 +1,6 @@
 package net.microfalx.heimdall.database.core;
 
-import jakarta.persistence.Id;
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -11,7 +9,7 @@ import net.microfalx.bootstrap.dataset.annotation.Component;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.dataset.annotation.Lookup;
 import net.microfalx.bootstrap.dataset.lookup.TimeZoneLookup;
-import net.microfalx.bootstrap.jdbc.entity.NamedTimestampAware;
+import net.microfalx.bootstrap.jdbc.entity.NamedAndTimestampedIdentityAware;
 import net.microfalx.bootstrap.jdbc.jpa.EncryptAttributeConverter;
 import net.microfalx.bootstrap.jdbc.support.Node;
 import net.microfalx.bootstrap.model.Field;
@@ -24,15 +22,8 @@ import java.time.ZoneId;
 @Name("Databases")
 @Getter
 @Setter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString(callSuper = true)
-public class Schema extends NamedTimestampAware {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    @EqualsAndHashCode.Include
-    private Integer id;
+public class Schema extends NamedAndTimestampedIdentityAware<Integer> {
 
     @Column(name = "type", length = 500)
     @Position(10)

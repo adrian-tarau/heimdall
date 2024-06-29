@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.OrderBy;
+import net.microfalx.bootstrap.jdbc.entity.IdentityAware;
 import net.microfalx.lang.annotation.Description;
 import net.microfalx.lang.annotation.Position;
 import net.microfalx.lang.annotation.Timestamp;
@@ -22,8 +23,8 @@ import java.time.LocalDateTime;
 @MappedSuperclass
 @Getter
 @Setter
-@ToString
-public abstract class TimestampAware {
+@ToString(callSuper = true)
+public abstract class TimestampAware extends IdentityAware<Long> {
 
     @Column(name = "created_at", nullable = false)
     @NotNull

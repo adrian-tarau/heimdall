@@ -1,13 +1,11 @@
-package net.microfalx.heimdall.infrastructure.core;
+package net.microfalx.heimdall.infrastructure.core.system;
 
-import jakarta.persistence.Id;
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
-import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedTimestampAware;
+import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
 import net.microfalx.lang.annotation.*;
 import org.hibernate.annotations.NaturalId;
 
@@ -16,18 +14,10 @@ import org.hibernate.annotations.NaturalId;
 @Name("Services")
 @Getter
 @Setter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString(callSuper = true)
-public class Service extends NamedAndTaggedTimestampAware {
+public class Service extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
 
     private static final int DEFAULT_TIMEOUT = 5000;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    @EqualsAndHashCode.Include
-    @Visible(value = false)
-    private Integer id;
 
     @NaturalId
     @Column(name = "natural_id", nullable = false)

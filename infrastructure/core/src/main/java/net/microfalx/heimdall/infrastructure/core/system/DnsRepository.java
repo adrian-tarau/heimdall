@@ -1,11 +1,9 @@
-package net.microfalx.heimdall.infrastructure.core;
+package net.microfalx.heimdall.infrastructure.core.system;
 
-import jakarta.transaction.Transactional;
 import net.microfalx.bootstrap.jdbc.jpa.NaturalJpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 @Repository
-@Transactional
 public interface DnsRepository extends NaturalJpaRepository<Dns, Integer>, JpaSpecificationExecutor<Cluster>  {
 }

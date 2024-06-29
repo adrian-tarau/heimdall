@@ -1,4 +1,4 @@
-package net.microfalx.heimdall.infrastructure.core;
+package net.microfalx.heimdall.infrastructure.core.system;
 
 import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
@@ -10,25 +10,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import static net.microfalx.bootstrap.core.utils.HostnameUtils.isHostname;
-
 @Controller
-@RequestMapping("/system/infrastructure/dns")
-@DataSet(model = Dns.class, timeFilter = false)
-@Help("infrastructure/dns")
-public class DnsController extends DataSetController<Dns, Integer> {
+@RequestMapping("/system/infrastructure/service")
+@DataSet(model = Service.class, timeFilter = false)
+@Help("infrastructure/service")
+public class ServiceController extends DataSetController<Service, Integer> {
 
     @Autowired
     private InfrastructureService infrastructureService;
 
     @Override
-    protected boolean beforePersist(net.microfalx.bootstrap.dataset.DataSet<Dns, Field<Dns>, Integer> dataSet, Dns model, State state) {
-        model.setValid(isHostname(model.getHostname()) && isHostname(model.getDomain()));
+    protected boolean beforePersist(net.microfalx.bootstrap.dataset.DataSet<Service, Field<Service>, Integer> dataSet, Service model, State state) {
+        if (model.getNaturalId() == null) model.setNaturalId(Service.toNaturalId(model));
         return super.beforePersist(dataSet, model, state);
     }
 
     @Override
-    protected void afterPersist(net.microfalx.bootstrap.dataset.DataSet<Dns, Field<Dns>, Integer> dataSet, Dns model, State state) {
+    protected void afterPersist(net.microfalx.bootstrap.dataset.DataSet<Service, Field<Service>, Integer> dataSet, Service model, State state) {
         super.afterPersist(dataSet, model, state);
         infrastructureService.reload();
     }

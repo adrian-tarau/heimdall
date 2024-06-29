@@ -1,33 +1,23 @@
 package net.microfalx.heimdall.infrastructure.ping;
 
 
-import jakarta.persistence.Id;
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
-import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedTimestampAware;
-import net.microfalx.heimdall.infrastructure.core.Server;
-import net.microfalx.heimdall.infrastructure.core.Service;
+import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
+import net.microfalx.heimdall.infrastructure.core.system.Server;
+import net.microfalx.heimdall.infrastructure.core.system.Service;
 import net.microfalx.lang.annotation.*;
 
 @Entity
 @Table(name = "infrastructure_ping")
 @Getter
 @Setter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString(callSuper = true)
 @Name("Health Check")
-public class Ping extends NamedAndTaggedTimestampAware {
-
-    @Id
-    @Column(name = "id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Include
-    @Visible(value = false)
-    private Integer id;
+public class Ping extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
 
     @ManyToOne
     @JoinColumn(name = "server_id", nullable = false)

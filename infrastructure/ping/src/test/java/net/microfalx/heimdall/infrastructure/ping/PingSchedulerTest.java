@@ -1,8 +1,8 @@
 package net.microfalx.heimdall.infrastructure.ping;
 
 import net.microfalx.heimdall.infrastructure.api.InfrastructureService;
-import net.microfalx.heimdall.infrastructure.core.Server;
-import net.microfalx.heimdall.infrastructure.core.Service;
+import net.microfalx.heimdall.infrastructure.core.system.Server;
+import net.microfalx.heimdall.infrastructure.core.system.Service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

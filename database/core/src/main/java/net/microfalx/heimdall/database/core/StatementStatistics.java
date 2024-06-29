@@ -2,12 +2,11 @@ package net.microfalx.heimdall.database.core;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.microfalx.bootstrap.jdbc.entity.IdentityAware;
 
 import java.time.LocalDateTime;
 
@@ -15,14 +14,8 @@ import java.time.LocalDateTime;
 @Table(name = "database_statements")
 @Getter
 @Setter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString(callSuper = true)
-public class StatementStatistics {
-
-    @Id
-    @Column(name = "id")
-    @EqualsAndHashCode.Include
-    private int id;
+public class StatementStatistics extends IdentityAware<Integer> {
 
     @Column(name = "execution_count")
     private long executionCount;

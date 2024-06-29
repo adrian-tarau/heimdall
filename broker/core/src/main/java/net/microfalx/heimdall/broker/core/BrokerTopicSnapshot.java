@@ -28,7 +28,7 @@ import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
 @ToString
 public class BrokerTopicSnapshot {
 
-    private Collection<Event> events = new ArrayList<>();
+    private final Collection<Event> events = new ArrayList<>();
     private int totalCount;
     private long totalSize;
 

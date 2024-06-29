@@ -1,14 +1,13 @@
 package net.microfalx.heimdall.broker.core;
 
-import jakarta.persistence.Id;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Filterable;
 import net.microfalx.bootstrap.dataset.annotation.OrderBy;
+import net.microfalx.bootstrap.jdbc.entity.IdentityAware;
 import net.microfalx.lang.annotation.*;
 
 import java.time.LocalDateTime;
@@ -18,17 +17,9 @@ import java.time.LocalDateTime;
 @Name("Events")
 @Getter
 @Setter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString(callSuper = true)
 @ReadOnly
-public class BrokerEvent {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    @EqualsAndHashCode.Include
-    @Visible(value = false)
-    private Integer id;
+public class BrokerEvent extends IdentityAware<Integer> {
 
     @ManyToOne
     @JoinColumn(name = "cluster_id", nullable = false)

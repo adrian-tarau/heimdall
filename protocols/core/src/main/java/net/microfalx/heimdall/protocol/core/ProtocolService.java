@@ -26,6 +26,7 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.PeriodicTrigger;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
@@ -40,6 +41,7 @@ import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -353,13 +355,17 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
         return template.execute(context -> {
             net.microfalx.heimdall.protocol.core.jpa.Address addressJpa = addressRepository.findByValue(addressValue);
             if (addressJpa == null) {
-                addressJpa = new net.microfalx.heimdall.protocol.core.jpa.Address();
-                addressJpa.setType(address.getType());
-                addressJpa.setName(resolveName(address));
-                addressJpa.setValue(addressValue);
-                net.microfalx.heimdall.protocol.core.jpa.Address finalAddressJpa = addressJpa;
-                addressRepository.save(finalAddressJpa);
-                addressCache.put(addressValue, finalAddressJpa);
+                TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+                transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+                addressJpa = transactionTemplate.execute(status -> {
+                    net.microfalx.heimdall.protocol.core.jpa.Address newAddressJpa = new net.microfalx.heimdall.protocol.core.jpa.Address();
+                    newAddressJpa.setType(address.getType());
+                    newAddressJpa.setName(resolveName(address));
+                    newAddressJpa.setValue(addressValue);
+                    addressRepository.save(newAddressJpa);
+                    return newAddressJpa;
+                });
+                addressCache.put(addressValue, addressJpa);
             }
             return addressJpa;
         });
@@ -556,17 +562,38 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
     }
 
     private void persist(Collection<E> events) {
+        AtomicBoolean persisted = new AtomicBoolean(true);
         TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
         transactionTemplate.execute(status -> {
             for (E event : events) {
                 try {
                     time("Persist", (t) -> persist(event));
                 } catch (Exception e) {
-                    LOGGER.error("Failed to persist event" + event, e);
+                    status.setRollbackOnly();
+                    persisted.set(false);
+                    LOGGER.warn("Failed to persist event in a common transaction, rollback and persist " +
+                            "individual events, current event: " + event, e);
                 }
             }
             return null;
         });
+        if (!persisted.get()) {
+            persistSingleTransactions(events);
+        }
+    }
+
+    private void persistSingleTransactions(Collection<E> events) {
+        for (E event : events) {
+            try {
+                TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+                transactionTemplate.execute(status -> {
+                    time("Persist", (t) -> persist(event));
+                    return null;
+                });
+            } catch (Exception e) {
+                LOGGER.error("Failed to persist event: " + event, e);
+            }
+        }
     }
 
     class SimulatorWorker implements Runnable {

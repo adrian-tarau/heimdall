@@ -3,7 +3,6 @@ package net.microfalx.heimdall.broker.core;
 import jakarta.persistence.Id;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -14,13 +13,13 @@ import net.microfalx.lang.annotation.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "broker_sessions")
 @Name("Sessions")
 @Getter
 @Setter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString(callSuper = true)
 @ReadOnly
 public class BrokerSession {
@@ -28,7 +27,6 @@ public class BrokerSession {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    @EqualsAndHashCode.Include
     @Name
     @Visible
     @Position(1)
@@ -117,6 +115,18 @@ public class BrokerSession {
     @Position(602)
     @Visible(value = false)
     private String resource;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof BrokerSession session)) return false;
+        return Objects.equals(id, session.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 
     /**
      * An enum for the session status

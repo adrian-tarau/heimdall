@@ -1,13 +1,12 @@
-package net.microfalx.heimdall.infrastructure.core;
+package net.microfalx.heimdall.infrastructure.core.system;
 
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Lookup;
 import net.microfalx.bootstrap.dataset.lookup.TimeZoneLookup;
-import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedTimestampAware;
+import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
 import net.microfalx.heimdall.infrastructure.api.Server;
 import net.microfalx.lang.annotation.Description;
 import net.microfalx.lang.annotation.Name;
@@ -20,16 +19,8 @@ import org.hibernate.annotations.NaturalId;
 @Name("Clusters")
 @Getter
 @Setter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString(callSuper = true)
-public class Cluster extends NamedAndTaggedTimestampAware {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    @EqualsAndHashCode.Include
-    @Visible(value = false)
-    private Integer id;
+public class Cluster extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
 
     @NaturalId
     @Column(name = "natural_id", nullable = false)

@@ -1,14 +1,12 @@
 package net.microfalx.heimdall.protocol.snmp.jpa;
 
-import jakarta.persistence.Id;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Searchable;
-import net.microfalx.bootstrap.jdbc.entity.NamedTimestampAware;
+import net.microfalx.bootstrap.jdbc.entity.NamedAndTimestampedIdentityAware;
 import net.microfalx.heimdall.protocol.snmp.mib.MibType;
 import net.microfalx.lang.annotation.*;
 
@@ -17,15 +15,8 @@ import net.microfalx.lang.annotation.*;
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 @Name("MIBs")
-public class SnmpMib extends NamedTimestampAware {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    @EqualsAndHashCode.Include
-    private Long id;
+public class SnmpMib extends NamedAndTimestampedIdentityAware<Long> {
 
     @Column(name = "type", nullable = false)
     @Position(5)

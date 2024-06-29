@@ -2,11 +2,9 @@ package net.microfalx.heimdall.protocol.gelf.jpa;
 
 import com.cloudbees.syslog.Facility;
 import com.cloudbees.syslog.Severity;
-import jakarta.persistence.Id;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -22,16 +20,8 @@ import net.microfalx.lang.annotation.*;
 @ReadOnly
 @Getter
 @Setter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString(callSuper = true)
 public class GelfEvent extends Event {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    @EqualsAndHashCode.Include
-    @Visible(false)
-    private Long id;
 
     @JoinColumn(name = "address_id")
     @ManyToOne

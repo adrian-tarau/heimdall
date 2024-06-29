@@ -3,7 +3,6 @@ package net.microfalx.heimdall.protocol.syslog.jpa;
 import com.cloudbees.syslog.Facility;
 import com.cloudbees.syslog.Severity;
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -22,15 +21,8 @@ import net.microfalx.lang.annotation.ReadOnly;
 @ReadOnly
 @Getter
 @Setter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString(callSuper = true)
 public class SyslogEvent extends Event {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    @EqualsAndHashCode.Include
-    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "address_id", nullable = false)

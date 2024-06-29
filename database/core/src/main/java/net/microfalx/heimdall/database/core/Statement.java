@@ -1,13 +1,12 @@
 package net.microfalx.heimdall.database.core;
 
-import jakarta.persistence.Id;
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.dataset.annotation.OrderBy;
+import net.microfalx.bootstrap.jdbc.entity.IdentityAware;
 import net.microfalx.lang.annotation.*;
 import net.microfalx.resource.Resource;
 import org.hibernate.annotations.NaturalId;
@@ -23,16 +22,9 @@ import static net.microfalx.lang.StringUtils.toIdentifier;
 @Name("Statements")
 @Getter
 @Setter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString(callSuper = true)
 @ReadOnly
-public class Statement {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    @EqualsAndHashCode.Include
-    private int id;
+public class Statement extends IdentityAware<Integer> {
 
     @ManyToOne
     @JoinColumn(name = "schema_id", nullable = false)

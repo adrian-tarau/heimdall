@@ -1,9 +1,7 @@
 package net.microfalx.heimdall.broker.core;
 
-import jakarta.persistence.Id;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -12,7 +10,7 @@ import net.microfalx.bootstrap.dataset.Alert;
 import net.microfalx.bootstrap.dataset.annotation.Component;
 import net.microfalx.bootstrap.dataset.annotation.Filterable;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
-import net.microfalx.bootstrap.jdbc.entity.NamedTimestampAware;
+import net.microfalx.bootstrap.jdbc.entity.NamedAndTimestampedIdentityAware;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.lang.annotation.*;
 import net.microfalx.resource.MimeType;
@@ -22,15 +20,8 @@ import net.microfalx.resource.MimeType;
 @Name("Topics")
 @Getter
 @Setter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString(callSuper = true)
-public class BrokerTopic extends NamedTimestampAware {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    @EqualsAndHashCode.Include
-    private Integer id;
+public class BrokerTopic extends NamedAndTimestampedIdentityAware<Integer> {
 
     @ManyToOne
     @JoinColumn(name = "cluster_id", nullable = false)

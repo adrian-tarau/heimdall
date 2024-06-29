@@ -1,11 +1,10 @@
 package net.microfalx.heimdall.infrastructure.core;
 
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
-import net.microfalx.heimdall.infrastructure.api.Cluster;
-import net.microfalx.heimdall.infrastructure.api.Environment;
-import net.microfalx.heimdall.infrastructure.api.Server;
-import net.microfalx.heimdall.infrastructure.api.Service;
 import net.microfalx.heimdall.infrastructure.api.*;
+import net.microfalx.heimdall.infrastructure.core.system.ClusterRepository;
+import net.microfalx.heimdall.infrastructure.core.system.ServerRepository;
+import net.microfalx.heimdall.infrastructure.core.system.ServiceRepository;
 import net.microfalx.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -138,8 +137,8 @@ class InfrastructureCache extends ApplicationContextSupport {
     }
 
     private void loadServices() {
-        List<net.microfalx.heimdall.infrastructure.core.Service> serviceJpas = getBean(ServiceRepository.class).findAll();
-        for (net.microfalx.heimdall.infrastructure.core.Service serviceJpa : serviceJpas) {
+        List<net.microfalx.heimdall.infrastructure.core.system.Service> serviceJpas = getBean(ServiceRepository.class).findAll();
+        for (net.microfalx.heimdall.infrastructure.core.system.Service serviceJpa : serviceJpas) {
             Service.Builder builder = new Service.Builder(serviceJpa.getNaturalId())
                     .path(serviceJpa.getPath()).port(serviceJpa.getPort()).type(serviceJpa.getType());
             if (isNotEmpty(serviceJpa.getUsername())) builder.user(serviceJpa.getUsername(), serviceJpa.getPassword());
@@ -153,9 +152,9 @@ class InfrastructureCache extends ApplicationContextSupport {
 
     private Map<Integer, Set<Server>> loadServers() {
         Map<Integer, Set<Server>> serversByCluster = new HashMap<>();
-        List<net.microfalx.heimdall.infrastructure.core.Server> serversJpas = getBean(ServerRepository.class).findAll();
-        for (net.microfalx.heimdall.infrastructure.core.Server serversJpa : serversJpas) {
-            net.microfalx.heimdall.infrastructure.core.Cluster clusterJpa = serversJpa.getCluster();
+        List<net.microfalx.heimdall.infrastructure.core.system.Server> serversJpas = getBean(ServerRepository.class).findAll();
+        for (net.microfalx.heimdall.infrastructure.core.system.Server serversJpa : serversJpas) {
+            net.microfalx.heimdall.infrastructure.core.system.Cluster clusterJpa = serversJpa.getCluster();
             Server.Builder builder = new Server.Builder(serversJpa.getNaturalId()).type(serversJpa.getType())
                     .icmp(serversJpa.isIcmp()).hostname(serversJpa.getHostname());
             if (clusterJpa != null) {
@@ -172,8 +171,8 @@ class InfrastructureCache extends ApplicationContextSupport {
     }
 
     private void loadClusters(Map<Integer, Set<Server>> serversByCluster) {
-        List<net.microfalx.heimdall.infrastructure.core.Cluster> clusterJpas = getBean(ClusterRepository.class).findAll();
-        for (net.microfalx.heimdall.infrastructure.core.Cluster clusterJpa : clusterJpas) {
+        List<net.microfalx.heimdall.infrastructure.core.system.Cluster> clusterJpas = getBean(ClusterRepository.class).findAll();
+        for (net.microfalx.heimdall.infrastructure.core.system.Cluster clusterJpa : clusterJpas) {
             Cluster.Builder builder = new Cluster.Builder(clusterJpa.getNaturalId()).zoneId(ZoneId.of(clusterJpa.getTimeZone()));
             builder.tags(setFromString(clusterJpa.getTags())).name(clusterJpa.getName()).description(clusterJpa.getDescription());
             Set<Server> servers = serversByCluster.getOrDefault(clusterJpa.getId(), Collections.emptySet());

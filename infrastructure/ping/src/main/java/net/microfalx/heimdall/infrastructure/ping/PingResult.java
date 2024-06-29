@@ -1,8 +1,6 @@
 package net.microfalx.heimdall.infrastructure.ping;
 
-import jakarta.persistence.Id;
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -11,11 +9,12 @@ import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
 import net.microfalx.bootstrap.dataset.Alert;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.dataset.annotation.OrderBy;
+import net.microfalx.bootstrap.jdbc.entity.IdentityAware;
 import net.microfalx.bootstrap.jdbc.jpa.DurationConverter;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.heimdall.infrastructure.api.Status;
-import net.microfalx.heimdall.infrastructure.core.Server;
-import net.microfalx.heimdall.infrastructure.core.Service;
+import net.microfalx.heimdall.infrastructure.core.system.Server;
+import net.microfalx.heimdall.infrastructure.core.system.Service;
 import net.microfalx.lang.annotation.*;
 
 import java.time.Duration;
@@ -26,17 +25,9 @@ import java.time.ZonedDateTime;
 @Table(name = "infrastructure_ping_result")
 @Getter
 @Setter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString(callSuper = true)
 @Name("Health Check Results")
-public class PingResult {
-
-    @Id
-    @Column(name = "id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Include
-    @Visible(value = false)
-    private Integer id;
+public class PingResult extends IdentityAware<Integer> {
 
     @ManyToOne
     @JoinColumn(name = "ping_id")

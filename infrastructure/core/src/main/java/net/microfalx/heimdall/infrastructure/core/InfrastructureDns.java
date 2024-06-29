@@ -6,6 +6,7 @@ import net.microfalx.bootstrap.jdbc.jpa.NaturalJpaRepository;
 import net.microfalx.bootstrap.model.MetadataService;
 import net.microfalx.heimdall.infrastructure.api.Dns;
 import net.microfalx.heimdall.infrastructure.api.Server;
+import net.microfalx.heimdall.infrastructure.core.system.DnsRepository;
 import net.microfalx.lang.CollectionUtils;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.TimeUtils;
@@ -69,8 +70,8 @@ public class InfrastructureDns extends ApplicationContextSupport {
 
     void load() {
         try {
-            List<net.microfalx.heimdall.infrastructure.core.Dns> dnsJpas = getBean(DnsRepository.class).findAll();
-            for (net.microfalx.heimdall.infrastructure.core.Dns dnsJpa : dnsJpas) {
+            List<net.microfalx.heimdall.infrastructure.core.system.Dns> dnsJpas = getBean(DnsRepository.class).findAll();
+            for (net.microfalx.heimdall.infrastructure.core.system.Dns dnsJpa : dnsJpas) {
                 Dns.Builder builder = new Dns.Builder(dnsJpa.getNaturalId());
                 builder.domain(dnsJpa.getDomain()).hostname(dnsJpa.getHostname()).ip(dnsJpa.getIp()).valid(dnsJpa.isValid());
                 builder.tags(CollectionUtils.setFromString(dnsJpa.getTags()))
@@ -125,8 +126,8 @@ public class InfrastructureDns extends ApplicationContextSupport {
 
     private void doUpdate(Server server) {
         Dns dns = resolveDns(server);
-        NaturalIdEntityUpdater<net.microfalx.heimdall.infrastructure.core.Dns, Integer> entityUpdater = getUpdater(DnsRepository.class);
-        net.microfalx.heimdall.infrastructure.core.Dns jpaDns = new net.microfalx.heimdall.infrastructure.core.Dns();
+        NaturalIdEntityUpdater<net.microfalx.heimdall.infrastructure.core.system.Dns, Integer> entityUpdater = getUpdater(DnsRepository.class);
+        net.microfalx.heimdall.infrastructure.core.system.Dns jpaDns = new net.microfalx.heimdall.infrastructure.core.system.Dns();
         jpaDns.setNaturalId(StringUtils.toIdentifier(dns.getIp()));
         jpaDns.setName(server.getName());
         jpaDns.setHostname(dns.getHostname());
