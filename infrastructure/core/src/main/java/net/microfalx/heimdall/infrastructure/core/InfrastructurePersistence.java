@@ -4,6 +4,7 @@ import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
 import net.microfalx.bootstrap.jdbc.jpa.NaturalIdEntityUpdater;
 import net.microfalx.bootstrap.jdbc.jpa.NaturalJpaRepository;
 import net.microfalx.bootstrap.model.MetadataService;
+import net.microfalx.heimdall.infrastructure.api.InfrastructureConstants;
 import net.microfalx.heimdall.infrastructure.core.system.*;
 import net.microfalx.lang.ExceptionUtils;
 
@@ -18,7 +19,7 @@ class InfrastructurePersistence extends ApplicationContextSupport {
         jpaEnvironment.setName(environment.getName());
         jpaEnvironment.setTags(setToString(environment.getTags()));
         jpaEnvironment.setDescription(environment.getDescription());
-        jpaEnvironment.setAttributes(ExceptionUtils.doAndRethrow(() -> environment.getAttributes().toJson().loadAsString()));
+        jpaEnvironment.setAttributes(ExceptionUtils.doAndRethrow(() -> environment.getAttributes().toProperties().loadAsString()));
         updater.findByNaturalIdAndUpdate(jpaEnvironment);
     }
 
@@ -42,7 +43,9 @@ class InfrastructurePersistence extends ApplicationContextSupport {
         jpaServer.setName(server.getName());
         jpaServer.setHostname(server.getHostname());
         jpaServer.setTags(setToString(server.getTags()));
+        jpaServer.setTimeZone(server.getZoneId().getId());
         jpaServer.setIcmp(server.isIcmp());
+        jpaServer.setAttributes(ExceptionUtils.doAndRethrow(() -> server.getAttributes().toProperties().loadAsString()));
         jpaServer.setDescription(server.getDescription());
         if (jpaCluster != null) {
             jpaServer.setCluster(jpaCluster);
@@ -62,15 +65,25 @@ class InfrastructurePersistence extends ApplicationContextSupport {
         jpaService.setType(service.getType());
         jpaService.setPort(service.getPort());
         jpaService.setPath(service.getPath());
+        jpaService.setLivenessPath(service.getLivenessPath());
+        jpaService.setReadinessPath(service.getReadinessPath());
+        jpaService.setMetricsPath(service.getMetricsPath());
         jpaService.setAuthType(service.getAuthType());
         jpaService.setUsername(service.getUserName());
         jpaService.setPassword(service.getPassword());
         jpaService.setToken(service.getToken());
+        jpaService.setDiscoverable(service.isDiscoverable());
+        jpaService.setTls(service.isTls());
         jpaService.setTags(setToString(service.getTags()));
         jpaService.setConnectionTimeOut((int) service.getConnectionTimeout().toMillis());
         jpaService.setReadTimeOut((int) service.getReadTimeout().toMillis());
         jpaService.setWriteTimeOut((int) service.getWriteTimeout().toMillis());
         updater.findByNaturalIdAndUpdate(jpaService);
+        if (!service.getTags().contains(InfrastructureConstants.AUTO_TAG)) {
+            updater.findByNaturalIdAndUpdate(jpaService);
+        } else {
+            updater.findByNaturalIdOrCreate(jpaService);
+        }
     }
 
     private <M, ID> NaturalIdEntityUpdater<M, ID> getUpdater(Class<? extends NaturalJpaRepository<M, ID>> repositoryClass) {

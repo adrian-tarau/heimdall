@@ -1,10 +1,6 @@
 package net.microfalx.heimdall.infrastructure.core;
 
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
-import net.microfalx.heimdall.infrastructure.api.Cluster;
-import net.microfalx.heimdall.infrastructure.api.Dns;
-import net.microfalx.heimdall.infrastructure.api.Environment;
-import net.microfalx.heimdall.infrastructure.api.Server;
 import net.microfalx.heimdall.infrastructure.api.*;
 import net.microfalx.lang.ClassUtils;
 import org.slf4j.Logger;
@@ -126,6 +122,11 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
     }
 
     @Override
+    public Collection<Server> getServers(net.microfalx.heimdall.infrastructure.api.Service service) {
+        return cache.getServers(service);
+    }
+
+    @Override
     public Status getStatus(net.microfalx.heimdall.infrastructure.api.Service service, Server server) {
         requireNonNull(service);
         requireNonNull(server);
@@ -139,6 +140,11 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
 
     @Override
     public Health getHealth(Environment environment) {
+        return Health.NA;
+    }
+
+    @Override
+    public Health getHealth(Cluster cluster) {
         return Health.NA;
     }
 
@@ -231,7 +237,11 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
 
     private void fireInitializedEvent() {
         for (InfrastructureListener listener : listeners) {
-            listener.onInfrastructureInitialization();
+            try {
+                listener.onInfrastructureInitialization();
+            } catch (Exception e) {
+                LOGGER.error("Failed to fire infrastructure initialization event for " + ClassUtils.getName(listener), e);
+            }
         }
     }
 

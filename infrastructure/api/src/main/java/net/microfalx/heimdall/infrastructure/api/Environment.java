@@ -110,6 +110,11 @@ public class Environment extends NamedAndTaggedIdentifyAware<String> implements 
             return this;
         }
 
+        public Builder attributes(Attributes<?> attributes) {
+            attributes.copyFrom(attributes);
+            return this;
+        }
+
         public Builder cluster(Cluster cluster) {
             requireNonNull(cluster);
             this.clusters.add(cluster);

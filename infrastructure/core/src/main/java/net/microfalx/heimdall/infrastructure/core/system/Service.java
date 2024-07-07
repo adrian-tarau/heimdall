@@ -37,9 +37,28 @@ public class Service extends NamedAndTaggedAndTimestampedIdentityAware<Integer> 
     private int port;
 
     @Column(name = "path", nullable = false)
+    @Label(value = "Base", group = "Paths")
     @Position(40)
     @Description("The path to access the service (HTTP/HTTPs protocol)")
     private String path;
+
+    @Column(name = "liveness_path", nullable = false)
+    @Label(value = "Liveness", group = "Paths")
+    @Position(41)
+    @Description("The path used to determine if the service is alive or dead (HTTP/HTTPs protocol)")
+    private String livenessPath;
+
+    @Column(name = "readiness_path", nullable = false)
+    @Label(value = "Readiness", group = "Paths")
+    @Position(42)
+    @Description("The path used to determine if the service is ready to serve traffic (HTTP/HTTPs protocol)")
+    private String readinessPath;
+
+    @Column(name = "metrics_path", nullable = false)
+    @Label(value = "Metrics", group = "Paths")
+    @Position(43)
+    @Description("The path used to extract metrics from a service (HTTP/HTTPs protocol)")
+    private String metricsPath;
 
     @Column(name = "auth_type", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -65,22 +84,33 @@ public class Service extends NamedAndTaggedAndTimestampedIdentityAware<Integer> 
     @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT, Visible.Mode.ADD})
     private String token;
 
-    @Column(name = "connection_timeout")
+    @Column(name = "discoverable", nullable = false)
     @Position(70)
+    @Description("Indicates that the service will be discovered automatically and it's status monitored")
+    private boolean discoverable;
+
+    @Column(name = "tls", nullable = false)
+    @Position(71)
+    @Label("TLS")
+    @Description("Indicates that the service will use Transport Layer Security (TLS) to protect the communication between clients and service. TLS is the upgraded version of SSL that fixes existing SSL vulnerabilities")
+    private boolean tls;
+
+    @Column(name = "connection_timeout")
+    @Position(80)
     @Label(group = "Timeout", value = "Connection")
     @Description("The amount of time to wait to establish a connect to the service")
     @Formattable(unit = Formattable.Unit.MILLI_SECOND)
     private int connectionTimeOut = DEFAULT_TIMEOUT;
 
     @Column(name = "read_timeout")
-    @Position(71)
+    @Position(81)
     @Label(group = "Timeout", value = "Read")
     @Description("The amount of time to wait to read a response from the service")
     @Formattable(unit = Formattable.Unit.MILLI_SECOND)
     private int readTimeOut = DEFAULT_TIMEOUT;
 
     @Column(name = "write_timeout")
-    @Position(72)
+    @Position(82)
     @Label(group = "Timeout", value = "Write")
     @Description("The amount of time to wait to write a request to the service")
     @Formattable(unit = Formattable.Unit.MILLI_SECOND)

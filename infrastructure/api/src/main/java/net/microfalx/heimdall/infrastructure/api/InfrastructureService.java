@@ -108,6 +108,14 @@ public interface InfrastructureService {
     Collection<Environment> find(Server server);
 
     /**
+     * Returns the servers running a given service.
+     *
+     * @param service the service
+     * @return the servers
+     */
+    Collection<Server> getServers(Service service);
+
+    /**
      * Returns the status of a service running within a server.
      *
      * @param service the service
@@ -123,6 +131,14 @@ public interface InfrastructureService {
      * @return a non-null instance
      */
     Health getHealth(Environment environment);
+
+    /**
+     * Returns the health of a cluster.
+     *
+     * @param cluster the cluster
+     * @return a non-null instance
+     */
+    Health getHealth(Cluster cluster);
 
     /**
      * Returns the health of a service running within a server.

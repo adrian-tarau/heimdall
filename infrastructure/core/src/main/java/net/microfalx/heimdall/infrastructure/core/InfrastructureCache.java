@@ -1,11 +1,14 @@
 package net.microfalx.heimdall.infrastructure.core;
 
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
+import net.microfalx.bootstrap.model.AttributeUtils;
 import net.microfalx.heimdall.infrastructure.api.*;
 import net.microfalx.heimdall.infrastructure.core.system.ClusterRepository;
 import net.microfalx.heimdall.infrastructure.core.system.ServerRepository;
 import net.microfalx.heimdall.infrastructure.core.system.ServiceRepository;
+import net.microfalx.lang.ExceptionUtils;
 import net.microfalx.lang.StringUtils;
+import net.microfalx.resource.MemoryResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,6 +117,18 @@ class InfrastructureCache extends ApplicationContextSupport {
         return foundEnvironments;
     }
 
+    Collection<Server> getServers(Service service) {
+        Set<Server> serversWithService = new HashSet<>();
+        for (Server server : getServers().values()) {
+            for (Service runningService : server.getServices()) {
+                if (runningService.equals(service)) {
+                    serversWithService.add(server);
+                }
+            }
+        }
+        return serversWithService;
+    }
+
     void load() {
         LOGGER.info("Load infrastructure");
         try {
@@ -143,8 +158,12 @@ class InfrastructureCache extends ApplicationContextSupport {
                     .path(serviceJpa.getPath()).port(serviceJpa.getPort()).type(serviceJpa.getType());
             if (isNotEmpty(serviceJpa.getUsername())) builder.user(serviceJpa.getUsername(), serviceJpa.getPassword());
             if (isNotEmpty(serviceJpa.getToken())) builder.token(serviceJpa.getToken());
-            builder.authType(serviceJpa.getAuthType()).connectionTimeout(ofMillis(serviceJpa.getConnectionTimeOut()))
+            builder.discoverable(serviceJpa.isDiscoverable()).tls(serviceJpa.isDiscoverable())
+                    .authType(serviceJpa.getAuthType())
+                    .connectionTimeout(ofMillis(serviceJpa.getConnectionTimeOut()))
                     .readTimeout(ofMillis(serviceJpa.getReadTimeOut())).writeTimeout(ofMillis(serviceJpa.getWriteTimeOut()));
+            builder.livenessPath(serviceJpa.getLivenessPath()).readinessPath(serviceJpa.getReadinessPath())
+                    .metricsPath(serviceJpa.getMetricsPath());
             builder.tags(setFromString(serviceJpa.getTags())).name(serviceJpa.getName()).description(serviceJpa.getDescription());
             registerService(builder.build());
         }
@@ -157,10 +176,10 @@ class InfrastructureCache extends ApplicationContextSupport {
             net.microfalx.heimdall.infrastructure.core.system.Cluster clusterJpa = serversJpa.getCluster();
             Server.Builder builder = new Server.Builder(serversJpa.getNaturalId()).type(serversJpa.getType())
                     .icmp(serversJpa.isIcmp()).hostname(serversJpa.getHostname());
-            if (clusterJpa != null) {
-                builder.zoneId(ZoneId.of(clusterJpa.getTimeZone()));
-            }
-            builder.tags(setFromString(serversJpa.getTags())).name(serversJpa.getName()).description(serversJpa.getDescription());
+            if (clusterJpa != null) builder.zoneId(ZoneId.of(clusterJpa.getTimeZone()));
+            builder.attributes(ExceptionUtils.doAndRethrow(() -> AttributeUtils.decodeProperties(MemoryResource.create(serversJpa.getAttributes()))));
+            builder.zoneId(ZoneId.of(serversJpa.getTimeZone())).tags(setFromString(serversJpa.getTags()))
+                    .name(serversJpa.getName()).description(serversJpa.getDescription());
             Server server = builder.build();
             registerServer(server);
             if (clusterJpa != null) {

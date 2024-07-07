@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.microfalx.bootstrap.dataset.annotation.Component;
+import net.microfalx.bootstrap.dataset.annotation.Lookup;
+import net.microfalx.bootstrap.dataset.lookup.TimeZoneLookup;
 import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.annotation.*;
@@ -39,14 +42,27 @@ public class Server extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
     @Description("The hostname of the server")
     private String hostname;
 
+    @Column(name = "time_zone", nullable = false)
+    @Position(35)
+    @Description("The timezone where the server is deployed")
+    @Lookup(model = TimeZoneLookup.class)
+    private String timeZone;
+
     @Column(name = "icmp", nullable = false)
     @Position(40)
     @Description("Indicates whether the server could be pinged using ICMP protocol")
     @Label("ICMP")
     private boolean icmp;
 
+    @Column(name = "attributes", nullable = false)
+    @Position(50)
+    @Description("A collection of attributes, one per line, separated by '=' associated with a server")
+    @Component(Component.Type.TEXT_AREA)
+    @Visible(modes = {Visible.Mode.EDIT, Visible.Mode.ADD, Visible.Mode.VIEW})
+    private String attributes;
+
     public static String toNaturalId(Server server) {
-        if (server == null) return  null;
+        if (server == null) return null;
         return StringUtils.toIdentifier(server.getHostname());
     }
 

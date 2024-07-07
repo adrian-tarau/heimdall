@@ -1,6 +1,7 @@
 package net.microfalx.heimdall.infrastructure.api;
 
 import lombok.ToString;
+import net.microfalx.bootstrap.model.Attributes;
 import net.microfalx.lang.IdentityAware;
 import net.microfalx.lang.NamedAndTaggedIdentifyAware;
 import net.microfalx.lang.StringUtils;
@@ -23,6 +24,7 @@ public class Server extends NamedAndTaggedIdentifyAware<String> implements Infra
     private String hostname;
     private Type type;
     private Set<Service> services = new HashSet<>();
+    private Attributes<?> attributes;
     private boolean icmp;
     private ZoneId zoneId;
 
@@ -42,6 +44,15 @@ public class Server extends NamedAndTaggedIdentifyAware<String> implements Infra
      */
     public Type getType() {
         return type;
+    }
+
+    /**
+     * Returns the attributes associated with this environment.
+     *
+     * @return a non-null instance
+     */
+    public Attributes<?> getAttributes() {
+        return attributes;
     }
 
     /**
@@ -125,7 +136,8 @@ public class Server extends NamedAndTaggedIdentifyAware<String> implements Infra
         private Type type = Type.VIRTUAL;
         private boolean icmp = true;
         private final Set<Service> services = new HashSet<>();
-        private ZoneId zoneId;
+        private final Attributes<?> attributes = Attributes.create();
+        private ZoneId zoneId = ZoneId.systemDefault();
 
         public Builder(String id) {
             super(id);
@@ -162,6 +174,16 @@ public class Server extends NamedAndTaggedIdentifyAware<String> implements Infra
             return this;
         }
 
+        public Builder attribute(String name, Object value) {
+            attributes.add(name, value);
+            return this;
+        }
+
+        public Builder attributes(Attributes<?> attributes) {
+            attributes.copyFrom(attributes);
+            return this;
+        }
+
         @Override
         protected IdentityAware<String> create() {
             return new Server();
@@ -186,6 +208,7 @@ public class Server extends NamedAndTaggedIdentifyAware<String> implements Infra
             server.type = type;
             server.icmp = icmp;
             server.zoneId = zoneId;
+            server.attributes = attributes;
             server.services = services;
             updateServer(server);
             return server;

@@ -28,7 +28,7 @@ public class Environment extends NamedAndTaggedAndTimestampedIdentityAware<Integ
     private String naturalId;
 
     @Column(name = "attributes", nullable = false)
-    @Position(20)
+    @Position(50)
     @Description("A collection of attributes, one per line, separated by '=' associated with an environment")
     @Component(Component.Type.TEXT_AREA)
     @Visible(modes = {Visible.Mode.EDIT, Visible.Mode.ADD, Visible.Mode.VIEW})

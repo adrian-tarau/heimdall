@@ -48,6 +48,12 @@ public enum Status {
     L7STS(70, true, false),
 
     /**
+     * The health check failed at application layer due to an <code>access denied response</code> (401 or 403 for HTTP).
+     */
+    @Name("L7/DEN")
+    L7DEN(75, false, false),
+
+    /**
      * The health check passed at network layer (ICMP).
      */
     @Name("L3/OK")

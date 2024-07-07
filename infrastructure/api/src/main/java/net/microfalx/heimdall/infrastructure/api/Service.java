@@ -5,26 +5,34 @@ import net.microfalx.lang.IdentityAware;
 import net.microfalx.lang.NamedAndTaggedIdentifyAware;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.UriUtils;
+import net.microfalx.lang.annotation.Name;
 
 import java.net.URI;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+import static net.microfalx.heimdall.infrastructure.api.InfrastructureConstants.AUTO_TAG;
 import static net.microfalx.lang.ArgumentUtils.requireBounded;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.StringUtils.addStartSlash;
 
 @ToString
 public class Service extends NamedAndTaggedIdentifyAware<String> implements InfrastructureElement {
 
     private int port;
     private String path;
+    private String livenessPath;
+    private String readinessPath;
+    private String metricsPath;
     private Type type;
 
     private AuthType authType;
     private String userName;
     private String password;
     private String token;
+    private boolean tls;
+    private boolean discoverable;
 
     private Duration connectionTimeout;
     private Duration readTimeout;
@@ -39,11 +47,11 @@ public class Service extends NamedAndTaggedIdentifyAware<String> implements Infr
     public static Service create(Service.Type type) {
         Builder builder = new Builder().type(type);
         switch (type) {
-            case HTTP -> builder.name("Web Server")
+            case HTTP -> builder.discoverable(true).tls(true).tag(AUTO_TAG).name("Web Server")
                     .description("The home page of the web server over HTTPs");
-            case SSH -> builder.name("Shell")
+            case SSH -> builder.tag(AUTO_TAG).name("Shell")
                     .description("The secure shell for the server");
-            case ICMP -> builder.name("Ping")
+            case ICMP -> builder.discoverable(true).tag(AUTO_TAG).name("Ping")
                     .description("The ICMP protocol used to check if the server is available in the network (and latency)");
             default -> throw new InfrastructureException("Unsupported type: " + type);
         }
@@ -62,12 +70,43 @@ public class Service extends NamedAndTaggedIdentifyAware<String> implements Infr
     /**
      * Returns the path at which the service receives requests.
      * <p>
-     * It only applies to some service types, like {@link Type#HTTP} or {@link Type#HTTPS}
+     * It only applies to some service types, like {@link Type#HTTP}
      *
      * @return the path, null if there is no path (root or does not apply)
      */
     public String getPath() {
-        return path;
+        if (getType() == Type.HTTP && StringUtils.isEmpty(path)) {
+            return UriUtils.SLASH;
+        } else {
+            return path;
+        }
+    }
+
+    /**
+     * Returns the path at which the service is validated to know if the service is alive or dead.
+     *
+     * @return the path, null if there is no dedicated path
+     */
+    public String getLivenessPath() {
+        return livenessPath;
+    }
+
+    /**
+     * Returns the path at which the service is validated to know if the service can receive requests.
+     *
+     * @return the path, null if there is no dedicated  path
+     */
+    public String getReadinessPath() {
+        return readinessPath;
+    }
+
+    /**
+     * Returns the path at which the service reports it's metrics.
+     *
+     * @return the path, null if the service does not expose metrics
+     */
+    public String getMetricsPath() {
+        return metricsPath;
     }
 
     /**
@@ -77,6 +116,24 @@ public class Service extends NamedAndTaggedIdentifyAware<String> implements Infr
      */
     public Type getType() {
         return type;
+    }
+
+    /**
+     * Returns whether the service uses Transport Layer Security (TLS).
+     *
+     * @return {@code true} if TLS is used, {@code false} otherwise
+     */
+    public boolean isTls() {
+        return tls;
+    }
+
+    /**
+     * Returns whether the service will be automatically discovered and tracked.
+     *
+     * @return {@code true} if automatically discovered and tracked, <code>false</code> otherwise
+     */
+    public boolean isDiscoverable() {
+        return discoverable;
     }
 
     /**
@@ -143,7 +200,7 @@ public class Service extends NamedAndTaggedIdentifyAware<String> implements Infr
     }
 
     /**
-     * Returns the URI to access the service deployed on a given server within an environment.
+     * Returns the URI to access the base service deployed on a given server within an environment.
      * <p>
      * If an environment is available, the environment variables will be applied against the service.
      *
@@ -152,14 +209,46 @@ public class Service extends NamedAndTaggedIdentifyAware<String> implements Infr
      * @return a non-null instance
      */
     public URI getUri(Server server, Environment environment) {
-        requireNonNull(server);
-        Service newService = this;
-        if (environment != null) newService = as(environment);
-        StringBuilder builder = new StringBuilder();
-        builder.append(newService.getType().getProtocol()).append("://").append(server.getHostname())
-                .append(':').append(newService.getPort());
-        if (newService.getPath() != null) builder.append(StringUtils.addStartSlash(newService.getPath()));
-        return UriUtils.parseUri(builder.toString());
+        return getUri(server, environment, getPath());
+    }
+
+    /**
+     * Returns the URI to access the liveness end-pint of the service deployed on a given server within an environment.
+     * <p>
+     * If an environment is available, the environment variables will be applied against the service.
+     *
+     * @param server      the server
+     * @param environment the environment, optional
+     * @return a non-null instance
+     */
+    public URI getLivenessUri(Server server, Environment environment) {
+        return getLivenessPath() != null ? getUri(server, environment, getLivenessPath()) : null;
+    }
+
+    /**
+     * Returns the URI to access the liveness end-pint of the service deployed on a given server within an environment.
+     * <p>
+     * If an environment is available, the environment variables will be applied against the service.
+     *
+     * @param server      the server
+     * @param environment the environment, optional
+     * @return a non-null instance
+     */
+    public URI getReadinessUri(Server server, Environment environment) {
+        return getReadinessPath() != null ? getUri(server, environment, getReadinessPath()) : null;
+    }
+
+    /**
+     * Returns the URI to access the metrics of the service deployed on a given server within an environment.
+     * <p>
+     * If an environment is available, the environment variables will be applied against the service.
+     *
+     * @param server      the server
+     * @param environment the environment, optional
+     * @return a non-null instance
+     */
+    public URI getMetricsUri(Server server, Environment environment) {
+        return getMetricsPath() != null ? getUri(server, environment, getMetricsPath()) : null;
     }
 
     /**
@@ -171,10 +260,38 @@ public class Service extends NamedAndTaggedIdentifyAware<String> implements Infr
     public Service as(Environment environment) {
         Service copy = (Service) copy();
         copy.path = environment.replaceVariables(path);
+        copy.livenessPath = environment.replaceVariables(livenessPath);
+        copy.readinessPath = environment.replaceVariables(readinessPath);
+        copy.metricsPath = environment.replaceVariables(metricsPath);
         copy.userName = environment.replaceVariables(userName);
         copy.password = environment.replaceVariables(password);
         copy.token = environment.replaceVariables(token);
         return copy;
+    }
+
+    /**
+     * Returns the URI to access the service deployed on a given server within an environment.
+     * <p>
+     * If an environment is available, the environment variables will be applied against the service.
+     *
+     * @param server      the server
+     * @param environment the environment, optional
+     * @return a non-null instance
+     */
+    public URI getUri(Server server, Environment environment, String path) {
+        requireNonNull(server);
+        Service newService = this;
+        if (environment != null) newService = as(environment);
+        StringBuilder builder = new StringBuilder();
+        if (getType() == Type.HTTP) {
+            builder.append(isTls() ? "https" : "http");
+        } else {
+            builder.append(newService.getType().getProtocol());
+        }
+        builder.append("://").append(server.getHostname())
+                .append(':').append(newService.getPort());
+        if (newService.getPath() != null) builder.append(addStartSlash(path));
+        return UriUtils.parseUri(builder.toString());
     }
 
     @Override
@@ -224,26 +341,31 @@ public class Service extends NamedAndTaggedIdentifyAware<String> implements Infr
         /**
          * A service accessed over ICMP (ping).
          */
+        @Name("ICMP")
         ICMP("icmp", -1),
 
         /**
          * A service accessed over HTTPs.
          */
+        @Name("HTTP")
         HTTP("http", 443),
 
         /**
          * A service accessed over SSH.
          */
+        @Name("SSH")
         SSH("ssh", 22),
 
         /**
          * A generic TCP service.
          */
+        @Name("TCP")
         TCP("tcp", -1),
 
         /**
          * A generic UDP service.
          */
+        @Name("UDP")
         UDP("udp", -1);
 
         private final String protocol;
@@ -288,16 +410,21 @@ public class Service extends NamedAndTaggedIdentifyAware<String> implements Infr
 
         private int port;
         private String path;
+        private String livenessPath;
+        private String readinessPath;
+        private String metricsPath;
         private Type type = Type.TCP;
 
         private AuthType authType = AuthType.NONE;
         private String userName;
         private String password;
         private String token;
+        private boolean tls;
+        private boolean discoverable;
 
-        private Duration connectionTimeout = Duration.ofSeconds(2);
-        private Duration readTimeout = connectionTimeout;
-        private Duration writeTimeout = connectionTimeout;
+        private Duration connectionTimeout = Duration.ofSeconds(5);
+        private Duration readTimeout = Duration.ofSeconds(10);
+        private Duration writeTimeout = Duration.ofSeconds(10);
 
         public Builder(String id) {
             super(id);
@@ -313,7 +440,22 @@ public class Service extends NamedAndTaggedIdentifyAware<String> implements Infr
         }
 
         public Builder path(String path) {
-            this.path = path;
+            this.path = addStartSlash(path);
+            return this;
+        }
+
+        public Builder livenessPath(String livenessPath) {
+            this.livenessPath = livenessPath != null ? addStartSlash(livenessPath) : null;
+            return this;
+        }
+
+        public Builder readinessPath(String readinessPath) {
+            this.readinessPath = readinessPath != null ? addStartSlash(readinessPath) : null;
+            return this;
+        }
+
+        public Builder metricsPath(String metricsPath) {
+            this.metricsPath = metricsPath != null ? addStartSlash(metricsPath) : null;
             return this;
         }
 
@@ -334,6 +476,7 @@ public class Service extends NamedAndTaggedIdentifyAware<String> implements Infr
             requireNonNull(userName);
             this.authType = AuthType.BASIC;
             this.userName = userName;
+            this.password = password;
             return this;
         }
 
@@ -348,6 +491,16 @@ public class Service extends NamedAndTaggedIdentifyAware<String> implements Infr
             requireNonNull(token);
             this.token = token;
             this.authType = AuthType.BEARER;
+            return this;
+        }
+
+        public Builder discoverable(boolean discoverable) {
+            this.discoverable = discoverable;
+            return this;
+        }
+
+        public Builder tls(boolean tls) {
+            this.tls = tls;
             return this;
         }
 
@@ -393,9 +546,14 @@ public class Service extends NamedAndTaggedIdentifyAware<String> implements Infr
             service.port = port;
             service.type = type;
             service.path = path;
+            service.livenessPath = livenessPath;
+            service.readinessPath = readinessPath;
+            service.metricsPath = metricsPath;
             service.authType = authType;
             service.userName = userName;
             service.password = password;
+            service.tls = tls;
+            service.discoverable = discoverable;
             service.token = token;
             service.connectionTimeout = connectionTimeout;
             service.readTimeout = readTimeout;

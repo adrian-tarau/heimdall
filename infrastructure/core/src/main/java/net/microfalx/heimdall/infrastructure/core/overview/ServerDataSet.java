@@ -7,37 +7,36 @@ import net.microfalx.bootstrap.model.MetadataService;
 import net.microfalx.bootstrap.model.PojoField;
 import net.microfalx.heimdall.infrastructure.api.Health;
 import net.microfalx.heimdall.infrastructure.api.InfrastructureService;
-import net.microfalx.heimdall.infrastructure.api.Server;
 import net.microfalx.lang.annotation.Provider;
 
 import java.util.stream.Collectors;
 
 @Provider
-public class ClusterDataSet extends MemoryDataSet<Cluster, PojoField<Cluster>, String> {
+public class ServerDataSet extends MemoryDataSet<Server, PojoField<Server>, String> {
 
-    public ClusterDataSet(DataSetFactory<Cluster, PojoField<Cluster>, String> factory, Metadata<Cluster, PojoField<Cluster>, String> metadata) {
+    public ServerDataSet(DataSetFactory<Server, PojoField<Server>, String> factory, Metadata<Server, PojoField<Server>, String> metadata) {
         super(factory, metadata);
     }
 
     @Override
-    protected Iterable<Cluster> extractModels() {
+    protected Iterable<Server> extractModels() {
         InfrastructureService infrastructureService = getService(InfrastructureService.class);
         MetadataService metadataService = getService(MetadataService.class);
-        return infrastructureService.getClusters().stream()
-                .map(cluster -> from(infrastructureService, metadataService, cluster))
+        return infrastructureService.getServers().stream()
+                .map(server -> from(infrastructureService, metadataService, server))
                 .collect(Collectors.toList());
     }
 
-    private Cluster from(InfrastructureService infrastructureService, MetadataService metadataService, net.microfalx.heimdall.infrastructure.api.Cluster cluster) {
-        Cluster newCluster = new Cluster();
-        metadataService.copy(cluster, newCluster);
-        newCluster.setTimeZone(cluster.getZoneId().getId());
-        newCluster.setServerCount(cluster.getServers().size());
-        newCluster.setHealth(infrastructureService.getHealth(cluster));
+    private Server from(InfrastructureService infrastructureService, MetadataService metadataService, net.microfalx.heimdall.infrastructure.api.Server server) {
+        Server newCluster = new Server();
+        metadataService.copy(server, newCluster);
+        newCluster.setTimeZone(server.getZoneId().getId());
+        newCluster.setServerCount(server.getServices().size());
+        newCluster.setHealth(infrastructureService.getHealth(server));
         int degradedCount = 0;
         int unhealthyCount = 0;
-        for (Server server : cluster.getServers()) {
-            Health health = infrastructureService.getHealth(server);
+        for (net.microfalx.heimdall.infrastructure.api.Service service : server.getServices()) {
+            Health health = infrastructureService.getHealth(service);
             switch (health) {
                 case DEGRADED -> degradedCount++;
                 case HEALTHY -> unhealthyCount++;
