@@ -12,20 +12,25 @@ import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 public enum Health {
 
     /**
+     * Indicates that the health check determined that the service was not available.
+     */
+    UNAVAILABLE(0),
+
+    /**
      * Indicates that the health check determined that the service was unhealthy, or an unhandled exception was
      * thrown while executing the health check.
      */
-    UNHEALTHY(0),
+    UNHEALTHY(1),
 
     /**
      * Indicates that the health check determined that the service was in a degraded state.
      */
-    DEGRADED(1),
+    DEGRADED(2),
 
     /**
      * Indicates that the health check determined that the service was healthy.
      */
-    HEALTHY(2),
+    HEALTHY(3),
 
     /**
      * Indicates that the health check did not run.

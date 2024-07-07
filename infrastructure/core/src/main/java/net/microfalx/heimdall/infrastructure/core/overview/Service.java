@@ -39,16 +39,22 @@ public class Service extends NamedIdentityAware<String> {
     private int serverCount;
 
     @Position(31)
-    @Label(value = "Degraded", group = "Servers")
-    @Description("The number of services in a degraded state on a cluster")
+    @Label(value = "Unavailable", group = "Servers")
+    @Description("The number of servers which are not available (down) holding a service")
     @Formattable(alert = HealthCountAlertProvider.class)
-    private int degradedCount;
+    private int unavailableCount;
 
     @Position(32)
     @Label(value = "Unhealthy", group = "Servers")
-    @Description("The number of services in an unhealthy state on a cluster")
+    @Description("The number of services in an unhealthy state holding a service")
     @Formattable(alert = HealthCountAlertProvider.class)
     private int unhealthyCount;
+
+    @Position(33)
+    @Label(value = "Degraded", group = "Servers")
+    @Description("The number of servers in a degraded state holding a service")
+    @Formattable(alert = HealthCountAlertProvider.class)
+    private int degradedCount;
 
     @Position(40)
     @Description("Indicates whether the service has any active instances")

@@ -21,7 +21,7 @@ import static net.microfalx.lang.StringUtils.addStartSlash;
 public class Service extends NamedAndTaggedIdentifyAware<String> implements InfrastructureElement {
 
     private int port;
-    private String path;
+    private String basePath;
     private String livenessPath;
     private String readinessPath;
     private String metricsPath;
@@ -74,11 +74,11 @@ public class Service extends NamedAndTaggedIdentifyAware<String> implements Infr
      *
      * @return the path, null if there is no path (root or does not apply)
      */
-    public String getPath() {
-        if (getType() == Type.HTTP && StringUtils.isEmpty(path)) {
+    public String getBasePath() {
+        if (getType() == Type.HTTP && StringUtils.isEmpty(basePath)) {
             return UriUtils.SLASH;
         } else {
-            return path;
+            return basePath;
         }
     }
 
@@ -209,7 +209,7 @@ public class Service extends NamedAndTaggedIdentifyAware<String> implements Infr
      * @return a non-null instance
      */
     public URI getUri(Server server, Environment environment) {
-        return getUri(server, environment, getPath());
+        return getUri(server, environment, getBasePath());
     }
 
     /**
@@ -259,7 +259,7 @@ public class Service extends NamedAndTaggedIdentifyAware<String> implements Infr
      */
     public Service as(Environment environment) {
         Service copy = (Service) copy();
-        copy.path = environment.replaceVariables(path);
+        copy.basePath = environment.replaceVariables(basePath);
         copy.livenessPath = environment.replaceVariables(livenessPath);
         copy.readinessPath = environment.replaceVariables(readinessPath);
         copy.metricsPath = environment.replaceVariables(metricsPath);
@@ -290,7 +290,7 @@ public class Service extends NamedAndTaggedIdentifyAware<String> implements Infr
         }
         builder.append("://").append(server.getHostname())
                 .append(':').append(newService.getPort());
-        if (newService.getPath() != null) builder.append(addStartSlash(path));
+        if (newService.getBasePath() != null) builder.append(addStartSlash(path));
         return UriUtils.parseUri(builder.toString());
     }
 
@@ -545,7 +545,7 @@ public class Service extends NamedAndTaggedIdentifyAware<String> implements Infr
             Service service = (Service) super.build();
             service.port = port;
             service.type = type;
-            service.path = path;
+            service.basePath = path;
             service.livenessPath = livenessPath;
             service.readinessPath = readinessPath;
             service.metricsPath = metricsPath;

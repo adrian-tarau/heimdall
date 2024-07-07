@@ -38,15 +38,22 @@ public class Cluster extends NamedIdentityAware<String> {
     private int serverCount;
 
     @Position(31)
-    @Label(value = "Degraded", group = "Servers")
-    @Description("The number of servers in a degraded state in a cluster")
+    @Label(value = "Unavailable", group = "Servers")
+    @Description("The number of servers which are not available (down) in a cluster")
     @Formattable(alert = HealthCountAlertProvider.class)
-    private int degradedCount;
+    private int unavailableCount;
 
     @Position(32)
     @Label(value = "Unhealthy", group = "Servers")
     @Description("The number of servers in an unhealthy state in a cluster")
     @Formattable(alert = HealthCountAlertProvider.class)
     private int unhealthyCount;
+
+    @Position(33)
+    @Label(value = "Degraded", group = "Servers")
+    @Description("The number of servers in a degraded state in a cluster")
+    @Formattable(alert = HealthCountAlertProvider.class)
+    private int degradedCount;
+
 
 }

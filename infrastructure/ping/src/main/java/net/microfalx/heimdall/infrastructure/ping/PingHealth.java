@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.infrastructure.ping;
 
+import net.microfalx.bootstrap.metrics.Series;
 import net.microfalx.heimdall.infrastructure.api.Health;
 import net.microfalx.heimdall.infrastructure.api.Ping;
 import net.microfalx.heimdall.infrastructure.api.Server;
@@ -51,6 +52,17 @@ public class PingHealth {
             queue.offer(ping);
         }
         lastPings.put(ping.getId(), ping);
+    }
+
+    /**
+     * Returns a (time) series with the ping results for a given service and server.
+     *
+     * @param service the service
+     * @param server  the server
+     * @return a non-null series
+     */
+    Series getSeries(net.microfalx.heimdall.infrastructure.api.Service service, Server server) {
+        return Series.create(PingUtils.getName(service, server));
     }
 
     /**

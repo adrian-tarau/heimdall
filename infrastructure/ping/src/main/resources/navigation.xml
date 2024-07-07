@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <navigations xmlns="https://net.microfalx/xsd/navigation-1.0.xsd">
     <menu id="left">
+        <item id="ping" text="Health Checks" action="infrastructure/ping" parent="infrastructure" position="100"
+              icon="fa-solid fa-tower-broadcast"/>
         <item id="ping" text="Health Checks" action="/system/infrastructure/ping" parent="infrastructure_system" position="100"
               icon="fa-solid fa-tower-broadcast"/>
         <item id="ping_result" text="Health Check Results" action="/system/infrastructure/ping_result" parent="infrastructure_system" position="110"

@@ -64,7 +64,7 @@ class InfrastructurePersistence extends ApplicationContextSupport {
         jpaService.setDescription(service.getDescription());
         jpaService.setType(service.getType());
         jpaService.setPort(service.getPort());
-        jpaService.setPath(service.getPath());
+        jpaService.setPath(service.getBasePath());
         jpaService.setLivenessPath(service.getLivenessPath());
         jpaService.setReadinessPath(service.getReadinessPath());
         jpaService.setMetricsPath(service.getMetricsPath());

@@ -52,12 +52,14 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
         this.health = health;
     }
 
-    public void setPersist(boolean persist) {
+    public PingExecutor setPersist(boolean persist) {
         this.persist = persist;
+        return this;
     }
 
-    public void setUseLiveness(boolean useLiveness) {
+    public PingExecutor setUseLiveness(boolean useLiveness) {
         this.useLiveness = useLiveness;
+        return this;
     }
 
     @Override
@@ -81,15 +83,14 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
             doPing();
         } catch (Exception e) {
             status = Status.L7STS;
-            errorCode = 500;
             errorMessage = getRootCauseMessage(e);
         } finally {
             end = ZonedDateTime.now();
         }
         if (persist) {
             health.registerPing(this);
+            doPersistPing();
         }
-        doPersistPing();
         return this;
     }
 
@@ -154,7 +155,7 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
     }
 
     private void doPingHttp() {
-        Status baseStatus = doPingHttp(createHttpUri());
+        Status baseStatus = doPingHttp(createHttpBaseUri());
         Integer baseErrorCode = this.errorCode;
         String baseErrorMessage = this.errorMessage;
 
@@ -252,7 +253,7 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
 
     }
 
-    private URI createHttpUri() {
+    private URI createHttpBaseUri() {
         Environment environment = infrastructureService.find(server).stream().findFirst().orElse(null);
         return service.getUri(server, environment);
     }

@@ -2,6 +2,7 @@ package net.microfalx.heimdall.infrastructure.ping;
 
 import net.microfalx.bootstrap.core.async.AsynchronousProperties;
 import net.microfalx.bootstrap.core.async.TaskExecutorFactory;
+import net.microfalx.bootstrap.metrics.Series;
 import net.microfalx.heimdall.infrastructure.api.Ping;
 import net.microfalx.heimdall.infrastructure.api.*;
 import org.slf4j.Logger;
@@ -60,10 +61,20 @@ public class PingService implements InitializingBean, InfrastructureListener {
      */
     public Ping ping(net.microfalx.heimdall.infrastructure.api.Service service, Server server) {
         net.microfalx.heimdall.infrastructure.ping.Ping ping = cache.find(service, server);
-        PingExecutor executor = new PingExecutor(ping, service, server, persistence, infrastructureService, health);
-        executor.setPersist(false);
-        executor.setUseLiveness(true);
+        PingExecutor executor = new PingExecutor(ping, service, server, persistence, infrastructureService, health)
+                .setPersist(false).setUseLiveness(true);
         return executor.execute();
+    }
+
+    /**
+     * Returns a (time) series with the ping results for a given service and server.
+     *
+     * @param service the service
+     * @param server  the server
+     * @return a non-null series
+     */
+    public Series getSeries(net.microfalx.heimdall.infrastructure.api.Service service, Server server) {
+        return health.getSeries(service, server);
     }
 
     /**

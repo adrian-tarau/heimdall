@@ -12,7 +12,7 @@ public class HealthAlertProvider<M, F extends Field<M>> implements Formattable.A
         Alert.Type type = switch (value) {
             case NA -> Alert.Type.LIGHT;
             case DEGRADED -> Alert.Type.WARNING;
-            case UNHEALTHY -> Alert.Type.DANGER;
+            case UNAVAILABLE, UNHEALTHY -> Alert.Type.DANGER;
             case HEALTHY -> Alert.Type.SUCCESS;
         };
         return Alert.builder().type(type).build();

@@ -5,9 +5,8 @@ import net.microfalx.bootstrap.dataset.MemoryDataSet;
 import net.microfalx.bootstrap.model.Metadata;
 import net.microfalx.bootstrap.model.MetadataService;
 import net.microfalx.bootstrap.model.PojoField;
-import net.microfalx.heimdall.infrastructure.api.Health;
 import net.microfalx.heimdall.infrastructure.api.InfrastructureService;
-import net.microfalx.heimdall.infrastructure.api.Server;
+import net.microfalx.heimdall.infrastructure.core.util.HealthSummary;
 import net.microfalx.lang.annotation.Provider;
 
 import java.util.stream.Collectors;
@@ -32,19 +31,14 @@ public class ClusterDataSet extends MemoryDataSet<Cluster, PojoField<Cluster>, S
         Cluster newCluster = new Cluster();
         metadataService.copy(cluster, newCluster);
         newCluster.setTimeZone(cluster.getZoneId().getId());
-        newCluster.setServerCount(cluster.getServers().size());
         newCluster.setHealth(infrastructureService.getHealth(cluster));
-        int degradedCount = 0;
-        int unhealthyCount = 0;
-        for (Server server : cluster.getServers()) {
-            Health health = infrastructureService.getHealth(server);
-            switch (health) {
-                case DEGRADED -> degradedCount++;
-                case HEALTHY -> unhealthyCount++;
-            }
-        }
-        newCluster.setDegradedCount(degradedCount);
-        newCluster.setUnhealthyCount(unhealthyCount);
+
+        HealthSummary<net.microfalx.heimdall.infrastructure.api.Server> healthSummary = new HealthSummary<>(infrastructureService::getHealth);
+        healthSummary.inspect(cluster.getServers());
+        newCluster.setServerCount(healthSummary.getTotalCount());
+        newCluster.setUnavailableCount(healthSummary.getUnavailableCount());
+        newCluster.setDegradedCount(healthSummary.getDegradedCount());
+        newCluster.setUnhealthyCount(healthSummary.getUnhealthyCount());
         return newCluster;
     }
 }
