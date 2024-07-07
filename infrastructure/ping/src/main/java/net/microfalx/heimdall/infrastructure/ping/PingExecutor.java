@@ -1,8 +1,8 @@
 package net.microfalx.heimdall.infrastructure.ping;
 
 import net.microfalx.heimdall.infrastructure.api.*;
-import net.microfalx.lang.ObjectUtils;
 
+import javax.net.ssl.SSLException;
 import java.io.IOException;
 import java.net.*;
 import java.net.http.*;
@@ -29,6 +29,7 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
     private final PingHealth health;
 
     private boolean persist = true;
+    private boolean useLiveness;
     private Status status = Status.NA;
     private ZonedDateTime start;
     private ZonedDateTime end;
@@ -37,7 +38,6 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
 
     PingExecutor(Ping ping, Service service, Server server, PingPersistence persistence,
                  InfrastructureService infrastructureService, PingHealth health) {
-        requireNonNull(ping);
         requireNonNull(service);
         requireNonNull(server);
         requireNonNull(persistence);
@@ -56,6 +56,10 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
         this.persist = persist;
     }
 
+    public void setUseLiveness(boolean useLiveness) {
+        this.useLiveness = useLiveness;
+    }
+
     @Override
     public String getId() {
         return id;
@@ -67,6 +71,7 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
     }
 
     Ping getPing() {
+        if (ping == null) throw new IllegalStateException("A ping is not available");
         return ping;
     }
 
@@ -75,14 +80,16 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
         try {
             doPing();
         } catch (Exception e) {
+            status = Status.L7STS;
+            errorCode = 500;
             errorMessage = getRootCauseMessage(e);
         } finally {
             end = ZonedDateTime.now();
         }
         if (persist) {
             health.registerPing(this);
-            doPersistPing();
         }
+        doPersistPing();
         return this;
     }
 
@@ -147,8 +154,54 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
     }
 
     private void doPingHttp() {
+        Status baseStatus = doPingHttp(createHttpUri());
+        Integer baseErrorCode = this.errorCode;
+        String baseErrorMessage = this.errorMessage;
+
+        Status livenessStatus = null;
+        Integer livenessErrorCode = null;
+        String livenessErrorMessage = null;
+        if (service.getLivenessPath() != null) {
+            livenessStatus = doPingHttp(createHttpLivenessUri());
+            livenessErrorCode = this.errorCode;
+            livenessErrorMessage = this.errorMessage;
+        }
+
+        Status readinessStatus = null;
+        Integer readinessErrorCode = null;
+        String readinessErrorMessage = null;
+        if (service.getReadinessPath() != null) {
+            readinessStatus = doPingHttp(createHttpReadinessUri());
+            readinessErrorCode = this.errorCode;
+            readinessErrorMessage = this.errorMessage;
+        }
+        if (baseStatus.isFailure() || baseStatus == Status.L7DEN) {
+            this.status = baseStatus;
+            this.errorCode = baseErrorCode;
+            this.errorMessage = baseErrorMessage;
+            if (useLiveness && baseStatus == Status.L7DEN && livenessStatus != null && !livenessStatus.isFailure()) {
+                this.status = livenessStatus;
+                this.errorCode = livenessErrorCode;
+                this.errorMessage = livenessErrorMessage;
+            }
+        } else if (livenessStatus != null && livenessStatus.isFailure()) {
+            this.status = livenessStatus;
+            this.errorCode = livenessErrorCode;
+            this.errorMessage = livenessErrorMessage;
+        } else if (readinessStatus != null && readinessStatus.isFailure()) {
+            this.status = readinessStatus;
+            this.errorCode = readinessErrorCode;
+            this.errorMessage = readinessErrorMessage;
+        } else {
+            this.status = baseStatus;
+            this.errorCode = baseErrorCode;
+            this.errorMessage = baseErrorMessage;
+        }
+    }
+
+    private Status doPingHttp(URI uri) {
         try {
-            HttpRequest.Builder builder = HttpRequest.newBuilder().uri(createHttpUri())
+            HttpRequest.Builder builder = HttpRequest.newBuilder().uri(uri)
                     .version(HttpClient.Version.HTTP_2).timeout(Duration.ofMillis(getReadTimeout())).GET();
             updateAuthentication(builder);
             HttpClient client = HttpClient.newBuilder().proxy(ProxySelector.getDefault())
@@ -164,7 +217,7 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
                 }
             } else if (response.statusCode() >= 400) {
                 errorCode = response.statusCode();
-                status = Status.L7STS;
+                status = isSecurityErrorCode(errorCode) ? Status.L7DEN : Status.L7STS;
             } else {
                 status = Status.L7OK;
             }
@@ -173,11 +226,17 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
         } catch (HttpTimeoutException e) {
             status = Status.L7TOUT;
             errorMessage = abbreviate(e.getMessage(), MAX_MESSAGE_WIDTH);
+        } catch (ConnectException e) {
+            status = Status.L4CON;
+        } catch (SSLException e) {
+            status = Status.L4CON;
+            errorMessage = abbreviate(e.getMessage(), MAX_MESSAGE_WIDTH);
         } catch (Exception e) {
             status = Status.L7STS;
             errorCode = 500;
             errorMessage = abbreviate(e.getMessage(), MAX_MESSAGE_WIDTH);
         }
+        return status;
     }
 
     private void updateAuthentication(HttpRequest.Builder builder) {
@@ -198,6 +257,20 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
         return service.getUri(server, environment);
     }
 
+    private URI createHttpLivenessUri() {
+        Environment environment = infrastructureService.find(server).stream().findFirst().orElse(null);
+        return service.getLivenessUri(server, environment);
+    }
+
+    private URI createHttpReadinessUri() {
+        Environment environment = infrastructureService.find(server).stream().findFirst().orElse(null);
+        return service.getReadinessUri(server, environment);
+    }
+
+    private boolean isSecurityErrorCode(Integer errorCode) {
+        return errorCode != null && (errorCode == 401 || errorCode == 403);
+    }
+
     private void doPingTcp() {
         try (Socket socket = new Socket()) {
             socket.connect(new InetSocketAddress(InetAddress.getByName(server.getHostname()), service.getPort()),
@@ -214,7 +287,7 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
     private void doPingUdp() {
         try (DatagramSocket socket = new DatagramSocket(service.getPort())) {
             socket.connect(new InetSocketAddress(service.getPort()));
-            socket.setSoTimeout(ping.getConnectionTimeOut());
+            socket.setSoTimeout(getConnectionTimeout());
             status = Status.L4OK;
         } catch (Exception e) {
             status = Status.L4CON;
@@ -223,14 +296,22 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
     }
 
     private void doPersistPing() {
-        persistence.persist(ping, this);
+        if (ping != null) persistence.persist(ping, this);
     }
 
     private int getConnectionTimeout() {
-        return ObjectUtils.defaultIfNull(ping.getConnectionTimeOut(), service.getConnectionTimeout().toMillis()).intValue();
+        if (ping != null && ping.getConnectionTimeOut() != null) {
+            return ping.getConnectionTimeOut();
+        } else {
+            return (int) service.getConnectionTimeout().toMillis();
+        }
     }
 
     private int getReadTimeout() {
-        return ObjectUtils.defaultIfNull(ping.getReadTimeOut(), service.getReadTimeout().toMillis()).intValue();
+        if (ping != null && ping.getConnectionTimeOut() != null) {
+            return ping.getReadTimeOut();
+        } else {
+            return (int) service.getReadTimeout().toMillis();
+        }
     }
 }

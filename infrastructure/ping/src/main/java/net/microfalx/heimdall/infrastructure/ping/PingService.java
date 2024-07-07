@@ -60,13 +60,10 @@ public class PingService implements InitializingBean, InfrastructureListener {
      */
     public Ping ping(net.microfalx.heimdall.infrastructure.api.Service service, Server server) {
         net.microfalx.heimdall.infrastructure.ping.Ping ping = cache.find(service, server);
-        if (ping != null) {
-            PingExecutor executor = new PingExecutor(ping, service, server, persistence, infrastructureService, health);
-            executor.setPersist(false);
-            return executor.execute();
-        } else {
-            return new CompletablePing(service, server);
-        }
+        PingExecutor executor = new PingExecutor(ping, service, server, persistence, infrastructureService, health);
+        executor.setPersist(false);
+        executor.setUseLiveness(true);
+        return executor.execute();
     }
 
     /**
@@ -84,7 +81,12 @@ public class PingService implements InitializingBean, InfrastructureListener {
     public boolean registerPing(String name, String description,
                                 net.microfalx.heimdall.infrastructure.api.Service service, Server server,
                                 Duration interval) {
-        return persistence.registerPing(name, service, server, interval, description);
+        boolean registered = persistence.registerPing(name, service, server, interval, description);
+        if (registered) {
+            LOGGER.info("Register ping '" + name + "' for service '" + service.getName() + "' and server '"
+                    + service.getName() + "', interval " + interval);
+        }
+        return registered;
     }
 
     @Override
@@ -114,6 +116,10 @@ public class PingService implements InitializingBean, InfrastructureListener {
         provisionPings();
         reload();
         startScheduler();
+    }
+
+    AsyncTaskExecutor getTaskExecutor() {
+        return taskExecutor;
     }
 
     private void provisionPings() {
