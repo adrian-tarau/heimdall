@@ -41,6 +41,11 @@ public class CompletablePing implements Ping {
     }
 
     @Override
+    public String getDescription() {
+        return null;
+    }
+
+    @Override
     public Status getStatus() {
         return status;
     }

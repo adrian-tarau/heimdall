@@ -4,7 +4,6 @@ import net.microfalx.bootstrap.dataset.DataSetFactory;
 import net.microfalx.bootstrap.dataset.MemoryDataSet;
 import net.microfalx.bootstrap.model.Metadata;
 import net.microfalx.bootstrap.model.PojoField;
-import net.microfalx.heimdall.infrastructure.api.InfrastructureService;
 import net.microfalx.heimdall.infrastructure.ping.PingHealth;
 import net.microfalx.heimdall.infrastructure.ping.PingService;
 import net.microfalx.lang.annotation.Provider;
@@ -23,10 +22,10 @@ public class PingDataSet extends MemoryDataSet<Ping, PojoField<Ping>, String> {
     protected Iterable<Ping> extractModels() {
         PingHealth pingHealth = getService(PingHealth.class);
         PingService pingService = getService(PingService.class);
-        InfrastructureService infrastructureService = getService(InfrastructureService.class);
         List<Ping> pings = new ArrayList<>();
         pingHealth.getLastPings().forEach((ping) -> {
             Ping overViewPing = new Ping();
+            overViewPing.setId(ping.getId());
             overViewPing.setName(ping.getName());
             overViewPing.setDescription(ping.getDescription());
             overViewPing.setService(ping.getService());
