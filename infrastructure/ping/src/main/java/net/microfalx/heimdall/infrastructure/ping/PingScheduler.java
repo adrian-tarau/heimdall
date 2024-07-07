@@ -4,6 +4,7 @@ import net.microfalx.heimdall.infrastructure.api.InfrastructureNotFoundException
 import net.microfalx.heimdall.infrastructure.api.InfrastructureService;
 import net.microfalx.heimdall.infrastructure.api.Server;
 import net.microfalx.heimdall.infrastructure.api.Service;
+import net.microfalx.heimdall.infrastructure.ping.system.Ping;
 import net.microfalx.lang.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,4 +1,4 @@
-package net.microfalx.heimdall.infrastructure.ping;
+package net.microfalx.heimdall.infrastructure.ping.system;
 
 import jakarta.persistence.*;
 import lombok.Getter;

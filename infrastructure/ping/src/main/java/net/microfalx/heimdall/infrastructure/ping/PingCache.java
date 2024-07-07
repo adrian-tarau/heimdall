@@ -2,6 +2,8 @@ package net.microfalx.heimdall.infrastructure.ping;
 
 import net.microfalx.heimdall.infrastructure.api.Server;
 import net.microfalx.heimdall.infrastructure.api.Service;
+import net.microfalx.heimdall.infrastructure.ping.system.Ping;
+import net.microfalx.heimdall.infrastructure.ping.system.PingRepository;
 import net.microfalx.lang.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

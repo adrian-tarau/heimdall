@@ -21,7 +21,7 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
 
     public static final int MAX_MESSAGE_WIDTH = 1000;
     private final String id;
-    private final Ping ping;
+    private final net.microfalx.heimdall.infrastructure.ping.system.Ping ping;
     private final Service service;
     private final Server server;
     private final PingPersistence persistence;
@@ -36,7 +36,7 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
     private Integer errorCode;
     private String errorMessage;
 
-    PingExecutor(Ping ping, Service service, Server server, PingPersistence persistence,
+    PingExecutor(net.microfalx.heimdall.infrastructure.ping.system.Ping ping, Service service, Server server, PingPersistence persistence,
                  InfrastructureService infrastructureService, PingHealth health) {
         requireNonNull(service);
         requireNonNull(server);
@@ -69,10 +69,23 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
 
     @Override
     public String getName() {
-        return server.getName() + "(" + service.getName() + ")";
+        if (ping == null) {
+            return server.getName() + "(" + service.getName() + ")";
+        } else {
+            return ping.getName();
+        }
     }
 
-    Ping getPing() {
+    @Override
+    public String getDescription() {
+        if (ping == null) {
+            return null;
+        } else {
+            return ping.getName();
+        }
+    }
+
+    net.microfalx.heimdall.infrastructure.ping.system.Ping getPing() {
         if (ping == null) throw new IllegalStateException("A ping is not available");
         return ping;
     }

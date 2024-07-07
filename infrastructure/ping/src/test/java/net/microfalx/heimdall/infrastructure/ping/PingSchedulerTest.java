@@ -3,6 +3,9 @@ package net.microfalx.heimdall.infrastructure.ping;
 import net.microfalx.heimdall.infrastructure.api.InfrastructureService;
 import net.microfalx.heimdall.infrastructure.core.system.Server;
 import net.microfalx.heimdall.infrastructure.core.system.Service;
+import net.microfalx.heimdall.infrastructure.ping.system.Ping;
+import net.microfalx.heimdall.infrastructure.ping.system.PingRepository;
+import net.microfalx.heimdall.infrastructure.ping.system.PingResultRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,7 +49,7 @@ class PingSchedulerTest {
 
     private net.microfalx.heimdall.infrastructure.api.Service service;
     private net.microfalx.heimdall.infrastructure.api.Server server;
-    private List<net.microfalx.heimdall.infrastructure.ping.Ping> pings;
+    private List<Ping> pings;
 
     private static final AtomicInteger idGenerator = new AtomicInteger(1);
 
@@ -90,8 +93,8 @@ class PingSchedulerTest {
         verify(pingExecutor).execute();
     }
 
-    private net.microfalx.heimdall.infrastructure.ping.Ping createPing(String hostName, boolean icmp,
-                                                                       int port, int interval) {
+    private Ping createPing(String hostName, boolean icmp,
+                            int port, int interval) {
         Server jpaServer = new Server();
         jpaServer.setId(idGenerator.getAndIncrement());
         jpaServer.setName("Server");
@@ -109,7 +112,7 @@ class PingSchedulerTest {
         jpaService.setPassword("");
         jpaService.setToken("");
 
-        net.microfalx.heimdall.infrastructure.ping.Ping jpaPing = new Ping();
+        Ping jpaPing = new Ping();
         jpaPing.setName(service.getName() + " " + server.getName());
         jpaPing.setId(idGenerator.getAndIncrement());
         jpaPing.setService(jpaService);

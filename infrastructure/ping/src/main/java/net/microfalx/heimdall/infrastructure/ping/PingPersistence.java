@@ -4,6 +4,9 @@ import net.microfalx.heimdall.infrastructure.api.Ping;
 import net.microfalx.heimdall.infrastructure.api.Server;
 import net.microfalx.heimdall.infrastructure.core.system.ServerRepository;
 import net.microfalx.heimdall.infrastructure.core.system.ServiceRepository;
+import net.microfalx.heimdall.infrastructure.ping.system.PingRepository;
+import net.microfalx.heimdall.infrastructure.ping.system.PingResult;
+import net.microfalx.heimdall.infrastructure.ping.system.PingResultRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,7 +32,7 @@ class PingPersistence {
      *
      * @param ping the ping
      */
-    void persist(net.microfalx.heimdall.infrastructure.ping.Ping jpaPing, Ping ping) {
+    void persist(net.microfalx.heimdall.infrastructure.ping.system.Ping jpaPing, Ping ping) {
         PingResult pingResult = new PingResult();
         pingResult.setService(jpaPing.getService());
         pingResult.setServer(jpaPing.getServer());
@@ -55,7 +58,7 @@ class PingPersistence {
     public boolean registerPing(String name, net.microfalx.heimdall.infrastructure.api.Service service, Server server,
                                 Duration interval, String description) {
         if (pingRepository.countPings(server.getId(), service.getId()) > 0) return false;
-        net.microfalx.heimdall.infrastructure.ping.Ping ping = new net.microfalx.heimdall.infrastructure.ping.Ping();
+        net.microfalx.heimdall.infrastructure.ping.system.Ping ping = new net.microfalx.heimdall.infrastructure.ping.system.Ping();
         ping.setName(name);
         ping.setDescription(description);
         ping.setServer(serverRepository.findByNaturalId(server.getId()).orElseThrow());

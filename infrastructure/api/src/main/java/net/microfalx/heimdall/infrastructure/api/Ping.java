@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.infrastructure.api;
 
+import net.microfalx.lang.Descriptable;
 import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.Nameable;
 
@@ -9,7 +10,7 @@ import java.time.ZonedDateTime;
 /**
  * An interface which carries the result of a ping operation.
  */
-public interface Ping extends Identifiable<String>, Nameable {
+public interface Ping extends Identifiable<String>, Nameable, Descriptable {
 
     /**
      * The service which is pinged.

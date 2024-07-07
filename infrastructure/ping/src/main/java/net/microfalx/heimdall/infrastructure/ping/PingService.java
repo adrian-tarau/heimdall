@@ -3,7 +3,6 @@ package net.microfalx.heimdall.infrastructure.ping;
 import net.microfalx.bootstrap.core.async.AsynchronousProperties;
 import net.microfalx.bootstrap.core.async.TaskExecutorFactory;
 import net.microfalx.bootstrap.metrics.Series;
-import net.microfalx.heimdall.infrastructure.api.Ping;
 import net.microfalx.heimdall.infrastructure.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +14,9 @@ import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.Collection;
+
+import static java.util.Collections.unmodifiableCollection;
 
 /**
  * A service which manages pings.
@@ -45,6 +47,10 @@ public class PingService implements InitializingBean, InfrastructureListener {
     private PingScheduler scheduler;
     private AsyncTaskExecutor taskExecutor;
 
+    public Collection<net.microfalx.heimdall.infrastructure.ping.system.Ping> getRegisterPings() {
+        return unmodifiableCollection(cache.getPings());
+    }
+
     /**
      * Reload ping metadata from database.
      */
@@ -60,7 +66,7 @@ public class PingService implements InitializingBean, InfrastructureListener {
      * @return the result of the ping
      */
     public Ping ping(net.microfalx.heimdall.infrastructure.api.Service service, Server server) {
-        net.microfalx.heimdall.infrastructure.ping.Ping ping = cache.find(service, server);
+        net.microfalx.heimdall.infrastructure.ping.system.Ping ping = cache.find(service, server);
         PingExecutor executor = new PingExecutor(ping, service, server, persistence, infrastructureService, health)
                 .setPersist(false).setUseLiveness(true);
         return executor.execute();

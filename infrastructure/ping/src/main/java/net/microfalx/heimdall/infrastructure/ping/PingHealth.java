@@ -1,20 +1,17 @@
 package net.microfalx.heimdall.infrastructure.ping;
 
 import net.microfalx.bootstrap.metrics.Series;
-import net.microfalx.heimdall.infrastructure.api.Health;
-import net.microfalx.heimdall.infrastructure.api.Ping;
-import net.microfalx.heimdall.infrastructure.api.Server;
-import net.microfalx.heimdall.infrastructure.api.Status;
+import net.microfalx.heimdall.infrastructure.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
+import java.time.Duration;
+import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static java.time.Duration.ofMillis;
+import static java.util.Collections.unmodifiableCollection;
 import static java.util.Collections.unmodifiableMap;
 
 /**
@@ -36,8 +33,64 @@ public class PingHealth {
      *
      * @return a non-null instance
      */
-    Map<String, Queue<Ping>> getPings() {
+    public Map<String, Queue<Ping>> getPings() {
         return unmodifiableMap(pings);
+    }
+
+    /**
+     * Returns the last pings.
+     *
+     * @return a non-null
+     */
+    public Collection<Ping> getLastPings() {
+        return unmodifiableCollection(lastPings.values());
+    }
+
+    /**
+     * Return the last duration of the ping
+     * @param service the service
+     * @param server the server
+     * @return the last duration of the ping
+     */
+    public Duration getLastDuration(Service service, Server server) {
+        Queue<Ping> pingQueue = getPingQueue(service, server);
+        Ping ping = (Ping) pingQueue.toArray()[pingQueue.toArray().length - 1];
+        return ping.getDuration();
+    }
+
+    /**
+     * Return the minimum duration of the ping
+     * @param service the service
+     * @param server the server t
+     * @return the minimum duration of the ping
+     */
+    public Duration getMinDuration(Service service, Server server) {
+        Queue<Ping> pingQueue = getPingQueue(service, server);
+        double duration = pingQueue.stream().mapToLong(p -> p.getDuration().toMillis()).min().orElse(0);
+        return ofMillis((long) duration);
+    }
+
+    /**
+     * Return the maximum duration of the ping
+     * @param service the service
+     * @param server the server
+     * @return the maximum duration of the ping
+     */
+    public Duration getMaxDuration(Service service, Server server) {
+        Queue<Ping> pingQueue = getPingQueue(service, server);
+        double duration = pingQueue.stream().mapToLong(p -> p.getDuration().toMillis()).max().orElse(0);
+        return ofMillis((long) duration);
+    }
+    /**
+     * Return the average duration of the ping
+     * @param service the service
+     * @param server the server
+     * @return the average duration of the ping
+     */
+    public Duration getAverageDuration(Service service, Server server) {
+        Queue<Ping> pingQueue = getPingQueue(service, server);
+        double duration = pingQueue.stream().mapToLong(p -> p.getDuration().toMillis()).average().orElse(0);
+        return ofMillis((long) duration);
     }
 
     /**

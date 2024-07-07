@@ -1,4 +1,4 @@
-package net.microfalx.heimdall.infrastructure.ping;
+package net.microfalx.heimdall.infrastructure.ping.overview;
 
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
@@ -6,9 +6,9 @@ import net.microfalx.bootstrap.web.dataset.DataSetController;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-@Controller
-@RequestMapping("/system/infrastructure/ping_result")
-@DataSet(model = PingResult.class)
-@Help("infrastructure/ping_result")
-public class PingResultController extends DataSetController<PingResult, Integer> {
+@Controller("OverviewPingController")
+@RequestMapping("infrastructure/ping")
+@DataSet(model = Ping.class, timeFilter = false)
+@Help("infrastructure/ping")
+public class PingController extends DataSetController<Ping, String> {
 }

@@ -2,6 +2,8 @@ package net.microfalx.heimdall.infrastructure.ping;
 
 import net.microfalx.heimdall.infrastructure.core.system.Server;
 import net.microfalx.heimdall.infrastructure.core.system.Service;
+import net.microfalx.heimdall.infrastructure.ping.system.Ping;
+import net.microfalx.heimdall.infrastructure.ping.system.PingRepository;
 import org.joor.Reflect;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
