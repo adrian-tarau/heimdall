@@ -1,6 +1,7 @@
 package net.microfalx.heimdall.infrastructure.ping;
 
 import net.microfalx.bootstrap.metrics.Series;
+import net.microfalx.bootstrap.metrics.Value;
 import net.microfalx.heimdall.infrastructure.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -48,8 +49,9 @@ public class PingHealth {
 
     /**
      * Return the last duration of the ping
+     *
      * @param service the service
-     * @param server the server
+     * @param server  the server
      * @return the last duration of the ping
      */
     public Duration getLastDuration(Service service, Server server) {
@@ -60,8 +62,9 @@ public class PingHealth {
 
     /**
      * Return the minimum duration of the ping
+     *
      * @param service the service
-     * @param server the server t
+     * @param server  the server t
      * @return the minimum duration of the ping
      */
     public Duration getMinDuration(Service service, Server server) {
@@ -72,8 +75,9 @@ public class PingHealth {
 
     /**
      * Return the maximum duration of the ping
+     *
      * @param service the service
-     * @param server the server
+     * @param server  the server
      * @return the maximum duration of the ping
      */
     public Duration getMaxDuration(Service service, Server server) {
@@ -81,10 +85,12 @@ public class PingHealth {
         double duration = pingQueue.stream().mapToLong(p -> p.getDuration().toMillis()).max().orElse(0);
         return ofMillis((long) duration);
     }
+
     /**
      * Return the average duration of the ping
+     *
      * @param service the service
-     * @param server the server
+     * @param server  the server
      * @return the average duration of the ping
      */
     public Duration getAverageDuration(Service service, Server server) {
@@ -115,7 +121,14 @@ public class PingHealth {
      * @return a non-null series
      */
     Series getSeries(net.microfalx.heimdall.infrastructure.api.Service service, Server server) {
-        return Series.create(PingUtils.getName(service, server));
+        Queue<Ping> pingQueue = getPingQueue(service, server);
+        List<Value> values = pingQueue.stream().map(ping -> {
+            if (ping.getStatus().isFailure()) {
+                return Value.create(ping.getStartedAt().toLocalDateTime(), -1 * ping.getDuration().toMillis());
+            }
+            return Value.create(ping.getStartedAt().toLocalDateTime(), ping.getDuration().toMillis());
+        }).toList();
+        return Series.create(PingUtils.getName(service, server), values);
     }
 
     /**
