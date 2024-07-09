@@ -123,12 +123,22 @@ public class PingHealth {
     Series getSeries(net.microfalx.heimdall.infrastructure.api.Service service, Server server) {
         Queue<Ping> pingQueue = getPingQueue(service, server);
         List<Value> values = pingQueue.stream().map(ping -> {
-            if (ping.getStatus().isFailure()) {
-                return Value.create(ping.getStartedAt().toLocalDateTime(), -1 * ping.getDuration().toMillis());
-            }
-            return Value.create(ping.getStartedAt().toLocalDateTime(), ping.getDuration().toMillis());
+            Duration duration = ping.getDuration();
+            if (ping.getStatus().isFailure()) duration = duration.negated();
+            return Value.create(ping.getStartedAt().toLocalDateTime(), duration.toMillis());
         }).toList();
         return Series.create(PingUtils.getName(service, server), values);
+    }
+
+    /**
+     * Returns the number of statuses grouped by status.
+     *
+     * @param service the service
+     * @param server  the server
+     * @return a non-null map
+     */
+    Map<Status, Integer> getStatusCounts(net.microfalx.heimdall.infrastructure.api.Service service, Server server) {
+        return Collections.emptyMap();
     }
 
     /**

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller("OverviewPingController")
-@RequestMapping("infrastructure/ping")
+@RequestMapping("/infrastructure/ping")
 @DataSet(model = Ping.class, timeFilter = false)
 @Help("infrastructure/ping")
 public class PingController extends DataSetController<Ping, String> {

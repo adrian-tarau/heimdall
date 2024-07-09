@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.Collection;
+import java.util.Map;
 
 import static java.util.Collections.unmodifiableCollection;
 
@@ -81,6 +82,17 @@ public class PingService implements InitializingBean, InfrastructureListener {
      */
     public Series getSeries(net.microfalx.heimdall.infrastructure.api.Service service, Server server) {
         return health.getSeries(service, server);
+    }
+
+    /**
+     * Returns the number of statuses grouped by status.
+     *
+     * @param service the service
+     * @param server  the server
+     * @return a non-null map
+     */
+    public Map<Status, Integer> getStatusCounts(net.microfalx.heimdall.infrastructure.api.Service service, Server server) {
+        return health.getStatusCounts(service, server);
     }
 
     /**

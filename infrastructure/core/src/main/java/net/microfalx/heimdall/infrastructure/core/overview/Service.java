@@ -5,8 +5,19 @@ import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.dataset.model.NamedIdentityAware;
+import net.microfalx.bootstrap.metrics.Series;
+import net.microfalx.bootstrap.metrics.Value;
+import net.microfalx.bootstrap.model.Field;
+import net.microfalx.bootstrap.web.chart.Chart;
+import net.microfalx.bootstrap.web.chart.annotation.Chartable;
+import net.microfalx.bootstrap.web.dataset.DataSetChartProvider;
 import net.microfalx.heimdall.infrastructure.api.Health;
 import net.microfalx.lang.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Name("Services")
 @Getter
@@ -42,6 +53,7 @@ public class Service extends NamedIdentityAware<String> {
     @Label(value = "Unavailable", group = "Servers")
     @Description("The number of servers which are not available (down) holding a service")
     @Formattable(alert = HealthCountAlertProvider.class)
+    @Chartable(width = 150, height = 18, provider = UnavailableChartProvider.class)
     private int unavailableCount;
 
     @Position(32)
@@ -59,4 +71,18 @@ public class Service extends NamedIdentityAware<String> {
     @Position(40)
     @Description("Indicates whether the service has any active instances")
     private boolean active;
+
+    public static class UnavailableChartProvider extends DataSetChartProvider<Service, Field<Service>, String> {
+
+        @Override
+        public void onUpdate(Chart chart) {
+            long now = System.currentTimeMillis();
+            Random random = ThreadLocalRandom.current();
+            List<Value> values = new ArrayList<>();
+            for (int i = 0; i < 20; i++) {
+                values.add(Value.create(now + i, random.nextInt(10)));
+            }
+            chart.addSeries(Series.create("test", values));
+        }
+    }
 }
