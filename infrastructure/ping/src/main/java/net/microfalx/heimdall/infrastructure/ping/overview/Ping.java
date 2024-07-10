@@ -21,9 +21,13 @@ import net.microfalx.heimdall.infrastructure.api.Status;
 import net.microfalx.heimdall.infrastructure.core.overview.HealthAlertProvider;
 import net.microfalx.heimdall.infrastructure.ping.PingService;
 import net.microfalx.heimdall.infrastructure.ping.dataset.StatusAlertProvider;
+import net.microfalx.lang.EnumUtils;
 import net.microfalx.lang.annotation.*;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Name("Health Checks")
 @Getter
@@ -87,8 +91,18 @@ public class Ping extends NamedIdentityAware<String> {
 
         @Override
         public void onUpdate(Chart chart) {
-            chart.addSeries(net.microfalx.bootstrap.web.chart.series.Series.create(3, 10, 7));
-            chart.setLabels("L7/OK", "L4/CON", "L4/TOUT");
+            chart.setTooltip(Tooltip.onlyValue());
+            PingService pingService = getBean(PingService.class);
+            Ping model = getModel(chart);
+            Map<Status, Long> statusCounts = pingService.getStatusCounts(model.getService(), model.getServer());
+            List<String> labels = new ArrayList<>();
+            List<Long> values = new ArrayList<>();
+            statusCounts.forEach((k, v) -> {
+                labels.add(EnumUtils.toName(k));
+                values.add(v);
+            });
+            chart.setLabels(labels);
+            chart.addSeries(net.microfalx.bootstrap.web.chart.series.Series.create(values));
         }
     }
 

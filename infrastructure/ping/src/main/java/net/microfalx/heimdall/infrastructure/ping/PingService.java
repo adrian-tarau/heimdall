@@ -91,7 +91,7 @@ public class PingService implements InitializingBean, InfrastructureListener {
      * @param server  the server
      * @return a non-null map
      */
-    public Map<Status, Integer> getStatusCounts(net.microfalx.heimdall.infrastructure.api.Service service, Server server) {
+    public Map<Status, Long> getStatusCounts(net.microfalx.heimdall.infrastructure.api.Service service, Server server) {
         return health.getStatusCounts(service, server);
     }
 

@@ -1,0 +1,31 @@
+package net.microfalx.heimdall.infrastructure.ping;
+
+import lombok.Getter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+@ConfigurationProperties("heimdall.infrustructure")
+@Getter
+public class InfrastructureProperties {
+
+
+    /**
+     * A threshold (percentage) which determines after how many unavailable infrastructure elements
+     * the overview infrastructure will be in {@link net.microfalx.heimdall.infrastructure.api.Health#DEGRADED}.
+     */
+    private float unavailableThreshold = 10f;
+
+    /**
+     * A threshold (percentage) which determines after how many degraded infrastructure elements
+     * the overview infrastructure will be in {@link net.microfalx.heimdall.infrastructure.api.Health#DEGRADED}.
+     */
+    private float degradedThreshold = 5f;
+
+    /**
+     * A threshold (percentage) which determines after how many unhealthy infrastructure elements
+     * the overview infrastructure will be in {@link net.microfalx.heimdall.infrastructure.api.Health#UNHEALTHY}.
+     */
+    private float unhealthyThreshold = 20f;
+}
+
