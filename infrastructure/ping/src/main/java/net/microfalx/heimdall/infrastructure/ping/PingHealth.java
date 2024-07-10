@@ -10,6 +10,8 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static java.time.Duration.ofMillis;
 import static java.util.Collections.unmodifiableCollection;
@@ -137,8 +139,10 @@ public class PingHealth {
      * @param server  the server
      * @return a non-null map
      */
-    Map<Status, Integer> getStatusCounts(net.microfalx.heimdall.infrastructure.api.Service service, Server server) {
-        return Collections.emptyMap();
+    Map<Status, Long> getStatusCounts(net.microfalx.heimdall.infrastructure.api.Service service, Server server) {
+        Queue<Ping> pingQueue = getPingQueue(service, server);
+        return pingQueue.stream().map(Ping::getStatus).collect(Collectors.groupingBy(Function.identity(),
+                Collectors.counting()));
     }
 
     /**
