@@ -4,12 +4,15 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
+import net.microfalx.bootstrap.dataset.annotation.Renderable;
 import net.microfalx.bootstrap.dataset.model.NamedIdentityAware;
 import net.microfalx.bootstrap.metrics.Series;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.web.chart.Chart;
+import net.microfalx.bootstrap.web.chart.Function;
 import net.microfalx.bootstrap.web.chart.Type;
 import net.microfalx.bootstrap.web.chart.annotation.Chartable;
+import net.microfalx.bootstrap.web.chart.tooltip.Tooltip;
 import net.microfalx.bootstrap.web.dataset.DataSetChartProvider;
 import net.microfalx.heimdall.infrastructure.api.Health;
 import net.microfalx.heimdall.infrastructure.api.Server;
@@ -74,11 +77,12 @@ public class Ping extends NamedIdentityAware<String> {
 
     @Position(33)
     @Description("The duration trend for the last health check executions")
-    @Formattable(discard = true)
+    @Renderable(discard = true)
     @Label(value = "Trend", group = "Durations")
     @Chartable(width = 150, height = 20, provider = DurationChartProvider.class)
     private Series durationTrend;
 
+    @Asynchronous(false)
     public static class HealthChartProvider extends DataSetChartProvider<Ping, Field<Ping>, String> {
 
         @Override
@@ -88,10 +92,12 @@ public class Ping extends NamedIdentityAware<String> {
         }
     }
 
+    @Asynchronous(false)
     public static class DurationChartProvider extends DataSetChartProvider<Ping, Field<Ping>, String> {
 
         @Override
         public void onUpdate(Chart chart) {
+            chart.setTooltip(Tooltip.durationNoTitleWithTimestamp()).setColors(Function.Color.negativeValue());
             PingService pingService = getBean(PingService.class);
             Ping model = getModel(chart);
             Series series = pingService.getSeries(model.getService(), model.getServer());
