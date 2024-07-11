@@ -91,7 +91,6 @@ public class Ping extends NamedIdentityAware<String> {
 
         @Override
         public void onUpdate(Chart chart) {
-            chart.setTooltip(Tooltip.onlyValue());
             PingService pingService = getBean(PingService.class);
             Ping model = getModel(chart);
             Map<Status, Long> statusCounts = pingService.getStatusCounts(model.getService(), model.getServer());
