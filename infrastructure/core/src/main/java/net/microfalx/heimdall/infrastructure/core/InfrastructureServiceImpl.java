@@ -2,6 +2,7 @@ package net.microfalx.heimdall.infrastructure.core;
 
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
 import net.microfalx.heimdall.infrastructure.api.*;
+import net.microfalx.heimdall.infrastructure.core.util.HealthSummary;
 import net.microfalx.lang.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -34,6 +36,9 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
 
     @Autowired
     private ApplicationContext applicationContext;
+
+    @Autowired
+    private InfrastructureProperties properties;
 
     private volatile InfrastructureCache cache = new InfrastructureCache();
     private final InfrastructureHealth health = new InfrastructureHealth();
@@ -140,22 +145,35 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
 
     @Override
     public Health getHealth(Environment environment) {
-        return Health.NA;
+        Set<Cluster> clusters = environment.getClusters();
+        HealthSummary<Cluster> clusterHealthSummary= new HealthSummary<Cluster>(this::getHealth).setProperties(properties);
+        clusterHealthSummary.inspect(clusters);
+        return clusterHealthSummary.getHealth();
     }
 
     @Override
     public Health getHealth(Cluster cluster) {
-        return Health.NA;
+        Set<Server> servers = cluster.getServers();
+        HealthSummary<Server> serverHealthSummary = new HealthSummary<Server>(this::getHealth).setProperties(properties);
+        serverHealthSummary.inspect(servers);
+        return serverHealthSummary.getHealth();
     }
 
     @Override
     public Health getHealth(net.microfalx.heimdall.infrastructure.api.Service service) {
-        return Health.NA;
+        Collection<Server> servers = getServers(service);
+        HealthSummary<Server> serverHealthSummary = new HealthSummary<Server>(this::getHealth).setProperties(properties);
+        serverHealthSummary.inspect(servers);
+        return serverHealthSummary.getHealth();
     }
 
     @Override
     public Health getHealth(Server server) {
-        return Health.NA;
+        HealthSummary<net.microfalx.heimdall.infrastructure.api.Service> healthSummary =
+                new HealthSummary<net.microfalx.heimdall.infrastructure.api.Service>(service -> getHealth(service, server))
+                        .setProperties(properties);
+        healthSummary.inspect(server.getServices());
+        return healthSummary.getHealth();
     }
 
     @Override

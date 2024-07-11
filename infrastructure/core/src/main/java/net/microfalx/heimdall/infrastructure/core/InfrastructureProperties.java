@@ -1,4 +1,4 @@
-package net.microfalx.heimdall.infrastructure.ping;
+package net.microfalx.heimdall.infrastructure.core;
 
 import lombok.Getter;
 import org.springframework.boot.context.properties.ConfigurationProperties;

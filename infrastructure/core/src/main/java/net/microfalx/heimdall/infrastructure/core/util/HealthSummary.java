@@ -2,6 +2,7 @@ package net.microfalx.heimdall.infrastructure.core.util;
 
 import net.microfalx.heimdall.infrastructure.api.Health;
 import net.microfalx.heimdall.infrastructure.api.InfrastructureElement;
+import net.microfalx.heimdall.infrastructure.core.InfrastructureProperties;
 
 import java.util.function.Function;
 
@@ -19,6 +20,8 @@ public class HealthSummary<T extends InfrastructureElement> {
     private int unavailableCount = 0;
     private int degradedCount = 0;
     private int unhealthyCount = 0;
+
+    private InfrastructureProperties properties = new InfrastructureProperties();
 
     public HealthSummary(Function<T, Health> extractor) {
         requireNonNull(extractor);
@@ -59,6 +62,24 @@ public class HealthSummary<T extends InfrastructureElement> {
      */
     public int getDegradedCount() {
         return degradedCount;
+    }
+
+    public HealthSummary<T> setProperties(InfrastructureProperties properties) {
+        requireNonNull(properties);
+        this.properties = properties;
+        return this;
+    }
+
+    public Health getHealth(){
+        if (totalCount==0) return Health.NA;
+        if (properties.getDegradedThreshold() >= degradedCount){
+            return Health.DEGRADED;
+        } else if (properties.getUnhealthyThreshold()>=unhealthyCount) {
+           return Health.UNHEALTHY;
+        } else if (properties.getUnavailableThreshold() >= unavailableCount) {
+            return Health.UNAVAILABLE;
+        }
+        return Health.HEALTHY;
     }
 
     /**
