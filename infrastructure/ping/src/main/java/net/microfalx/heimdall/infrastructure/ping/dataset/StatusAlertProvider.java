@@ -25,6 +25,6 @@ public class StatusAlertProvider<M> extends ApplicationContextSupport implements
         } else if (value == Status.NA) {
             type = Alert.Type.LIGHT;
         }
-        return Alert.builder().type(type).message(message).build();
+        return Alert.builder().type(type).minWidth(70).message(message).build();
     }
 }

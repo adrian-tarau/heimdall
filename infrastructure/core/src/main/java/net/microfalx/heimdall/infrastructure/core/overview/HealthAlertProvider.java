@@ -15,6 +15,6 @@ public class HealthAlertProvider<M, F extends Field<M>> implements Formattable.A
             case UNAVAILABLE, UNHEALTHY -> Alert.Type.DANGER;
             case HEALTHY -> Alert.Type.SUCCESS;
         };
-        return Alert.builder().type(type).build();
+        return Alert.builder().type(type).minWidth(100).build();
     }
 }

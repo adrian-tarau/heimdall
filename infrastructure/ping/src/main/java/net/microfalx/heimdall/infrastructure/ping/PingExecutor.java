@@ -81,7 +81,7 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
         if (ping == null) {
             return null;
         } else {
-            return ping.getName();
+            return ping.getDescription();
         }
     }
 
