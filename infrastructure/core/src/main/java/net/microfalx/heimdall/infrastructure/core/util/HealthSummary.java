@@ -70,14 +70,14 @@ public class HealthSummary<T extends InfrastructureElement> {
         return this;
     }
 
-    public Health getHealth(){
-        if (totalCount==0) return Health.NA;
-        if (properties.getDegradedThreshold() >= degradedCount){
-            return Health.DEGRADED;
-        } else if (properties.getUnhealthyThreshold()>=unhealthyCount) {
-           return Health.UNHEALTHY;
-        } else if (properties.getUnavailableThreshold() >= unavailableCount) {
+    public Health getHealth() {
+        if (totalCount == 0) return Health.NA;
+        if ((((float) unavailableCount / totalCount) * 100) >= properties.getUnavailableThreshold()) {
             return Health.UNAVAILABLE;
+        } else if ((((float) unhealthyCount / totalCount) * 100) >= properties.getUnhealthyThreshold()) {
+            return Health.UNHEALTHY;
+        } else if ((((float) degradedCount / totalCount) * 100) >= properties.getDegradedThreshold()) {
+            return Health.DEGRADED;
         }
         return Health.HEALTHY;
     }
