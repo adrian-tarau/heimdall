@@ -2,6 +2,7 @@ package net.microfalx.heimdall.infrastructure.ping;
 
 import lombok.Getter;
 import lombok.Setter;
+import net.microfalx.heimdall.infrastructure.api.InfrastructureConstants;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,7 +15,7 @@ public class PingProperties {
     /**
      * The number of threads used to ping services.
      */
-    private int threads = 20;
+    private int threads = InfrastructureConstants.WINDOW_SIZE;
 
     /**
      * The number of pings used to calculate the health of a service.

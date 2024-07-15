@@ -86,7 +86,10 @@ class InfrastructureProvisioning implements Runnable {
                 .description("An open-source relational database management system").build());
         infrastructureService.registerService((Service) new Service.Builder().type(Service.Type.TCP).port(5432)
                 .discoverable(true).tag(AUTO_TAG).tag(DATABASE_TAG).name("Postgres")
-                .description("Am open-source relational database management system emphasizing extensibility and SQL compliance").build());
+                .description("An open-source relational database management system emphasizing extensibility and SQL compliance").build());
+        infrastructureService.registerService((Service) new Service.Builder().type(Service.Type.TCP).port(5433)
+                .discoverable(true).tag(AUTO_TAG).tag(DATABASE_TAG).name("Vertica")
+                .description("An is an OLAP (online analytical processing) data warehouse management system").build());
     }
 
     private void provisionOtherServices() {

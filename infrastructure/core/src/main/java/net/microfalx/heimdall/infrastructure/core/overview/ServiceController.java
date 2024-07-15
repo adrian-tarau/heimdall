@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller("OverviewServiceController")
 @RequestMapping("/infrastructure/service")
-@DataSet(model = Service.class, timeFilter = false)
+@DataSet(model = Service.class, timeFilter = false, defaultQuery = "active = true")
 @Help("infrastructure/service")
 public class ServiceController extends DataSetController<Service, String> {
 }

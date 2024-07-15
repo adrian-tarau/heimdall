@@ -2,7 +2,9 @@ package net.microfalx.heimdall.infrastructure.ping;
 
 import net.microfalx.heimdall.infrastructure.api.*;
 
+import javax.net.SocketFactory;
 import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.net.*;
 import java.net.http.*;
@@ -243,7 +245,7 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
         } catch (ConnectException e) {
             status = Status.L4CON;
         } catch (SSLException e) {
-            status = Status.L4CON;
+            status = Status.L6TLS;
             errorMessage = abbreviate(e.getMessage(), MAX_MESSAGE_WIDTH);
         } catch (Exception e) {
             status = Status.L7STS;
@@ -286,7 +288,7 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
     }
 
     private void doPingTcp() {
-        try (Socket socket = new Socket()) {
+        try (Socket socket = createSocket()) {
             socket.connect(new InetSocketAddress(InetAddress.getByName(server.getHostname()), service.getPort()),
                     getConnectionTimeout());
             status = Status.L4OK;
@@ -296,6 +298,11 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
             status = Status.L4CON;
             errorMessage = abbreviate(e.getMessage(), MAX_MESSAGE_WIDTH);
         }
+    }
+
+    private Socket createSocket() throws IOException {
+        SocketFactory socketFactory = service.isTls() ? SSLSocketFactory.getDefault() : SocketFactory.getDefault();
+        return socketFactory.createSocket();
     }
 
     private void doPingUdp() {

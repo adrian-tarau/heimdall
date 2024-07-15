@@ -27,7 +27,13 @@ public enum Status {
      * The health check failed at transport layer due to a timeout.
      */
     @Name("L4/TOUT")
-    L4TOUT(20, true, true),
+    L4TOUT(15, true, true),
+
+    /**
+     * The health check failed at presentation due to TLS errors.
+     */
+    @Name("L6/TLS")
+    L6TLS(20, true, false),
 
     /**
      * The health check failed at application layer due to a timeout.
@@ -68,7 +74,7 @@ public enum Status {
     /**
      * The health check passed at application layer.
      */
-    @Name("L4/OK")
+    @Name("L7/OK")
     L7OK(100, false, false),
 
     /**

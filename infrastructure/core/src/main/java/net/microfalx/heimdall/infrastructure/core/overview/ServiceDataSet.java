@@ -31,13 +31,15 @@ public class ServiceDataSet extends MemoryDataSet<Service, PojoField<Service>, S
     private Service from(InfrastructureService infrastructureService, MetadataService metadataService, net.microfalx.heimdall.infrastructure.api.Service service) {
         Service newService = new Service();
         metadataService.copy(service, newService);
+        newService.setReference(service);
         newService.setHealth(infrastructureService.getHealth(service));
         HealthSummary<Server> healthSummary = new HealthSummary<>(infrastructureService::getHealth);
         healthSummary.inspect(infrastructureService.getServers(service));
-        newService.setServerCount(healthSummary.getTotalCount());
+        newService.setTotalCount(healthSummary.getTotalCount());
         newService.setUnavailableCount(healthSummary.getUnavailableCount());
         newService.setDegradedCount(healthSummary.getDegradedCount());
         newService.setUnhealthyCount(healthSummary.getUnhealthyCount());
+        newService.setActive(healthSummary.getTotalCount() > 0);
         return newService;
     }
 }

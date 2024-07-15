@@ -47,6 +47,23 @@ public class Environment extends NamedAndTaggedIdentifyAware<String> implements 
     }
 
     /**
+     * Returns all servers part of this environment.
+     * <p>
+     * This method returns a union of all server assigned to this environment, and all servers from all clusters assigned
+     * to this environment.
+     *
+     * @return a non-null instance
+     */
+    public Set<Server> getAllServers() {
+        Set<Server> allServers = new HashSet<>();
+        for (Cluster cluster : clusters) {
+            allServers.addAll(cluster.getServers());
+        }
+        allServers.addAll(servers);
+        return allServers;
+    }
+
+    /**
      * Replaces the variables in the given text.
      * <p>
      * Variables can be accessed by using the placeholder <code>${name}</code>. Parameters are case-insensitive.

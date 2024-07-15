@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -107,7 +108,7 @@ public class PingHealth {
      * @param ping the ping
      */
     void registerPing(Ping ping) {
-        Queue<Ping> queue = pings.computeIfAbsent(ping.getId(), pings -> new ArrayBlockingQueue<>(properties.getWindowSize()));
+        Queue<Ping> queue = pings.computeIfAbsent(ping.getId(), pings -> createPingQueue(ping));
         if (!queue.offer(ping)) {
             queue.remove();
             queue.offer(ping);
@@ -180,6 +181,17 @@ public class PingHealth {
                 return Health.HEALTHY;
             }
         }
+    }
+
+    private Queue<Ping> createPingQueue(Ping ping) {
+        Duration duration = Duration.ofSeconds(30);
+        Queue<Ping> queue = new ArrayBlockingQueue<>(properties.getWindowSize());
+        ZonedDateTime timestamp = ZonedDateTime.now().minus(duration.multipliedBy(properties.getWindowSize()));
+        for (int i = 0; i < properties.getWindowSize(); i++) {
+            queue.offer(new CompletablePing(ping.getService(), ping.getServer()).setStartedAt(timestamp).setEndedAt(timestamp));
+            timestamp = timestamp.plus(duration);
+        }
+        return queue;
     }
 
     private Queue<Ping> getPingQueue(net.microfalx.heimdall.infrastructure.api.Service service, Server server) {

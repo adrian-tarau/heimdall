@@ -50,9 +50,10 @@ public class CompletablePing implements Ping {
         return status;
     }
 
-    public void setStatus(Status status) {
+    public CompletablePing setStatus(Status status) {
         requireNonNull(status);
         this.status = status;
+        return this;
     }
 
     @Override
@@ -70,9 +71,10 @@ public class CompletablePing implements Ping {
         return startedAt;
     }
 
-    public void setStartedAt(ZonedDateTime startedAt) {
+    public CompletablePing setStartedAt(ZonedDateTime startedAt) {
         requireNonNull(startedAt);
         this.startedAt = startedAt;
+        return this;
     }
 
     @Override
@@ -80,9 +82,10 @@ public class CompletablePing implements Ping {
         return endedAt;
     }
 
-    public void setEndedAt(ZonedDateTime endedAt) {
+    public CompletablePing setEndedAt(ZonedDateTime endedAt) {
         requireNonNull(endedAt);
         this.endedAt = endedAt;
+        return this;
     }
 
     @Override

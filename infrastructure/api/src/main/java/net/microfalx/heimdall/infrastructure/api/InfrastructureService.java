@@ -1,5 +1,7 @@
 package net.microfalx.heimdall.infrastructure.api;
 
+import net.microfalx.bootstrap.metrics.Series;
+
 import java.util.Collection;
 
 /**
@@ -127,43 +129,36 @@ public interface InfrastructureService {
     /**
      * Returns the health of a service running within a server.
      *
-     * @param environment the environment
-     * @return a non-null instance
-     */
-    Health getHealth(Environment environment);
-
-    /**
-     * Returns the health of a cluster.
-     *
-     * @param cluster the cluster
-     * @return a non-null instance
-     */
-    Health getHealth(Cluster cluster);
-
-    /**
-     * Returns the health of a service running within a server.
-     *
-     * @param service the service
-     * @return a non-null instance
-     */
-    Health getHealth(Service service);
-
-    /**
-     * Returns the health of a service running within a server.
-     *
-     * @param server the server
-     * @return a non-null instance
-     */
-    Health getHealth(Server server);
-
-    /**
-     * Returns the health of a service running within a server.
-     *
      * @param service the service
      * @param server  the server
      * @return a non-null instance
      */
     Health getHealth(Service service, Server server);
+
+    /**
+     * Returns the health of an infrastructure element.
+     *
+     * @param element the environment
+     * @return a non-null instance
+     */
+    Health getHealth(InfrastructureElement element);
+
+    /**
+     * Returns the health trend for a given infrastructure element.
+     *
+     * @param element the element
+     * @return the health trend
+     */
+    Collection<Health> getHealthTrend(InfrastructureElement element);
+
+    /**
+     * Returns the health trend for a given infrastructure element and a given health severity.
+     *
+     * @param element the element
+     * @param health the element
+     * @return the health trend
+     */
+    Series getHealthTrend(InfrastructureElement element, Health health);
 
     /**
      * Resolves the DNS for a given server.

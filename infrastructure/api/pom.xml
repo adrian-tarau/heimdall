@@ -42,6 +42,11 @@
             <artifactId>bootstrap-model</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>net.microfalx.bootstrap</groupId>
+            <artifactId>bootstrap-metrics</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>

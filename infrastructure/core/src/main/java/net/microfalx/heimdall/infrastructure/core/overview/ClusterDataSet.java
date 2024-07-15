@@ -30,12 +30,13 @@ public class ClusterDataSet extends MemoryDataSet<Cluster, PojoField<Cluster>, S
     private Cluster from(InfrastructureService infrastructureService, MetadataService metadataService, net.microfalx.heimdall.infrastructure.api.Cluster cluster) {
         Cluster newCluster = new Cluster();
         metadataService.copy(cluster, newCluster);
+        newCluster.setReference(cluster);
         newCluster.setTimeZone(cluster.getZoneId().getId());
         newCluster.setHealth(infrastructureService.getHealth(cluster));
 
         HealthSummary<net.microfalx.heimdall.infrastructure.api.Server> healthSummary = new HealthSummary<>(infrastructureService::getHealth);
         healthSummary.inspect(cluster.getServers());
-        newCluster.setServerCount(healthSummary.getTotalCount());
+        newCluster.setTotalCount(healthSummary.getTotalCount());
         newCluster.setUnavailableCount(healthSummary.getUnavailableCount());
         newCluster.setDegradedCount(healthSummary.getDegradedCount());
         newCluster.setUnhealthyCount(healthSummary.getUnhealthyCount());

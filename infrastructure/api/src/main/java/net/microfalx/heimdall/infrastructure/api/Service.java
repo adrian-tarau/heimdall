@@ -532,6 +532,7 @@ public class Service extends NamedAndTaggedIdentifyAware<String> implements Infr
             builder.append(type.name().toLowerCase());
             if (port > 0) builder.append('_').append(port);
             if (path != null) builder.append('_').append(StringUtils.toIdentifier(path));
+            if (tls) builder.append("_tls");
             return builder.toString();
         }
 

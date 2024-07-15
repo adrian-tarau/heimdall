@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.infrastructure.api;
 
+import net.microfalx.lang.Prioritizable;
 import net.microfalx.lang.annotation.Name;
 
 import java.util.StringJoiner;
@@ -9,7 +10,7 @@ import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 /**
  * An enum for the health of a service.
  */
-public enum Health {
+public enum Health implements Prioritizable {
 
     /**
      * Indicates that the health check determined that the service was not available.
@@ -44,6 +45,11 @@ public enum Health {
         this.priority = priority;
     }
 
+    @Override
+    public int getPriority() {
+        return priority;
+    }
+
     /**
      * Returns whether this health comes before another health regarding the severity of the health.
      *
@@ -62,4 +68,6 @@ public enum Health {
                 .add("name=" + name())
                 .toString();
     }
+
+
 }

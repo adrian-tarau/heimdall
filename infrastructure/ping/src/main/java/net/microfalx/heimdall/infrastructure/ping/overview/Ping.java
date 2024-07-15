@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
+import net.microfalx.bootstrap.dataset.annotation.OrderBy;
 import net.microfalx.bootstrap.dataset.annotation.Renderable;
 import net.microfalx.bootstrap.dataset.model.NamedIdentityAware;
 import net.microfalx.bootstrap.metrics.Series;
@@ -12,6 +13,7 @@ import net.microfalx.bootstrap.web.chart.Chart;
 import net.microfalx.bootstrap.web.chart.Function;
 import net.microfalx.bootstrap.web.chart.Type;
 import net.microfalx.bootstrap.web.chart.annotation.Chartable;
+import net.microfalx.bootstrap.web.chart.annotations.Annotations;
 import net.microfalx.bootstrap.web.chart.tooltip.Tooltip;
 import net.microfalx.bootstrap.web.dataset.DataSetChartProvider;
 import net.microfalx.heimdall.infrastructure.api.Health;
@@ -28,6 +30,10 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static net.microfalx.bootstrap.web.dataset.DataSetChartProvider.PIE_HEIGHT;
+import static net.microfalx.bootstrap.web.dataset.DataSetChartProvider.PIE_WIDTH;
+import static net.microfalx.heimdall.infrastructure.api.InfrastructureConstants.*;
 
 @Name("Health Checks")
 @Getter
@@ -47,7 +53,8 @@ public class Ping extends NamedIdentityAware<String> {
     @Position(25)
     @Description("The overall health of the health check")
     @Formattable(alert = HealthAlertProvider.class)
-    @Chartable(type = Type.PIE, width = 20, height = 20, provider = HealthChartProvider.class)
+    @Chartable(type = Type.PIE, width = PIE_WIDTH, height = PIE_HEIGHT, provider = HealthChartProvider.class)
+    @OrderBy
     private Health health;
 
     @Position(26)
@@ -83,7 +90,7 @@ public class Ping extends NamedIdentityAware<String> {
     @Description("The duration trend for the last health check executions")
     @Renderable(discard = true)
     @Label(value = "Trend", group = "Durations")
-    @Chartable(width = 150, height = 20, provider = DurationChartProvider.class)
+    @Chartable(width = TREND_CHART_WIDTH, height = TREND_CHART_HEIGHT, provider = DurationChartProvider.class)
     private Series durationTrend;
 
     @Asynchronous(false)
@@ -97,8 +104,10 @@ public class Ping extends NamedIdentityAware<String> {
             List<String> labels = new ArrayList<>();
             List<Long> values = new ArrayList<>();
             statusCounts.forEach((k, v) -> {
-                labels.add(EnumUtils.toName(k));
-                values.add(v);
+                if (k != Status.NA) {
+                    labels.add(EnumUtils.toName(k));
+                    values.add(v);
+                }
             });
             chart.setLabels(labels);
             chart.addSeries(net.microfalx.bootstrap.web.chart.series.Series.create(values));
@@ -111,6 +120,7 @@ public class Ping extends NamedIdentityAware<String> {
         @Override
         public void onUpdate(Chart chart) {
             chart.setTooltip(Tooltip.durationNoTitleWithTimestamp()).setColors(Function.Color.negativeValue());
+            chart.setAnnotations(Annotations.zeroY(TREND_ZERO_FILL_COLOR));
             PingService pingService = getBean(PingService.class);
             Ping model = getModel(chart);
             Series series = pingService.getSeries(model.getService(), model.getServer());

@@ -31,12 +31,13 @@ public class ServerDataSet extends MemoryDataSet<Server, PojoField<Server>, Stri
     private Server from(InfrastructureService infrastructureService, MetadataService metadataService, net.microfalx.heimdall.infrastructure.api.Server server) {
         Server newCluster = new Server();
         metadataService.copy(server, newCluster);
+        newCluster.setReference(server);
         newCluster.setTimeZone(server.getZoneId().getId());
         newCluster.setHealth(infrastructureService.getHealth(server));
 
         HealthSummary<Service> healthSummary = new HealthSummary<>(infrastructureService::getHealth);
         healthSummary.inspect(server.getServices());
-        newCluster.setServerCount(healthSummary.getTotalCount());
+        newCluster.setTotalCount(healthSummary.getTotalCount());
         newCluster.setUnavailableCount(healthSummary.getUnavailableCount());
         newCluster.setDegradedCount(healthSummary.getDegradedCount());
         newCluster.setUnhealthyCount(healthSummary.getUnhealthyCount());

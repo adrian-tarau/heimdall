@@ -1,9 +1,13 @@
 package net.microfalx.heimdall.infrastructure.core.util;
 
 import net.microfalx.heimdall.infrastructure.api.Health;
+import net.microfalx.heimdall.infrastructure.api.HealthAware;
 import net.microfalx.heimdall.infrastructure.api.InfrastructureElement;
 import net.microfalx.heimdall.infrastructure.core.InfrastructureProperties;
+import net.microfalx.lang.TimeUtils;
+import net.microfalx.lang.Timestampable;
 
+import java.time.LocalDateTime;
 import java.util.function.Function;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
@@ -13,13 +17,16 @@ import static net.microfalx.lang.ArgumentUtils.requireNonNull;
  *
  * @param <T> the type of infrastructure element
  */
-public class HealthSummary<T extends InfrastructureElement> {
+public class HealthSummary<T extends InfrastructureElement> implements HealthAware, Timestampable<LocalDateTime> {
 
     private final Function<T, Health> extractor;
+    private final long timestamp = System.currentTimeMillis();
     private int totalCount;
     private int unavailableCount = 0;
     private int degradedCount = 0;
     private int unhealthyCount = 0;
+
+    private Health health;
 
     private InfrastructureProperties properties = new InfrastructureProperties();
 
@@ -29,57 +36,51 @@ public class HealthSummary<T extends InfrastructureElement> {
     }
 
     /**
-     * Returns the total number of infrastructure elements.
+     * Changes the default properties (thresholds used to calculate health).
      *
-     * @return a positive integer
+     * @param properties the new properties
+     * @return self
      */
-    public int getTotalCount() {
-        return totalCount;
-    }
-
-    /**
-     * Returns the number of infrastructure elements with their health equal to {@link Health#UNAVAILABLE}.
-     *
-     * @return a positive integer
-     */
-    public int getUnavailableCount() {
-        return unavailableCount;
-    }
-
-    /**
-     * Returns the number of infrastructure elements with their health equal to {@link Health#UNHEALTHY}.
-     *
-     * @return a positive integer
-     */
-    public int getUnhealthyCount() {
-        return unhealthyCount;
-    }
-
-    /**
-     * Returns the number of infrastructure elements with their health equal to {@link Health#DEGRADED}.
-     *
-     * @return a positive integer
-     */
-    public int getDegradedCount() {
-        return degradedCount;
-    }
-
     public HealthSummary<T> setProperties(InfrastructureProperties properties) {
         requireNonNull(properties);
         this.properties = properties;
         return this;
     }
 
+    @Override
+    public LocalDateTime getCreatedAt() {
+        return TimeUtils.toLocalDateTime(timestamp);
+    }
+
+    public int getTotalCount() {
+        return totalCount;
+    }
+
+    public int getUnavailableCount() {
+        return unavailableCount;
+    }
+
+    public int getUnhealthyCount() {
+        return unhealthyCount;
+    }
+
+    public int getDegradedCount() {
+        return degradedCount;
+    }
+
     public Health getHealth() {
         if (totalCount == 0) return Health.NA;
+        if (health != null) return health;
         if ((((float) unavailableCount / totalCount) * 100) >= properties.getUnavailableThreshold()) {
-            return Health.UNAVAILABLE;
+            health = Health.UNAVAILABLE;
         } else if ((((float) unhealthyCount / totalCount) * 100) >= properties.getUnhealthyThreshold()) {
-            return Health.UNHEALTHY;
+            health = Health.UNHEALTHY;
         } else if ((((float) degradedCount / totalCount) * 100) >= properties.getDegradedThreshold()) {
-            return Health.DEGRADED;
+            health = Health.DEGRADED;
+        } else {
+            health = Health.HEALTHY;
         }
-        return Health.HEALTHY;
+        return health;
     }
 
     /**
@@ -101,6 +102,7 @@ public class HealthSummary<T extends InfrastructureElement> {
      */
     public void inspect(T value) {
         requireNonNull(value);
+        health = null;
         totalCount++;
         Health health = extractor.apply(value);
         switch (health) {

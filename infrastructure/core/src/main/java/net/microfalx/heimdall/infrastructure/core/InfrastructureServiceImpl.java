@@ -1,6 +1,7 @@
 package net.microfalx.heimdall.infrastructure.core;
 
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
+import net.microfalx.bootstrap.metrics.Series;
 import net.microfalx.heimdall.infrastructure.api.*;
 import net.microfalx.heimdall.infrastructure.core.util.HealthSummary;
 import net.microfalx.lang.ClassUtils;
@@ -13,12 +14,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -35,13 +37,18 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
     private AsyncTaskExecutor taskExecutor;
 
     @Autowired
+    private TaskScheduler taskScheduler;
+
+    @Autowired
     private ApplicationContext applicationContext;
 
     @Autowired
     private InfrastructureProperties properties;
 
+    @Autowired
+    private InfrastructureHealth health;
+
     private volatile InfrastructureCache cache = new InfrastructureCache();
-    private final InfrastructureHealth health = new InfrastructureHealth();
     private final InfrastructureDns dns = new InfrastructureDns();
     private final InfrastructurePersistence infrastructurePersistence = new InfrastructurePersistence();
     private final Collection<InfrastructureListener> listeners = new CopyOnWriteArrayList<>();
@@ -144,36 +151,19 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
     }
 
     @Override
-    public Health getHealth(Environment environment) {
-        Set<Cluster> clusters = environment.getClusters();
-        HealthSummary<Cluster> clusterHealthSummary= new HealthSummary<Cluster>(this::getHealth).setProperties(properties);
-        clusterHealthSummary.inspect(clusters);
-        return clusterHealthSummary.getHealth();
+    public Health getHealth(InfrastructureElement element) {
+        requireNonNull(element);
+        return getHealthSummary(element).getHealth();
     }
 
     @Override
-    public Health getHealth(Cluster cluster) {
-        Set<Server> servers = cluster.getServers();
-        HealthSummary<Server> serverHealthSummary = new HealthSummary<Server>(this::getHealth).setProperties(properties);
-        serverHealthSummary.inspect(servers);
-        return serverHealthSummary.getHealth();
+    public Collection<Health> getHealthTrend(InfrastructureElement element) {
+        return health.getHealthTrend(element);
     }
 
     @Override
-    public Health getHealth(net.microfalx.heimdall.infrastructure.api.Service service) {
-        Collection<Server> servers = getServers(service);
-        HealthSummary<Server> serverHealthSummary = new HealthSummary<Server>(this::getHealth).setProperties(properties);
-        serverHealthSummary.inspect(servers);
-        return serverHealthSummary.getHealth();
-    }
-
-    @Override
-    public Health getHealth(Server server) {
-        HealthSummary<net.microfalx.heimdall.infrastructure.api.Service> healthSummary =
-                new HealthSummary<net.microfalx.heimdall.infrastructure.api.Service>(service -> getHealth(service, server))
-                        .setProperties(properties);
-        healthSummary.inspect(server.getServices());
-        return healthSummary.getHealth();
+    public Series getHealthTrend(InfrastructureElement element, Health health) {
+        return this.health.getHealthTrend(element, health);
     }
 
     @Override
@@ -206,6 +196,7 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
     public void onApplicationEvent(ApplicationStartedEvent event) {
         initializeListeners();
         taskExecutor.submit(this::fireInitializedEvent);
+        taskScheduler.schedule(new InfrastructureScheduler(this, health), new CronTrigger(properties.getSchedule()));
     }
 
     @Override
@@ -214,6 +205,25 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
         provisionInfrastructure();
         this.reload();
         started = true;
+    }
+
+    public InfrastructureHealth getHealth() {
+        return health;
+    }
+
+    @SuppressWarnings("unchecked")
+    <T extends InfrastructureElement> HealthSummary<T> getHealthSummary(InfrastructureElement element) {
+        if (element instanceof Environment) {
+            return (HealthSummary<T>) getHealthSummary((Environment) element);
+        } else if (element instanceof Cluster) {
+            return (HealthSummary<T>) getHealthSummary((Cluster) element);
+        } else if (element instanceof Server) {
+            return (HealthSummary<T>) getHealthSummary((Server) element);
+        } else if (element instanceof net.microfalx.heimdall.infrastructure.api.Service) {
+            return (HealthSummary<T>) getHealthSummary((net.microfalx.heimdall.infrastructure.api.Service) element);
+        } else {
+            throw new IllegalStateException("Unhandled infrastructure element: " + ClassUtils.getName(element));
+        }
     }
 
     private void doRegisterServer(Server server, Cluster cluster) {
@@ -287,6 +297,40 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
             }
         }
         return health;
+    }
+
+    private HealthSummary<Server> getHealthSummary(Environment environment) {
+        requireNonNull(environment);
+        environment = cache.getEnvironment(environment.getId());
+        HealthSummary<Server> clusterHealthSummary = new HealthSummary<Server>(this::getHealth).setProperties(properties);
+        clusterHealthSummary.inspect(environment.getAllServers());
+        return clusterHealthSummary;
+    }
+
+    private HealthSummary<Server> getHealthSummary(Cluster cluster) {
+        requireNonNull(cluster);
+        cluster = cache.getCluster(cluster.getId());
+        HealthSummary<Server> serverHealthSummary = new HealthSummary<Server>(this::getHealth).setProperties(properties);
+        serverHealthSummary.inspect(cluster.getServers());
+        return serverHealthSummary;
+    }
+
+    private HealthSummary<Server> getHealthSummary(net.microfalx.heimdall.infrastructure.api.Service service) {
+        requireNonNull(service);
+        service = cache.getService(service.getId());
+        HealthSummary<Server> serverHealthSummary = new HealthSummary<Server>(this::getHealth).setProperties(properties);
+        serverHealthSummary.inspect(getServers(service));
+        return serverHealthSummary;
+    }
+
+    private HealthSummary<net.microfalx.heimdall.infrastructure.api.Service> getHealthSummary(Server server) {
+        requireNonNull(server);
+        Server finalServer = cache.getServer(server.getId());
+        HealthSummary<net.microfalx.heimdall.infrastructure.api.Service> healthSummary =
+                new HealthSummary<net.microfalx.heimdall.infrastructure.api.Service>(service -> getHealth(service, finalServer))
+                        .setProperties(properties);
+        healthSummary.inspect(server.getServices());
+        return healthSummary;
     }
 
     private Cluster mergeClusters(Cluster source, Cluster target) {
