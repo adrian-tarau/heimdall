@@ -12,6 +12,8 @@ import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.annotation.*;
 import org.hibernate.annotations.NaturalId;
 
+import java.util.Collection;
+
 @Entity
 @Table(name = "infrastructure_server")
 @Name("Servers")
@@ -60,6 +62,11 @@ public class Server extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
     @Component(Component.Type.TEXT_AREA)
     @Visible(modes = {Visible.Mode.EDIT, Visible.Mode.ADD, Visible.Mode.VIEW})
     private String attributes;
+
+    @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})
+    @ManyToMany()
+    @JoinTable(name="infrastructure_environment_to_server", joinColumns = @JoinColumn(name = "server_id"), inverseJoinColumns = @JoinColumn(name = "environment_id"))
+    private Collection<Environment> environments;
 
     public static String toNaturalId(Server server) {
         if (server == null) return null;

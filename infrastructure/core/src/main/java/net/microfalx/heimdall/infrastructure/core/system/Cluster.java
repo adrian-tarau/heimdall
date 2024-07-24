@@ -14,6 +14,8 @@ import net.microfalx.lang.annotation.Position;
 import net.microfalx.lang.annotation.Visible;
 import org.hibernate.annotations.NaturalId;
 
+import java.util.Collection;
+
 @Entity
 @Table(name = "infrastructure_cluster")
 @Name("Clusters")
@@ -38,4 +40,9 @@ public class Cluster extends NamedAndTaggedAndTimestampedIdentityAware<Integer> 
     @Description("The timezone where the cluster is deployed")
     @Lookup(model = TimeZoneLookup.class)
     private String timeZone;
+
+    @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})
+    @ManyToMany()
+    @JoinTable(name="infrastructure_environment_to_cluster", joinColumns = @JoinColumn(name = "cluster_id"), inverseJoinColumns = @JoinColumn(name = "environment_id"))
+    private Collection<Environment> environments;
 }
