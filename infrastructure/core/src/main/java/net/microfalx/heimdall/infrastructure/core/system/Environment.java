@@ -34,12 +34,12 @@ public class Environment extends NamedAndTaggedAndTimestampedIdentityAware<Integ
     @Visible(modes = {Visible.Mode.EDIT, Visible.Mode.ADD, Visible.Mode.VIEW})
     private String attributes;
 
-    @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})
+    @Visible(value = false)
     @ManyToMany()
     @JoinTable(name="infrastructure_environment_to_cluster", joinColumns = @JoinColumn(name = "environment_id"), inverseJoinColumns = @JoinColumn(name = "cluster_id"))
     private Collection<Cluster> clusters;
 
-    @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})
+    @Visible(value = false)
     @ManyToMany()
     @JoinTable(name="infrastructure_environment_to_server", joinColumns = @JoinColumn(name = "environment_id"), inverseJoinColumns = @JoinColumn(name = "server_id"))
     private Collection<Server> servers;
