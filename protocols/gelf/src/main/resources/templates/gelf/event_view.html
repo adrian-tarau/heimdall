@@ -10,7 +10,7 @@
 
             </div>
             <div class="row">
-                <div class="col-md-2"><span class="fw-bold">Severity: </span><span class="fst-italic" th:text="${#dataset.getDisplayValue(model, 'level')}"></span></div>
+                <div class="col-md-2"><span class="fw-bold">Severity: </span><span class="fst-italic" th:text="${#dataset.getDisplayValue(model, 'severity')}"></span></div>
                 <div class="col-md-2"><span class="fw-bold">Facility: </span><span class="fst-italic" th:text="${#dataset.getDisplayValue(model, 'facility')}"></span></div>
                 <div class="col-md-4"></div>
                 <div class="col-md-4"><span class="fw-bold">Send At: </span><span class="fst-italic" th:text="${#formats.format(model.sentAt)}"></span></div>
@@ -19,7 +19,7 @@
         <div class="row border rounded bg-body-secondary mb-3 p-3 fs-6 dataset-attributes">
             <div class="col-md-12 p-5">
             <span th:each="badge : ${badges}" th:class="|badge rounded-pill me-1 name-default ${#dataset.getAttributeClasses(badge)}|">
-                <span th:text="${badge.label}"></span><span>:&nbsp;</span>
+                <span th:text="${badge.name}"></span><span>:&nbsp;</span>
                 <span th:text="${badge.value}"></span>
             </span>
             </div>
@@ -35,7 +35,7 @@
                 <li class="nav-item" th:if="${model.longMessage}">
                     <button class="nav-link" data-bs-toggle="tab" data-bs-target="#long_message" type="button">Long Message</button>
                 </li>
-                <li class="nav-item" th:if="${fields.hasAttributes()}">
+                <li class="nav-item" th:unless="${fields.isEmpty()}">
                     <button class="nav-link" data-bs-toggle="tab" data-bs-target="#fields" type="button">Fields</button>
                 </li>
             </ul>
@@ -46,7 +46,7 @@
                 <div class="tab-pane fade" id="long_message" th:if="${model.longMessage}">
                     <p class="dataset-text-mono" th:text="${#resources.load(model.longMessage.resource)}" style="height:500px"></p>
                 </div>
-                <div class="tab-pane fade" id="fields" th:if="${fields.hasAttributes()}">
+                <div class="tab-pane fade" id="fields" th:unless="${fields.isEmpty()}">
                     <table class="table" style="height:500px">
                         <thead class="thead-dark">
                         <tr>

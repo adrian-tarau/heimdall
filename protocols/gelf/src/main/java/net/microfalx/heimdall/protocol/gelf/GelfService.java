@@ -48,6 +48,10 @@ public final class GelfService extends ProtocolService<GelfEvent, net.microfalx.
         gelfEvent.setCreatedAt(message.getCreatedAt().toLocalDateTime());
         gelfEvent.setReceivedAt(message.getReceivedAt().toLocalDateTime());
         gelfEvent.setSentAt(message.getSentAt().toLocalDateTime());
+        gelfEvent.setApplication(message.getApplication());
+        gelfEvent.setProcess(message.getProcess());
+        gelfEvent.setLogger(message.getLogger());
+        gelfEvent.setThread(message.getThread());
         Iterator<net.microfalx.heimdall.protocol.core.Part> parts = message.getParts().iterator();
         gelfEvent.setShortMessage(persistPart(parts.next()));
         if (parts.hasNext()) gelfEvent.setLongMessage(persistPart(parts.next()));

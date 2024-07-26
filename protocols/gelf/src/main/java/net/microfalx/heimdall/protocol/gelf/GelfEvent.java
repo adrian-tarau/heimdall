@@ -10,6 +10,10 @@ public class GelfEvent extends AbstractEvent {
     private com.cloudbees.syslog.Severity gelfSeverity = com.cloudbees.syslog.Severity.INFORMATIONAL;
     private String version = "1.1";
     private Throwable throwable;
+    private String application;
+    private String process;
+    private String logger;
+    private String thread;
 
     public GelfEvent() {
         super(Type.GELF);
@@ -45,6 +49,38 @@ public class GelfEvent extends AbstractEvent {
             default -> setSeverity(Severity.TRACE);
         }
         return this;
+    }
+
+    public String getApplication() {
+        return application;
+    }
+
+    public void setApplication(String application) {
+        this.application = application;
+    }
+
+    public String getProcess() {
+        return process;
+    }
+
+    public void setProcess(String process) {
+        this.process = process;
+    }
+
+    public String getLogger() {
+        return logger;
+    }
+
+    public void setLogger(String logger) {
+        this.logger = logger;
+    }
+
+    public String getThread() {
+        return thread;
+    }
+
+    public void setThread(String thread) {
+        this.thread = thread;
     }
 
     public Throwable getThrowable() {

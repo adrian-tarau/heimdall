@@ -37,9 +37,8 @@ public class GelfController extends ProtocolController<GelfEvent> {
         for (Attribute attribute : attributes) {
             if (shouldDisplayAsBadge(attribute, true)) {
                 badgeAttributes.add(attribute);
-            } else {
-                fieldAttributes.add(attribute);
             }
+            fieldAttributes.add(attribute);
         }
         controllerModel.addAttribute("complex", !fieldAttributes.isEmpty() || dataSetModel.getLongMessage() != null);
         controllerModel.addAttribute("badges", badgeAttributes);

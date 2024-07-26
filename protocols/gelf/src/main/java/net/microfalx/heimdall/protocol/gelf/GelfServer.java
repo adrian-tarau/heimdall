@@ -167,7 +167,18 @@ public class GelfServer implements InitializingBean, ProtocolServerHandler {
         while (fields.hasNext()) {
             Map.Entry<String, JsonNode> field = fields.next();
             if (field.getKey().startsWith("_")) {
-                gelfEvent.add(field.getKey().substring(1), field.getValue().textValue());
+                String name = field.getKey().substring(1);
+                String value = field.getValue().textValue();
+                gelfEvent.add(name, value);
+                if (containsInArray(name, APPLICATION_FIELDS)) {
+                    gelfEvent.setApplication(value);
+                } else if (containsInArray(name, PROCESS_FIELDS)) {
+                    gelfEvent.setProcess(value);
+                } else if (containsInArray(name, LOGGER_FIELDS)) {
+                    gelfEvent.setLogger(value);
+                } else if (containsInArray(name, THREAD_FIELDS)) {
+                    gelfEvent.setThread(value);
+                }
             }
         }
     }
@@ -216,4 +227,9 @@ public class GelfServer implements InitializingBean, ProtocolServerHandler {
             throw new ProtocolException("Failed to extract Gelf JSON payload", e);
         }
     }
+
+    private static final String[] APPLICATION_FIELDS = {"Application", "ApplicationName"};
+    private static final String[] PROCESS_FIELDS = {"Process", "ProcessName", "Service", "ServiceName"};
+    private static final String[] LOGGER_FIELDS = {"LoggerName", "Category"};
+    private static final String[] THREAD_FIELDS = {"Thread", "ThreadName"};
 }

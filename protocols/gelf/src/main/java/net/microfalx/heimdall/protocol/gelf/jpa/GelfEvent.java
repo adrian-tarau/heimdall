@@ -27,7 +27,7 @@ public class GelfEvent extends Event {
     @ManyToOne
     @NotNull
     @Position(1)
-    @Description("The name of the host, source or application that sent the Gelf log event")
+    @Description("The name of the host, source or application that sent the log event")
     private Address address;
 
     @JoinColumn(name = "short_message_id")
@@ -35,7 +35,7 @@ public class GelfEvent extends Event {
     @Name
     @Position(5)
     @Label("Message")
-    @Description("The short version of the Gelf message")
+    @Description("The short version of the log event")
     @Filterable
     private Part shortMessage;
 
@@ -43,7 +43,7 @@ public class GelfEvent extends Event {
     @OneToOne
     @Position(6)
     @Visible(modes = Visible.Mode.VIEW)
-    @Description("The full version of the Gelf message")
+    @Description("The full version of th emessage")
     @Filterable
     private Part longMessage;
 
@@ -60,16 +60,36 @@ public class GelfEvent extends Event {
     @Visible(modes = Visible.Mode.VIEW)
     private String version;
 
-    @Column(name = "level", nullable = false)
+    @Column(name = "application_name", nullable = false)
     @Position(25)
+    @Description("Identify the application which sent the log event")
+    private String application;
+
+    @Column(name = "process_name", nullable = false)
+    @Position(26)
+    @Description("Identify the process/service which sent the log event")
+    private String process;
+
+    @Column(name = "logger_name", nullable = false)
+    @Position(27)
+    @Description("Identify the logger which logged of the log event")
+    private String logger;
+
+    @Column(name = "thread_name", nullable = false)
+    @Position(28)
+    @Description("Identify the application thread which logged of the log event")
+    private String thread;
+
+    @Column(name = "level", nullable = false)
+    @Position(35)
     @Filterable
-    @Description("Identify the importance of the Gelf log event")
+    @Description("Identify the importance of the log event")
     private Severity severity;
 
     @Column(name = "facility", nullable = false)
-    @Position(30)
+    @Position(36)
     @Filterable
-    @Description("Determines which process of the machine created the Gelf log event")
+    @Description("Determines which process of the machine created the log event")
     private Facility facility;
 
 }
