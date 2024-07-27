@@ -23,7 +23,7 @@ import java.time.ZoneId;
 @ToString(callSuper = true)
 public class Broker extends NamedAndTimestampedIdentityAware<Integer> {
 
-    @Column(name = "type", length = 500)
+    @Column(name = "type")
     @Position(6)
     @Enumerated(EnumType.STRING)
     @Width(min = "50")

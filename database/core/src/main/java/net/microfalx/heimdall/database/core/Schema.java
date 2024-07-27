@@ -1,6 +1,8 @@
 package net.microfalx.heimdall.database.core;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -25,23 +27,26 @@ import java.time.ZoneId;
 @ToString(callSuper = true)
 public class Schema extends NamedAndTimestampedIdentityAware<Integer> {
 
-    @Column(name = "type", length = 500)
+    @Column(name = "type")
     @Position(10)
     @Enumerated(EnumType.STRING)
     @Width(min = "50")
     @Description("The type of database")
+    @NotNull
     private net.microfalx.bootstrap.jdbc.support.Database.Type type;
 
     @Column(name = "url", length = 2000)
     @Position(20)
     @Width(min = "300")
     @Description("The JDBC URL of the database")
+    @NotEmpty
     private String url;
 
     @Column(name = "username", length = 100)
     @Position(30)
     @Description("The user name used to connect to the database")
     @Label("User Name")
+    @NotEmpty
     private String username;
 
     @Column(name = "password", length = 100)

@@ -28,6 +28,7 @@ public class BrokerTopic extends NamedAndTimestampedIdentityAware<Integer> {
     @Position(2)
     @Description("The broker which owns the topic")
     @Visible(modes = {Visible.Mode.ADD, Visible.Mode.BROWSE})
+    @NotNull
     private Broker broker;
 
     @Column(name = "type")
