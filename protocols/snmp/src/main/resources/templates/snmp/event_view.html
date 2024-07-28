@@ -3,7 +3,7 @@
 <body>
 <div th:fragment="fields">
     <div class="container-fluid">
-        <div class="row border rounded bg-body-secondary mb-3 p-3 fs-6">
+        <div class="row border rounded bg-body-secondary mb-1 p-1 fs-6">
             <div class="row">
                 <div class="col-md-4"><span class="fw-bold">From: </span><span class="fst-italic" th:text="${model.agentAddress.name}"></span></div>
                 <div class="col-md-4"><span class="fw-bold">Trap Type: </span><span class="fst-italic" th:text="${#dataset.getDisplayValue(model, 'trapType')}"></span></div>
@@ -18,7 +18,7 @@
                 <div class="col-md-12"><span class="fw-bold">Community String: </span><span class="fst-italic" th:text="${model.communityString}"></span></div>
             </div>
         </div>
-        <div class="row mb-3 p-3 fs-6">
+        <div class="row mb-1 p-1 fs-6">
             <ul class="nav nav-tabs" role="tablist">
                 <li class="nav-item active">
                     <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#message" type="button">Message</button>

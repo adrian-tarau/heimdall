@@ -2,16 +2,16 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 
-<div class="row border rounded bg-body-secondary mb-3 p-3 fs-6" th:unless="${imports.isEmpty()}" th:fragment="imports">
+<div class="row border rounded bg-body-secondary mb-1 p-1 fs-6" th:unless="${imports.isEmpty()}" th:fragment="imports">
     <h5>Imports</h5>
-    <div class="flex-row m-4 p-2">
+    <div class="flex-row m-1 p-1">
         <a th:each="import : ${imports}" href="#" th:onclick="return false" class="d-inline">
             <span class="badge rounded-pill text-bg-primary" th:text="${import.getName()}"></span>
         </a>
     </div>
 </div>
 
-<div class="row mb-3 p-3 fs-6" th:fragment="variables">
+<div class="row mb-1 p-1 fs-6" th:fragment="variables">
     <ul class="nav nav-tabs" role="tablist">
         <li class="nav-item active">
             <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#variables" type="button">Variables</button>

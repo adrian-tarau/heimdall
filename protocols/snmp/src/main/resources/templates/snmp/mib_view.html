@@ -3,7 +3,7 @@
 <body>
 <div th:fragment="fields">
     <div class="container-fluid">
-        <div class="row border rounded bg-body-secondary mb-3 p-3 fs-6">
+        <div class="row border rounded bg-body-secondary mb-1 p-1 fs-6">
             <div class="row mb-2">
                 <div class="col-md-8"><span class="fw-bold">Name: </span><span class="fst-italic" th:text="${model.name}"></span></div>
                 <div class="col-md-4"><span class="fw-bold">Created At: </span><span class="fst-italic" th:text="${model.createdAt}"></span></div>
@@ -12,10 +12,10 @@
                 <div class="col-md-8"><span class="fw-bold">Type: </span><span class="fst-italic" th:text="${model.type}"></span></div>
                 <div class="col-md-4"><span class="fw-bold">Modified At: </span><span class="fst-italic" th:text="${model.modifiedAt}"></span></div>
             </div>
-            <div class="row mt-2">
+            <div class="row mt-1">
                 <div class="col-md-6"><span class="fw-bold">File Name: </span><span class="fst-italic" th:text="${model.fileName}"></span></div>
             </div>
-            <div class="row mt-2">
+            <div class="row mt-1">
                 <div class="col-md-12"><span class="fw-bold">Description: </span><span class="fst-italic" th:text="${model.description}"></span></div>
             </div>
         </div>

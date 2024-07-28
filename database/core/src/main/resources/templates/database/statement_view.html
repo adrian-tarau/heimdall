@@ -3,7 +3,7 @@
 <body>
 <div th:fragment="fields">
     <div class="container-fluid">
-        <div class="row border rounded bg-body-secondary mb-3 p-3 fs-6">
+        <div class="row border rounded bg-body-secondary mb-1 p-1 fs-6">
             <div class="row">
                 <div class="col-md-4"><span class="fw-bold">Database: </span><span class="fst-italic" th:text="${model.schema.name}"></span></div>
                 <div class="col-md-4"><span class="fw-bold">Database Type: </span><span class="fst-italic" th:text="${model.databaseType}"></span></div>
@@ -14,8 +14,8 @@
                 <div class="col-md-4"><span class="fw-bold">Length: </span><span class="fst-italic" th:text="${model.length}"></span></div>
             </div>
         </div>
-        <div class="row border rounded p-3 mt-2">
-            <iframe class="w-100 p-3" style="height:400px" loading="lazy" th:src="${#content.getViewUri(content)}"></iframe>
+        <div class="row border rounded p-1 mt-1">
+            <iframe class="w-100 p-1" style="height:400px" loading="lazy" th:src="${#content.getViewUri(content)}"></iframe>
         </div>
     </div>
 </div>

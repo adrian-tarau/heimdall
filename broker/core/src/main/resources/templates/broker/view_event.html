@@ -3,7 +3,7 @@
 <body>
 <div th:fragment="fields">
     <div class="container-fluid">
-        <div class="row border rounded bg-body-secondary mb-3 p-3 fs-6">
+        <div class="row border rounded bg-body-secondary mb-1 p-1 fs-6">
             <div class="row">
                 <div class="col-md-8"><span class="fw-bold">Event Id: </span>
                     <span class="fst-italic"  th:text="${model.eventId}"></span>
@@ -17,15 +17,15 @@
                 <div class="col-md-4"><span class="fw-bold">Received At: </span><span class="fst-italic" th:text="${#formats.format(model.receivedAt)}"></span></div>
             </div>
         </div>
-        <div th:unless="${badges.isEmpty()}" class="row border rounded bg-body-secondary mb-3 p-3 fs-6 dataset-attributes">
-            <div class="col-md-12 p-5">
+        <div th:unless="${badges.isEmpty()}" class="row border rounded bg-body-secondary mb-1 p-1 fs-6 dataset-attributes">
+            <div class="col-md-12 p-1">
             <span th:each="badge : ${badges}" th:class="|badge rounded-pill me-1 name-default ${#dataset.getAttributeClasses(badge)}|">
                 <span th:text="${badge.name}"></span><span>:&nbsp;</span>
                 <span th:text="${badge.value}"></span>
             </span>
             </div>
         </div>
-        <div class="row mb-3 p-3 fs-6">
+        <div class="row mb-1 p-1 fs-6">
             <ul class="nav nav-tabs" role="tablist">
                 <li class="nav-item active">
                     <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#event" type="button">Event</button>
