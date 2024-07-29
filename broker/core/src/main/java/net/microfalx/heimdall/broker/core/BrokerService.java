@@ -21,6 +21,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.support.PeriodicTrigger;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -38,6 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static java.time.Duration.ofMinutes;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
 import static net.microfalx.lang.StringUtils.*;
@@ -258,7 +260,7 @@ public class BrokerService implements InitializingBean {
     }
 
     private void scheduleTasks() {
-        //taskScheduler.schedule(new SessionSchedulerTask(), new PeriodicTrigger(ofMinutes(1)));
+        taskScheduler.schedule(new SessionSchedulerTask(), new PeriodicTrigger(ofMinutes(1)));
     }
 
     private void initializeExecutor() {
