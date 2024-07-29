@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("/system/infrastructure/service")
 @DataSet(model = Service.class, timeFilter = false)
-@Help("infrastructure/service")
+@Help("admin/infrastructure/service")
 public class ServiceController extends DataSetController<Service, Integer> {
 
     @Autowired

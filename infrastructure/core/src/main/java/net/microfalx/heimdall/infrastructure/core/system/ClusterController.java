@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller("SystemClusterController")
 @RequestMapping("/system/infrastructure/cluster")
 @DataSet(model = Cluster.class, timeFilter = false)
-@Help("infrastructure/cluster")
+@Help("admin/infrastructure/cluster")
 public class ClusterController extends DataSetController<Cluster, Integer> {
 
     @Autowired
