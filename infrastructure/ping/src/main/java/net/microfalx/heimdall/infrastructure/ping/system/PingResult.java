@@ -62,7 +62,7 @@ public class PingResult extends IdentityAware<Integer> {
 
     @Column(name = "duration", nullable = false)
     @Convert(converter = DurationConverter.class)
-    @Formattable(unit = Formattable.Unit.MILLI_SECOND)
+    @Formattable(unit = Formattable.Unit.NANO_SECOND)
     @Position(32)
     @Width("90")
     private Duration duration;

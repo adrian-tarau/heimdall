@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static java.time.Duration.ofMillis;
+import static java.time.Duration.ofNanos;
 import static java.util.Collections.unmodifiableCollection;
 import static java.util.Collections.unmodifiableMap;
 
@@ -72,8 +72,8 @@ public class PingHealth {
      */
     public Duration getMinDuration(Service service, Server server) {
         Queue<Ping> pingQueue = getPingQueue(service, server);
-        double duration = pingQueue.stream().mapToLong(p -> p.getDuration().toMillis()).min().orElse(0);
-        return ofMillis((long) duration);
+        double duration = pingQueue.stream().mapToLong(p -> p.getDuration().toNanos()).min().orElse(0);
+        return ofNanos((long) duration);
     }
 
     /**
@@ -85,8 +85,8 @@ public class PingHealth {
      */
     public Duration getMaxDuration(Service service, Server server) {
         Queue<Ping> pingQueue = getPingQueue(service, server);
-        double duration = pingQueue.stream().mapToLong(p -> p.getDuration().toMillis()).max().orElse(0);
-        return ofMillis((long) duration);
+        double duration = pingQueue.stream().mapToLong(p -> p.getDuration().toNanos()).max().orElse(0);
+        return ofNanos((long) duration);
     }
 
     /**
@@ -98,8 +98,8 @@ public class PingHealth {
      */
     public Duration getAverageDuration(Service service, Server server) {
         Queue<Ping> pingQueue = getPingQueue(service, server);
-        double duration = pingQueue.stream().mapToLong(p -> p.getDuration().toMillis()).average().orElse(0);
-        return ofMillis((long) duration);
+        double duration = pingQueue.stream().mapToLong(p -> p.getDuration().toNanos()).average().orElse(0);
+        return ofNanos((long) duration);
     }
 
     /**
@@ -128,7 +128,7 @@ public class PingHealth {
         List<Value> values = pingQueue.stream().map(ping -> {
             Duration duration = ping.getDuration();
             if (ping.getStatus().isFailure()) duration = duration.negated();
-            return Value.create(ping.getStartedAt().toLocalDateTime(), duration.toMillis());
+            return Value.create(ping.getStartedAt().toLocalDateTime(), duration.toNanos());
         }).toList();
         return Series.create(PingUtils.getName(service, server), values);
     }

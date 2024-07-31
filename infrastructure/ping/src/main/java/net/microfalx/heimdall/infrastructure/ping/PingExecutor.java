@@ -93,14 +93,14 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
     }
 
     net.microfalx.heimdall.infrastructure.api.Ping execute() {
-        start = ZonedDateTime.now();
+        start = ZonedDateTime.now().withNano((int) System.nanoTime());
         try {
             doPing();
         } catch (Exception e) {
             status = Status.L7STS;
             errorMessage = getRootCauseMessage(e);
         } finally {
-            end = ZonedDateTime.now();
+            end = ZonedDateTime.now().withNano((int) System.nanoTime());
         }
         if (persist) {
             health.registerPing(this);
