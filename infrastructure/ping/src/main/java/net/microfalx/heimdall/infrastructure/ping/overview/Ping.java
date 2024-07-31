@@ -64,19 +64,19 @@ public class Ping extends NamedIdentityAware<String> {
 
     @Position(29)
     @Description("The amount of time the last health check took")
-    @Formattable(unit = Formattable.Unit.MILLI_SECOND)
+    @Formattable(unit = Formattable.Unit.NANO_SECOND)
     @Label(value = "Last", group = "Durations")
     private Duration lastDuration;
 
     @Position(30)
     @Description("The minimum time it took to run the health check")
-    @Formattable(unit = Formattable.Unit.MILLI_SECOND)
+    @Formattable(unit = Formattable.Unit.NANO_SECOND)
     @Label(value = "Minimum", group = "Durations")
     private Duration minimumDuration;
 
     @Position(31)
     @Description("The average time it took to run the health check")
-    @Formattable(unit = Formattable.Unit.MILLI_SECOND)
+    @Formattable(unit = Formattable.Unit.NANO_SECOND)
     @Label(value = "Average", group = "Durations")
     private Duration averageDuration;
 
