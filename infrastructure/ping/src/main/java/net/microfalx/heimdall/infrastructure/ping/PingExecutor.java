@@ -35,6 +35,7 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
     private Status status = Status.NA;
     private ZonedDateTime start;
     private ZonedDateTime end;
+    private Duration duration;
     private Integer errorCode;
     private String errorMessage;
 
@@ -93,14 +94,16 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
     }
 
     net.microfalx.heimdall.infrastructure.api.Ping execute() {
-        start = ZonedDateTime.now().withNano((int) System.nanoTime());
+        long startTime = System.nanoTime();
+        start = ZonedDateTime.now();
         try {
             doPing();
         } catch (Exception e) {
             status = Status.L7STS;
             errorMessage = getRootCauseMessage(e);
         } finally {
-            end = ZonedDateTime.now().withNano((int) System.nanoTime());
+            duration = Duration.ofNanos(System.nanoTime() - startTime);
+            end = ZonedDateTime.now();
         }
         if (persist) {
             health.registerPing(this);
@@ -131,7 +134,7 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
 
     @Override
     public Duration getDuration() {
-        return Duration.between(getStartedAt(), getEndedAt());
+        return duration;
     }
 
     @Override
