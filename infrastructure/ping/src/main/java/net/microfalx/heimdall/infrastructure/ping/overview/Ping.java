@@ -82,7 +82,7 @@ public class Ping extends NamedIdentityAware<String> {
 
     @Position(32)
     @Description("The maximum time it took to run the health check")
-    @Formattable(unit = Formattable.Unit.MILLI_SECOND)
+    @Formattable(unit = Formattable.Unit.NANO_SECOND)
     @Label(value = "Maximum", group = "Durations")
     private Duration maximumDuration;
 
