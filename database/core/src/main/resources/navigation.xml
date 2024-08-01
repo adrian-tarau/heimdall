@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <navigations xmlns="https://net.microfalx/xsd/navigation-1.0.xsd">
     <menu id="left">
-        <menu id="databases" text="Databases" position="10" icon="fa-solid fa-database">
+        <menu id="databases" text="Databases" position="10" roles="admin" icon="fa-solid fa-database">
             <item id="snapshot" text="Snapshots" action="/database/snapshot" icon="fa-solid fa-heart-pulse"/>
             <item id="node" text="Nodes" action="/database/node" icon="fa-solid fa-server"/>
             <item id="user" text="Users" action="/database/user" icon="fa-solid fa-users"/>

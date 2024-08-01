@@ -4,9 +4,9 @@
         <item id="ping" text="Health Checks" action="/infrastructure/ping" parent="infrastructure" position="100"
               icon="fa-solid fa-tower-broadcast"/>
         <item id="ping" text="Health Checks" action="/system/infrastructure/ping" parent="infrastructure_system" position="100"
-              icon="fa-solid fa-tower-broadcast"/>
+              roles="admin" icon="fa-solid fa-tower-broadcast"/>
         <item id="ping_result" text="Health Check Results" action="/system/infrastructure/ping_result" parent="infrastructure_system" position="110"
-              icon="fa-solid fa-tower-broadcast"/>
+              roles="admin" icon="fa-solid fa-tower-broadcast"/>
 
     </menu>
 </navigations>

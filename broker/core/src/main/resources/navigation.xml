@@ -7,7 +7,7 @@
             <item id="consumer" text="Consumers" action="/system/broker/consumer" icon="fa-solid fa-arrow-right-to-bracket"/>
             <item id="producer" text="Producers" action="/system/broker/producer" icon="fa-solid fa-arrow-right-from-bracket"/>
         </menu>
-        <item id="manage" text="Manage" parent="brokers_admin" action="/system/broker/manage" position="0" icon="fa-solid fa-server"/>
-        <item id="topic" text="Topics" parent="brokers_admin" action="/system/broker/topic" position="0" icon="fa-solid fa-comments"/>
+        <item id="manage" text="Manage" parent="brokers_admin" action="/system/broker/manage" position="0" roles="admin" icon="fa-solid fa-server"/>
+        <item id="topic" text="Topics" parent="brokers_admin" action="/system/broker/topic" position="1" roles="admin" icon="fa-solid fa-comments"/>
     </menu>
 </navigations>

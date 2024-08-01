@@ -6,7 +6,7 @@
             <item id="completed" text="Completed" action="/rest/completed" icon="fa-solid fa-vial-circle-check"/>
         </menu>
         <menu id="rest_admin" text="Rest API" position="100" parent="system" action="/system/rest"
-              icon="fa-solid fa-plug">
+              roles="admin" icon="fa-solid fa-plug">
             <item id="environment" text="Environments" action="/system/rest/environment" icon="fa-solid fa-server"/>
             <item id="test_suite" text="Test Suites" action="/system/rest/test-suite" icon="fa-solid fa-vials"/>
             <item id="test" text="Tests" action="/system/rest/test" icon="fa-solid fa-vial"/>
