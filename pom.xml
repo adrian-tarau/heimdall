@@ -31,7 +31,7 @@
     <parent>
         <groupId>net.microfalx</groupId>
         <artifactId>pom</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
     </parent>
 
     <name>Heimdall</name>
@@ -70,12 +70,12 @@
 
     <properties>
         <spring.app.profiles>local,dev</spring.app.profiles>
-        <spring.boot.version>3.2.2</spring.boot.version>
+        <spring.boot.version>3.3.2</spring.boot.version>
         <bootstrap.version>1.0.0-SNAPSHOT</bootstrap.version>
-        <apache.tika.version>2.9.1</apache.tika.version>
+        <apache.tika.version>2.9.2</apache.tika.version>
         <apache.jmeter.version>5.6.3</apache.jmeter.version>
-        <subethasmtp.version>7.0.1</subethasmtp.version>
-        <datafaker.version>2.1.0</datafaker.version>
+        <subethasmtp.version>7.1.1</subethasmtp.version>
+        <datafaker.version>2.3.1</datafaker.version>
         <syslog4j.version>0.9.61</syslog4j.version>
         <logstash-gelf.version>1.15.1</logstash-gelf.version>
         <snmp4j.version>3.7.7</snmp4j.version>
@@ -85,7 +85,7 @@
         <mysql.version>8.3.0</mysql.version>
         <postgres.version>42.7.2</postgres.version>
         <vertica.version>24.1.0-0</vertica.version>
-        <ipaddress.version>5.4.0</ipaddress.version>
+        <ipaddress.version>5.5.0</ipaddress.version>
     </properties>
 
     <developers>
@@ -103,14 +103,6 @@
         <dependencies>
 
             <!-- Runtime -->
-
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring.boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
 
             <dependency>
                 <groupId>net.microfalx.bootstrap</groupId>
@@ -257,10 +249,21 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
             <dependency>
                 <groupId>org.apache.jmeter</groupId>
                 <artifactId>ApacheJMeter_bom-thirdparty</artifactId>
                 <version>${apache.jmeter.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Spring Boot -->
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
