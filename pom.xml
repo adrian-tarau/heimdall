@@ -69,23 +69,10 @@
     <inceptionYear>2023</inceptionYear>
 
     <properties>
-        <spring.app.profiles>local,dev</spring.app.profiles>
-        <spring.boot.version>3.3.2</spring.boot.version>
         <bootstrap.version>1.0.0-SNAPSHOT</bootstrap.version>
-        <apache.tika.version>2.9.1</apache.tika.version>
         <apache.jmeter.version>5.6.3</apache.jmeter.version>
-        <subethasmtp.version>7.1.1</subethasmtp.version>
-        <datafaker.version>2.3.1</datafaker.version>
-        <syslog4j.version>0.9.61</syslog4j.version>
-        <logstash-gelf.version>1.15.1</logstash-gelf.version>
-        <snmp4j.version>3.7.7</snmp4j.version>
-        <jsmiparser.version>0.14</jsmiparser.version>
-        <syslog.version>1.1.7</syslog.version>
-        <commons-email>1.5</commons-email>
-        <mysql.version>8.3.0</mysql.version>
-        <postgres.version>42.7.2</postgres.version>
-        <vertica.version>24.1.0-0</vertica.version>
-        <ipaddress.version>5.5.0</ipaddress.version>
+
+        <spring.boot.version>3.3.2</spring.boot.version>
     </properties>
 
     <developers>
@@ -102,164 +89,10 @@
     <dependencyManagement>
         <dependencies>
 
-            <!-- Runtime -->
-
             <dependency>
                 <groupId>net.microfalx.bootstrap</groupId>
-                <artifactId>bootstrap-core</artifactId>
+                <artifactId>bootstrap-bom</artifactId>
                 <version>${bootstrap.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>net.microfalx.bootstrap</groupId>
-                <artifactId>bootstrap-jdbc</artifactId>
-                <version>${bootstrap.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>net.microfalx.bootstrap</groupId>
-                <artifactId>bootstrap-broker</artifactId>
-                <version>${bootstrap.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>net.microfalx.bootstrap</groupId>
-                <artifactId>bootstrap-search</artifactId>
-                <version>${bootstrap.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>net.microfalx.bootstrap</groupId>
-                <artifactId>bootstrap-template</artifactId>
-                <version>${bootstrap.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>net.microfalx.bootstrap</groupId>
-                <artifactId>bootstrap-security</artifactId>
-                <version>${bootstrap.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>net.microfalx.bootstrap</groupId>
-                <artifactId>bootstrap-model</artifactId>
-                <version>${bootstrap.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>net.microfalx.bootstrap</groupId>
-                <artifactId>bootstrap-metrics</artifactId>
-                <version>${bootstrap.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>net.microfalx.bootstrap</groupId>
-                <artifactId>bootstrap-web</artifactId>
-                <version>${bootstrap.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>net.microfalx.bootstrap</groupId>
-                <artifactId>bootstrap-deploy</artifactId>
-                <version>${bootstrap.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.mysql</groupId>
-                <artifactId>mysql-connector-j</artifactId>
-                <version>${mysql.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.postgresql</groupId>
-                <artifactId>postgresql</artifactId>
-                <version>${postgres.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.vertica.jdbc</groupId>
-                <artifactId>vertica-jdbc</artifactId>
-                <version>${vertica.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.github.davidmoten</groupId>
-                <artifactId>subethasmtp</artifactId>
-                <version>${subethasmtp.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-api</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-email</artifactId>
-                <version>${commons-email}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.graylog2</groupId>
-                <artifactId>syslog4j</artifactId>
-                <version>${syslog4j.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.cloudbees</groupId>
-                <artifactId>syslog-java-client</artifactId>
-                <version>${syslog.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>biz.paluch.logging</groupId>
-                <artifactId>logstash-gelf</artifactId>
-                <version>${logstash-gelf.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.snmp4j</groupId>
-                <artifactId>snmp4j</artifactId>
-                <version>${snmp4j.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jsmiparser</groupId>
-                <artifactId>jsmiparser-api</artifactId>
-                <version>${jsmiparser.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-api</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.tika</groupId>
-                <artifactId>tika-core</artifactId>
-                <version>${apache.tika.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>net.datafaker</groupId>
-                <artifactId>datafaker</artifactId>
-                <version>${datafaker.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.github.seancfoley</groupId>
-                <artifactId>ipaddress</artifactId>
-                <version>${ipaddress.version}</version>
-            </dependency>
-
-            <!-- BOMs -->
-
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring.boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -278,15 +111,6 @@
                 <version>${apache.jmeter.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-
-            <!-- Tests -->
-
-            <dependency>
-                <groupId>net.microfalx.bootstrap</groupId>
-                <artifactId>bootstrap-test</artifactId>
-                <version>${bootstrap.version}</version>
-                <scope>test</scope>
             </dependency>
 
         </dependencies>
