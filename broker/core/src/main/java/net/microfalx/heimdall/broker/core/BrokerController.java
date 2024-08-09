@@ -4,7 +4,7 @@ import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.model.Field;
-import net.microfalx.bootstrap.web.dataset.DataSetController;
+import net.microfalx.bootstrap.web.dataset.SystemDataSetController;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
@@ -20,7 +20,7 @@ import java.util.Properties;
 @RequestMapping("/system/broker/manage")
 @DataSet(model = Broker.class, timeFilter = false)
 @Help("system/broker/manage")
-public class BrokerController extends DataSetController<Broker, Integer> {
+public class BrokerController extends SystemDataSetController<Broker, Integer> {
 
     @Autowired
     private BrokerRepository brokerRepository;

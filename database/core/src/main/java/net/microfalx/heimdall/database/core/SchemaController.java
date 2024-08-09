@@ -5,7 +5,7 @@ import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.jdbc.support.Database;
 import net.microfalx.bootstrap.model.Field;
-import net.microfalx.bootstrap.web.dataset.DataSetController;
+import net.microfalx.bootstrap.web.dataset.SystemDataSetController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Controller;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping(value = "/system/database/manage")
 @DataSet(model = Schema.class, timeFilter = false)
 @Help("admin/database/manage")
-public class SchemaController extends DataSetController<Schema, Integer> {
+public class SchemaController extends SystemDataSetController<Schema, Integer> {
 
     @Autowired
     private SchemaRepository schemaRepository;

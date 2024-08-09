@@ -4,7 +4,7 @@ import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.model.Field;
-import net.microfalx.bootstrap.web.dataset.DataSetController;
+import net.microfalx.bootstrap.web.dataset.SystemDataSetController;
 import net.microfalx.heimdall.infrastructure.api.InfrastructureService;
 import net.microfalx.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/system/infrastructure/environment")
 @DataSet(model = Environment.class, timeFilter = false)
 @Help("admin/infrastructure/environment")
-public class EnvironmentController extends DataSetController<Environment, Integer> {
+public class EnvironmentController extends SystemDataSetController<Environment, Integer> {
 
     @Autowired
     private InfrastructureService infrastructureService;
