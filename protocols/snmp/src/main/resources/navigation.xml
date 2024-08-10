@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <navigations xmlns="https://net.microfalx/xsd/navigation-1.0.xsd">
-    <menu id="left">
+    <menu id="primary">
         <item id="snmp" parent="protocols" text="SNMP" position="10" action="/protocol/snmp" icon="fa-solid fa-network-wired"/>
         <item id="mib" text="SNMP / MIBs" parent="protocols_admin" action="/system/protocol/snmp/mib" roles="admin" icon="fa-solid fa-sitemap"/>
         <item id="module" text="SNMP / Modules" parent="protocols_admin" action="/system/protocol/snmp/module" roles="admin" icon="fa-solid fa-book"/>
