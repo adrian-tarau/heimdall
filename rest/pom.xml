@@ -37,6 +37,7 @@
     <name>Heimdall - Rest</name>
 
     <modules>
+        <module>api</module>
         <module>core</module>
         <module>jmeter</module>
         <module>k6</module>

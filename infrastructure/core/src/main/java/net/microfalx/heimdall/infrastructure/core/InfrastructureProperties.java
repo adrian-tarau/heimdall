@@ -1,13 +1,15 @@
 package net.microfalx.heimdall.infrastructure.core;
 
 import lombok.Getter;
+import lombok.Setter;
 import net.microfalx.heimdall.infrastructure.api.InfrastructureConstants;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties("heimdall.infrustructure")
+@ConfigurationProperties("heimdall.infrastructure")
 @Getter
+@Setter
 public class InfrastructureProperties {
 
     /**

@@ -2,14 +2,14 @@
 <navigations xmlns="https://net.microfalx/xsd/navigation-1.0.xsd">
     <menu id="primary">
         <menu id="rest" text="Rest API" position="100" action="/rest" icon="fa-solid fa-plug">
-            <item id="running" text="Running" action="/rest/running" icon="fa-solid fa-gears"/>
-            <item id="completed" text="Completed" action="/rest/completed" icon="fa-solid fa-vial-circle-check"/>
+            <item id="simulation" text="Simulations" action="/rest/simulation" icon="fa-solid fa-vials"/>
+            <item id="running" text="Running" action="/rest/simulation/running" icon="fa-solid fa-gears"/>
+            <item id="result" text="Results" action="/rest/simulation/result" icon="fa-solid fa-vial-circle-check"/>
         </menu>
         <menu id="rest_admin" text="Rest API" position="100" parent="system" action="/system/rest"
               roles="admin" icon="fa-solid fa-plug">
-            <item id="environment" text="Environments" action="/system/rest/environment" icon="fa-solid fa-server"/>
-            <item id="test_suite" text="Test Suites" action="/system/rest/test-suite" icon="fa-solid fa-vials"/>
-            <item id="test" text="Tests" action="/system/rest/test" icon="fa-solid fa-vial"/>
+            <item id="simulation" text="Simulations" action="/system/rest/simulation" icon="fa-solid fa-vials"/>
+            <item id="schedule" text="Schedules" action="/system/rest/schedule" icon="fa-solid fa-clock"/>
         </menu>
     </menu>
 </navigations>
