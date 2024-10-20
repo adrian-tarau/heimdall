@@ -1,58 +1,89 @@
-create table rest_environment
+create table rest_step
 (
     id          integer                                 not null auto_increment primary key,
+    natural_id  varchar(100)                            not null,
+    scenario_id integer                                 not null,
     name        varchar(100)                            not null,
-    url         varchar(2000)                           not null,
-    username    varchar(100)                            not null,
-    password    varchar(100)                            not null,
-    bearer      varchar(500)                            not null,
-    api_key     varchar(500)                            not null,
-    time_zone   varchar(100) default 'America/New_York' not null,
-    parameters  mediumtext,
     created_at  datetime                                not null,
     modified_at datetime,
-    description varchar(1000)
+    tags        varchar(100),
+    description varchar(1000),
+    constraint nk$rest_step$natural_id unique key (natural_id)
+    constraint fk$rest_step$scenario foreign key (scenario_id) references scenario (id)
 ) ENGINE = InnoDB;
 
-create table rest_test_suite
-(
-    id          integer               not null auto_increment primary key,
-    name        varchar(100)          not null,
-    type        ENUM ('JMETER', 'K6') not null,
-    model       mediumblob            not null,
-    parameters  mediumtext,
-    created_at  datetime              not null,
-    modified_at datetime,
-    description varchar(1000)
-) ENGINE = InnoDB;
-
-create table rest_test
+create table rest_scenario
 (
     id            integer               not null auto_increment primary key,
-    test_suite_id integer               not null,
+    natural_id    varchar(100)          not null,
+    simulation_id integer               not null,
     name          varchar(100)          not null,
-    type          ENUM ('JMETER', 'K6') not null,
-    model         mediumblob            not null,
-    parameters    mediumtext,
+    start_time    integer               not null,
+    gracefulStop  integer               not null,
+    function      varchar(100)          not null,
     created_at    datetime              not null,
     modified_at   datetime,
+    tags          varchar(100),
     description   varchar(1000),
-    constraint fk$rest_test$test_suite foreign key (test_suite_id) references rest_test_suite (id)
+    constraint nk$rest_scenario$natural_id unique key (natural_id)
+    constraint fk$rest_scenario$simulation foreign key (simulation_id) references simulation (id)
 ) ENGINE = InnoDB;
 
-create table rest_session
+create table rest_simulation
 (
-    id            bigint                        not null auto_increment primary key,
-    test_suite_id integer,
-    test_id       integer,
-    status        ENUM ('SUCCESSFUL', 'FAILED') not null,
-    type          ENUM ('JMETER', 'K6')         not null,
-    started_at    datetime                      not null,
-    ended_at      datetime                      not null,
-    duration      int                           not null,
-    resource      varchar(1000),
-    constraint fk$rest_session$test foreign key (test_id) references rest_test (id),
-    constraint fk$rest_session$test_suite foreign key (test_suite_id) references rest_test_suite (id)
+    id            integer                          not null auto_increment primary key,
+    natural_id    varchar(100)                     not null,
+    name          varchar(100)                     not null,
+    type          ENUM ('JMETER', 'K6','GATLING')  not null,
+    resource      varchar(1000)                    not null,
+    created_at    datetime                         not null,
+    modified_at   datetime,
+    tags          varchar(100),
+    description   varchar(1000),
+    constraint nk$rest_simulation$natural_id unique key (natural_id)
 ) ENGINE = InnoDB;
 
-create index rest_session$started_at on rest_session (started_at);
+create table rest_schedule
+(
+    id              integer                       auto_increment primary key,
+    environment_id  integer                       not null,
+    simulation_id   integer                       not null,
+    expression      varchar(100),
+    `interval`      integer,
+    created_at      datetime                      not null,
+    modified_at     datetime,
+    description     varchar(1000),
+    constraint fk$rest_schedule$environment foreign key (environment_id) references environment (id),
+    constraint fk$rest_schedule$simulation foreign key (simulation_id) references simulation (id)
+) ENGINE = InnoDB;
+
+create table rest_output
+(
+    id                           bigint                       not null auto_increment primary key,
+    environment_id               integer                       not null,
+    simulation_id                integer                       not null,
+    started_at                   datetime                      not null,
+    ended_at                     datetime                      not null,
+    duration                     integer                       not null,
+    data_received                float                         not null,
+    data_sent                    float                         not null,
+    iterations                   float                         not null,
+    iteration_duration           float                         not null,
+    vus                          float                         not null,
+    vus_max                      float                         not null,
+    http_request_blocked         float                         not null,
+    http_request_connecting      float                         not null,
+    http_Request_duration        float                         not null,
+    http_request_failed          float                         not null,
+    http_request_receiving       float                         not null,
+    http_request_sending         float                         not null,
+    http_request_tls_handshaking float                         not null,
+    http_request_waiting         float                         not null,
+    http_requests                float                         not null,
+    version                      varchar(50),
+    description                  varchar(1000),
+    constraint fk$rest_output$environment foreign key (environment_id) references environment (id),
+    constraint fk$rest_output$simulation foreign key (simulation_id) references simulation (id)
+) ENGINE = InnoDB;
+
+create index ix$rest_output$started on rest_output (started_at);
