@@ -22,7 +22,7 @@ public class Simulation extends NamedAndTaggedAndTimestampedIdentityAware<Intege
     @Description("The natural id of the simulation")
     @Visible(modes = {Visible.Mode.BROWSE,Visible.Mode.VIEW})
     @Position(2)
-    private Integer naturalId;
+    private String naturalId;
 
     @Column(name = "type",nullable = false)
     @Enumerated(EnumType.STRING)
