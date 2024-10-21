@@ -59,7 +59,7 @@ create table rest_schedule
 
 create table rest_output
 (
-    id                           bigint                       not null auto_increment primary key,
+    id                           bigint                        not null auto_increment primary key,
     environment_id               integer                       not null,
     simulation_id                integer                       not null,
     started_at                   datetime                      not null,
