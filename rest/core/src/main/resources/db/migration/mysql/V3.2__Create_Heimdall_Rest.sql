@@ -20,7 +20,7 @@ create table rest_scenario
     name          varchar(100) not null,
     start_time    integer      not null,
     gracefulStop  integer      not null,
-    function      varchar(100) not null,
+    `function`      varchar(100) not null,
     created_at    datetime     not null,
     modified_at   datetime,
     tags          varchar(100),

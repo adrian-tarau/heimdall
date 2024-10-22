@@ -4,17 +4,28 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import net.microfalx.bootstrap.jdbc.entity.NamedAndTimestampedIdentityAware;
+import net.microfalx.bootstrap.dataset.annotation.Component;
+import net.microfalx.bootstrap.dataset.annotation.Filterable;
+import net.microfalx.bootstrap.jdbc.entity.TimestampAware;
 import net.microfalx.heimdall.infrastructure.core.system.Environment;
 import net.microfalx.lang.annotation.Description;
 import net.microfalx.lang.annotation.Position;
+import net.microfalx.lang.annotation.Visible;
+import net.microfalx.lang.annotation.Width;
 
 @Entity
 @Table(name = "rest_schedule")
 @ToString
 @Getter
 @Setter
-public class Schedule extends NamedAndTimestampedIdentityAware<Integer> {
+public class Schedule extends TimestampAware {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    @Position(1)
+    @Visible(false)
+    private int id;
 
     @ManyToOne
     @JoinColumn(name = "environment_id", nullable = false)
@@ -37,4 +48,12 @@ public class Schedule extends NamedAndTimestampedIdentityAware<Integer> {
     @Description("The scheduling interval")
     @Position(25)
     private String interval;
+
+    @Column(name = "description")
+    @Position(1000)
+    @Component(Component.Type.TEXT_AREA)
+    @Description("A description for a {name}")
+    @Width("300px")
+    @Filterable()
+    private String description;
 }
