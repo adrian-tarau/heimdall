@@ -17,6 +17,7 @@ public class Project extends NamedAndTaggedIdentifyAware<String> {
     private String userName;
     private String password;
     private String token;
+    private Type type;
 
     public static Builder create(URI uri) {
         return new Builder(uri);
@@ -58,12 +59,34 @@ public class Project extends NamedAndTaggedIdentifyAware<String> {
         return token;
     }
 
+    /**
+     * Returns the type of the project
+     *
+     * @return a non-null instance
+     */
+    public Type getType() {
+        return type;
+    }
+
+    public enum Type {
+        /**
+         * The GIT version control
+         */
+        GIT,
+
+        /**
+         * The SVN version control
+         */
+        SVN,
+    }
+
     public static class Builder extends NamedAndTaggedIdentifyAware.Builder<String> {
 
         private final URI uri;
         private String userName;
         private String password;
         private String token;
+        private Type type;
 
         public Builder(URI uri) {
             super();
@@ -86,6 +109,12 @@ public class Project extends NamedAndTaggedIdentifyAware<String> {
             return this;
         }
 
+        public Builder type(Type type) {
+            requireNonNull(type);
+            this.type = type;
+            return this;
+        }
+
         @Override
         protected IdentityAware<String> create() {
             return new Project();
@@ -102,6 +131,8 @@ public class Project extends NamedAndTaggedIdentifyAware<String> {
             project.userName = userName;
             project.password = password;
             project.token = token;
+            if (type == null) throw new IllegalArgumentException("The type is require");
+            project.type=type;
             return project;
         }
     }

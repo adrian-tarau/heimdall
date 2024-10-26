@@ -4,12 +4,16 @@ import net.microfalx.lang.IdentityAware;
 import net.microfalx.lang.NamedAndTaggedIdentifyAware;
 import net.microfalx.resource.Resource;
 
+import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+
 /**
  * A group of functions/classes used in simulations.
  */
 public class Library extends NamedAndTaggedIdentifyAware<String> {
 
     private Resource resource;
+    private Project project;
+    private Simulation.Type type;
 
     /**
      * Returns the library code.
@@ -20,9 +24,30 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
         return resource;
     }
 
+    /**
+     * Returns the library project
+     *
+     * @return a non-null instance
+     */
+    public Project getProject() {
+        return project;
+    }
+
+    /**
+     * Returns the type of simulation (the tool which will execute the simulation).
+     *
+     * @return a non-null instance
+     */
+    public Simulation.Type getType() {
+        return type;
+    }
+
+
     public static class Builder extends NamedAndTaggedIdentifyAware.Builder<String> {
 
         private Resource resource;
+        private Project project;
+        private Simulation.Type type;
 
         public Builder(String id) {
             super(id);
@@ -32,7 +57,19 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
         }
 
         public Builder resource(Resource resource) {
+            requireNonNull(resource);
             this.resource = resource;
+            return this;
+        }
+
+        public Builder project(Project project) {
+            this.project = project;
+            return this;
+        }
+
+        public Builder type(Simulation.Type type) {
+            requireNonNull(type);
+            this.type = type;
             return this;
         }
 
@@ -45,7 +82,10 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
         public NamedAndTaggedIdentifyAware<String> build() {
             Library library = (Library) super.build();
             if (resource == null) throw new IllegalArgumentException("Library script is required");
+            if (type == null) throw new IllegalArgumentException("The type is require");
             library.resource = resource;
+            library.type=type;
+            library.project=project;
             return library;
         }
     }

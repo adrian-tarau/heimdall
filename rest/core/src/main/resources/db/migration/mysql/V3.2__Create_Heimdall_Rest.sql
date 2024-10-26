@@ -13,6 +13,20 @@ create table rest_project
     description varchar(1000)
 ) ENGINE = InnoDB;
 
+create table rest_library
+(
+    id          integer             auto_increment primary key,
+    project_id  integer,
+    name        varchar(100)        not null,
+    type        ENUM ('JMETER', 'K6','GATLING') not null,
+    resource    varchar(2000)       not null,
+    created_at  datetime            not null,
+    modified_at datetime,
+    tags        varchar(100),
+    description varchar(1000),
+    constraint fk$rest_library$project foreign key (project_id) references rest_project (id)
+) ENGINE = InnoDB;
+
 create table rest_simulation
 (
     id          integer                         not null auto_increment primary key,
