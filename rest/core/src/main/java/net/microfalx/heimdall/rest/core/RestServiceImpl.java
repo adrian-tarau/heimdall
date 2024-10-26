@@ -2,27 +2,19 @@ package net.microfalx.heimdall.rest.core;
 
 
 import lombok.extern.slf4j.Slf4j;
-import net.microfalx.heimdall.rest.api.Library;
-import net.microfalx.heimdall.rest.api.RestService;
-import net.microfalx.heimdall.rest.api.Schedule;
-import net.microfalx.heimdall.rest.api.Simulation;
+import net.microfalx.heimdall.rest.api.*;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.Collections;
-
-import static java.util.Collections.unmodifiableCollection;
 
 @Service
 @Slf4j
 public class RestServiceImpl implements RestService, InitializingBean {
 
-    private volatile Collection<Simulation> simulations = Collections.emptyList();
-    private volatile Collection<Schedule> schedules = Collections.emptyList();
-    private volatile Collection<Library> libraries = Collections.emptyList();
+    private volatile RestCache cache = new RestCache();
 
     @Autowired
     private RestProperties properties;
@@ -33,27 +25,47 @@ public class RestServiceImpl implements RestService, InitializingBean {
     private final RestPersistence persistence = new RestPersistence();
 
     @Override
+    public Collection<Project> getProjects() {
+        return cache.getProjects();
+    }
+
+    @Override
     public Collection<Simulation> getSimulations() {
-        return unmodifiableCollection(simulations);
+        return cache.getSimulations();
+    }
+
+    @Override
+    public void registerSimulation(Simulation simulation) {
+
     }
 
     @Override
     public Collection<Schedule> getSchedules() {
-        return unmodifiableCollection(schedules);
+        return cache.getSchedules();
     }
 
     @Override
     public Collection<Library> getLibraries() {
-        return unmodifiableCollection(libraries);
+        return cache.getLibraries();
+    }
+
+    @Override
+    public void registerLibrary(Library library) {
+
+    }
+
+    @Override
+    public void reload() {
+        RestCache cache = new RestCache();
+        cache.setApplicationContext(applicationContext);
+        cache.load();
+        this.cache = cache;
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
         persistence.setApplicationContext(applicationContext);
-        loadSimulations();
+        this.reload();
     }
 
-    private void loadSimulations() {
-
-    }
 }

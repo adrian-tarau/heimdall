@@ -39,14 +39,20 @@ public class Schedule extends TimestampAware {
     @Position(15)
     private Simulation simulation;
 
+    @Column(name = "type", length = 100, nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Description("The type of the scheduler")
+    @Position(20)
+    private net.microfalx.heimdall.rest.api.Schedule.Type type;
+
     @Column(name = "expression", length = 100)
     @Description("The scheduling expression")
-    @Position(20)
+    @Position(25)
     private String expression;
 
-    @Column(name = "interval")
+    @Column(name = "interval", length = 100)
     @Description("The scheduling interval")
-    @Position(25)
+    @Position(30)
     private String interval;
 
     @Column(name = "description")

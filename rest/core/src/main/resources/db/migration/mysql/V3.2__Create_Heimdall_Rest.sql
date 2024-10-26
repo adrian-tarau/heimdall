@@ -1,6 +1,22 @@
+create table rest_project
+(
+    id          integer             not null auto_increment primary key,
+    name        varchar(100)        not null,
+    type        ENUM ('GIT', 'SVN') not null,
+    uri         varchar(2000)       not null,
+    user_name   varchar(100),
+    password    varchar(100),
+    token       varchar(2000),
+    created_at  datetime            not null,
+    modified_at datetime,
+    tags        varchar(100),
+    description varchar(1000)
+) ENGINE = InnoDB;
+
 create table rest_simulation
 (
     id          integer                         not null auto_increment primary key,
+    project_id integer,
     natural_id  varchar(100)                    not null,
     name        varchar(100)                    not null,
     type        ENUM ('JMETER', 'K6','GATLING') not null,
@@ -9,7 +25,8 @@ create table rest_simulation
     modified_at datetime,
     tags        varchar(100),
     description varchar(1000),
-    constraint nk$rest_simulation$natural_id unique key (natural_id)
+    constraint nk$rest_simulation$natural_id unique key (natural_id),
+    constraint fk$rest_simulation$project foreign key (project_id) references rest_project (id)
 ) ENGINE = InnoDB;
 
 create table rest_scenario
@@ -20,7 +37,7 @@ create table rest_scenario
     name          varchar(100) not null,
     start_time    integer      not null,
     gracefulStop  integer      not null,
-    `function`      varchar(100) not null,
+    `function` varchar(100) not null,
     created_at    datetime     not null,
     modified_at   datetime,
     tags          varchar(100),
@@ -31,11 +48,11 @@ create table rest_scenario
 
 create table rest_step
 (
-    id          integer                                 not null auto_increment primary key,
-    natural_id  varchar(100)                            not null,
-    scenario_id integer                                 not null,
-    name        varchar(100)                            not null,
-    created_at  datetime                                not null,
+    id          integer      not null auto_increment primary key,
+    natural_id  varchar(100) not null,
+    scenario_id integer      not null,
+    name        varchar(100) not null,
+    created_at  datetime     not null,
     modified_at datetime,
     tags        varchar(100),
     description varchar(1000),
@@ -45,41 +62,42 @@ create table rest_step
 
 create table rest_schedule
 (
-    id              integer                       auto_increment primary key,
-    environment_id  integer                       not null,
-    simulation_id   integer                       not null,
-    expression      varchar(100),
-    `interval`      integer,
-    created_at      datetime                      not null,
-    modified_at     datetime,
-    description     varchar(1000),
+    id             integer auto_increment primary key,
+    environment_id integer                         not null,
+    simulation_id  integer                         not null,
+    type           ENUM ('EXPRESSION', 'INTERVAL') not null,
+    expression     varchar(100),
+    `interval`     varchar(100),
+    created_at     datetime                        not null,
+    modified_at    datetime,
+    description    varchar(1000),
     constraint fk$rest_schedule$environment foreign key (environment_id) references infrastructure_environment (id),
     constraint fk$rest_schedule$simulation foreign key (simulation_id) references rest_simulation (id)
 ) ENGINE = InnoDB;
 
 create table rest_output
 (
-    id                           bigint                        not null auto_increment primary key,
-    environment_id               integer                       not null,
-    simulation_id                integer                       not null,
-    started_at                   datetime                      not null,
-    ended_at                     datetime                      not null,
-    duration                     integer                       not null,
-    data_received                float                         not null,
-    data_sent                    float                         not null,
-    iterations                   float                         not null,
-    iteration_duration           float                         not null,
-    vus                          float                         not null,
-    vus_max                      float                         not null,
-    http_request_blocked         float                         not null,
-    http_request_connecting      float                         not null,
-    http_Request_duration        float                         not null,
-    http_request_failed          float                         not null,
-    http_request_receiving       float                         not null,
-    http_request_sending         float                         not null,
-    http_request_tls_handshaking float                         not null,
-    http_request_waiting         float                         not null,
-    http_requests                float                         not null,
+    id                           bigint   not null auto_increment primary key,
+    environment_id               integer  not null,
+    simulation_id                integer  not null,
+    started_at                   datetime not null,
+    ended_at                     datetime not null,
+    duration                     integer  not null,
+    data_received                float    not null,
+    data_sent                    float    not null,
+    iterations                   float    not null,
+    iteration_duration           float    not null,
+    vus                          float    not null,
+    vus_max                      float    not null,
+    http_request_blocked         float    not null,
+    http_request_connecting      float    not null,
+    http_Request_duration        float    not null,
+    http_request_failed          float    not null,
+    http_request_receiving       float    not null,
+    http_request_sending         float    not null,
+    http_request_tls_handshaking float    not null,
+    http_request_waiting         float    not null,
+    http_requests                float    not null,
     version                      varchar(50),
     description                  varchar(1000),
     constraint fk$rest_output$environment foreign key (environment_id) references infrastructure_environment (id),

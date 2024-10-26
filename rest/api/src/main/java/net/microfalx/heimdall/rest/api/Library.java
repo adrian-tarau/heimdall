@@ -31,7 +31,7 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
         public Builder() {
         }
 
-        public Builder setResource(Resource resource) {
+        public Builder resource(Resource resource) {
             this.resource = resource;
             return this;
         }
