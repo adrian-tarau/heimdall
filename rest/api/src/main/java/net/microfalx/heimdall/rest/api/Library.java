@@ -1,12 +1,10 @@
 package net.microfalx.heimdall.rest.api;
 
-import net.microfalx.lang.Hashing;
 import net.microfalx.lang.IdentityAware;
 import net.microfalx.lang.NamedAndTaggedIdentifyAware;
 import net.microfalx.resource.Resource;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
-import static net.microfalx.lang.StringUtils.toIdentifier;
 
 /**
  * A group of functions/classes used in simulations.
@@ -93,7 +91,7 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
         @Override
         protected String updateId() {
             if (resource != null) {
-                return type.name().toLowerCase() + "_" + Hashing.hash(toIdentifier(resource.getFileName()));
+                return Simulation.getNaturalId(type, resource);
             } else {
                 return super.updateId();
             }

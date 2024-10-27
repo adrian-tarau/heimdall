@@ -91,6 +91,17 @@ public class Project extends NamedAndTaggedIdentifyAware<String> {
         return defaultIfEmpty(simulationPath, UriUtils.SLASH);
     }
 
+    /**
+     * Returns the natural identifier based on repository URI.
+     *
+     * @param uri the repository URI
+     * @return a non-null instance
+     */
+    public static String getNaturalId(URI uri) {
+        requireNonNull(uri);
+        return Hashing.hash(uri.toASCIIString());
+    }
+
     public enum Type {
         /**
          * The GIT version control
@@ -160,7 +171,7 @@ public class Project extends NamedAndTaggedIdentifyAware<String> {
 
         @Override
         protected String updateId() {
-            return Hashing.hash(uri.toASCIIString());
+            return getNaturalId(uri);
         }
 
         @Override

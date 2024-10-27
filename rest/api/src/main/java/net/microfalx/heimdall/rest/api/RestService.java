@@ -1,5 +1,8 @@
 package net.microfalx.heimdall.rest.api;
 
+import net.microfalx.resource.Resource;
+
+import java.io.IOException;
 import java.util.Collection;
 
 /**
@@ -48,6 +51,23 @@ public interface RestService {
      * @param library the library
      */
     void registerLibrary(Library library);
+
+    /**
+     * Registers a resource to be stored for later use.
+     *
+     * @param resource the resource
+     * @return a new resource
+     * @throws IOException if an I/O error occurs
+     */
+    Resource registerResource(Resource resource) throws IOException;
+
+    /**
+     * Returns a simulation based on the provided scrip
+     *
+     * @param resource the resource
+     * @return a non-null instance
+     */
+    Simulation discover(Resource resource);
 
     /**
      * Reloads the rest definitions.

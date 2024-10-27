@@ -77,9 +77,10 @@ public class Simulation extends NamedAndTaggedIdentifyAware<String> {
 
     /**
      * Return the project repository
+     *
      * @return a non-null instance
      */
-    public Project getProject(){
+    public Project getProject() {
         return project;
     }
 
@@ -92,6 +93,18 @@ public class Simulation extends NamedAndTaggedIdentifyAware<String> {
         return timeout;
     }
 
+    /**
+     * Returns the natural identifier for a resource.
+     *
+     * @param type     the simulation type
+     * @param resource the resource
+     * @return a non-null instance
+     */
+    public static String getNaturalId(Type type, Resource resource) {
+        requireNonNull(type);
+        requireNonNull(resource);
+        return type.name().toLowerCase() + "_" + Hashing.hash(toIdentifier(resource.getFileName()));
+    }
 
     public enum Type {
 
@@ -146,6 +159,14 @@ public class Simulation extends NamedAndTaggedIdentifyAware<String> {
             super(id);
         }
 
+        public Builder(Simulation simulation) {
+            super(simulation.getId());
+            this.type = simulation.getType();
+            this.resource = simulation.getResource();
+            this.project = simulation.getProject();
+            this.timeout = simulation.getTimeout();
+        }
+
         public Builder() {
         }
 
@@ -181,14 +202,14 @@ public class Simulation extends NamedAndTaggedIdentifyAware<String> {
         @Override
         protected String updateId() {
             if (resource != null) {
-                return type.name().toLowerCase() + "_" + Hashing.hash(toIdentifier(resource.getFileName()));
+                return getNaturalId(type, resource);
             } else {
                 return super.updateId();
             }
         }
 
         public Builder project(Project project) {
-            this.project=project;
+            this.project = project;
             return this;
         }
 
@@ -201,7 +222,7 @@ public class Simulation extends NamedAndTaggedIdentifyAware<String> {
             simulation.type = type;
             simulation.timeout = timeout;
             simulation.resource = resource;
-            simulation.project=project;
+            simulation.project = project;
             return simulation;
         }
     }
