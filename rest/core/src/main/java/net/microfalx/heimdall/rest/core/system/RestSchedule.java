@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.rest.core.system;
 
+import jakarta.persistence.Id;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,13 +9,11 @@ import net.microfalx.bootstrap.dataset.annotation.Component;
 import net.microfalx.bootstrap.dataset.annotation.Filterable;
 import net.microfalx.bootstrap.jdbc.entity.TimestampAware;
 import net.microfalx.heimdall.infrastructure.core.system.Environment;
-import net.microfalx.lang.annotation.Description;
-import net.microfalx.lang.annotation.Position;
-import net.microfalx.lang.annotation.Visible;
-import net.microfalx.lang.annotation.Width;
+import net.microfalx.lang.annotation.*;
 
 @Entity
 @Table(name = "rest_schedule")
+@Name("Schedule")
 @ToString
 @Getter
 @Setter

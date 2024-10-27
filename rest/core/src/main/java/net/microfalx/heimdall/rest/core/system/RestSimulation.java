@@ -5,13 +5,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
-import net.microfalx.lang.annotation.Description;
-import net.microfalx.lang.annotation.NaturalId;
-import net.microfalx.lang.annotation.Position;
-import net.microfalx.lang.annotation.Visible;
+import net.microfalx.lang.annotation.*;
 
 @Entity
 @Table(name = "rest_simulation")
+@Name("Simulation")
 @ToString
 @Getter
 @Setter

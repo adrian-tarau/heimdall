@@ -1,38 +1,67 @@
 package net.microfalx.heimdall.rest.core;
 
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
+import net.microfalx.bootstrap.jdbc.jpa.NaturalIdEntityUpdater;
+import net.microfalx.bootstrap.jdbc.jpa.NaturalJpaRepository;
+import net.microfalx.bootstrap.model.MetadataService;
 import net.microfalx.heimdall.rest.api.Library;
-import net.microfalx.heimdall.rest.core.system.RestLibrary;
-import net.microfalx.heimdall.rest.core.system.RestLibraryRepository;
-import net.microfalx.heimdall.rest.core.system.RestSimulation;
-import net.microfalx.heimdall.rest.core.system.RestSimulationRepository;
+import net.microfalx.heimdall.rest.api.Project;
+import net.microfalx.heimdall.rest.api.SimulationException;
+import net.microfalx.heimdall.rest.core.system.*;
 import net.microfalx.lang.CollectionUtils;
 
 public class RestPersistence extends ApplicationContextSupport {
 
-    RestLibrary execute(Library library) {
-        RestLibraryRepository restLibraryRepository = getBean(RestLibraryRepository.class);
+    void save(Library library) {
+        NaturalIdEntityUpdater<RestLibrary, Integer> restLibraryUpdater = getUpdater(RestLibraryRepository.class);
         RestLibrary jpaLibrary = new RestLibrary();
-        //jpaLibrary.setProject(execute(library.getProject()));
-        jpaLibrary.setType(library.getType());
         jpaLibrary.setName(library.getName());
-        jpaLibrary.setDescription(library.getDescription());
+        jpaLibrary.setType(library.getType());
+        jpaLibrary.setNaturalId(library.getId());
+        jpaLibrary.setProject(loadProject(library.getProject()));
         jpaLibrary.setResource(library.getResource().toURI().toASCIIString());
         jpaLibrary.setTags(CollectionUtils.setToString(library.getTags()));
-        return restLibraryRepository.save(jpaLibrary);
+        jpaLibrary.setDescription(library.getDescription());
+        restLibraryUpdater.findByNaturalIdAndUpdate(jpaLibrary);
     }
 
-    RestSimulation execute(net.microfalx.heimdall.rest.api.Simulation simulation) {
-        RestSimulationRepository simulationRepository = getBean(RestSimulationRepository.class);
+    void save(net.microfalx.heimdall.rest.api.Simulation simulation) {
+        NaturalIdEntityUpdater<RestSimulation, Integer> updater = getUpdater(RestSimulationRepository.class);
         RestSimulation jpaSimulation = new RestSimulation();
-        //jpaSimulation.setProject(execute(simulation.getProject()));
-        jpaSimulation.setDescription(simulation.getDescription());
-        jpaSimulation.setResource(simulation.getResource().toURI().toASCIIString());
-        jpaSimulation.setType(simulation.getType());
-        jpaSimulation.setNaturalId(simulation.getId());
-        jpaSimulation.setTags(CollectionUtils.setToString(simulation.getTags()));
         jpaSimulation.setName(simulation.getName());
-        return simulationRepository.save(jpaSimulation);
+        jpaSimulation.setNaturalId(simulation.getId());
+        jpaSimulation.setType(simulation.getType());
+        jpaSimulation.setProject(loadProject(simulation.getProject()));
+        jpaSimulation.setResource(simulation.getResource().toURI().toASCIIString());
+        jpaSimulation.setTags(CollectionUtils.setToString(simulation.getTags()));
+        jpaSimulation.setDescription(simulation.getDescription());
+        updater.findByNaturalIdAndUpdate(jpaSimulation);
+    }
+
+    private <M, ID> NaturalIdEntityUpdater<M, ID> getUpdater(Class<? extends NaturalJpaRepository<M, ID>> repositoryClass) {
+        NaturalJpaRepository<M, ID> repository = getBean(repositoryClass);
+        NaturalIdEntityUpdater<M, ID> updater = new NaturalIdEntityUpdater<>(getBean(MetadataService.class), repository);
+        updater.setApplicationContext(getApplicationContext());
+        return updater;
+    }
+
+    private RestProject createProject(Library library) {
+        NaturalIdEntityUpdater<RestProject, Integer> restProjectUpdater = getUpdater(RestProjectRepository.class);
+        RestProject jpaProject = new RestProject();
+        jpaProject.setDescription(library.getProject().getDescription());
+        jpaProject.setUri(library.getProject().getUri().toASCIIString());
+        jpaProject.setType(library.getProject().getType());
+        jpaProject.setName(library.getProject().getName());
+        jpaProject.setToken(library.getProject().getToken());
+        jpaProject.setPassword(library.getProject().getPassword());
+        jpaProject.setUserName(library.getProject().getUserName());
+        jpaProject.setNaturalId(library.getId());
+        return restProjectUpdater.findByNaturalIdAndUpdate(jpaProject);
+    }
+
+    private RestProject loadProject(Project project) {
+        return getBean(RestProjectRepository.class).findByNaturalId(project.getId())
+                .orElseThrow(() -> new SimulationException("A project with identifier '" + project.getId() + "' is not registered"));
     }
 
 }

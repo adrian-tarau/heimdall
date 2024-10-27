@@ -122,7 +122,7 @@ class RestCache extends ApplicationContextSupport {
     private void loadSimulations() {
         List<RestSimulation> simulationJPAs = getBean(RestSimulationRepository.class).findAll();
         simulationJPAs.forEach(restSimulation -> {
-            Simulation.Builder builder = new Simulation.Builder();
+            Simulation.Builder builder = new Simulation.Builder(restSimulation.getNaturalId());
             builder.project(projects.get(restSimulation.getProject().getNaturalId()))
                     .resource(MemoryResource.create(restSimulation.getResource()))
                     .type(restSimulation.getType()).tag(restSimulation.getTags())
@@ -134,14 +134,14 @@ class RestCache extends ApplicationContextSupport {
 
     private void loadSchedules() {
         List<RestSchedule> scheduleJPAs = getBean(RestScheduleRepository.class).findAll();
-        scheduleJPAs.forEach(restSimulation -> {
+        scheduleJPAs.forEach(restSchedule -> {
             Environment environment = getBean(InfrastructureService.class).
-                    getEnvironment(restSimulation.getEnvironment().getNaturalId());
+                    getEnvironment(restSchedule.getEnvironment().getNaturalId());
             Schedule.Builder builder = new Schedule.Builder();
-            builder.simulation(simulations.get(restSimulation.getSimulation().getNaturalId()))
+            builder.simulation(simulations.get(restSchedule.getSimulation().getNaturalId()))
                     .environment(environment)
-                    .interval(Duration.parse(restSimulation.getInterval())).expression(restSimulation.getExpression())
-                    .description(restSimulation.getDescription()).build();
+                    .interval(Duration.parse(restSchedule.getInterval())).expression(restSchedule.getExpression())
+                    .description(restSchedule.getDescription()).build();
             Schedule schedule = builder.build();
             registerSchedule(schedule);
         });

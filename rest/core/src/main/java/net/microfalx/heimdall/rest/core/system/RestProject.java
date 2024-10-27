@@ -4,14 +4,13 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.microfalx.bootstrap.dataset.annotation.Component;
 import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
 import net.microfalx.heimdall.rest.api.Project;
-import net.microfalx.lang.annotation.Description;
-import net.microfalx.lang.annotation.NaturalId;
-import net.microfalx.lang.annotation.Position;
-import net.microfalx.lang.annotation.Visible;
+import net.microfalx.lang.annotation.*;
 
 @Entity
+@Name("Project")
 @Table(name = "rest_project")
 @ToString
 @Getter
@@ -21,7 +20,6 @@ public class RestProject extends NamedAndTaggedAndTimestampedIdentityAware<Integ
     @Column(name = "natural_id", nullable = false, length = 100, unique = true)
     @NaturalId
     @Visible(value = false)
-    @Position(3)
     private String naturalId;
 
     @Column(name = "type", nullable = false)
@@ -43,10 +41,28 @@ public class RestProject extends NamedAndTaggedAndTimestampedIdentityAware<Integ
     @Column(name = "password", length = 100)
     @Description("The password to the project repository")
     @Position(25)
+    @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})
+    @Component(Component.Type.PASSWORD)
     private String password;
 
     @Column(name = "token", length = 2000)
     @Description("The token to the project repository")
     @Position(30)
+    @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})
+    @Component(Component.Type.PASSWORD)
     private String token;
+
+    @Column(name = "simulation_path", length = 2000)
+    @Description("The path within the project which holds the simulations")
+    @Position(40)
+    @Label(group = "Paths", value = "Simulation")
+    private String simulationPath;
+
+    @Column(name = "library_path", length = 2000)
+    @Description("The path within the project which holds the (shared) libraries required for the simulation")
+    @Position(45)
+    @Label(group = "Paths", value = "Library")
+    private String libraryPath;
+
+
 }

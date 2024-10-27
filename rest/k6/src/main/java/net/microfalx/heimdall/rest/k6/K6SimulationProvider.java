@@ -1,10 +1,11 @@
 package net.microfalx.heimdall.rest.k6;
 
 import net.microfalx.heimdall.rest.api.Simulation;
-import net.microfalx.lang.StringUtils;
 import net.microfalx.resource.Resource;
 
-public class K6SimulationProvider implements Simulation.Provider{
+import static net.microfalx.lang.StringUtils.capitalizeWords;
+
+public class K6SimulationProvider implements Simulation.Provider {
 
     @Override
     public String getName() {
@@ -20,7 +21,7 @@ public class K6SimulationProvider implements Simulation.Provider{
     public Simulation create(Resource resource) {
         Simulation.Builder builder = new Simulation.Builder().resource(resource).
                 type(Simulation.Type.K6);
-        builder.name(StringUtils.toIdentifier(resource.getName()));
+        builder.name(capitalizeWords(resource.getName()));
         builder.description(resource.getDescription());
         builder.tag("");
         return builder.build();

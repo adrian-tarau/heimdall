@@ -8,10 +8,10 @@
         </menu>
         <menu id="rest_admin" text="Rest API" position="100" parent="system" action="/system/rest"
               roles="admin" icon="fa-solid fa-plug">
-            <item id="simulation" text="Simulations" action="/system/rest/simulation" icon="fa-solid fa-vials"/>
-            <item id="schedule" text="Schedules" action="/system/rest/schedule" icon="fa-solid fa-clock"/>
             <item id="project" text="Projects" action="/system/rest/project" icon="fa-solid fa-diagram-project"/>
+            <item id="simulation" text="Simulations" action="/system/rest/simulation" icon="fa-solid fa-vials"/>
             <item id="library" text="Libraries" action="/system/rest/library" icon="fa-solid fa-book"/>
+            <item id="schedule" text="Schedules" action="/system/rest/schedule" icon="fa-solid fa-clock"/>
         </menu>
     </menu>
 </navigations>
