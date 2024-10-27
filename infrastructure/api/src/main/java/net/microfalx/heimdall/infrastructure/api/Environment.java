@@ -20,6 +20,25 @@ public class Environment extends NamedAndTaggedIdentifyAware<String> implements 
     private Set<Server> servers;
 
     /**
+     * Creates a builder for an environment.
+     *
+     * @return a non-null instance
+     */
+    public static Builder create() {
+        return new Builder();
+    }
+
+    /**
+     * Creates a builder for an environment.
+     *
+     * @param id the environment identifier
+     * @return a non-null instance
+     */
+    public static Builder create(String id) {
+        return new Builder(id);
+    }
+
+    /**
      * Returns the attributes associated with this environment.
      *
      * @return a non-null instance

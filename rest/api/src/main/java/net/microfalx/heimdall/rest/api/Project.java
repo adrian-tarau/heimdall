@@ -1,8 +1,6 @@
 package net.microfalx.heimdall.rest.api;
 
-import net.microfalx.lang.Hashing;
-import net.microfalx.lang.IdentityAware;
-import net.microfalx.lang.NamedAndTaggedIdentifyAware;
+import net.microfalx.lang.*;
 
 import java.net.URI;
 
@@ -19,8 +17,20 @@ public class Project extends NamedAndTaggedIdentifyAware<String> {
     private String token;
     private Type type;
 
+    private String libraryPath;
+    private String simulationPath;
+
     public static Builder create(URI uri) {
         return new Builder(uri);
+    }
+
+    /**
+     * Returns the type of the project
+     *
+     * @return a non-null instance
+     */
+    public Type getType() {
+        return type;
     }
 
     /**
@@ -60,12 +70,20 @@ public class Project extends NamedAndTaggedIdentifyAware<String> {
     }
 
     /**
-     * Returns the type of the project
+     * Returns the path within the project which holds the (shared) libraries required for the simulation
+     * @return a non-null instance
+     */
+    public String getLibraryPath() {
+        return StringUtils.defaultIfEmpty(libraryPath, UriUtils.SLASH);
+    }
+
+    /**
+     * Returns the path within the project which holds the simulations.
      *
      * @return a non-null instance
      */
-    public Type getType() {
-        return type;
+    public String getSimulationPath() {
+        return StringUtils.defaultIfEmpty(simulationPath, UriUtils.SLASH);
     }
 
     public enum Type {
@@ -83,10 +101,13 @@ public class Project extends NamedAndTaggedIdentifyAware<String> {
     public static class Builder extends NamedAndTaggedIdentifyAware.Builder<String> {
 
         private final URI uri;
+        private Type type;
         private String userName;
         private String password;
         private String token;
-        private Type type;
+
+        private String libraryPath = UriUtils.SLASH;
+        private String simulationPath = UriUtils.SLASH;
 
         public Builder(URI uri) {
             super();
@@ -115,6 +136,18 @@ public class Project extends NamedAndTaggedIdentifyAware<String> {
             return this;
         }
 
+        public Builder libraryPath(String libraryPath) {
+            requireNonNull(libraryPath);
+            this.libraryPath = libraryPath;
+            return this;
+        }
+
+        public Builder simulationPath(String simulationPath) {
+            requireNonNull(simulationPath);
+            this.simulationPath = simulationPath;
+            return this;
+        }
+
         @Override
         protected IdentityAware<String> create() {
             return new Project();
@@ -128,11 +161,13 @@ public class Project extends NamedAndTaggedIdentifyAware<String> {
         @Override
         public NamedAndTaggedIdentifyAware<String> build() {
             Project project = (Project) super.build();
+            if (type == null) throw new IllegalArgumentException("The type is require");
+            project.type = type;
             project.userName = userName;
             project.password = password;
             project.token = token;
-            if (type == null) throw new IllegalArgumentException("The type is require");
-            project.type=type;
+            project.libraryPath = libraryPath;
+            project.simulationPath = simulationPath;
             return project;
         }
     }
