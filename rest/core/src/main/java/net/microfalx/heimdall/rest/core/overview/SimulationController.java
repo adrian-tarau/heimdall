@@ -2,12 +2,12 @@ package net.microfalx.heimdall.rest.core.overview;
 
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.web.dataset.DataSetController;
-import net.microfalx.heimdall.rest.core.system.Simulation;
+import net.microfalx.heimdall.rest.core.system.RestSimulation;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller("OverviewSimulationController")
-@DataSet(model = Simulation.class, timeFilter = false)
+@DataSet(model = RestSimulation.class, timeFilter = false)
 @RequestMapping("/rest/simulation")
-public class SimulationController extends DataSetController<Simulation,Integer> {
+public class SimulationController extends DataSetController<RestSimulation,Integer> {
 }

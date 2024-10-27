@@ -6,7 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller("SystemSimulationController")
-@DataSet(model = Simulation.class, timeFilter = false)
+@DataSet(model = RestSimulation.class, timeFilter = false)
 @RequestMapping("/system/rest/simulation")
-public class SimulationController extends DataSetController<Simulation,Integer> {
+public class RestSimulationController extends DataSetController<RestSimulation,Integer> {
 }

@@ -7,7 +7,7 @@ import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Component;
 import net.microfalx.bootstrap.dataset.annotation.Filterable;
 import net.microfalx.heimdall.infrastructure.core.system.Environment;
-import net.microfalx.heimdall.rest.core.system.Simulation;
+import net.microfalx.heimdall.rest.core.system.RestSimulation;
 import net.microfalx.lang.annotation.Description;
 import net.microfalx.lang.annotation.Position;
 import net.microfalx.lang.annotation.Visible;
@@ -40,7 +40,7 @@ public class SimulationResult{
     @JoinColumn(name = "simulation_id", nullable = false)
     @Description("The simulation used to produce the output")
     @Position(15)
-    private Simulation simulation;
+    private RestSimulation simulation;
 
     @Column(name = "started_at", nullable = false)
     @Description("the start time of the simulation")
