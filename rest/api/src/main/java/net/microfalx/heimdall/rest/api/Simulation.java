@@ -23,6 +23,7 @@ import static net.microfalx.lang.StringUtils.toIdentifier;
 public class Simulation extends NamedAndTaggedIdentifyAware<String> {
 
     private Collection<Scenario> scenarios;
+    private Project project;
     private Type type;
     private Resource resource;
     private Duration timeout;
@@ -68,10 +69,18 @@ public class Simulation extends NamedAndTaggedIdentifyAware<String> {
     /**
      * Returns the script/file which contains the simulation plan.
      *
-     * @return a non-null
+     * @return a non-null instance
      */
     public Resource getResource() {
         return resource;
+    }
+
+    /**
+     * Return the project repository
+     * @return a non-null instance
+     */
+    public Project getProject(){
+        return project;
     }
 
     /**
@@ -82,6 +91,7 @@ public class Simulation extends NamedAndTaggedIdentifyAware<String> {
     public Duration getTimeout() {
         return timeout;
     }
+
 
     public enum Type {
 
@@ -129,6 +139,7 @@ public class Simulation extends NamedAndTaggedIdentifyAware<String> {
         private final Collection<Scenario> scenarios = new ArrayList<>();
         private Type type;
         private Resource resource;
+        private Project project;
         private Duration timeout = ofMinutes(15);
 
         public Builder(String id) {
@@ -176,6 +187,11 @@ public class Simulation extends NamedAndTaggedIdentifyAware<String> {
             }
         }
 
+        public Builder project(Project project) {
+            this.project=project;
+            return this;
+        }
+
         @Override
         public Simulation build() {
             Simulation simulation = (Simulation) super.build();
@@ -185,6 +201,7 @@ public class Simulation extends NamedAndTaggedIdentifyAware<String> {
             simulation.type = type;
             simulation.timeout = timeout;
             simulation.resource = resource;
+            simulation.project=project;
             return simulation;
         }
     }

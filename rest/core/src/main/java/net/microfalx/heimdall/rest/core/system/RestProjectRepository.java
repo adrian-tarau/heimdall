@@ -1,7 +1,7 @@
 package net.microfalx.heimdall.rest.core.system;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import net.microfalx.bootstrap.jdbc.jpa.NaturalJpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface RestProjectRepository extends JpaRepository<RestProject,Integer>, JpaSpecificationExecutor<RestProject> {
+public interface RestProjectRepository extends NaturalJpaRepository<RestProject, Integer>, JpaSpecificationExecutor<RestProject> {
 }

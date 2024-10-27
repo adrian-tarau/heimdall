@@ -8,12 +8,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller("SystemScheduleController")
-@DataSet(model = Schedule.class, timeFilter = false)
+@DataSet(model = RestSchedule.class, timeFilter = false)
 @RequestMapping("/system/rest/schedule")
-public class ScheduleController extends DataSetController<Schedule,Integer> {
+public class RestScheduleController extends DataSetController<RestSchedule,Integer> {
 
     @Override
-    protected void validate(Schedule model, State state, JsonFormResponse<?> response) {
+    protected void validate(RestSchedule model, State state, JsonFormResponse<?> response) {
         super.validate(model, state, response);
     }
 }

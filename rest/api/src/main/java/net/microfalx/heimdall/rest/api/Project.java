@@ -1,10 +1,14 @@
 package net.microfalx.heimdall.rest.api;
 
-import net.microfalx.lang.*;
+import net.microfalx.lang.Hashing;
+import net.microfalx.lang.IdentityAware;
+import net.microfalx.lang.NamedAndTaggedIdentifyAware;
+import net.microfalx.lang.UriUtils;
 
 import java.net.URI;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.StringUtils.defaultIfEmpty;
 
 /**
  * A project (a source code repository) containing simulations related to the project.
@@ -71,10 +75,11 @@ public class Project extends NamedAndTaggedIdentifyAware<String> {
 
     /**
      * Returns the path within the project which holds the (shared) libraries required for the simulation
+     *
      * @return a non-null instance
      */
     public String getLibraryPath() {
-        return StringUtils.defaultIfEmpty(libraryPath, UriUtils.SLASH);
+        return defaultIfEmpty(libraryPath, UriUtils.SLASH);
     }
 
     /**
@@ -83,7 +88,7 @@ public class Project extends NamedAndTaggedIdentifyAware<String> {
      * @return a non-null instance
      */
     public String getSimulationPath() {
-        return StringUtils.defaultIfEmpty(simulationPath, UriUtils.SLASH);
+        return defaultIfEmpty(simulationPath, UriUtils.SLASH);
     }
 
     public enum Type {
@@ -159,7 +164,7 @@ public class Project extends NamedAndTaggedIdentifyAware<String> {
         }
 
         @Override
-        public NamedAndTaggedIdentifyAware<String> build() {
+        public Project build() {
             Project project = (Project) super.build();
             if (type == null) throw new IllegalArgumentException("The type is require");
             project.type = type;

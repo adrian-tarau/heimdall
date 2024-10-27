@@ -36,7 +36,8 @@ public class RestServiceImpl implements RestService, InitializingBean {
 
     @Override
     public void registerSimulation(Simulation simulation) {
-
+        cache.registerSimulation(simulation);
+        persistence.execute(simulation);
     }
 
     @Override
@@ -51,7 +52,8 @@ public class RestServiceImpl implements RestService, InitializingBean {
 
     @Override
     public void registerLibrary(Library library) {
-
+        cache.registerLibrary(library);
+        persistence.execute(library);
     }
 
     @Override

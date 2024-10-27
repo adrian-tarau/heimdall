@@ -18,7 +18,7 @@ import net.microfalx.lang.annotation.Width;
 @ToString
 @Getter
 @Setter
-public class Schedule extends TimestampAware {
+public class RestSchedule extends TimestampAware {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,7 +37,7 @@ public class Schedule extends TimestampAware {
     @JoinColumn(name = "simulation_id", nullable = false)
     @Description("The simulation to be executed by this schedule")
     @Position(15)
-    private Simulation simulation;
+    private RestSimulation simulation;
 
     @Column(name = "type", length = 100, nullable = false)
     @Enumerated(EnumType.STRING)
