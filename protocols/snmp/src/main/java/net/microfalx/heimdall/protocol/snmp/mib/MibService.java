@@ -432,7 +432,11 @@ public class MibService implements InitializingBean {
         MibParser parser = new MibParser();
         for (SnmpMib snmpMib : snmpMibRepository.findAll()) {
             Resource resource = MemoryResource.create(snmpMib.getContent(), snmpMib.getFileName());
-            resource = copyWorkspace(resource);
+            try {
+                resource = copyWorkspace(resource);
+            } catch (IOException e) {
+                LOGGER.warn("Failed to load MIB '" + snmpMib.getName() + "' from repository", e);
+            }
             parser.add(resource, snmpMib.getType());
         }
         Collection<MibModule> modules = parser.parseAll();
@@ -550,7 +554,7 @@ public class MibService implements InitializingBean {
         module.severityOid = extractor.getSeverityOid();
     }
 
-    private Resource copyWorkspace(Resource resource) {
+    private Resource copyWorkspace(Resource resource) throws IOException {
         Resource workspaceResource = workspace.resolve(String.valueOf(resource.getFileName().charAt(0)).toLowerCase(), Resource.Type.DIRECTORY);
         workspaceResource = workspaceResource.resolve(resource.getFileName(), Resource.Type.FILE);
         return workspaceResource.copyFrom(resource);

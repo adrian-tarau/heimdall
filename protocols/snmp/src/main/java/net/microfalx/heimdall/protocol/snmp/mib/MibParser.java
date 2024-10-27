@@ -2,6 +2,7 @@ package net.microfalx.heimdall.protocol.snmp.mib;
 
 import com.google.common.collect.Iterables;
 import net.microfalx.lang.EnumUtils;
+import net.microfalx.lang.ExceptionUtils;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceUtils;
 import net.microfalx.resource.TemporaryFileResource;
@@ -17,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
@@ -231,7 +233,11 @@ public class MibParser {
             }
             if (url == null) {
                 Resource tmpResource = TemporaryFileResource.file(resource.getFileName() + ".tmp", null);
-                tmpResource.copyFrom(resource);
+                try {
+                    tmpResource.copyFrom(resource);
+                } catch (IOException e) {
+                    return ExceptionUtils.throwException(e);
+                }
                 url = tmpResource.toURL();
             }
             urls.add(url);
