@@ -12,11 +12,14 @@ public class K6Simulator extends AbstractSimulator {
     protected Options resolveOptions() {
         return new Options("k6").setName("Grafana K6").setVersion("0.54.0")
                 .setLinuxPackage("k6-v${VERSION}-linux-amd64.tar.gz").setWindowsPackage("k6-v${VERSION}-windows-amd64.zip")
-                .setExecutable("k6");
+                .setMinimumFileCount(1).setLinuxExecutable("k6").setWindowsExecutable("k6.exe");
     }
 
     @Override
     protected void update(List<String> arguments, File input, File output, SimulationContext context) {
-
+        arguments.add("run");
+        arguments.add("--out");
+        arguments.add("csv=" + output.getName());
+        arguments.add(input.getName());
     }
 }

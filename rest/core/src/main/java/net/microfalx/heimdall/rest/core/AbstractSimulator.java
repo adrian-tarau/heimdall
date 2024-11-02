@@ -22,6 +22,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static net.microfalx.lang.FormatterUtils.formatDuration;
 import static net.microfalx.lang.JvmUtils.isWindows;
@@ -199,15 +200,15 @@ public abstract class AbstractSimulator implements Identifiable<String>, Nameabl
         try {
             timedOut = !process.waitFor(simulation.getTimeout().toMillis(), TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
-            throw new SimulationExecutionException("Execution of simulator '" + simulation.getName() + "' was interrupted", e);
+            throw new SimulationExecutionException("Execution of simulator '" + getName() + "' was interrupted", e);
         }
         if (timedOut) {
-            throw new SimulationExecutionException("Execution of simulator '" + simulation.getName() + "' timed out ("
+            throw new SimulationExecutionException("Execution of simulator '" + getName() + "' timed out ("
                     + formatDuration(simulation.getTimeout()) + ")");
         }
         int exitValue = process.exitValue();
         if (exitValue != 0) {
-            throw new SimulationExecutionException("Execution of simulator '" + simulation.getName() + "' failed with error code = "
+            throw new SimulationExecutionException("Execution of simulator '" + getName() + "' failed with error code = "
                     + exitValue + ", error stream: " + getErrorOutput());
         }
     }
@@ -268,10 +269,20 @@ public abstract class AbstractSimulator implements Identifiable<String>, Nameabl
 
     private boolean validatePackage() throws IOException {
         Resource targetWorkspace = getWorkspace();
+        if (!targetWorkspace.exists()) return false;
         Set<String> requiredFiles = getOptions().getRequiredFiles();
         for (String requiredFile : requiredFiles) {
             Resource resource = targetWorkspace.resolve(requiredFile);
             if (!resource.exists()) return false;
+        }
+        int minimumFileCount = getOptions().getMinimumFileCount();
+        if (minimumFileCount > 0) {
+            AtomicInteger fileCount = new AtomicInteger();
+            targetWorkspace.walk((root, child) -> {
+                fileCount.incrementAndGet();
+                return true;
+            });
+            if (fileCount.get() < minimumFileCount) return false;
         }
         return true;
     }
@@ -290,6 +301,7 @@ public abstract class AbstractSimulator implements Identifiable<String>, Nameabl
         private String windowsExecutable;
         private boolean removeFirstPath = true;
         private Set<String> requiredFiles = new HashSet<>();
+        private int minimumFileCount;
 
         public Options(String id) {
             this.id = id;
@@ -302,6 +314,11 @@ public abstract class AbstractSimulator implements Identifiable<String>, Nameabl
 
         public Options addFiles(String... files) {
             this.requiredFiles.addAll(Arrays.asList(files));
+            return this;
+        }
+
+        public Options setMinimumFileCount(int minimumFileCount) {
+            this.minimumFileCount = minimumFileCount;
             return this;
         }
 

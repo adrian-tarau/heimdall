@@ -17,6 +17,10 @@ public class JmeterSimulator extends AbstractSimulator {
 
     @Override
     protected void update(List<String> arguments, File input, File output, SimulationContext context) {
-
+        arguments.add("-n");
+        arguments.add("-t");
+        arguments.add(input.getName());
+        arguments.add("-l");
+        arguments.add(output.getName());
     }
 }
