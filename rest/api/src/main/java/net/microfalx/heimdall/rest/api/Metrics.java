@@ -22,4 +22,5 @@ public class Metrics {
     public static final Metric HTTP_REQ_SENDING = Metric.create("http_req_sending");
     public static final Metric HTTP_REQ_WAITING = Metric.create("http_req_waiting");
     public static final Metric HTTP_REQ_RECEIVING = Metric.create("http_req_receiving");
+    public static final Metric HTTP_REQ_FAILED = Metric.create("http_req_failed");
 }

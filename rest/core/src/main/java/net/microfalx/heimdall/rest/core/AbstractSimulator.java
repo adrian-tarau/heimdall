@@ -3,6 +3,7 @@ package net.microfalx.heimdall.rest.core;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.microfalx.bootstrap.model.Attribute;
 import net.microfalx.heimdall.rest.api.*;
 import net.microfalx.lang.*;
 import net.microfalx.resource.ClassPathResource;
@@ -186,6 +187,8 @@ public abstract class AbstractSimulator implements Identifiable<String>, Nameabl
         ProcessBuilder processBuilder = new ProcessBuilder(arguments).directory(toFile(getSessionWorkspace()))
                 .redirectError(toFile(systemOutput))
                 .redirectOutput(toFile(systemError));
+        update(processBuilder, context);
+        exportEnvironmentVariables(processBuilder, context);
         Process process;
         try {
             process = processBuilder.start();
@@ -206,6 +209,13 @@ public abstract class AbstractSimulator implements Identifiable<String>, Nameabl
         if (exitValue != 0) {
             throw new SimulationExecutionException("Execution of simulator '" + simulation.getName() + "' failed with error code = "
                     + exitValue + ", error stream: " + getErrorOutput());
+        }
+    }
+
+    private void exportEnvironmentVariables(ProcessBuilder processBuilder, SimulationContext context) {
+        for (Attribute attribute : context.getEnvironment().getAttributes()) {
+            String name = StringUtils.toIdentifier(attribute.getName()).toUpperCase();
+            processBuilder.environment().put(name, ObjectUtils.toString(attribute.getValue()));
         }
     }
 
