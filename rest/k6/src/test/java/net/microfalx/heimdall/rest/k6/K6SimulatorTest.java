@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -38,15 +39,15 @@ class K6SimulatorTest {
     @Test
     void simpleSimulation() throws IOException {
         K6Simulator simulator = new K6Simulator(createSimulation("simple_simulation.js"));
-        Output output = simulator.execute(simulationContext);
-        assertOutput(output);
+        Collection<Output> output = simulator.execute(simulationContext);
+        assertOutput(output.iterator().next());
     }
 
     @Test
     void scenariosSimulation() throws IOException {
         K6Simulator simulator = new K6Simulator(createSimulation("scenarios_simulation.js"));
-        Output output = simulator.execute(simulationContext);
-        assertOutput(output);
+        Collection<Output> output = simulator.execute(simulationContext);
+        assertOutput(output.iterator().next());
     }
 
     private Simulation createSimulation(String fileName) {

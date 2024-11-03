@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.util.Collections.unmodifiableCollection;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.StringUtils.toIdentifier;
 
@@ -33,7 +32,7 @@ public abstract class AbstractOutputParser {
     private final Resource resource;
 
     private final Map<String, SimulationOutput> outputs = new HashMap<>();
-    private final Map<String, Measurement> values = new HashMap<>();
+    private final Map<String, TimeSeries> timeSeries = new HashMap<>();
     private final static Map<String, Metric> metrics = new HashMap<>();
 
     public AbstractOutputParser(SimulationContext simulationContext, Simulation simulation, Resource resource) {
@@ -97,24 +96,15 @@ public abstract class AbstractOutputParser {
     }
 
     /**
-     * Returns the collection which olds a list of values associated with a scenario and a metric.
+     * Returns the time-series for a scenario (its name) and a metric.
      *
      * @param name   the name of the scenario
-     * @param metric the metric
+     * @param metric the metric name
      * @return a non-null instance
      */
-    protected final Measurement getMeasurement(String name, Metric metric) {
+    protected final TimeSeries getTimeSeries(String name, Metric metric) {
         String id = toIdentifier(name) + "_" + metric.getId();
-        return values.computeIfAbsent(id, s -> new Measurement(id, name, metric));
-    }
-
-    /**
-     * Returns all the measurements.
-     *
-     * @return a non-null instance
-     */
-    protected final Collection<Measurement> getMeasurements() {
-        return unmodifiableCollection(values.values());
+        return timeSeries.computeIfAbsent(id, s -> new TimeSeries(id, name, metric));
     }
 
     /**
@@ -141,16 +131,16 @@ public abstract class AbstractOutputParser {
     }
 
     /**
-     * Holds values for a scenario and a metric.
+     * A streams of timestamped values belonging to the same metric and scenario.
      */
-    public static class Measurement implements Identifiable<String>, Nameable {
+    public static class TimeSeries implements Identifiable<String>, Nameable {
 
         private final String id;
         private final String name;
         private final Metric metric;
         private final Collection<Value> values = new ArrayList<>();
 
-        Measurement(String id, String name, Metric metric) {
+        TimeSeries(String id, String name, Metric metric) {
             this.id = id;
             this.name = name;
             this.metric = metric;

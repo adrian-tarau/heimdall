@@ -20,12 +20,14 @@ import org.springframework.util.StreamUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URL;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.util.Collections.unmodifiableCollection;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.FormatterUtils.formatDuration;
 import static net.microfalx.lang.JvmUtils.isWindows;
@@ -47,6 +49,9 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
     private Resource systemOutput;
     private Resource systemError;
     private Resource output;
+
+    private volatile boolean running;
+    private final Collection<Resource> reports = new CopyOnWriteArraySet<>();
 
     private static final Set<String> INSTALLED = new CopyOnWriteArraySet<>();
 
@@ -71,13 +76,35 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
     }
 
     @Override
+    public final boolean isRunning() {
+        return running;
+    }
+
+    @Override
+    public Collection<Resource> getReports() {
+        return unmodifiableCollection(reports);
+    }
+
+    @Override
+    public Optional<URL> getDashboardUrl() {
+        return Optional.empty();
+    }
+
+    @Override
     public final Collection<Output> execute(SimulationContext context) {
         Resource resource = doExecute(context);
+        Collection<Output> outputs;
         try {
-            return parseOutput(context, resource);
+            outputs = parseOutput(context, resource);
         } catch (Exception e) {
             throw new SimulationException("Failed to parse simulation output '" + simulation.getName() + "'", e);
         }
+        try {
+            completion();
+        } catch (IOException e) {
+            throw new SimulationException("Failed to complete simulation '" + simulation.getName() + "'", e);
+        }
+        return outputs;
     }
 
     /**
@@ -130,6 +157,23 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
     protected abstract void update(List<String> arguments, File input, File output, SimulationContext context);
 
     /**
+     * Invoked at the end of the simulation
+     */
+    protected void completion() throws IOException {
+        // empty by default
+    }
+
+    /**
+     * Registers a report.
+     *
+     * @param resource the content of the report
+     */
+    protected final void addReport(Resource resource) {
+        requireNonNull(resource);
+        this.reports.add(resource);
+    }
+
+    /**
      * Returns the workspace of the simulator.
      *
      * @return a non-null instance
@@ -164,10 +208,16 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
         }
     }
 
+    /**
+     * Returns the workspace directory where the simulation will store results.
+     *
+     * @return the resource
+     */
     protected final Resource getSessionWorkspace() {
-        if (sessionWorkspace == null)
+        if (sessionWorkspace == null) {
             sessionWorkspace = Resource.workspace().resolve("simulation", Resource.Type.DIRECTORY)
                     .resolve(UUID.randomUUID().toString(), Resource.Type.DIRECTORY);
+        }
         return sessionWorkspace;
     }
 
@@ -226,25 +276,30 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
         update(processBuilder, context);
         exportEnvironmentVariables(processBuilder, context);
         Process process;
+        running = true;
         try {
-            process = processBuilder.start();
-        } catch (IOException e) {
-            throw new SimulationExecutionException("Failed to start simulator, executable '" + executable + "'", e);
-        }
-        boolean timedOut;
-        try {
-            timedOut = !process.waitFor(simulation.getTimeout().toMillis(), TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
-            throw new SimulationExecutionException("Execution of simulator '" + getName() + "' was interrupted", e);
-        }
-        if (timedOut) {
-            throw new SimulationExecutionException("Execution of simulator '" + getName() + "' timed out ("
-                    + formatDuration(simulation.getTimeout()) + ")");
-        }
-        int exitValue = process.exitValue();
-        if (exitValue != 0) {
-            throw new SimulationExecutionException("Execution of simulator '" + getName() + "' failed with error code = "
-                    + exitValue + ", error stream: " + getErrorOutput());
+            try {
+                process = processBuilder.start();
+            } catch (IOException e) {
+                throw new SimulationExecutionException("Failed to start simulator, executable '" + executable + "'", e);
+            }
+            boolean timedOut;
+            try {
+                timedOut = !process.waitFor(simulation.getTimeout().toMillis(), TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                throw new SimulationExecutionException("Execution of simulator '" + getName() + "' was interrupted", e);
+            }
+            if (timedOut) {
+                throw new SimulationExecutionException("Execution of simulator '" + getName() + "' timed out ("
+                        + formatDuration(simulation.getTimeout()) + ")");
+            }
+            int exitValue = process.exitValue();
+            if (exitValue != 0) {
+                throw new SimulationExecutionException("Execution of simulator '" + getName() + "' failed with error code = "
+                        + exitValue + ", error stream: " + getErrorOutput());
+            }
+        } finally {
+            running = false;
         }
     }
 
