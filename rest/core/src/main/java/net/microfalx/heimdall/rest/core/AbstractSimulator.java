@@ -71,7 +71,7 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
     }
 
     @Override
-    public final Output execute(SimulationContext context) {
+    public final Collection<Output> execute(SimulationContext context) {
         Resource resource = doExecute(context);
         try {
             return parseOutput(context, resource);
@@ -105,7 +105,7 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
      * @param resource the simulator output
      * @return the simulation output
      */
-    protected abstract Output parseOutput(SimulationContext context, Resource resource) throws IOException;
+    protected abstract Collection<Output> parseOutput(SimulationContext context, Resource resource) throws IOException;
 
     /**
      * Updates the process environment with data available in the context.

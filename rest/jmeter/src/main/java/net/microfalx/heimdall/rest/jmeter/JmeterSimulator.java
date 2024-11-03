@@ -8,6 +8,7 @@ import net.microfalx.resource.Resource;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 
 public class JmeterSimulator extends AbstractSimulator {
@@ -33,7 +34,7 @@ public class JmeterSimulator extends AbstractSimulator {
     }
 
     @Override
-    protected Output parseOutput(SimulationContext context, Resource resource) throws IOException  {
+    protected Collection<Output> parseOutput(SimulationContext context, Resource resource) throws IOException {
         return new JmeterOutputParser(context, getSimulation(), resource).parse();
     }
 }

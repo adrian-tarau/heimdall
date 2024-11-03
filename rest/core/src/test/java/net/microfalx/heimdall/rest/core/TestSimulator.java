@@ -11,6 +11,8 @@ import net.microfalx.resource.Resource;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public class TestSimulator extends AbstractSimulator {
@@ -32,8 +34,8 @@ public class TestSimulator extends AbstractSimulator {
     }
 
     @Override
-    protected Output parseOutput(SimulationContext context, Resource resource) throws IOException {
-        return new SimulationOutput(context.getEnvironment(), getSimulation())
-                .setDataReceived(Vector.create(Metrics.DATA_RECEIVED, Value.create(12)));
+    protected Collection<Output> parseOutput(SimulationContext context, Resource resource) throws IOException {
+        return Collections.singleton(new SimulationOutput("test", "Test", context.getEnvironment(), getSimulation())
+                .setDataReceived(Vector.create(Metrics.DATA_RECEIVED, Value.create(12))));
     }
 }

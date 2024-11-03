@@ -3,13 +3,15 @@ package net.microfalx.heimdall.rest.api;
 import net.microfalx.bootstrap.metrics.Matrix;
 import net.microfalx.bootstrap.metrics.Vector;
 import net.microfalx.heimdall.infrastructure.api.Environment;
+import net.microfalx.lang.Identifiable;
+import net.microfalx.lang.Nameable;
 
 import java.time.LocalDateTime;
 
 /**
  * The output of a simulation.
  */
-public interface Output {
+public interface Output extends Identifiable<String>, Nameable {
 
     /**
      * Returns the environment targeted by a simulation.

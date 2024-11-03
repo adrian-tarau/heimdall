@@ -13,12 +13,17 @@ import net.microfalx.heimdall.rest.api.Simulation;
 import java.time.LocalDateTime;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.StringUtils.toIdentifier;
 
 @Getter
 @Setter
 @ToString(onlyExplicitlyIncluded = true)
 public class SimulationOutput implements Output {
 
+    @ToString.Include
+    private final String id;
+    @ToString.Include
+    private final String name;
     @ToString.Include
     private final Environment environment;
     @ToString.Include
@@ -47,11 +52,23 @@ public class SimulationOutput implements Output {
     private Matrix httpRequestWaiting;
     private Vector httpRequests;
 
-    public SimulationOutput(Environment environment, Simulation simulation) {
+    public SimulationOutput(String id, String name, Environment environment, Simulation simulation) {
+        requireNonNull(id);
+        requireNonNull(name);
         requireNonNull(environment);
         requireNonNull(simulation);
+        this.id = toIdentifier(id);
+        this.name = name;
         this.environment = environment;
         this.simulation = simulation;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public Vector getDataReceived() {
@@ -59,7 +76,7 @@ public class SimulationOutput implements Output {
     }
 
     public Vector getDataSent() {
-        return dataSent != null ? dataSent : Vector.empty(Metrics.DATA_RECEIVED);
+        return dataSent != null ? dataSent : Vector.empty(Metrics.DATA_SENT);
     }
 
     public Vector getIterations() {

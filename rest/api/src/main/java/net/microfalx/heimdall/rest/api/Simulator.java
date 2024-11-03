@@ -3,6 +3,8 @@ package net.microfalx.heimdall.rest.api;
 import net.microfalx.lang.Nameable;
 import org.atteo.classindex.IndexSubclasses;
 
+import java.util.Collection;
+
 /**
  * A simulator which knows how to start, execute and complete a simulation and returns the simulation results (the output).
  */
@@ -21,7 +23,7 @@ public interface Simulator {
      * @param context the context in which the simulation runs
      * @return a non-null instance
      */
-    Output execute(SimulationContext context);
+    Collection<Output> execute(SimulationContext context);
 
     @IndexSubclasses
     interface Provider extends Nameable {

@@ -16,9 +16,11 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
@@ -59,9 +61,9 @@ class AbstractSimulatorTest {
 
     @Test
     void execute() throws IOException {
-        Output output = simulator.execute(simulationContext);
-        assertNotNull(output);
-        assertThat(output.getDataReceived().getValue().asDouble()).isEqualTo(12);
+        Collection<Output> output = simulator.execute(simulationContext);
+        assertEquals(1, output.size());
+        assertThat(output.iterator().next().getDataReceived().getValue().asDouble()).isEqualTo(12);
     }
 
 }
