@@ -68,6 +68,6 @@ public class K6Simulator extends AbstractSimulator {
 
     @Override
     protected Collection<Output> parseOutput(SimulationContext context, Resource resource) throws IOException {
-        return new K6OutputParser(context, getSimulation(), resource).parse();
+        return new K6OutputParser(this, getSimulation(), context, resource).parse();
     }
 }

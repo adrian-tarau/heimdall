@@ -1,7 +1,9 @@
 package net.microfalx.heimdall.rest.core;
 
+import net.microfalx.bootstrap.metrics.Matrix;
 import net.microfalx.bootstrap.metrics.Metric;
 import net.microfalx.bootstrap.metrics.Value;
+import net.microfalx.bootstrap.metrics.Vector;
 import net.microfalx.heimdall.rest.api.Metrics;
 import net.microfalx.heimdall.rest.api.Output;
 import net.microfalx.heimdall.rest.api.Simulation;
@@ -14,11 +16,13 @@ import org.apache.commons.csv.CSVRecord;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.util.Collections.unmodifiableCollection;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.StringUtils.toIdentifier;
 
@@ -27,6 +31,7 @@ import static net.microfalx.lang.StringUtils.toIdentifier;
  */
 public abstract class AbstractOutputParser {
 
+    private final AbstractSimulator simulator;
     private final SimulationContext simulationContext;
     private final Simulation simulation;
     private final Resource resource;
@@ -35,21 +40,16 @@ public abstract class AbstractOutputParser {
     private final Map<String, TimeSeries> timeSeries = new HashMap<>();
     private final static Map<String, Metric> metrics = new HashMap<>();
 
-    public AbstractOutputParser(SimulationContext simulationContext, Simulation simulation, Resource resource) {
-        requireNonNull(simulationContext);
+    public AbstractOutputParser(AbstractSimulator simulator, Simulation simulation, SimulationContext simulationContext,
+                                Resource resource) {
+        requireNonNull(simulator);
         requireNonNull(simulation);
+        requireNonNull(simulationContext);
         requireNonNull(resource);
+        this.simulator = simulator;
         this.simulationContext = simulationContext;
         this.simulation = simulation;
         this.resource = resource;
-    }
-
-    public SimulationContext getSimulationContext() {
-        return simulationContext;
-    }
-
-    public Simulation getSimulation() {
-        return simulation;
     }
 
     /**
@@ -67,6 +67,23 @@ public abstract class AbstractOutputParser {
         return outputs.values().stream().map(output -> (Output) output).toList();
     }
 
+    /**
+     * Returns the time when the simulation was started.
+     *
+     * @return a non-null instance
+     */
+    protected final LocalDateTime getStartTime() {
+        return simulator.getStartTime();
+    }
+
+    /**
+     * Returns the time when the simulation has ended.
+     *
+     * @return a non-null instance
+     */
+    protected final LocalDateTime getEndTime() {
+        return simulator.getEndTime();
+    }
 
     /**
      * Returns the output associated with a scenario.
@@ -105,6 +122,15 @@ public abstract class AbstractOutputParser {
     protected final TimeSeries getTimeSeries(String name, Metric metric) {
         String id = toIdentifier(name) + "_" + metric.getId();
         return timeSeries.computeIfAbsent(id, s -> new TimeSeries(id, name, metric));
+    }
+
+    /**
+     * Returns all the scenarios.
+     *
+     * @return a non-null instance
+     */
+    protected final Collection<String> getScenarios() {
+        return unmodifiableCollection(outputs.keySet());
     }
 
     /**
@@ -160,9 +186,20 @@ public abstract class AbstractOutputParser {
             this.values.add(value);
         }
 
-        public Collection<Value> getValues() {
-            return values;
+        public Matrix getMatrix() {
+            return Matrix.create(metric, values);
         }
+
+        public Vector getVector() {
+            Matrix matrix = getMatrix();
+            if (matrix.getValues().isEmpty()) {
+                return Vector.empty(metric);
+            } else {
+                Value last = matrix.getLast().get();
+                return Vector.create(metric, Value.create(last.getTimestamp(), matrix.getAverage().getAsDouble()));
+            }
+        }
+
     }
 
     static {

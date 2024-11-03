@@ -35,6 +35,6 @@ public class JmeterSimulator extends AbstractSimulator {
 
     @Override
     protected Collection<Output> parseOutput(SimulationContext context, Resource resource) throws IOException {
-        return new JmeterOutputParser(context, getSimulation(), resource).parse();
+        return new JmeterOutputParser(this, getSimulation(), context, resource).parse();
     }
 }

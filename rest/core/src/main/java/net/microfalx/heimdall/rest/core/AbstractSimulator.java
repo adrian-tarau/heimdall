@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
@@ -50,6 +51,8 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
     private Resource systemError;
     private Resource output;
 
+    private LocalDateTime startTime = LocalDateTime.now();
+    private LocalDateTime endTime;
     private volatile boolean running;
     private final Collection<Resource> reports = new CopyOnWriteArraySet<>();
 
@@ -161,6 +164,24 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
      */
     protected void completion() throws IOException {
         // empty by default
+    }
+
+    /**
+     * Returns the time when the simulation was started.
+     *
+     * @return a non-null instance
+     */
+    protected final LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    /**
+     * Returns the time when the simulation has ended.
+     *
+     * @return a non-null instance
+     */
+    protected final LocalDateTime getEndTime() {
+        return endTime != null ? endTime : LocalDateTime.now();
     }
 
     /**
