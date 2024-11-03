@@ -2,6 +2,7 @@ package net.microfalx.heimdall.rest.core;
 
 import net.microfalx.bootstrap.metrics.Metric;
 import net.microfalx.bootstrap.metrics.Value;
+import net.microfalx.heimdall.rest.api.Metrics;
 import net.microfalx.heimdall.rest.api.Output;
 import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.heimdall.rest.api.SimulationContext;
@@ -12,11 +13,13 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.util.Collections.unmodifiableCollection;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.StringUtils.toIdentifier;
 
@@ -31,6 +34,7 @@ public abstract class AbstractOutputParser {
 
     private final Map<String, SimulationOutput> outputs = new HashMap<>();
     private final Map<String, Measurement> values = new HashMap<>();
+    private final static Map<String, Metric> metrics = new HashMap<>();
 
     public AbstractOutputParser(SimulationContext simulationContext, Simulation simulation, Resource resource) {
         requireNonNull(simulationContext);
@@ -78,15 +82,39 @@ public abstract class AbstractOutputParser {
     }
 
     /**
+     * Returns a metric by name.
+     *
+     * @param name the name
+     * @return a non-null instance
+     */
+    protected Metric getMetric(String name) {
+        String identifier = toIdentifier(name);
+        Metric metric = metrics.get(identifier);
+        if (metric == null) {
+            metric = Metric.create(name);
+        }
+        return metric;
+    }
+
+    /**
      * Returns the collection which olds a list of values associated with a scenario and a metric.
      *
      * @param name   the name of the scenario
      * @param metric the metric
      * @return a non-null instance
      */
-    protected final Measurement getValue(String name, Metric metric) {
+    protected final Measurement getMeasurement(String name, Metric metric) {
         String id = toIdentifier(name) + "_" + metric.getId();
         return values.computeIfAbsent(id, s -> new Measurement(id, name, metric));
+    }
+
+    /**
+     * Returns all the measurements.
+     *
+     * @return a non-null instance
+     */
+    protected final Collection<Measurement> getMeasurements() {
+        return unmodifiableCollection(values.values());
     }
 
     /**
@@ -100,6 +128,17 @@ public abstract class AbstractOutputParser {
      * Invoked at the end of the output parsing to push all the metrics into the output.
      */
     protected abstract void completion();
+
+    private static void initMetrics() {
+        for (Field field : Metrics.class.getFields()) {
+            try {
+                Metric metric = (Metric) field.get(null);
+                metrics.put(toIdentifier(metric.getId()), metric);
+            } catch (IllegalAccessException e) {
+                // it should not happen
+            }
+        }
+    }
 
     /**
      * Holds values for a scenario and a metric.
@@ -134,5 +173,9 @@ public abstract class AbstractOutputParser {
         public Collection<Value> getValues() {
             return values;
         }
+    }
+
+    static {
+        initMetrics();
     }
 }
