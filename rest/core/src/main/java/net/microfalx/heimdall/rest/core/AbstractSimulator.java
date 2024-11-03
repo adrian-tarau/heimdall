@@ -3,6 +3,7 @@ package net.microfalx.heimdall.rest.core;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import net.microfalx.bootstrap.model.Attribute;
 import net.microfalx.heimdall.rest.api.*;
 import net.microfalx.lang.*;
@@ -21,9 +22,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.FormatterUtils.formatDuration;
 import static net.microfalx.lang.JvmUtils.isWindows;
 import static net.microfalx.lang.StringUtils.capitalizeWords;
@@ -33,8 +36,10 @@ import static net.microfalx.resource.ResourceUtils.toFile;
 /**
  * Base class for the simulator.
  */
-public abstract class AbstractSimulator implements Identifiable<String>, Nameable {
+@Slf4j
+public abstract class AbstractSimulator implements Simulator, Identifiable<String>, Nameable {
 
+    private final Simulation simulation;
     private Options options;
     private Resource installWorkspace;
     private Resource sessionWorkspace;
@@ -43,43 +48,36 @@ public abstract class AbstractSimulator implements Identifiable<String>, Nameabl
     private Resource systemError;
     private Resource output;
 
+    private static final Set<String> INSTALLED = new CopyOnWriteArraySet<>();
+
+    public AbstractSimulator(Simulation simulation) {
+        requireNonNull(simulation);
+        this.simulation = simulation;
+    }
+
     @Override
-    public String getId() {
+    public final String getId() {
         return getOptions().getId();
     }
 
     @Override
-    public String getName() {
+    public final String getName() {
         return getOptions().getName();
     }
 
-    /**
-     * Executes the simulation and returns the resource containing the data produced by the simulation.
-     *
-     * @param simulation the simulation
-     * @param context    the simulation context
-     * @return the data
-     */
-    public final Resource execute(Simulation simulation, SimulationContext context) {
+    @Override
+    public final Simulation getSimulation() {
+        return simulation;
+    }
+
+    @Override
+    public final Output execute(SimulationContext context) {
+        Resource resource = doExecute(context);
         try {
-            unpack();
-            prepareScripts(simulation, context);
-            runSimulation(simulation, context);
-        } catch (SimulationException e) {
-            throw e;
+            return parseOutput(context, resource);
         } catch (Exception e) {
-            throw new SimulationException("Failed to prepare simulation '" + simulation.getName() + "'", e);
+            throw new SimulationException("Failed to parse simulation output '" + simulation.getName() + "'", e);
         }
-        try {
-            if (!output.exists()) {
-                throw new SimulationException("An output is not available at the end of the simulation of " + simulation.getName());
-            }
-        } catch (SimulationExecutionException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new SimulationExecutionException("Failed to execute simulation '" + simulation.getName() + "'", e);
-        }
-        return output;
     }
 
     /**
@@ -99,6 +97,15 @@ public abstract class AbstractSimulator implements Identifiable<String>, Nameabl
      * @return a non-null instance
      */
     protected abstract Options resolveOptions();
+
+    /**
+     * Parses the output of the executor and returns a simulation output.
+     *
+     * @param context  the simulation context
+     * @param resource the simulator output
+     * @return the simulation output
+     */
+    protected abstract Output parseOutput(SimulationContext context, Resource resource) throws IOException;
 
     /**
      * Updates the process environment with data available in the context.
@@ -164,7 +171,35 @@ public abstract class AbstractSimulator implements Identifiable<String>, Nameabl
         return sessionWorkspace;
     }
 
-    private void prepareScripts(Simulation simulation, SimulationContext context) {
+    /**
+     * Executes the simulation and returns the resource containing the data produced by the simulation.
+     *
+     * @param context the simulation context
+     * @return the data
+     */
+    private Resource doExecute(SimulationContext context) {
+        try {
+            unpack();
+            prepareScripts(context);
+            runSimulation(context);
+        } catch (SimulationException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new SimulationException("Failed to prepare simulation '" + simulation.getName() + "'", e);
+        }
+        try {
+            if (!output.exists()) {
+                throw new SimulationException("An output is not available at the end of the simulation of " + simulation.getName());
+            }
+        } catch (SimulationExecutionException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new SimulationExecutionException("Failed to execute simulation '" + simulation.getName() + "'", e);
+        }
+        return output;
+    }
+
+    private void prepareScripts(SimulationContext context) {
         Resource workspace = getSessionWorkspace();
         try {
             input = copyResource(workspace, simulation.getResource());
@@ -180,7 +215,7 @@ public abstract class AbstractSimulator implements Identifiable<String>, Nameabl
         systemError = workspace.resolve(simulationFileName + ".system.error");
     }
 
-    private void runSimulation(Simulation simulation, SimulationContext context) {
+    private void runSimulation(SimulationContext context) {
         List<String> arguments = new ArrayList<>();
         File executable = toFile(getWorkspace().resolve(getOptions().getExecutable()));
         arguments.add(executable.getAbsolutePath());
@@ -268,6 +303,7 @@ public abstract class AbstractSimulator implements Identifiable<String>, Nameabl
     }
 
     private boolean validatePackage() throws IOException {
+        if (INSTALLED.contains(getId())) return true;
         Resource targetWorkspace = getWorkspace();
         if (!targetWorkspace.exists()) return false;
         Set<String> requiredFiles = getOptions().getRequiredFiles();
@@ -284,6 +320,7 @@ public abstract class AbstractSimulator implements Identifiable<String>, Nameabl
             });
             if (fileCount.get() < minimumFileCount) return false;
         }
+        INSTALLED.add(getId());
         return true;
     }
 

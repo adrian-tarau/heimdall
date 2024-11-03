@@ -4,9 +4,9 @@ import net.microfalx.lang.Nameable;
 import org.atteo.classindex.IndexSubclasses;
 
 /**
- * An executor which knows how to start, execute and complete a simulation and returns the simulation results (the output).
+ * A simulator which knows how to start, execute and complete a simulation and returns the simulation results (the output).
  */
-public interface SimulationExecutor {
+public interface Simulator {
 
     /**
      * Returns the simulation.
@@ -35,11 +35,11 @@ public interface SimulationExecutor {
         boolean supports(Simulation simulation);
 
         /**
-         * Creates an executor for a given simulation.
+         * Creates a simulator for a given simulation.
          *
          * @param simulation the simulation
          * @return a non-null instance
          */
-        SimulationExecutor create(Simulation simulation);
+        Simulator create(Simulation simulation);
     }
 }

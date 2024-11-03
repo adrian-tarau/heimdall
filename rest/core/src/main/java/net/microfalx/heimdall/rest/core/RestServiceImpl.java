@@ -33,8 +33,8 @@ public class RestServiceImpl implements RestService, InitializingBean {
     private ResourceService resourceService;
 
     private final RestPersistence persistence = new RestPersistence();
-    private final Collection<Simulation.Provider> providers = new CopyOnWriteArrayList<>();
-    private final Collection<SimulationExecutor.Provider> executorProviders = new CopyOnWriteArrayList<>();
+    private final Collection<Simulation.Provider> simulationProviders = new CopyOnWriteArrayList<>();
+    private final Collection<Simulator.Provider> simulatorProviders = new CopyOnWriteArrayList<>();
     private Resource scriptResource;
 
     @Override
@@ -80,7 +80,7 @@ public class RestServiceImpl implements RestService, InitializingBean {
     @Override
     public Simulation discover(Resource resource) {
         requireNonNull(resource);
-        for (Simulation.Provider provider : providers) {
+        for (Simulation.Provider provider : simulationProviders) {
             if (provider.supports(resource)) {
                 return provider.create(resource);
             }
@@ -97,7 +97,7 @@ public class RestServiceImpl implements RestService, InitializingBean {
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         initializeProviders();
         initResources();
         persistence.setApplicationContext(applicationContext);
@@ -108,14 +108,14 @@ public class RestServiceImpl implements RestService, InitializingBean {
         LOGGER.info("Discover simulation providers:");
         Collection<Simulation.Provider> simulationProviders = ClassUtils.resolveProviderInstances(Simulation.Provider.class);
         for (Simulation.Provider provider : simulationProviders) {
-            LOGGER.info(" - " + ClassUtils.getName(provider));
-            this.providers.add(provider);
+            LOGGER.info(" - {}", ClassUtils.getName(provider));
+            this.simulationProviders.add(provider);
         }
         LOGGER.info("Discover simulation executor providers:");
-        Collection<SimulationExecutor.Provider> simulationExecutorProviders = ClassUtils.resolveProviderInstances(SimulationExecutor.Provider.class);
-        for (SimulationExecutor.Provider provider : simulationExecutorProviders) {
-            LOGGER.info(" - " + ClassUtils.getName(provider));
-            this.executorProviders.add(provider);
+        Collection<Simulator.Provider> simulatorProviders = ClassUtils.resolveProviderInstances(Simulator.Provider.class);
+        for (Simulator.Provider provider : simulatorProviders) {
+            LOGGER.info(" - {}", ClassUtils.getName(provider));
+            this.simulatorProviders.add(provider);
         }
     }
 

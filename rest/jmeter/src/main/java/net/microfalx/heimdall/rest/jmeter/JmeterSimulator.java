@@ -1,12 +1,19 @@
 package net.microfalx.heimdall.rest.jmeter;
 
+import net.microfalx.heimdall.rest.api.Output;
+import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.heimdall.rest.api.SimulationContext;
 import net.microfalx.heimdall.rest.core.AbstractSimulator;
+import net.microfalx.resource.Resource;
 
 import java.io.File;
 import java.util.List;
 
 public class JmeterSimulator extends AbstractSimulator {
+
+    public JmeterSimulator(Simulation simulation) {
+        super(simulation);
+    }
 
     @Override
     protected Options resolveOptions() {
@@ -22,5 +29,10 @@ public class JmeterSimulator extends AbstractSimulator {
         arguments.add(input.getName());
         arguments.add("-l");
         arguments.add(output.getName());
+    }
+
+    @Override
+    protected Output parseOutput(SimulationContext context, Resource resource) {
+        return new JmeterOutputParser(context, getSimulation(), resource).parse();
     }
 }
