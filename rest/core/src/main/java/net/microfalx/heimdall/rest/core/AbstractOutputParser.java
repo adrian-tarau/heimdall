@@ -16,8 +16,8 @@ import static net.microfalx.lang.ArgumentUtils.requireNonNull;
  */
 public abstract class AbstractOutputParser {
 
-    protected final SimulationContext simulationContext;
-    protected final Simulation simulation;
+    private final SimulationContext simulationContext;
+    private final Simulation simulation;
     private final Resource resource;
 
     protected final SimulationOutput output;
@@ -32,6 +32,14 @@ public abstract class AbstractOutputParser {
         this.output = new SimulationOutput(simulationContext.getEnvironment(), simulation);
     }
 
+    public SimulationContext getSimulationContext() {
+        return simulationContext;
+    }
+
+    public Simulation getSimulation() {
+        return simulation;
+    }
+
     /**
      * Parses the output and returns the simulation result as metrics.
      *
@@ -40,6 +48,9 @@ public abstract class AbstractOutputParser {
      */
     public final Output parse() throws IOException {
         Iterable<CSVRecord> records = CSVFormat.RFC4180.parse(resource.getReader());
+        for (CSVRecord record : records) {
+            handle(record, output);
+        }
         return output;
     }
 
@@ -47,6 +58,7 @@ public abstract class AbstractOutputParser {
      * Handles one record from the output file.
      *
      * @param record the record
+     * @param output the output
      */
-    protected abstract void handle(CSVRecord record);
+    protected abstract void handle(CSVRecord record, SimulationOutput output);
 }

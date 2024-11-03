@@ -62,7 +62,7 @@ public interface RestService {
     Resource registerResource(Resource resource) throws IOException;
 
     /**
-     * Returns a simulation based on the provided scrip
+     * Returns a simulation based on the provided script.
      *
      * @param resource the resource
      * @return a non-null instance
