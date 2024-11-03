@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -38,8 +39,8 @@ class JmeterSimulatorTest {
     @Test
     void simpleSimulation() throws IOException {
         JmeterSimulator simulator = new JmeterSimulator(createSimulation("simple_simulation.jmx"));
-        Output output = simulator.execute(simulationContext);
-        assertOutput(output);
+        Collection<Output> output = simulator.execute(simulationContext);
+        assertOutput(output.iterator().next());
     }
 
     private Simulation createSimulation(String fileName) {
