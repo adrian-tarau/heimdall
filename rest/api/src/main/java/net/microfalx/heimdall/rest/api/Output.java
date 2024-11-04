@@ -6,6 +6,7 @@ import net.microfalx.heimdall.infrastructure.api.Environment;
 import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.Nameable;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 /**
@@ -35,11 +36,18 @@ public interface Output extends Identifiable<String>, Nameable {
     LocalDateTime getStartTime();
 
     /**
-     * Returns the end time of the simulation
+     * Returns the end time of the simulation.
      *
      * @return a non-null instance
      */
     LocalDateTime getEndTime();
+
+    /**
+     * Returns the duration of the simulation.
+     *
+     * @return a non-null instance
+     */
+    Duration getDuration();
 
     /**
      * Returns the amount of received data.

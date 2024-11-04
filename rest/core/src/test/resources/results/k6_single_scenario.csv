@@ -1,0 +1,7 @@
+metric_name,timestamp,metric_value,check,error,error_code,expected_response,group,method,name,proto,scenario,service,status,subproto,tls_version,url,extra_tags,metadata
+http_reqs,1730582173,1.000000,,,,true,,GET,http://test.k6.io,HTTP/1.1,default,,308,,,http://test.k6.io,,
+http_req_duration,1730582173,13.281000,,,,true,,GET,http://test.k6.io,HTTP/1.1,default,,308,,,http://test.k6.io,,
+http_req_blocked,1730582173,64.566700,,,,true,,GET,http://test.k6.io,HTTP/1.1,default,,308,,,http://test.k6.io,,
+http_req_connecting,1730582173,15.166400,,,,true,,GET,http://test.k6.io,HTTP/1.1,default,,308,,,http://test.k6.io,,
+iteration_duration,1730582174,1171.007200,,,,,,,,,default,,,,,,,
+iterations,1730582174,1.000000,,,,,,,,,default,,,,,,,

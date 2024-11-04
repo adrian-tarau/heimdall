@@ -59,7 +59,10 @@ public abstract class AbstractOutputParser {
      * @throws IOException if an I/O error occurs
      */
     public final Collection<Output> parse() throws IOException {
-        Iterable<CSVRecord> records = CSVFormat.RFC4180.parse(resource.getReader());
+        CSVFormat format = CSVFormat.Builder.create(CSVFormat.RFC4180)
+                .setHeader().setSkipHeaderRecord(true)
+                .build();
+        Iterable<CSVRecord> records = format.parse(resource.getReader());
         for (CSVRecord record : records) {
             process(record);
         }
@@ -94,7 +97,7 @@ public abstract class AbstractOutputParser {
     protected final SimulationOutput getOutput(String name) {
         requireNonNull(name);
         return outputs.computeIfAbsent(name.toLowerCase(),
-                s -> new SimulationOutput(toIdentifier(name), name, simulationContext.getEnvironment(), simulation));
+                s -> new SimulationOutput(name, simulationContext.getEnvironment(), simulation));
     }
 
     /**
@@ -120,6 +123,7 @@ public abstract class AbstractOutputParser {
      * @return a non-null instance
      */
     protected final TimeSeries getTimeSeries(String name, Metric metric) {
+        getOutput(name);
         String id = toIdentifier(name) + "_" + metric.getId();
         return timeSeries.computeIfAbsent(id, s -> new TimeSeries(id, name, metric));
     }

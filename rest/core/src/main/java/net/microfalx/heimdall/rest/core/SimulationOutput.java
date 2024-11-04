@@ -9,7 +9,9 @@ import net.microfalx.heimdall.infrastructure.api.Environment;
 import net.microfalx.heimdall.rest.api.Metrics;
 import net.microfalx.heimdall.rest.api.Output;
 import net.microfalx.heimdall.rest.api.Simulation;
+import net.microfalx.lang.StringUtils;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
@@ -52,13 +54,12 @@ public class SimulationOutput implements Output {
     private Matrix httpRequestWaiting;
     private Vector httpRequests;
 
-    public SimulationOutput(String id, String name, Environment environment, Simulation simulation) {
-        requireNonNull(id);
+    public SimulationOutput(String name, Environment environment, Simulation simulation) {
         requireNonNull(name);
         requireNonNull(environment);
         requireNonNull(simulation);
-        this.id = toIdentifier(id);
-        this.name = name;
+        this.id = toIdentifier(name);
+        this.name = StringUtils.capitalizeWords(name);
         this.environment = environment;
         this.simulation = simulation;
     }
@@ -69,6 +70,11 @@ public class SimulationOutput implements Output {
 
     public String getName() {
         return name;
+    }
+
+    @Override
+    public Duration getDuration() {
+        return Duration.between(startTime, endTime);
     }
 
     public Vector getDataReceived() {

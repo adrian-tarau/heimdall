@@ -35,7 +35,7 @@ public class TestSimulator extends AbstractSimulator {
 
     @Override
     protected Collection<Output> parseOutput(SimulationContext context, Resource resource) throws IOException {
-        return Collections.singleton(new SimulationOutput("test", "Test", context.getEnvironment(), getSimulation())
+        return Collections.singleton(new SimulationOutput("Test", context.getEnvironment(), getSimulation())
                 .setDataReceived(Vector.create(Metrics.DATA_RECEIVED, Value.create(12))));
     }
 }
