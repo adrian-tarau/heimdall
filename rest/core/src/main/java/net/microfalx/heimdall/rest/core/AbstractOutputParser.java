@@ -147,7 +147,34 @@ public abstract class AbstractOutputParser {
     /**
      * Invoked at the end of the output parsing to push all the metrics into the output.
      */
-    protected abstract void completion();
+    protected void completion() {
+        convertTimeSeriesToOutputs();
+    }
+
+    protected final void convertTimeSeriesToOutputs() {
+        for (String scenario : getScenarios()) {
+            SimulationOutput output = getOutput(scenario);
+            output.setStartTime(getStartTime());
+            output.setEndTime(getEndTime());
+
+            output.setDataSent(getTimeSeries(scenario, Metrics.DATA_SENT).getVector());
+            output.setDataReceived(getTimeSeries(scenario, Metrics.DATA_RECEIVED).getVector());
+            output.setVus(getTimeSeries(scenario, Metrics.VUS).getVector());
+            output.setVusMax(getTimeSeries(scenario, Metrics.VUS_MAX).getVector());
+            output.setIterationDuration(getTimeSeries(scenario, Metrics.ITERATION_DURATION).getMatrix());
+            output.setIterations(getTimeSeries(scenario, Metrics.ITERATIONS).getVector());
+
+            output.setHttpRequests(getTimeSeries(scenario, Metrics.HTTP_REQS).getVector());
+            output.setHttpRequestBlocked(getTimeSeries(scenario, Metrics.HTTP_REQ_BLOCKED).getMatrix());
+            output.setHttpRequestConnecting(getTimeSeries(scenario, Metrics.HTTP_REQ_CONNECTING).getMatrix());
+            output.setHttpRequestDuration(getTimeSeries(scenario, Metrics.HTTP_REQ_DURATION).getMatrix());
+            output.setHttpRequestFailed(getTimeSeries(scenario, Metrics.HTTP_REQ_FAILED).getVector());
+            output.setHttpRequestSending(getTimeSeries(scenario, Metrics.HTTP_REQ_SENDING).getMatrix());
+            output.setHttpRequestTlsHandshaking(getTimeSeries(scenario, Metrics.HTTP_REQ_TLS_HANDSHAKING).getMatrix());
+            output.setHttpRequestWaiting(getTimeSeries(scenario, Metrics.HTTP_REQ_WAITING).getMatrix());
+            output.setHttpRequestReceiving(getTimeSeries(scenario, Metrics.DATA_RECEIVED).getMatrix());
+        }
+    }
 
     private static void initMetrics() {
         for (Field field : Metrics.class.getFields()) {
