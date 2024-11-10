@@ -151,6 +151,16 @@ public abstract class AbstractOutputParser {
         convertTimeSeriesToOutputs();
     }
 
+    /**
+     * Invoked at the end of processing for each scenario to fill in additional metrics.
+     *
+     * @param scenario the scenario
+     * @param output   the output
+     */
+    protected void completion(String scenario, SimulationOutput output) {
+        // empty by default
+    }
+
     protected final void convertTimeSeriesToOutputs() {
         for (String scenario : getScenarios()) {
             SimulationOutput output = getOutput(scenario);
@@ -159,8 +169,8 @@ public abstract class AbstractOutputParser {
 
             output.setDataSent(getTimeSeries(scenario, Metrics.DATA_SENT).getVector());
             output.setDataReceived(getTimeSeries(scenario, Metrics.DATA_RECEIVED).getVector());
-            output.setVus(getTimeSeries(scenario, Metrics.VUS).getVector());
-            output.setVusMax(getTimeSeries(scenario, Metrics.VUS_MAX).getVector());
+            output.setVus(getTimeSeries(scenario, Metrics.VUS).getMatrix());
+            output.setVusMax(getTimeSeries(scenario, Metrics.VUS_MAX).getMatrix());
             output.setIterationDuration(getTimeSeries(scenario, Metrics.ITERATION_DURATION).getMatrix());
             output.setIterations(getTimeSeries(scenario, Metrics.ITERATIONS).getVector());
 
@@ -173,6 +183,8 @@ public abstract class AbstractOutputParser {
             output.setHttpRequestTlsHandshaking(getTimeSeries(scenario, Metrics.HTTP_REQ_TLS_HANDSHAKING).getMatrix());
             output.setHttpRequestWaiting(getTimeSeries(scenario, Metrics.HTTP_REQ_WAITING).getMatrix());
             output.setHttpRequestReceiving(getTimeSeries(scenario, Metrics.DATA_RECEIVED).getMatrix());
+
+            completion(scenario, output);
         }
     }
 

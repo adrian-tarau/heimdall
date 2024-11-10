@@ -5,6 +5,6 @@ export const options = {
   duration: '5s',
 };
 export default function () {
-  http.get('https://test.k6.io');
-  sleep(1);
+  http.get(`${__ENV.REST_API_URI}`);
+  sleep(0.5);
 }

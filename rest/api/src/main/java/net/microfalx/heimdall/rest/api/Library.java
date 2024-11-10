@@ -69,6 +69,7 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
         public Builder resource(Resource resource) {
             requireNonNull(resource);
             this.resource = resource;
+            this.name(resource.getName());
             return this;
         }
 

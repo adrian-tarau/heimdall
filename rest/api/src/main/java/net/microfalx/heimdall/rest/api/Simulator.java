@@ -36,13 +36,25 @@ public interface Simulator {
     Collection<Output> execute(SimulationContext context);
 
     /**
-     * Returns the reports produced by the simulator.
+     * Returns the report (the content) produced by the simulator.
      * <p>
      * At least a text report will be produced by most simulators. An HTML report can be available with some simulators.
+     * If the simulator can produce an HTML and text report, the HTML report will be returned.
+     * <p>
+     * Some simulators would generate multiple reports. In this case, the resource will contain an archive that will contain
+     * all the reports. It is expected that the archive has a file in the root called <code>index.html</code> or
+     * <code>report.txt</code> with the entry point of the reports.
      *
      * @return a non-ull instance
      */
-    Collection<Resource> getReports();
+    Resource getReport();
+
+    /**
+     * Returns a resource containing the log of the simulation.
+     *
+     * @return a non-null instance
+     */
+    Resource getLogs();
 
     /**
      * Returns an optional URL to the live dashboard of the simulator.

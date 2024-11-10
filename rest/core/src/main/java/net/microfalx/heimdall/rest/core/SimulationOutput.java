@@ -40,8 +40,8 @@ public class SimulationOutput implements Output {
     private Vector iterations;
     private Matrix iterationDuration;
 
-    private Vector vus;
-    private Vector vusMax;
+    private Matrix vus;
+    private Matrix vusMax;
 
     private Matrix httpRequestBlocked;
     private Matrix httpRequestConnecting;
@@ -93,12 +93,12 @@ public class SimulationOutput implements Output {
         return iterationDuration != null ? iterationDuration : Matrix.empty(Metrics.ITERATION_DURATION);
     }
 
-    public Vector getVus() {
-        return vus != null ? vus : Vector.empty(Metrics.VUS);
+    public Matrix getVus() {
+        return vus != null ? vus : Matrix.empty(Metrics.VUS);
     }
 
-    public Vector getVusMax() {
-        return vusMax != null ? vusMax : Vector.empty(Metrics.VUS_MAX);
+    public Matrix getVusMax() {
+        return vusMax != null ? vusMax : Matrix.empty(Metrics.VUS_MAX);
     }
 
     public Matrix getHttpRequestBlocked() {

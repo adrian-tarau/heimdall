@@ -57,13 +57,14 @@ public class K6Simulator extends AbstractSimulator {
         String simulationFileName = removeFileExtension(getSimulation().getResource().getFileName());
         process.environment().put("K6_WEB_DASHBOARD_EXPORT", simulationFileName + ".html");
         process.environment().put("K6_WEB_DASHBOARD_PERIOD", "5s");
+        process.environment().put("K6_CSV_TIME_FORMAT", "unix_milli");
         htmlReport = getSessionWorkspace().resolve(simulationFileName + ".html");
     }
 
     @Override
     protected void completion() throws IOException {
         super.completion();
-        if (htmlReport.exists()) addReport(htmlReport);
+        setReport(htmlReport);
     }
 
     @Override

@@ -82,14 +82,14 @@ public interface Output extends Identifiable<String>, Nameable {
      *
      * @return a non-null instance
      */
-    Vector getVus();
+    Matrix getVus();
 
     /**
      * Returns the maximum possible number of virtual users.
      *
      * @return a non-null instance
      */
-    Vector getVusMax();
+    Matrix getVusMax();
 
     /**
      * Returns the time spent blocked (waiting for a free TCP connection slot) before initiating the request.
@@ -155,5 +155,4 @@ public interface Output extends Identifiable<String>, Nameable {
      * @return a non-null instance
      */
     Vector getHttpRequests();
-
 }

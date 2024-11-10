@@ -11,12 +11,13 @@ export const options = {
     per_vu_scenario: {
       executor: 'per-vu-iterations',
       vus: 3,
-      iterations: 3,
+      iterations: 5,
       startTime: '5s',
     },
   },
 };
 
 export default function () {
-  http.get('https://test.k6.io/');
+  http.get(`${__ENV.REST_API_URI}`);
+  sleep(0.5);
 }

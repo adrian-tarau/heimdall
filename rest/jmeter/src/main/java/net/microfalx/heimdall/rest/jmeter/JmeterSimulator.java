@@ -5,6 +5,7 @@ import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.heimdall.rest.api.SimulationContext;
 import net.microfalx.heimdall.rest.core.AbstractSimulator;
 import net.microfalx.resource.Resource;
+import net.microfalx.resource.ResourceUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +13,9 @@ import java.util.Collection;
 import java.util.List;
 
 public class JmeterSimulator extends AbstractSimulator {
+
+    private Resource htmlReport;
+    private Resource jmeterLog;
 
     public JmeterSimulator(Simulation simulation) {
         super(simulation);
@@ -31,6 +35,18 @@ public class JmeterSimulator extends AbstractSimulator {
         arguments.add(input.getName());
         arguments.add("-l");
         arguments.add(output.getName());
+        htmlReport = getSessionWorkspace().resolve("html", Resource.Type.DIRECTORY);
+        arguments.add("-e");
+        arguments.add("-o");
+        arguments.add(ResourceUtils.toFile(htmlReport).getAbsolutePath());
+        jmeterLog = getSessionWorkspace().resolve("jmeter.log");
+        setLog(jmeterLog);
+    }
+
+    @Override
+    protected void completion() throws IOException {
+        super.completion();
+        if (htmlReport.exists()) setReport(htmlReport);
     }
 
     @Override

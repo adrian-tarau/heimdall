@@ -9,6 +9,7 @@ import net.microfalx.heimdall.rest.api.*;
 import net.microfalx.lang.*;
 import net.microfalx.resource.ClassPathResource;
 import net.microfalx.resource.FileResource;
+import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.Resource;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveException;
@@ -22,18 +23,22 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
+import java.text.MessageFormat;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static java.util.Collections.unmodifiableCollection;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
+import static net.microfalx.lang.FormatterUtils.formatBytes;
 import static net.microfalx.lang.FormatterUtils.formatDuration;
 import static net.microfalx.lang.JvmUtils.isWindows;
-import static net.microfalx.lang.StringUtils.capitalizeWords;
-import static net.microfalx.lang.StringUtils.replaceAll;
+import static net.microfalx.lang.StringUtils.*;
+import static net.microfalx.lang.TextUtils.LINE_SEPARATOR;
+import static net.microfalx.lang.TextUtils.getHeader;
 import static net.microfalx.resource.ResourceUtils.toFile;
 
 /**
@@ -54,7 +59,10 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
     private LocalDateTime startTime = LocalDateTime.now();
     private LocalDateTime endTime;
     private volatile boolean running;
-    private final Collection<Resource> reports = new CopyOnWriteArraySet<>();
+    private volatile boolean successful;
+    private Resource report = Resource.NULL;
+    private Resource log = Resource.NULL;
+    private StringBuilder logger = new StringBuilder(8000);
 
     private static final Set<String> INSTALLED = new CopyOnWriteArraySet<>();
 
@@ -84,8 +92,29 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
     }
 
     @Override
-    public Collection<Resource> getReports() {
-        return unmodifiableCollection(reports);
+    public Resource getReport() {
+        return report;
+    }
+
+    @Override
+    public Resource getLogs() {
+        StringBuilder finalLogs = null;
+        try {
+            finalLogs = new StringBuilder();
+            finalLogs.append(getHeader("Execution Log")).append(LINE_SEPARATOR).append(logger).append(LINE_SEPARATOR);
+            if (log.exists()) {
+                finalLogs.append(getHeader("Simulator Log")).append(LINE_SEPARATOR).append(log.loadAsString());
+            }
+            if (systemOutput.exists()) {
+                finalLogs.append(getHeader("Simulator System Output")).append(LINE_SEPARATOR).append(systemOutput.loadAsString());
+            }
+            if (systemError.exists()) {
+                finalLogs.append(getHeader("Simulator System Error")).append(LINE_SEPARATOR).append(systemError.loadAsString());
+            }
+        } catch (IOException e) {
+            finalLogs.append("\n\nFailed to retrieve logs: ").append(ExceptionUtils.getRootCauseMessage(e));
+        }
+        return MemoryResource.create(finalLogs.toString());
     }
 
     @Override
@@ -189,9 +218,22 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
      *
      * @param resource the content of the report
      */
-    protected final void addReport(Resource resource) {
+    protected final void setReport(Resource resource) {
         requireNonNull(resource);
-        this.reports.add(resource);
+        this.report = resource;
+    }
+
+    /**
+     * Registers a log produced by a simulator.
+     * <p>
+     * Most of the time the simulator will just output to the standard output and error stream. However, some simulators
+     * might create an additional log file.
+     *
+     * @param resource the content of the report
+     */
+    protected final void setLog(Resource resource) {
+        requireNonNull(resource);
+        this.log = resource;
     }
 
     /**
@@ -217,6 +259,7 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
         Resource targetWorkspace = getWorkspace();
         try {
             if (!validatePackage()) {
+                log("Unpack simulator to ''{0}''", targetWorkspace.toURI());
                 ArchiveInputStream<? extends ArchiveEntry> stream = new ArchiveStreamFactory().createArchiveInputStream(packageResource.getInputStream());
                 unpack(targetWorkspace, stream);
                 makeExecutable(targetWorkspace);
@@ -243,29 +286,57 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
     }
 
     /**
+     * Logs one line into the logger.
+     *
+     * @param format the format
+     * @param args   the arguments
+     * @see java.text.MessageFormat
+     */
+    protected final void log(String format, Object... args) {
+        requireNotEmpty(format);
+        if (!logger.isEmpty()) logger.append('\n');
+        logger.append(MessageFormat.format(format, args));
+    }
+
+    /**
+     * Appends a blob of text to the logger.
+     *
+     * @param text the text to append
+     */
+    protected final void appendLog(String text) {
+        if (text == null) logger.append(text);
+    }
+
+    /**
      * Executes the simulation and returns the resource containing the data produced by the simulation.
      *
      * @param context the simulation context
      * @return the data
      */
     private Resource doExecute(SimulationContext context) {
+        startTime = LocalDateTime.now();
         try {
             unpack();
             prepareScripts(context);
-            runSimulation(context);
         } catch (SimulationException e) {
             throw e;
         } catch (Exception e) {
             throw new SimulationException("Failed to prepare simulation '" + simulation.getName() + "'", e);
         }
         try {
+            runSimulation(context);
             if (!output.exists()) {
-                throw new SimulationException("An output is not available at the end of the simulation of " + simulation.getName());
+                String message = "An output is not available at the end of the simulation of " + simulation.getName();
+                log(message);
+                successful = false;
+                throw new SimulationException(message);
             }
         } catch (SimulationExecutionException e) {
             throw e;
         } catch (Exception e) {
             throw new SimulationExecutionException("Failed to execute simulation '" + simulation.getName() + "'", e);
+        } finally {
+            endTime = LocalDateTime.now();
         }
         return output;
     }
@@ -273,17 +344,21 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
     private void prepareScripts(SimulationContext context) {
         Resource workspace = getSessionWorkspace();
         try {
+            log("Prepare script ''{0}'' ({0})", simulation.getName(), formatBytes(simulation.getResource().length()));
             input = copyResource(workspace, simulation.getResource());
+            if (!context.getLibraries().isEmpty()) {
+                log("Prepare libraries ({0})", context.getLibraries().size());
+            }
             for (Library library : context.getLibraries()) {
+                log(" - ''{0}}' ({0})", library.getName(), formatBytes(library.getResource().length()));
                 copyResource(workspace, library.getResource());
             }
         } catch (IOException e) {
             throw new SimulationException("Filed to copy simulation or libraries to working space '" + workspace + "'", e);
         }
-        String simulationFileName = FileUtils.removeFileExtension(simulation.getResource().getFileName());
-        output = workspace.resolve(simulationFileName + ".data");
-        systemOutput = workspace.resolve(simulationFileName + ".system.output");
-        systemError = workspace.resolve(simulationFileName + ".system.error");
+        output = workspace.resolve(getId() + ".csv");
+        systemOutput = workspace.resolve(getId() + ".system.output");
+        systemError = workspace.resolve(getId() + ".system.error");
     }
 
     private void runSimulation(SimulationContext context) {
@@ -299,6 +374,7 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
         Process process;
         running = true;
         try {
+            log("Execute simulator, command like:\n  " + String.join(SPACE, arguments));
             try {
                 process = processBuilder.start();
             } catch (IOException e) {
@@ -315,9 +391,13 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
                         + formatDuration(simulation.getTimeout()) + ")");
             }
             int exitValue = process.exitValue();
+            successful = exitValue == 0;
             if (exitValue != 0) {
+                log("Execution of simulator '" + getName() + "' failed with error code = " + exitValue);
                 throw new SimulationExecutionException("Execution of simulator '" + getName() + "' failed with error code = "
                         + exitValue + ", error stream: " + getErrorOutput());
+            } else {
+                log("Simulation completed successfully in " + formatDuration(Duration.between(getStartTime(), getEndTime())));
             }
         } finally {
             running = false;
@@ -325,7 +405,7 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
     }
 
     private void exportEnvironmentVariables(ProcessBuilder processBuilder, SimulationContext context) {
-        for (Attribute attribute : context.getEnvironment().getAttributes()) {
+        for (Attribute attribute : context.getEnvironment().getAttributes(true)) {
             String name = StringUtils.toIdentifier(attribute.getName()).toUpperCase();
             processBuilder.environment().put(name, ObjectUtils.toString(attribute.getValue()));
         }

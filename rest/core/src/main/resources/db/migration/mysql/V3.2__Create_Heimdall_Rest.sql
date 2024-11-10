@@ -118,6 +118,8 @@ create table rest_output
     http_request_waiting         float    not null,
     http_requests                float    not null,
     version                      varchar(50),
+    logs_uri                     varchar(500),
+    report_uri                   varchar(500),
     description                  varchar(1000),
     constraint fk$rest_output$environment foreign key (environment_id) references infrastructure_environment (id),
     constraint fk$rest_output$simulation foreign key (simulation_id) references rest_simulation (id)

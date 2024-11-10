@@ -8,6 +8,8 @@ import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.heimdall.rest.api.SimulationContext;
 import net.microfalx.resource.ClassPathResource;
 import net.microfalx.resource.MemoryResource;
+import net.microfalx.resource.Resource;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +21,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,15 +44,24 @@ class JmeterSimulatorTest {
         JmeterSimulator simulator = new JmeterSimulator(createSimulation("simple_simulation.jmx"));
         Collection<Output> output = simulator.execute(simulationContext);
         assertOutput(output.iterator().next());
+        assertLogs(simulator.getLogs());
     }
 
     private Simulation createSimulation(String fileName) {
-        return Simulation.create(ClassPathResource.file("scripts/" + fileName)).type(Simulation.Type.JMETER).build();
+        return (Simulation) Simulation.create(ClassPathResource.file("scripts/" + fileName)).type(Simulation.Type.JMETER)
+                .name(fileName).build();
     }
 
     private void assertOutput(Output output) throws IOException {
         assertNotNull(output);
-        org.assertj.core.api.Assertions.assertThat(output.getSimulation().getResource().loadAsString()).contains("test.k6.io").contains("home_page").contains("Thread Group");
+        org.assertj.core.api.Assertions.assertThat(output.getSimulation().getResource().loadAsString()).contains("test.k6.io")
+                .contains("home_page").contains("Thread Group");
+    }
+
+    private void assertLogs(Resource resource) throws IOException {
+        assertTrue(resource.exists());
+        Assertions.assertThat(resource.loadAsString()).contains("Execution Log").contains("Prepare libraries")
+                .contains("o.a.j.u.JMeterUtils");
     }
 
 }

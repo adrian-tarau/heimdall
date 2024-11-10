@@ -7,6 +7,7 @@ import net.microfalx.heimdall.rest.api.Output;
 import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.heimdall.rest.api.SimulationContext;
 import net.microfalx.resource.MemoryResource;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,8 +21,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -64,6 +64,8 @@ class AbstractSimulatorTest {
         Collection<Output> output = simulator.execute(simulationContext);
         assertEquals(1, output.size());
         assertThat(output.iterator().next().getDataReceived().getValue().asDouble()).isEqualTo(12);
+        assertTrue(simulator.getLogs().exists());
+        Assertions.assertThat(simulator.getLogs().loadAsString()).contains("aaa");
     }
 
 }
