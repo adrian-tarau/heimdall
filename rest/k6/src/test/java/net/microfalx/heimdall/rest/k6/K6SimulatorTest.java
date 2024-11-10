@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
@@ -56,6 +57,6 @@ class K6SimulatorTest {
 
     private void assertOutput(Output output) throws IOException {
         assertNotNull(output);
-        //org.assertj.core.api.Assertions.assertThat(resource.loadAsString()).contains("metric_name").contains("http_reqs").contains("data_sent");
+        assertEquals(0,output.getHttpRequests().getValue().getValue());
     }
 }

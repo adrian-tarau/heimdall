@@ -19,7 +19,7 @@ class JmeterOutputParser extends AbstractOutputParser {
     @Override
     protected void process(CSVRecord record) {
         String scenario = record.get("label");
-        long timestamp =Long.parseLong(record.get("timestamp"));
+        long timestamp =Long.parseLong(record.get("timeStamp"));
 
         TimeSeries timeSeries1 = getTimeSeries(scenario, Metrics.HTTP_REQ_DURATION);
         timeSeries1.add(Value.create(timestamp, Double.parseDouble(record.get("elapsed"))));

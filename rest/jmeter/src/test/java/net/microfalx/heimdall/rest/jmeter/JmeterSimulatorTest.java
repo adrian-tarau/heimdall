@@ -49,7 +49,7 @@ class JmeterSimulatorTest {
 
     private void assertOutput(Output output) throws IOException {
         assertNotNull(output);
-        //org.assertj.core.api.Assertions.assertThat(resource.loadAsString()).contains("test.k6.io").contains("home_page").contains("Thread Group");
+        org.assertj.core.api.Assertions.assertThat(output.getSimulation().getResource().loadAsString()).contains("test.k6.io").contains("home_page").contains("Thread Group");
     }
 
 }
