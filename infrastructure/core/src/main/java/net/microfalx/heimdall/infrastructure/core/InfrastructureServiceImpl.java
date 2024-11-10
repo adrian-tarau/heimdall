@@ -130,11 +130,13 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
 
     @Override
     public Collection<Environment> find(Server server) {
+        requireNonNull(server);
         return cache.find(server);
     }
 
     @Override
     public Collection<Server> getServers(net.microfalx.heimdall.infrastructure.api.Service service) {
+        requireNonNull(service);
         return cache.getServers(service);
     }
 
@@ -229,7 +231,7 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
     private void doRegisterServer(Server server, Cluster cluster) {
         server = dns.register(server);
         cache.registerServer(server);
-        if (isHostname(server.getHostname())) {
+        if (isHostname(server.getHostname()) || Server.ID.equals(server.getId())) {
             infrastructurePersistence.execute(server, cluster, null);
         } else {
             pendingServers.put(server.getId(), server);

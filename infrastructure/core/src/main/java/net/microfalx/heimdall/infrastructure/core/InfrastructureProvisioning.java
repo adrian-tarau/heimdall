@@ -1,6 +1,8 @@
 package net.microfalx.heimdall.infrastructure.core;
 
+import net.microfalx.heimdall.infrastructure.api.Environment;
 import net.microfalx.heimdall.infrastructure.api.InfrastructureService;
+import net.microfalx.heimdall.infrastructure.api.Server;
 import net.microfalx.heimdall.infrastructure.api.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +31,8 @@ class InfrastructureProvisioning implements Runnable {
     }
 
     private void provisionServices() {
+        provisionServers();
+        provisionEnvironments();
         provisionCoreServices();
         provisionNetworkServices();
         provisionDatabaseServices();
@@ -39,6 +43,18 @@ class InfrastructureProvisioning implements Runnable {
         infrastructureService.registerService(Service.create(Service.Type.HTTP));
         infrastructureService.registerService(Service.create(Service.Type.SSH));
         infrastructureService.registerService(Service.create(Service.Type.ICMP));
+    }
+
+    private void provisionServers() {
+        infrastructureService.registerServer(Server.get());
+    }
+
+    private void provisionEnvironments() {
+        infrastructureService.registerEnvironment((Environment) Environment.create("heimdall")
+                .server(Server.get())
+                .tag(AUTO_TAG).tag("heimdall")
+                .name("Heimdall").description("The environment represented by this instance of Heimdel")
+                .build());
     }
 
     private void provisionNetworkServices() {

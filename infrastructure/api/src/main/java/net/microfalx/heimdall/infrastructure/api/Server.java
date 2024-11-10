@@ -1,25 +1,38 @@
 package net.microfalx.heimdall.infrastructure.api;
 
+import inet.ipaddr.IPAddressString;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import net.microfalx.bootstrap.model.Attributes;
 import net.microfalx.lang.IdentityAware;
 import net.microfalx.lang.NamedAndTaggedIdentifyAware;
-import net.microfalx.lang.StringUtils;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
 import static java.util.Collections.unmodifiableSet;
+import static net.microfalx.bootstrap.core.utils.HostnameUtils.getServerNameFromHost;
+import static net.microfalx.bootstrap.core.utils.HostnameUtils.isHostname;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
+import static net.microfalx.lang.ExceptionUtils.throwException;
+import static net.microfalx.lang.StringUtils.isEmpty;
 import static net.microfalx.lang.StringUtils.toIdentifier;
 
 /**
  * A class used to provide a server within the infrastructure.
  */
+@Slf4j
 @ToString
 public class Server extends NamedAndTaggedIdentifyAware<String> implements InfrastructureElement {
+
+    public static String ID = "local";
+    public static final Server LOCAL = (Server) Server.create("localhost").tag("local").description("The local server")
+            .id(Server.ID).build();
 
     private String hostname;
     private Type type;
@@ -27,6 +40,35 @@ public class Server extends NamedAndTaggedIdentifyAware<String> implements Infra
     private Attributes<?> attributes;
     private boolean icmp;
     private ZoneId zoneId;
+
+    public static InetAddress LOCAL_ADDRESS;
+    private static volatile Server SERVER;
+
+    public static Server get() {
+        if (SERVER == null) {
+            SERVER = (Server) create(LOCAL_ADDRESS.getCanonicalHostName()).tag("local").build();
+        }
+        return SERVER;
+    }
+
+    /**
+     * Creates a builder for a server.
+     *
+     * @return a non-null instance
+     */
+    public static Builder create() {
+        return new Builder();
+    }
+
+    /**
+     * Creates a builder for a server.
+     *
+     * @param hostname the hostname
+     * @return a non-null instance
+     */
+    public static Builder create(String hostname) {
+        return new Builder().hostname(hostname);
+    }
 
     /**
      * Returns the hostname of the server
@@ -64,6 +106,15 @@ public class Server extends NamedAndTaggedIdentifyAware<String> implements Infra
      */
     public boolean isIcmp() {
         return icmp;
+    }
+
+    /**
+     * Returns whether the server points to the local server.
+     *
+     * @return {@code true} if local server, {@code false} otherwise
+     */
+    public boolean isLocal() {
+        return ID.equals(getId());
     }
 
     /**
@@ -111,6 +162,19 @@ public class Server extends NamedAndTaggedIdentifyAware<String> implements Infra
         return Objects.hash(super.hashCode(), hostname);
     }
 
+    static {
+        try {
+            LOCAL_ADDRESS = InetAddress.getLocalHost();
+            LOGGER.info("Local hostname is '{}'", LOCAL_ADDRESS.getCanonicalHostName());
+        } catch (UnknownHostException e) {
+            try {
+                LOCAL_ADDRESS = InetAddress.getByName("localhost");
+            } catch (UnknownHostException ex) {
+                throwException(e);
+            }
+        }
+    }
+
     /**
      * An enum for the server type
      */
@@ -147,6 +211,7 @@ public class Server extends NamedAndTaggedIdentifyAware<String> implements Infra
         }
 
         public Builder hostname(String hostname) {
+            requireNotEmpty(hostname);
             this.hostname = hostname;
             return this;
         }
@@ -191,18 +256,22 @@ public class Server extends NamedAndTaggedIdentifyAware<String> implements Infra
 
         @Override
         protected String updateId() {
-            return toIdentifier(hostname);
+            IPAddressString ipAddressString = new IPAddressString(hostname);
+            if (ipAddressString.isLoopback()) {
+                this.hostname = "localhost";
+                return ID;
+            } else {
+                return toIdentifier(hostname);
+            }
         }
 
         private void updateServer(Server server) {
-            if (icmp) {
-                server.services.add(Service.create(Service.Type.ICMP));
-            }
+            if (icmp) server.services.add(Service.create(Service.Type.ICMP));
         }
 
         @Override
         public Server build() {
-            if (StringUtils.isEmpty(hostname)) throw new IllegalArgumentException("Hostname is required");
+            if (isEmpty(hostname)) throw new IllegalArgumentException("Hostname is required");
             Server server = (Server) super.build();
             server.hostname = hostname;
             server.type = type;
@@ -210,6 +279,15 @@ public class Server extends NamedAndTaggedIdentifyAware<String> implements Infra
             server.zoneId = zoneId;
             server.attributes = attributes;
             server.services = services;
+            if (server.isLocal()) {
+                server.setName("Local");
+            } else if (isEmpty(this.name())) {
+                if (isHostname(hostname)) {
+                    server.setName(getServerNameFromHost(hostname));
+                } else {
+                    server.setName(hostname);
+                }
+            }
             updateServer(server);
             return server;
         }

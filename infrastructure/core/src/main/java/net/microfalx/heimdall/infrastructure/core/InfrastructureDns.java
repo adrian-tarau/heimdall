@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import static java.lang.System.currentTimeMillis;
 import static net.microfalx.bootstrap.core.utils.HostnameUtils.isHostname;
 import static net.microfalx.bootstrap.core.utils.HostnameUtils.isIp;
+import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.StringUtils.toIdentifier;
 import static net.microfalx.lang.TimeUtils.millisSince;
 import static net.microfalx.lang.TimeUtils.oneHourAgo;
@@ -47,6 +48,7 @@ public class InfrastructureDns extends ApplicationContextSupport {
     }
 
     Dns getDns(Server server) {
+        requireNonNull(server);
         String id = getId(server);
         Dns dns = dnss.get(id);
         if (dns == null || shouldUpdateDns(id)) {
@@ -60,6 +62,7 @@ public class InfrastructureDns extends ApplicationContextSupport {
     }
 
     Server register(Server server) {
+        if (server.isLocal()) return server;
         doUpdate(server);
         Dns dns = getDns(server);
         if (isIp(server.getHostname()) && dns.isValid() && !dns.getFqdn().equalsIgnoreCase(server.getHostname())) {

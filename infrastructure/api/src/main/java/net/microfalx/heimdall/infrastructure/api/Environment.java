@@ -1,16 +1,24 @@
 package net.microfalx.heimdall.infrastructure.api;
 
 import lombok.ToString;
+import net.microfalx.bootstrap.model.Attribute;
 import net.microfalx.bootstrap.model.Attributes;
 import net.microfalx.lang.IdentityAware;
 import net.microfalx.lang.NamedAndTaggedIdentifyAware;
 import net.microfalx.lang.StringUtils;
+import net.microfalx.lang.UriUtils;
 
+import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 
 import static java.util.Collections.unmodifiableSet;
+import static net.microfalx.heimdall.infrastructure.api.InfrastructureConstants.*;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.StringUtils.EMPTY_STRING;
+import static net.microfalx.lang.StringUtils.defaultIfEmpty;
+import static net.microfalx.lang.UriUtils.SLASH;
+import static net.microfalx.lang.UriUtils.parseUri;
 
 @ToString
 public class Environment extends NamedAndTaggedIdentifyAware<String> implements InfrastructureElement {
@@ -18,6 +26,10 @@ public class Environment extends NamedAndTaggedIdentifyAware<String> implements 
     private Attributes<?> attributes;
     private Set<Cluster> clusters;
     private Set<Server> servers;
+
+    private URI baseUri;
+    private String appPath;
+    private String apiPath;
 
     /**
      * Creates a builder for an environment.
@@ -41,10 +53,64 @@ public class Environment extends NamedAndTaggedIdentifyAware<String> implements 
     /**
      * Returns the attributes associated with this environment.
      *
+     * @param all {@code true} to return all the attributes, user provided and environment, {@code false} only for user attributes
      * @return a non-null instance
      */
-    public Attributes<?> getAttributes() {
-        return attributes;
+    public Attributes<?> getAttributes(boolean all) {
+        if (all) {
+            Attributes<Attribute> allAttributes = Attributes.create(this.attributes);
+            updateAttributes(allAttributes);
+            return allAttributes;
+        } else {
+            return attributes;
+        }
+    }
+
+    /**
+     * Returns the base URI (most of the time it will be a URL).
+     *
+     * @return a non-null
+     */
+    public URI getBaseUri() {
+        return baseUri;
+    }
+
+    /**
+     * Returns the application URI (most of the time it will be a URL and HTTP protocol), which in most cases is the user interface.
+     *
+     * @return a non-null
+     */
+    public URI getAppUri() {
+        return UriUtils.appendPath(baseUri, apiPath);
+    }
+
+    /**
+     * Returns the API URI (most of the time it will be a URL and HTTP protocol), which in most cases is the Rest API.
+     *
+     * @return a non-null
+     */
+    public URI getApiUri() {
+        return UriUtils.appendPath(baseUri, apiPath);
+    }
+
+    /**
+     * Returns the application path, relative to the base URI.
+     *
+     * @return a non-null instance
+     * @see #getBaseUri()
+     */
+    public String getAppPath() {
+        return appPath;
+    }
+
+    /**
+     * Returns the API path, relative to the base URI.
+     *
+     * @return a non-null instance
+     * @see #getBaseUri()
+     */
+    public String getApiPath() {
+        return apiPath;
     }
 
     /**
@@ -111,11 +177,18 @@ public class Environment extends NamedAndTaggedIdentifyAware<String> implements 
         return false;
     }
 
+    private void updateAttributes(Attributes<?> attributes) {
+        attributes.addIfAbsent(BASE_URI, getBaseUri().toASCIIString());
+        attributes.addIfAbsent(APP_URI, getAppUri().toASCIIString());
+        attributes.addIfAbsent(API_URI, getApiUri().toASCIIString());
+        attributes.addIfAbsent(REST_API_URI, getApiUri().toASCIIString());
+    }
+
     private static void updateDefaultAttributes(Attributes<?> attributes) {
-        attributes.add(InfrastructureConstants.USERNAME_VARIABLE, StringUtils.EMPTY_STRING);
-        attributes.add(InfrastructureConstants.PASSWORD_VARIABLE, StringUtils.EMPTY_STRING);
-        attributes.add(InfrastructureConstants.BEARER_VARIABLE, StringUtils.EMPTY_STRING);
-        attributes.add(InfrastructureConstants.API_KEY_VARIABLE, StringUtils.EMPTY_STRING);
+        attributes.addIfAbsent(USERNAME_VARIABLE, EMPTY_STRING);
+        attributes.addIfAbsent(PASSWORD_VARIABLE, EMPTY_STRING);
+        attributes.addIfAbsent(BEARER_VARIABLE, EMPTY_STRING);
+        attributes.addIfAbsent(API_KEY_VARIABLE, EMPTY_STRING);
     }
 
     /**
@@ -126,6 +199,10 @@ public class Environment extends NamedAndTaggedIdentifyAware<String> implements 
         private final Attributes<?> attributes = Attributes.create();
         private final Set<Cluster> clusters = new HashSet<>();
         private final Set<Server> servers = new HashSet<>();
+
+        private String baseUri;
+        private String appPath;
+        private String apiPath;
 
         public Builder(String id) {
             super(id);
@@ -163,12 +240,31 @@ public class Environment extends NamedAndTaggedIdentifyAware<String> implements 
             return this;
         }
 
+        public Builder baseUri(String baseUri) {
+            this.baseUri = baseUri;
+            return this;
+        }
+
+        public Builder appPath(String appPath) {
+            this.appPath = appPath;
+            return this;
+        }
+
+        public Builder apiPath(String apiPath) {
+            this.apiPath = apiPath;
+            return this;
+        }
+
         @Override
         public Environment build() {
+            if (StringUtils.isEmpty(baseUri)) throw new IllegalArgumentException("Base URI is required");
             Environment environment = (Environment) super.build();
             environment.attributes = attributes;
             environment.clusters = clusters;
             environment.servers = servers;
+            environment.baseUri = parseUri(baseUri);
+            environment.appPath = defaultIfEmpty(appPath, SLASH);
+            environment.apiPath = defaultIfEmpty(apiPath, SLASH);
             return environment;
         }
     }

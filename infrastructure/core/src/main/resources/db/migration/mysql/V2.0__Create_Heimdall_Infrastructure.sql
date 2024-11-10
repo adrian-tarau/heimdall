@@ -1,12 +1,3 @@
-drop table if exists infrastructure_environment_to_cluster;
-drop table if exists infrastructure_environment_to_server;
-drop table if exists infrastructure_server_to_service;
-drop table if exists infrastructure_dns;
-drop table if exists infrastructure_environment;
-drop table if exists infrastructure_server;
-drop table if exists infrastructure_cluster;
-drop table if exists infrastructure_service;
-
 create table infrastructure_dns
 (
     id          integer               not null auto_increment primary key,
@@ -97,6 +88,9 @@ create table infrastructure_environment
     id          integer      not null auto_increment primary key,
     natural_id  varchar(500) not null,
     name        varchar(100) not null,
+    base_uri    varchar(500) not null,
+    app_path    varchar(100),
+    api_path    varchar(100),
     tags        varchar(500),
     created_at  datetime     not null,
     modified_at datetime,

@@ -5,7 +5,13 @@ package net.microfalx.heimdall.infrastructure.api;
  */
 public interface InfrastructureConstants {
 
-    // Variables
+    // URI Variables
+    String BASE_URI = "base_uri";
+    String APP_URI = "app_uri";
+    String API_URI = "api_uri";
+    String REST_API_URI = "rest_api_uri";
+
+    // Credential Variables
     String USERNAME_VARIABLE = "username";
     String PASSWORD_VARIABLE = "password";
     String BEARER_VARIABLE = "bearer";

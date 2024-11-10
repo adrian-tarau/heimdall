@@ -7,7 +7,6 @@ import net.microfalx.heimdall.infrastructure.core.system.ClusterRepository;
 import net.microfalx.heimdall.infrastructure.core.system.ServerRepository;
 import net.microfalx.heimdall.infrastructure.core.system.ServiceRepository;
 import net.microfalx.lang.ExceptionUtils;
-import net.microfalx.lang.StringUtils;
 import net.microfalx.resource.MemoryResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +34,7 @@ class InfrastructureCache extends ApplicationContextSupport {
     }
 
     void registerServer(Server server) {
-        servers.put(StringUtils.toIdentifier(server.getId()), server);
+        servers.put(toIdentifier(server.getId()), server);
     }
 
     Server getServer(String id) {
@@ -48,7 +47,7 @@ class InfrastructureCache extends ApplicationContextSupport {
     }
 
     void registerCluster(Cluster cluster) {
-        clusters.put(StringUtils.toIdentifier(cluster.getId()), cluster);
+        clusters.put(toIdentifier(cluster.getId()), cluster);
         for (Server server : cluster.getServers()) {
             registerServer(server);
         }
@@ -75,7 +74,7 @@ class InfrastructureCache extends ApplicationContextSupport {
     }
 
     void registerService(Service service) {
-        services.put(StringUtils.toIdentifier(service.getId()), service);
+        services.put(toIdentifier(service.getId()), service);
     }
 
     Map<String, Service> getServices() {
@@ -92,7 +91,7 @@ class InfrastructureCache extends ApplicationContextSupport {
     }
 
     void registerEnvironment(Environment environment) {
-        environments.put(StringUtils.toIdentifier(environment.getId()), environment);
+        environments.put(toIdentifier(environment.getId()), environment);
     }
 
     Map<String, Environment> getEnvironments() {
