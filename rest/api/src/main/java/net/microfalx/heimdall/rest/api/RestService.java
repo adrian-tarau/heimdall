@@ -18,7 +18,23 @@ public interface RestService {
     Collection<Project> getProjects();
 
     /**
-     * Returns a collection of registered simulation.
+     * Registers a project.
+     *
+     * @param project the project
+     */
+    void registerProject(Project project);
+
+    /**
+     * Returns a project by its identifier.
+     *
+     * @param id the project identifier.
+     * @return the project
+     * @throws RestNotFoundException if such a project does not exist
+     */
+    Project getProject(String id);
+
+    /**
+     * Returns a collection of registered simulations.
      *
      * @return a non-null instance
      */
@@ -54,10 +70,14 @@ public interface RestService {
 
     /**
      * Registers a resource to be stored for later use.
+     * <p>
+     * The resource is the byproduct of a simulation. Each resource will be saved in different storages, based on
+     * the attributes attached to the resource.
      *
      * @param resource the resource
      * @return a new resource
      * @throws IOException if an I/O error occurs
+     * @see RestConstants constants ending in <code>_ATTR</code>
      */
     Resource registerResource(Resource resource) throws IOException;
 

@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Component;
+import net.microfalx.bootstrap.dataset.annotation.Filterable;
+import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
 import net.microfalx.heimdall.rest.api.Project;
 import net.microfalx.lang.annotation.*;
@@ -31,11 +33,15 @@ public class RestProject extends NamedAndTaggedAndTimestampedIdentityAware<Integ
     @Column(name = "uri", nullable = false, length = 2000)
     @Description("The URI to the project repository")
     @Position(15)
+    @Filterable
+    @Formattable(maximumLength = 40)
     private String uri;
 
     @Column(name = "user_name", length = 100)
     @Description("The username to the project repository")
     @Position(20)
+    @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})
+    @Filterable
     private String userName;
 
     @Column(name = "password", length = 100)
@@ -43,6 +49,7 @@ public class RestProject extends NamedAndTaggedAndTimestampedIdentityAware<Integ
     @Position(25)
     @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})
     @Component(Component.Type.PASSWORD)
+    @Filterable
     private String password;
 
     @Column(name = "token", length = 2000)
@@ -50,18 +57,23 @@ public class RestProject extends NamedAndTaggedAndTimestampedIdentityAware<Integ
     @Position(30)
     @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})
     @Component(Component.Type.PASSWORD)
+    @Filterable
     private String token;
 
     @Column(name = "simulation_path", length = 2000)
     @Description("The path within the project which holds the simulations")
     @Position(40)
     @Label(group = "Paths", value = "Simulation")
+    @Formattable(maximumLength = 30)
+    @Filterable
     private String simulationPath;
 
     @Column(name = "library_path", length = 2000)
     @Description("The path within the project which holds the (shared) libraries required for the simulation")
     @Position(45)
+    @Formattable(maximumLength = 30)
     @Label(group = "Paths", value = "Library")
+    @Filterable
     private String libraryPath;
 
 

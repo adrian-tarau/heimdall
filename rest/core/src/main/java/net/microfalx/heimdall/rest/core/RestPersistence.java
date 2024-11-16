@@ -12,6 +12,23 @@ import net.microfalx.lang.CollectionUtils;
 
 public class RestPersistence extends ApplicationContextSupport {
 
+    void save(Project project) {
+        NaturalIdEntityUpdater<RestProject, Integer> restLibraryUpdater = getUpdater(RestProjectRepository.class);
+        RestProject jpaProject = new RestProject();
+        jpaProject.setName(project.getName());
+        jpaProject.setType(project.getType());
+        jpaProject.setNaturalId(project.getId());
+        jpaProject.setUri(project.getUri().toASCIIString());
+        jpaProject.setUserName(project.getUserName());
+        jpaProject.setPassword(project.getPassword());
+        jpaProject.setToken(project.getToken());
+        jpaProject.setTags(CollectionUtils.setToString(project.getTags()));
+        jpaProject.setLibraryPath(project.getLibraryPath());
+        jpaProject.setSimulationPath(project.getSimulationPath());
+        jpaProject.setDescription(project.getDescription());
+        restLibraryUpdater.findByNaturalIdAndUpdate(jpaProject);
+    }
+
     void save(Library library) {
         NaturalIdEntityUpdater<RestLibrary, Integer> restLibraryUpdater = getUpdater(RestLibraryRepository.class);
         RestLibrary jpaLibrary = new RestLibrary();
@@ -43,20 +60,6 @@ public class RestPersistence extends ApplicationContextSupport {
         NaturalIdEntityUpdater<M, ID> updater = new NaturalIdEntityUpdater<>(getBean(MetadataService.class), repository);
         updater.setApplicationContext(getApplicationContext());
         return updater;
-    }
-
-    private RestProject createProject(Library library) {
-        NaturalIdEntityUpdater<RestProject, Integer> restProjectUpdater = getUpdater(RestProjectRepository.class);
-        RestProject jpaProject = new RestProject();
-        jpaProject.setDescription(library.getProject().getDescription());
-        jpaProject.setUri(library.getProject().getUri().toASCIIString());
-        jpaProject.setType(library.getProject().getType());
-        jpaProject.setName(library.getProject().getName());
-        jpaProject.setToken(library.getProject().getToken());
-        jpaProject.setPassword(library.getProject().getPassword());
-        jpaProject.setUserName(library.getProject().getUserName());
-        jpaProject.setNaturalId(library.getId());
-        return restProjectUpdater.findByNaturalIdAndUpdate(jpaProject);
     }
 
     private RestProject loadProject(Project project) {

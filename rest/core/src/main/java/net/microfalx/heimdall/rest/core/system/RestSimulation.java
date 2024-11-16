@@ -37,4 +37,8 @@ public class RestSimulation extends NamedAndTaggedAndTimestampedIdentityAware<In
     @Description("The resource")
     @Position(100)
     private String resource;
+
+    @Column(name = "hash")
+    @Visible(value = false)
+    private String hash;
 }

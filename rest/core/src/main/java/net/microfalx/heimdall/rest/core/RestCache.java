@@ -3,10 +3,7 @@ package net.microfalx.heimdall.rest.core;
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
 import net.microfalx.heimdall.infrastructure.api.Environment;
 import net.microfalx.heimdall.infrastructure.api.InfrastructureService;
-import net.microfalx.heimdall.rest.api.Library;
-import net.microfalx.heimdall.rest.api.Project;
-import net.microfalx.heimdall.rest.api.Schedule;
-import net.microfalx.heimdall.rest.api.Simulation;
+import net.microfalx.heimdall.rest.api.*;
 import net.microfalx.heimdall.rest.core.system.*;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.resource.MemoryResource;
@@ -34,6 +31,12 @@ class RestCache extends ApplicationContextSupport {
 
     Collection<Project> getProjects() {
         return unmodifiableCollection(projects.values());
+    }
+
+    Project getProject(String id) {
+        Project project = projects.get(StringUtils.toIdentifier(id));
+        if (project == null) throw new RestNotFoundException("A project with identifier '" + id + "' does not exist");
+        return project;
     }
 
     Collection<Simulation> getSimulations() {

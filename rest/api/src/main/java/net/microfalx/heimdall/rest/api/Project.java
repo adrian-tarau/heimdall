@@ -16,10 +16,11 @@ import static net.microfalx.lang.StringUtils.defaultIfEmpty;
 public class Project extends NamedAndTaggedIdentifyAware<String> {
 
     private URI uri;
+    private Type type;
+
     private String userName;
     private String password;
     private String token;
-    private Type type;
 
     private String libraryPath;
     private String simulationPath;
@@ -74,7 +75,10 @@ public class Project extends NamedAndTaggedIdentifyAware<String> {
     }
 
     /**
-     * Returns the path within the project which holds the (shared) libraries required for the simulation
+     * Returns the path within the project which holds the (shared) libraries required for the simulation.
+     *
+     * Multiple paths can be provided, separated by <code>;</code>. The path can also contain <code>**</code> and
+     * <code>*</code> for matching any file at any level or any directory.
      *
      * @return a non-null instance
      */
@@ -84,6 +88,9 @@ public class Project extends NamedAndTaggedIdentifyAware<String> {
 
     /**
      * Returns the path within the project which holds the simulations.
+     *
+     * Multiple paths can be provided, separated by <code>;</code>. The path can also contain <code>**</code> and
+     * <code>*</code> for matching any file at any level or any directory.
      *
      * @return a non-null instance
      */
@@ -117,7 +124,7 @@ public class Project extends NamedAndTaggedIdentifyAware<String> {
     public static class Builder extends NamedAndTaggedIdentifyAware.Builder<String> {
 
         private final URI uri;
-        private Type type;
+        private Type type = Type.GIT;
         private String userName;
         private String password;
         private String token;
@@ -179,6 +186,7 @@ public class Project extends NamedAndTaggedIdentifyAware<String> {
             Project project = (Project) super.build();
             if (type == null) throw new IllegalArgumentException("The type is require");
             project.type = type;
+            project.uri = uri;
             project.userName = userName;
             project.password = password;
             project.token = token;

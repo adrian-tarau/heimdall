@@ -38,4 +38,8 @@ public class RestLibrary extends NamedAndTaggedAndTimestampedIdentityAware<Integ
     @Description("The type of simulation")
     @Position(15)
     private String resource;
+
+    @Column(name = "hash")
+    @Visible(value = false)
+    private String hash;
 }

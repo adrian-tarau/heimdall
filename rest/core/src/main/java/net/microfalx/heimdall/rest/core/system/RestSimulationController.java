@@ -1,6 +1,7 @@
 package net.microfalx.heimdall.rest.core.system;
 
 import net.microfalx.bootstrap.dataset.DataSetException;
+import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.web.dataset.DataSetController;
@@ -38,5 +39,11 @@ public class RestSimulationController extends DataSetController<RestSimulation, 
         } catch (IOException e) {
             ExceptionUtils.throwException(e);
         }
+    }
+
+    @Override
+    protected void afterPersist(net.microfalx.bootstrap.dataset.DataSet<RestSimulation, Field<RestSimulation>, Integer> dataSet, RestSimulation model, State state) {
+        super.afterPersist(dataSet, model, state);
+        restService.reload();
     }
 }
