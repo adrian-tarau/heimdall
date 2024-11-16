@@ -4,11 +4,11 @@ import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
 import net.microfalx.bootstrap.jdbc.jpa.NaturalIdEntityUpdater;
 import net.microfalx.bootstrap.jdbc.jpa.NaturalJpaRepository;
 import net.microfalx.bootstrap.model.MetadataService;
-import net.microfalx.heimdall.infrastructure.api.InfrastructureConstants;
 import net.microfalx.heimdall.infrastructure.core.system.*;
 import net.microfalx.lang.ExceptionUtils;
 
 import static net.microfalx.lang.CollectionUtils.setToString;
+import static net.microfalx.lang.NamedAndTaggedIdentifyAware.AUTO_TAG;
 
 class InfrastructurePersistence extends ApplicationContextSupport {
 
@@ -82,7 +82,7 @@ class InfrastructurePersistence extends ApplicationContextSupport {
         jpaService.setReadTimeOut((int) service.getReadTimeout().toMillis());
         jpaService.setWriteTimeOut((int) service.getWriteTimeout().toMillis());
         updater.findByNaturalIdAndUpdate(jpaService);
-        if (!service.getTags().contains(InfrastructureConstants.AUTO_TAG)) {
+        if (!service.getTags().contains(AUTO_TAG)) {
             updater.findByNaturalIdAndUpdate(jpaService);
         } else {
             updater.findByNaturalIdOrCreate(jpaService);

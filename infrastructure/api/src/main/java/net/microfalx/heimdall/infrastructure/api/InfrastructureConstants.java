@@ -17,7 +17,6 @@ public interface InfrastructureConstants {
     String BEARER_VARIABLE = "bearer";
     String API_KEY_VARIABLE = "api_key";
 
-    String AUTO_TAG = "auto";
     String DATABASE_TAG = "db";
     String K8S_TAG = "k8s";
     String API_TAG = "api";

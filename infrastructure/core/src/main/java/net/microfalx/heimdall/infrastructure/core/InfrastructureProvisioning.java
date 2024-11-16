@@ -7,8 +7,10 @@ import net.microfalx.heimdall.infrastructure.api.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static net.microfalx.heimdall.infrastructure.api.InfrastructureConstants.*;
+import static net.microfalx.heimdall.infrastructure.api.InfrastructureConstants.DATABASE_TAG;
+import static net.microfalx.heimdall.infrastructure.api.InfrastructureConstants.OS_TAG;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.NamedAndTaggedIdentifyAware.AUTO_TAG;
 
 class InfrastructureProvisioning implements Runnable {
 
@@ -51,7 +53,7 @@ class InfrastructureProvisioning implements Runnable {
 
     private void provisionEnvironments() {
         infrastructureService.registerEnvironment((Environment) Environment.create("heimdall")
-                .server(Server.get())
+                .server(Server.get()).baseUri("http://localhost:8080")
                 .tag(AUTO_TAG).tag("heimdall")
                 .name("Heimdall").description("The environment represented by this instance of Heimdel")
                 .build());

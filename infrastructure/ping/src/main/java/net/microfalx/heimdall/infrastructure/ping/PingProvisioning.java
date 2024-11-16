@@ -69,7 +69,7 @@ class PingProvisioning implements Runnable {
                     LOGGER.error("Failed to register service '" + service.getName() + "' for server '" + server.getName() + "'", e);
                 }
             } else {
-                LOGGER.info("Service '" + service.getName() + "' is not available on '" + server.getName() + "', status: " + ping.getStatus()
+                LOGGER.debug("Service '" + service.getName() + "' is not available on '" + server.getName() + "', status: " + ping.getStatus()
                         + ", error code: " + ping.getErrorCode() + ", error message: " + ping.getErrorMessage());
             }
         }

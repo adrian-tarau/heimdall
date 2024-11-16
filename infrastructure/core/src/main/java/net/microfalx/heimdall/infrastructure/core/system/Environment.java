@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Component;
+import net.microfalx.bootstrap.dataset.annotation.Filterable;
+import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
 import net.microfalx.lang.annotation.*;
 import org.hibernate.annotations.NaturalId;
@@ -28,18 +30,21 @@ public class Environment extends NamedAndTaggedAndTimestampedIdentityAware<Integ
     @Position(30)
     @Description("The base URL for the web application server")
     @Label(group = "URI", value = "Base")
+    @Filterable
     private String baseUri;
 
     @Column(name = "app_path", nullable = false)
     @Position(31)
     @Description("The path of the web application (user interface, appended to the base URI)")
     @Label(group = "URI", value = "Application")
+    @Filterable
     private String appPath;
 
     @Column(name = "api_path", nullable = false)
     @Position(32)
     @Description("The path of the Rest API (appended to the base URI)")
     @Label(group = "URI", value = "Rest API")
+    @Filterable
     private String apiPath;
 
     @Column(name = "attributes", nullable = false)
@@ -48,6 +53,22 @@ public class Environment extends NamedAndTaggedAndTimestampedIdentityAware<Integ
     @Component(Component.Type.TEXT_AREA)
     @Visible(modes = {Visible.Mode.EDIT, Visible.Mode.ADD, Visible.Mode.VIEW})
     private String attributes;
+
+    @Transient
+    @Label("Clusters")
+    @Position(60)
+    @Visible(modes = {Visible.Mode.BROWSE})
+    @Formattable(negativeValue = Formattable.NA)
+    @Description("The number of clusters part of an environment")
+    private int clusterCount;
+
+    @Transient
+    @Label("Servers")
+    @Position(61)
+    @Visible(modes = {Visible.Mode.BROWSE})
+    @Formattable(negativeValue = Formattable.NA)
+    @Description("The number of servers part of an environment")
+    private int serverCount;
 
     @Visible(value = false)
     @ManyToMany()

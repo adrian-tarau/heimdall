@@ -12,7 +12,6 @@ import java.time.Duration;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-import static net.microfalx.heimdall.infrastructure.api.InfrastructureConstants.AUTO_TAG;
 import static net.microfalx.lang.ArgumentUtils.requireBounded;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.StringUtils.addStartSlash;
