@@ -4,8 +4,10 @@ import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
 import net.microfalx.bootstrap.model.AttributeUtils;
 import net.microfalx.heimdall.infrastructure.api.*;
 import net.microfalx.heimdall.infrastructure.core.system.ClusterRepository;
+import net.microfalx.heimdall.infrastructure.core.system.EnvironmentRepository;
 import net.microfalx.heimdall.infrastructure.core.system.ServerRepository;
 import net.microfalx.heimdall.infrastructure.core.system.ServiceRepository;
+import net.microfalx.lang.CollectionUtils;
 import net.microfalx.lang.ExceptionUtils;
 import net.microfalx.resource.MemoryResource;
 import org.slf4j.Logger;
@@ -200,6 +202,24 @@ class InfrastructureCache extends ApplicationContextSupport {
     }
 
     private void loadEnvironment() {
-
+        List<net.microfalx.heimdall.infrastructure.core.system.Environment> environmentsJpas
+                = getBean(EnvironmentRepository.class).findAll();
+        environmentsJpas.forEach(e -> {
+            Environment.Builder builder = new Environment.Builder(e.getNaturalId());
+            builder.tags(CollectionUtils.setFromString(e.getTags())).name(e.getName()).description(e.getDescription());
+            servers.forEach((key, value1) -> {
+                Server server = getBean(InfrastructureService.class).getServer(key);
+                builder.attributes(server.getAttributes());
+                builder.server(server);
+            });
+            clusters.forEach((key, value1) -> {
+                Cluster cluster = getBean(InfrastructureService.class).getCluster(key);
+                builder.cluster(cluster);
+            });
+            builder.apiPath(e.getApiPath());
+            builder.appPath(e.getAppPath());
+            builder.baseUri(e.getBaseUri());
+            registerEnvironment(builder.build());
+        });
     }
 }
