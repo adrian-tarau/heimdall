@@ -41,7 +41,12 @@ class RestProjectManagerTest {
 
 
     @Test
-    void reload() {
+    void gitClone() {
+        restProjectManager.initialize(restService);
+    }
+
+    @Test
+    void gitUpdate(){
         restProjectManager.initialize(restService);
         restProjectManager.reload();
     }
