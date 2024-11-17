@@ -31,7 +31,8 @@ class RestProjectManagerTest {
     @BeforeEach
     void setUp() {
         Project project = (Project) Project.create(UriUtils.parseUri("https://github.com/adrian-tarau/heimdall.git")).type(Project.Type.GIT)
-                .libraryPath("**/test/resource/rest/library").simulationPath("**/test/resource/rest/library")
+                .libraryPath("**/test/resource/rest/library/*.js")
+                .simulationPath("**/test/resource/rest/library/*.js")
                 .tag(SELF_TAG).tag(AUTO_TAG).tag(LOCAL_TAG)
                 .name("Heimdall").description("A testing/monitoring tool for developers")
                 .build();

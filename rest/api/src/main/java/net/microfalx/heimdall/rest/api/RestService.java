@@ -82,8 +82,8 @@ public interface RestService {
     /**
      * Registers a resource to be stored for later use.
      * <p>
-     * The resource is the byproduct of a simulation. Each resource will be saved in different storages, based on
-     * the attributes attached to the resource.
+     * The resource is the byproduct of a simulation. Each resource will be saved in different storage,
+     * based on the attributes attached to the resource.
      *
      * @param resource the resource
      * @return a new resource

@@ -1,9 +1,15 @@
 package net.microfalx.heimdall.rest.core;
 
 import lombok.extern.slf4j.Slf4j;
+import net.microfalx.heimdall.rest.api.Library;
 import net.microfalx.heimdall.rest.api.Project;
+import net.microfalx.heimdall.rest.api.Simulation;
+import net.microfalx.heimdall.rest.api.SimulationException;
 import net.microfalx.lang.ExceptionUtils;
+import net.microfalx.lang.Hashing;
+import net.microfalx.resource.FileResource;
 import net.microfalx.resource.Resource;
+import org.springframework.util.AntPathMatcher;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,7 +17,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
+import static net.microfalx.heimdall.rest.api.RestConstants.SCRIPT_ATTR;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.ExceptionUtils.getRootCauseMessage;
 import static net.microfalx.lang.FileUtils.validateDirectoryExists;
 import static net.microfalx.lang.StringUtils.SPACE;
 import static net.microfalx.lang.TimeUtils.ONE_MINUTE;
@@ -107,7 +115,7 @@ public class RestProjectManager {
             try {
                 process.destroy();
             } catch (Exception e) {
-                LOGGER.warn("Failed to destroy the process: " + ExceptionUtils.getRootCauseMessage(e));
+                LOGGER.warn("Failed to destroy the process: " + getRootCauseMessage(e));
             }
             if (error.exists()) error.delete();
             if (output.exists()) output.delete();
@@ -150,9 +158,9 @@ public class RestProjectManager {
      *
      * @param project the project
      */
-    private void discover(Project project) {
-        File directory = getWorkspace(project);
-
+    private void discover(Project project) throws IOException {
+        discover(project, DiscoveryType.LIBRARY, project.getLibraryPath());
+        discover(project, DiscoveryType.SIMULATION, project.getSimulationPath());
     }
 
     /**
@@ -181,7 +189,23 @@ public class RestProjectManager {
      * @param discoveryType the enum which tells if we discover a library or a simulation
      * @param pathPattern   an Ant path matcher
      */
-    private void discoverDirectories(Project project, DiscoveryType discoveryType, String pathPattern) {
+    private void discover(Project project, DiscoveryType discoveryType, String pathPattern) throws IOException {
+        AntPathMatcher pathMatcher = new AntPathMatcher();
+        String[] patterns = pathPattern.split(";");
+        Resource directory = FileResource.directory(getWorkspace(project));
+        directory.walk((root, child) -> {
+            String resourcePath = child.getPath();
+            for (String pattern : patterns) {
+                if (pathMatcher.match(pattern, resourcePath)) {
+                    try {
+                        discover(project, child, discoveryType);
+                    } catch (SimulationException e) {
+                        LOGGER.warn("Invalid script type for '" + child.getPath() + "', root cause: " + getRootCauseMessage(e));
+                    }
+                }
+            }
+            return true;
+        });
     }
 
     /**
@@ -190,8 +214,34 @@ public class RestProjectManager {
      * @param resource      the file resource
      * @param discoveryType the enum which tells if we discover a library or a simulation
      */
-    private void discoverFile(Resource resource, DiscoveryType discoveryType) {
+    private void discover(Project project, Resource resource, DiscoveryType discoveryType) throws IOException {
+        Simulation discoveredSimulation = restService.discover(resource);
+        Resource storedResource = restService.registerResource(resource.withAttribute(SCRIPT_ATTR, Boolean.TRUE));
+        String id = getId(project, discoveredSimulation);
+        if (discoveryType == DiscoveryType.LIBRARY) {
+            Library.Builder builder = new Library.Builder(id).project(project)
+                    .resource(storedResource);
+            builder.path(resource.getPath()).tags(discoveredSimulation.getTags())
+                    .name(discoveredSimulation.getName()).description(discoveredSimulation.getDescription());
+            builder.type(discoveredSimulation.getType());
+            restService.registerLibrary(builder.build());
+        } else if (discoveryType == DiscoveryType.SIMULATION) {
+            Simulation.Builder builder = new Simulation.Builder(id).project(project)
+                    .resource(storedResource);
+            builder.path(resource.getPath()).tags(discoveredSimulation.getTags())
+                    .name(discoveredSimulation.getName()).description(discoveredSimulation.getDescription());
+            builder.type(discoveredSimulation.getType());
+            restService.registerSimulation(builder.build());
+        } else {
+            throw new IllegalStateException("Unhandled discovery type: " + discoveryType);
+        }
+    }
 
+    private String getId(Project project, Simulation simulation) {
+        Hashing hashing = Hashing.create();
+        hashing.update(project.getId());
+        hashing.update(simulation.getId());
+        return hashing.asString();
     }
 
     /**
