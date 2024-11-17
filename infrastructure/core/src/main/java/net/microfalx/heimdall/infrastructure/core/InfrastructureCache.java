@@ -7,7 +7,6 @@ import net.microfalx.heimdall.infrastructure.core.system.ClusterRepository;
 import net.microfalx.heimdall.infrastructure.core.system.EnvironmentRepository;
 import net.microfalx.heimdall.infrastructure.core.system.ServerRepository;
 import net.microfalx.heimdall.infrastructure.core.system.ServiceRepository;
-import net.microfalx.lang.CollectionUtils;
 import net.microfalx.lang.ExceptionUtils;
 import net.microfalx.resource.MemoryResource;
 import org.slf4j.Logger;
@@ -26,10 +25,17 @@ class InfrastructureCache extends ApplicationContextSupport {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InfrastructureCache.class);
 
+    private final InfrastructureServiceImpl infrastructureService;
+
     private final Map<String, Server> servers = new HashMap<>();
     private final Map<String, Cluster> clusters = new HashMap<>();
     private final Map<String, net.microfalx.heimdall.infrastructure.api.Service> services = new HashMap<>();
     private final Map<String, Environment> environments = new HashMap<>();
+
+    InfrastructureCache(InfrastructureServiceImpl infrastructureService) {
+        this.infrastructureService = infrastructureService;
+        registerServer(Server.LOCAL);
+    }
 
     Map<String, Server> getServers() {
         return servers;
@@ -206,14 +212,14 @@ class InfrastructureCache extends ApplicationContextSupport {
                 = getBean(EnvironmentRepository.class).findAll();
         environmentsJpas.forEach(e -> {
             Environment.Builder builder = new Environment.Builder(e.getNaturalId());
-            builder.tags(CollectionUtils.setFromString(e.getTags())).name(e.getName()).description(e.getDescription());
-            servers.forEach((key, value1) -> {
-                Server server = getBean(InfrastructureService.class).getServer(key);
+            builder.tags(setFromString(e.getTags())).name(e.getName()).description(e.getDescription());
+            servers.forEach((k, v) -> {
+                Server server = infrastructureService.getServer(k);
                 builder.attributes(server.getAttributes());
                 builder.server(server);
             });
-            clusters.forEach((key, value1) -> {
-                Cluster cluster = getBean(InfrastructureService.class).getCluster(key);
+            clusters.forEach((k, v) -> {
+                Cluster cluster = infrastructureService.getCluster(k);
                 builder.cluster(cluster);
             });
             builder.apiPath(e.getApiPath());

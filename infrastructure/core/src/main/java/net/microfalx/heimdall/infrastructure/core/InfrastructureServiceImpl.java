@@ -48,7 +48,7 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
     @Autowired
     private InfrastructureHealth health;
 
-    private volatile InfrastructureCache cache = new InfrastructureCache();
+    private volatile InfrastructureCache cache = new InfrastructureCache(this);
     private final InfrastructureDns dns = new InfrastructureDns();
     private final InfrastructurePersistence infrastructurePersistence = new InfrastructurePersistence();
     private final Collection<InfrastructureListener> listeners = new CopyOnWriteArrayList<>();
@@ -187,7 +187,7 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
 
     @Override
     public void reload() {
-        InfrastructureCache cache = new InfrastructureCache();
+        InfrastructureCache cache = new InfrastructureCache(this);
         cache.setApplicationContext(getApplicationContext());
         cache.load();
         this.cache = cache;
@@ -250,14 +250,15 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
     }
 
     private void initializeListeners() {
-        LOGGER.info("Initialize listeners:");
+        LOGGER.debug("Initialize infrastructure listeners:");
         initializeListeners(ClassUtils.resolveProviderInstances(InfrastructureListener.class));
         initializeListeners(applicationContext.getBeansOfType(InfrastructureListener.class).values());
+        LOGGER.info("Initialized {} infrastructure listeners", listeners.size());
     }
 
     private void initializeListeners(Collection<InfrastructureListener> infrastructureListeners) {
         for (InfrastructureListener infrastructureListener : infrastructureListeners) {
-            LOGGER.info(" - " + ClassUtils.getName(infrastructureListener));
+            LOGGER.debug(" - {}", ClassUtils.getName(infrastructureListener));
             if (infrastructureListener instanceof ApplicationContextAware) {
                 ((ApplicationContextAware) infrastructureListener).setApplicationContext(applicationContext);
             }
