@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.rest.api;
 
+import lombok.ToString;
 import net.microfalx.heimdall.infrastructure.api.Environment;
 import net.microfalx.lang.IdentityAware;
 import net.microfalx.lang.NamedAndTaggedIdentifyAware;
@@ -11,6 +12,7 @@ import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 /**
  * A schedule for executing simulations on a schedule.
  */
+@ToString
 public class Schedule extends NamedAndTaggedIdentifyAware<String> {
 
     private Type type;

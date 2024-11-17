@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.rest.api;
 
+import lombok.ToString;
 import net.microfalx.lang.IdentityAware;
 import net.microfalx.lang.NamedAndTaggedIdentifyAware;
 import net.microfalx.resource.Resource;
@@ -10,6 +11,7 @@ import static net.microfalx.lang.StringUtils.isEmpty;
 /**
  * A group of functions/classes used in simulations.
  */
+@ToString
 public class Library extends NamedAndTaggedIdentifyAware<String> {
 
     private Resource resource;

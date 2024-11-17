@@ -3,8 +3,7 @@
 
     <!-- Application  -->
     <update-asset-bundle id="controller">
-        <asset path="rest_library.js" type="script"/>
-        <asset path="rest_simulation.js" type="script"/>
+        <asset path="heimdall_rest.js" type="script"/>
 
     </update-asset-bundle>
 

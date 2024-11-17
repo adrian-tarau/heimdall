@@ -213,18 +213,7 @@ class InfrastructureCache extends ApplicationContextSupport {
         environmentsJpas.forEach(e -> {
             Environment.Builder builder = new Environment.Builder(e.getNaturalId());
             builder.tags(setFromString(e.getTags())).name(e.getName()).description(e.getDescription());
-            servers.forEach((k, v) -> {
-                Server server = infrastructureService.getServer(k);
-                builder.attributes(server.getAttributes());
-                builder.server(server);
-            });
-            clusters.forEach((k, v) -> {
-                Cluster cluster = infrastructureService.getCluster(k);
-                builder.cluster(cluster);
-            });
-            builder.apiPath(e.getApiPath());
-            builder.appPath(e.getAppPath());
-            builder.baseUri(e.getBaseUri());
+            builder.baseUri(e.getBaseUri()).apiPath(e.getApiPath()).appPath(e.getAppPath());
             registerEnvironment(builder.build());
         });
     }

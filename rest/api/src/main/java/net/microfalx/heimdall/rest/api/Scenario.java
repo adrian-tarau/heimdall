@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.rest.api;
 
+import lombok.ToString;
 import net.microfalx.lang.IdentityAware;
 import net.microfalx.lang.NamedAndTaggedIdentifyAware;
 
@@ -12,6 +13,7 @@ import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 /**
  * A model for diverse workloads, or traffic patterns in load tests.
  */
+@ToString
 public class Scenario extends NamedAndTaggedIdentifyAware<String> {
 
     private Collection<Step> steps;

@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.rest.api;
 
+import lombok.ToString;
 import net.microfalx.lang.Hashing;
 import net.microfalx.lang.IdentityAware;
 import net.microfalx.lang.Nameable;
@@ -21,14 +22,15 @@ import static net.microfalx.lang.StringUtils.toIdentifier;
  * <p>
  * The simulation holds a reference to the script which contains the actual simulation rules.
  */
+@ToString
 public class Simulation extends NamedAndTaggedIdentifyAware<String> {
 
-    private Collection<Scenario> scenarios;
     private Project project;
     private Type type;
     private Resource resource;
     private String path;
     private Duration timeout;
+    private Collection<Scenario> scenarios;
 
     /**
      * Creates a simulation builder out of a simulation identifier.

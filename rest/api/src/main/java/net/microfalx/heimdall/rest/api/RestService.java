@@ -66,6 +66,15 @@ public interface RestService {
     Collection<Schedule> getSchedules();
 
     /**
+     * Returns a schedule by its identifier.
+     *
+     * @param id the schedule identifier.
+     * @return the schedule
+     * @throws RestNotFoundException if such a schedule does not exist
+     */
+    Schedule getSchedule(String id);
+
+    /**
      * Returns a collection of libraries supporting the simulations.
      *
      * @return a non-null instance

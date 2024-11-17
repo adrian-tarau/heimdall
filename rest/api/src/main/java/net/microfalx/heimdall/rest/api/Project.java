@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.rest.api;
 
+import lombok.ToString;
 import net.microfalx.lang.Hashing;
 import net.microfalx.lang.IdentityAware;
 import net.microfalx.lang.NamedAndTaggedIdentifyAware;
@@ -13,6 +14,7 @@ import static net.microfalx.lang.StringUtils.defaultIfEmpty;
 /**
  * A project (a source code repository) containing simulations related to the project.
  */
+@ToString
 public class Project extends NamedAndTaggedIdentifyAware<String> {
 
     private URI uri;

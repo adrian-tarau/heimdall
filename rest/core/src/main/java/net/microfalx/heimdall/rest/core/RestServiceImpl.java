@@ -4,6 +4,7 @@ package net.microfalx.heimdall.rest.core;
 import lombok.extern.slf4j.Slf4j;
 import net.microfalx.bootstrap.resource.ResourceService;
 import net.microfalx.heimdall.infrastructure.api.Environment;
+import net.microfalx.heimdall.infrastructure.api.InfrastructureService;
 import net.microfalx.heimdall.rest.api.*;
 import net.microfalx.lang.ClassUtils;
 import net.microfalx.lang.UriUtils;
@@ -43,6 +44,9 @@ public class RestServiceImpl implements RestService, InitializingBean {
     private ResourceService resourceService;
 
     @Autowired
+    private InfrastructureService infrastructureService;
+
+    @Autowired
     private TaskExecutor taskExecutor;
 
     private final RestProjectManager projectManager = new RestProjectManager();
@@ -70,7 +74,7 @@ public class RestServiceImpl implements RestService, InitializingBean {
     @Override
     public void registerProject(Project project) {
         requireNonNull(project);
-        cache.registerProject(project);
+        cache.registerProject(project, null);
         persistence.save(project);
     }
 
@@ -88,13 +92,19 @@ public class RestServiceImpl implements RestService, InitializingBean {
     @Override
     public void registerSimulation(Simulation simulation) {
         requireNonNull(simulation);
-        cache.registerSimulation(simulation);
+        cache.registerSimulation(simulation, null);
         persistence.save(simulation);
     }
 
     @Override
     public Collection<Schedule> getSchedules() {
         return cache.getSchedules();
+    }
+
+    @Override
+    public Schedule getSchedule(String id) {
+        requireNonNull(id);
+        return cache.getSchedule(id);
     }
 
     @Override
@@ -105,7 +115,7 @@ public class RestServiceImpl implements RestService, InitializingBean {
     @Override
     public void registerLibrary(Library library) {
         requireNonNull(library);
-        cache.registerLibrary(library);
+        cache.registerLibrary(library, null);
         persistence.save(library);
     }
 
@@ -201,7 +211,7 @@ public class RestServiceImpl implements RestService, InitializingBean {
     private void registerHeimdall() {
         if (!properties.isSelf()) return;
         Project project = (Project) Project.create(UriUtils.parseUri("https://github.com/adrian-tarau/heimdall.git")).type(Project.Type.GIT)
-                .libraryPath("**/test/resource/rest/library").simulationPath("**/test/resource/rest/library")
+                .libraryPath("**/test/resource/rest/library/*.js").simulationPath("**/test/resource/rest/simulation/*.js")
                 .tag(SELF_TAG).tag(AUTO_TAG).tag(LOCAL_TAG)
                 .name("Heimdall").description("A testing/monitoring tool for developers")
                 .build();

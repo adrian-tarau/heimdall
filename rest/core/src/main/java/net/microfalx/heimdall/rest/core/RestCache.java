@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
-import java.time.Duration;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +19,7 @@ import java.util.Map;
 import static java.time.Duration.ofSeconds;
 import static java.util.Collections.unmodifiableCollection;
 import static net.microfalx.lang.CollectionUtils.setFromString;
+import static net.microfalx.lang.TimeUtils.parseDuration;
 
 class RestCache extends ApplicationContextSupport {
 
@@ -54,24 +54,34 @@ class RestCache extends ApplicationContextSupport {
         return unmodifiableCollection(schedules.values());
     }
 
+    Schedule getSchedule(String id) {
+        Schedule schedule = schedules.get(StringUtils.toIdentifier(id));
+        if (schedule == null) throw new RestNotFoundException("A schedule with identifier '" + id + "' does not exist");
+        return schedule;
+    }
+
     Collection<Library> getLibraries() {
         return unmodifiableCollection(libraries.values());
     }
 
-    void registerProject(Project project) {
+    void registerProject(Project project, Integer key) {
         projects.put(StringUtils.toIdentifier(project.getId()), project);
+        if (key != null) projects.put(Integer.toString(key), project);
     }
 
-    void registerSimulation(Simulation simulation) {
+    void registerSimulation(Simulation simulation, Integer key) {
         simulations.put(StringUtils.toIdentifier(simulation.getId()), simulation);
+        if (key != null) simulations.put(Integer.toString(key), simulation);
     }
 
-    void registerSchedule(Schedule schedule) {
+    void registerSchedule(Schedule schedule, Integer key) {
         schedules.put(StringUtils.toIdentifier(schedule.getId()), schedule);
+        if (key != null) schedules.put(Integer.toString(key), schedule);
     }
 
-    void registerLibrary(Library library) {
+    void registerLibrary(Library library, Integer key) {
         libraries.put(StringUtils.toIdentifier(library.getId()), library);
+        if (key != null) libraries.put(Integer.toString(key), library);
     }
 
     void load() {
@@ -109,7 +119,7 @@ class RestCache extends ApplicationContextSupport {
                     .name(restProject.getName()).description(restProject.getDescription())
                     .id(restProject.getNaturalId());
             Project project = builder.build();
-            registerProject(project);
+            registerProject(project, restProject.getId());
         });
     }
 
@@ -124,7 +134,7 @@ class RestCache extends ApplicationContextSupport {
                     .tags(setFromString(restLibrary.getTags()))
                     .name(restLibrary.getName()).description(restLibrary.getDescription()).build();
             Library library = builder.build();
-            registerLibrary(library);
+            registerLibrary(library, restLibrary.getId());
         });
     }
 
@@ -138,7 +148,7 @@ class RestCache extends ApplicationContextSupport {
                     .type(restSimulation.getType()).tag(restSimulation.getTags())
                     .name(restSimulation.getName()).description(restSimulation.getDescription()).build();
             Simulation simulation = builder.build();
-            registerSimulation(simulation);
+            registerSimulation(simulation, restSimulation.getId());
         });
     }
 
@@ -147,13 +157,19 @@ class RestCache extends ApplicationContextSupport {
         scheduleJPAs.forEach(restSchedule -> {
             Environment environment = getBean(InfrastructureService.class).
                     getEnvironment(restSchedule.getEnvironment().getNaturalId());
-            Schedule.Builder builder = new Schedule.Builder();
-            builder.simulation(simulations.get(restSchedule.getSimulation().getNaturalId()))
-                    .environment(environment)
-                    .interval(Duration.parse(restSchedule.getInterval())).expression(restSchedule.getExpression())
-                    .description(restSchedule.getDescription()).build();
+            Schedule.Builder builder = new Schedule.Builder(Integer.toString(restSchedule.getId()));
+            builder.simulation(getSimulation(restSchedule.getSimulation().getNaturalId())).environment(environment);
+            switch (restSchedule.getType()) {
+                case EXPRESSION:
+                    builder.expression(restSchedule.getExpression());
+                    break;
+                case INTERVAL:
+                    builder.interval(parseDuration(restSchedule.getInterval()));
+                    break;
+            }
+            builder.description(restSchedule.getDescription()).build();
             Schedule schedule = builder.build();
-            registerSchedule(schedule);
+            registerSchedule(schedule, restSchedule.getId());
         });
     }
 }
