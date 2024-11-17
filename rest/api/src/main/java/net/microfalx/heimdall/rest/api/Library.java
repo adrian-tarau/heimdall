@@ -5,6 +5,7 @@ import net.microfalx.lang.NamedAndTaggedIdentifyAware;
 import net.microfalx.resource.Resource;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.StringUtils.isEmpty;
 
 /**
  * A group of functions/classes used in simulations.
@@ -13,6 +14,7 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
 
     private Resource resource;
     private Project project;
+    private String path;
     private Simulation.Type type;
 
     /**
@@ -23,6 +25,15 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
      */
     public static Builder create(Resource resource) {
         return new Builder().resource(resource);
+    }
+
+    /**
+     * Returns the original path of the resource which supports this library.
+     *
+     * @return a non-null instance
+     */
+    public String getPath() {
+        return path;
     }
 
     /**
@@ -57,6 +68,7 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
 
         private Resource resource;
         private Project project;
+        private String path;
         private Simulation.Type type;
 
         public Builder(String id) {
@@ -69,7 +81,8 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
         public Builder resource(Resource resource) {
             requireNonNull(resource);
             this.resource = resource;
-            this.name(resource.getName());
+            if (emptyName()) this.name(resource.getName());
+            if (isEmpty(path)) this.path = resource.getPath();
             return this;
         }
 
@@ -81,6 +94,12 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
         public Builder type(Simulation.Type type) {
             requireNonNull(type);
             this.type = type;
+            return this;
+        }
+
+        public Builder path(String path) {
+            requireNonNull(path);
+            this.path = path;
             return this;
         }
 
@@ -106,6 +125,7 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
             library.resource = resource;
             library.type = type;
             library.project = project;
+            library.path = path;
             return library;
         }
     }

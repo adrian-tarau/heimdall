@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.IOException;
 
+import static net.microfalx.heimdall.rest.api.RestConstants.SCRIPT_ATTR;
+
 @Controller("SystemSimulationController")
 @DataSet(model = RestSimulation.class, timeFilter = false, canAdd = false, canUpload = true)
 @RequestMapping("/system/rest/simulation")
@@ -33,8 +35,8 @@ public class RestSimulationController extends DataSetController<RestSimulation, 
             throw new DataSetException("Invalid simulation type '" + resource.getName() + "'");
         }
         try {
-            Resource storedResource = restService.registerResource(resource);
-            Simulation.Builder builder = new Simulation.Builder(simulation).resource(storedResource);
+            Resource storedResource = restService.registerResource(resource.withAttribute(SCRIPT_ATTR, Boolean.TRUE));
+            Simulation.Builder builder = new Simulation.Builder(simulation).resource(storedResource).path(resource.getFileName());
             restService.registerSimulation(builder.build());
         } catch (IOException e) {
             ExceptionUtils.throwException(e);

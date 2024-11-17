@@ -76,9 +76,11 @@ public class Project extends NamedAndTaggedIdentifyAware<String> {
 
     /**
      * Returns the path within the project which holds the (shared) libraries required for the simulation.
-     *
+     * <p>
      * Multiple paths can be provided, separated by <code>;</code>. The path can also contain <code>**</code> and
      * <code>*</code> for matching any file at any level or any directory.
+     * <p>
+     * For more examples about patterns, see <a href="https://ant.apache.org/manual/dirtasks.html#patterns">Ant patterns</a>.
      *
      * @return a non-null instance
      */
@@ -88,9 +90,11 @@ public class Project extends NamedAndTaggedIdentifyAware<String> {
 
     /**
      * Returns the path within the project which holds the simulations.
-     *
+     * <p>
      * Multiple paths can be provided, separated by <code>;</code>. The path can also contain <code>**</code> and
      * <code>*</code> for matching any file at any level or any directory.
+     * <p>
+     * For more examples about patterns, see <a href="https://ant.apache.org/manual/dirtasks.html#patterns">Ant patterns</a>.
      *
      * @return a non-null instance
      */

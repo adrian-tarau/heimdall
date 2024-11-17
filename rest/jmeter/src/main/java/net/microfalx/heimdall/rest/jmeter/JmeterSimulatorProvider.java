@@ -2,7 +2,9 @@ package net.microfalx.heimdall.rest.jmeter;
 
 import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.heimdall.rest.api.Simulator;
+import net.microfalx.lang.annotation.Provider;
 
+@Provider
 public class JmeterSimulatorProvider implements Simulator.Provider {
 
     @Override

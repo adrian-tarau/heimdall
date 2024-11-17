@@ -13,6 +13,7 @@ import java.util.Collection;
 
 import static java.time.Duration.ofMinutes;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.StringUtils.isEmpty;
 import static net.microfalx.lang.StringUtils.toIdentifier;
 
 /**
@@ -26,6 +27,7 @@ public class Simulation extends NamedAndTaggedIdentifyAware<String> {
     private Project project;
     private Type type;
     private Resource resource;
+    private String path;
     private Duration timeout;
 
     /**
@@ -46,6 +48,15 @@ public class Simulation extends NamedAndTaggedIdentifyAware<String> {
      */
     public static Builder create(Resource resource) {
         return new Builder().resource(resource);
+    }
+
+    /**
+     * Returns the original path of the resource which supports this simulation.
+     *
+     * @return a non-null instance
+     */
+    public String getPath() {
+        return path;
     }
 
     /**
@@ -152,6 +163,7 @@ public class Simulation extends NamedAndTaggedIdentifyAware<String> {
         private final Collection<Scenario> scenarios = new ArrayList<>();
         private Type type;
         private Resource resource;
+        private String path;
         private Project project;
         private Duration timeout = ofMinutes(15);
 
@@ -161,6 +173,9 @@ public class Simulation extends NamedAndTaggedIdentifyAware<String> {
 
         public Builder(Simulation simulation) {
             super(simulation.getId());
+            this.tags(simulation.getTags())
+                    .name(simulation.getName())
+                    .description(simulation.getDescription());
             this.type = simulation.getType();
             this.resource = simulation.getResource();
             this.project = simulation.getProject();
@@ -190,6 +205,14 @@ public class Simulation extends NamedAndTaggedIdentifyAware<String> {
         public Builder resource(Resource resource) {
             requireNonNull(resource);
             this.resource = resource;
+            if (emptyName()) this.name(resource.getName());
+            if (isEmpty(path)) this.path = resource.getPath();
+            return this;
+        }
+
+        public Builder path(String path) {
+            requireNonNull(path);
+            this.path = path;
             return this;
         }
 
@@ -223,6 +246,7 @@ public class Simulation extends NamedAndTaggedIdentifyAware<String> {
             simulation.timeout = timeout;
             simulation.resource = resource;
             simulation.project = project;
+            simulation.path = path;
             return simulation;
         }
     }

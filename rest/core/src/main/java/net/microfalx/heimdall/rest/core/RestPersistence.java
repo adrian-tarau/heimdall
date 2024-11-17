@@ -37,6 +37,7 @@ public class RestPersistence extends ApplicationContextSupport {
         jpaLibrary.setNaturalId(library.getId());
         jpaLibrary.setProject(loadProject(library.getProject()));
         jpaLibrary.setResource(library.getResource().toURI().toASCIIString());
+        jpaLibrary.setPath(library.getPath());
         jpaLibrary.setTags(CollectionUtils.setToString(library.getTags()));
         jpaLibrary.setDescription(library.getDescription());
         restLibraryUpdater.findByNaturalIdAndUpdate(jpaLibrary);
@@ -48,8 +49,11 @@ public class RestPersistence extends ApplicationContextSupport {
         jpaSimulation.setName(simulation.getName());
         jpaSimulation.setNaturalId(simulation.getId());
         jpaSimulation.setType(simulation.getType());
+        jpaSimulation.setTimeout((int) simulation.getTimeout().toSeconds());
         jpaSimulation.setProject(loadProject(simulation.getProject()));
         jpaSimulation.setResource(simulation.getResource().toURI().toASCIIString());
+        jpaSimulation.setPath(simulation.getPath());
+        jpaSimulation.setOverride(true);
         jpaSimulation.setTags(CollectionUtils.setToString(simulation.getTags()));
         jpaSimulation.setDescription(simulation.getDescription());
         updater.findByNaturalIdAndUpdate(jpaSimulation);
@@ -63,6 +67,7 @@ public class RestPersistence extends ApplicationContextSupport {
     }
 
     private RestProject loadProject(Project project) {
+        if (project == null) return null;
         return getBean(RestProjectRepository.class).findByNaturalId(project.getId())
                 .orElseThrow(() -> new SimulationException("A project with identifier '" + project.getId() + "' is not registered"));
     }

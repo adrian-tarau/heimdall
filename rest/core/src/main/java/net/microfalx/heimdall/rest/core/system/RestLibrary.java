@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
 import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.lang.annotation.*;
@@ -34,9 +35,19 @@ public class RestLibrary extends NamedAndTaggedAndTimestampedIdentityAware<Integ
     @Position(10)
     private Simulation.Type type;
 
-    @Column(name = "resource", nullable = false, length = 2000)
-    @Description("The type of simulation")
+    @Column(name = "path", nullable = false, length = 2000)
+    @Description("The path of the script for the library")
+    @Formattable(maximumLength = 40)
     @Position(15)
+    private String path;
+
+    @Column(name = "override", nullable = false)
+    @Description("Indicates whether the library was overwritten from UI")
+    @Position(16)
+    private boolean override;
+
+    @Column(name = "resource", nullable = false, length = 2000)
+    @Visible(false)
     private String resource;
 
     @Column(name = "hash")

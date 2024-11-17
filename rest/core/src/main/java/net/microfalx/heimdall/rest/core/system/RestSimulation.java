@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
 import net.microfalx.lang.annotation.*;
 
@@ -33,9 +34,25 @@ public class RestSimulation extends NamedAndTaggedAndTimestampedIdentityAware<In
     @Position(50)
     private net.microfalx.heimdall.rest.api.Simulation.Type type;
 
+    @Column(name = "path", nullable = false, length = 2000)
+    @Description("The path of the script for the simulation")
+    @Formattable(maximumLength = 40)
+    @Position(15)
+    private String path;
+
+    @Column(name = "override", nullable = false)
+    @Description("Indicates whether the simulation was overwritten from UI")
+    @Position(16)
+    private boolean override;
+
+    @Column(name = "timeout", nullable = false)
+    @Description("The timeout associated with the simulation")
+    @Position(7)
+    @Formattable(unit = Formattable.Unit.SECOND)
+    private int timeout;
+
     @Column(name = "resource", nullable = false, length = 1000)
-    @Description("The resource")
-    @Position(100)
+    @Visible(false)
     private String resource;
 
     @Column(name = "hash")

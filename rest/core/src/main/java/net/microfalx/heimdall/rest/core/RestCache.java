@@ -57,17 +57,14 @@ class RestCache extends ApplicationContextSupport {
 
     void registerSimulation(Simulation simulation) {
         simulations.put(StringUtils.toIdentifier(simulation.getId()), simulation);
-        registerProject(simulation.getProject());
     }
 
     void registerSchedule(Schedule schedule) {
         schedules.put(StringUtils.toIdentifier(schedule.getId()), schedule);
-        registerSimulation(schedule.getSimulation());
     }
 
     void registerLibrary(Library library) {
         libraries.put(StringUtils.toIdentifier(library.getId()), library);
-        registerProject(library.getProject());
     }
 
     void load() {
@@ -114,7 +111,7 @@ class RestCache extends ApplicationContextSupport {
         librariesJPAs.forEach(restLibrary -> {
             Library.Builder builder = new Library.Builder(restLibrary.getNaturalId());
             builder.project(projects.get(restLibrary.getProject().getNaturalId())).type(restLibrary.getType())
-                    .resource(MemoryResource.create(restLibrary.getResource()))
+                    .resource(MemoryResource.create(restLibrary.getResource())).path(restLibrary.getPath())
                     .tags(setFromString(restLibrary.getTags()))
                     .name(restLibrary.getName()).description(restLibrary.getDescription()).build();
             Library library = builder.build();
@@ -127,7 +124,8 @@ class RestCache extends ApplicationContextSupport {
         simulationJPAs.forEach(restSimulation -> {
             Simulation.Builder builder = new Simulation.Builder(restSimulation.getNaturalId());
             builder.project(projects.get(restSimulation.getProject().getNaturalId()))
-                    .resource(MemoryResource.create(restSimulation.getResource()))
+                    .resource(MemoryResource.create(restSimulation.getResource())).path(restSimulation.getPath())
+                    .timeout(Duration.ofSeconds(restSimulation.getTimeout()))
                     .type(restSimulation.getType()).tag(restSimulation.getTags())
                     .name(restSimulation.getName()).description(restSimulation.getDescription()).build();
             Simulation simulation = builder.build();

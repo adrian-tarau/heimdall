@@ -159,7 +159,7 @@ public class RestServiceImpl implements RestService, InitializingBean {
             LOGGER.debug(" - {}", ClassUtils.getName(provider));
             this.simulationProviders.add(provider);
         }
-        LOGGER.info("Discovered " + simulationProviders.size() + " simulation providers");
+        LOGGER.info("Discovered {} simulation providers", simulationProviders.size());
 
         LOGGER.debug("Discover simulation executor providers:");
         Collection<Simulator.Provider> simulatorProviders = ClassUtils.resolveProviderInstances(Simulator.Provider.class);
@@ -167,7 +167,7 @@ public class RestServiceImpl implements RestService, InitializingBean {
             LOGGER.debug(" - {}", ClassUtils.getName(provider));
             this.simulatorProviders.add(provider);
         }
-        LOGGER.info("Discovered " + simulatorProviders.size() + " simulator providers");
+        LOGGER.info("Discovered {} simulator providers", simulatorProviders.size());
     }
 
     private void initResources() {

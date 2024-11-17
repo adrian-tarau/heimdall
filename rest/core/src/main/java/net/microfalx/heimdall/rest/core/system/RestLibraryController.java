@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.IOException;
 
-import static net.microfalx.lang.StringUtils.capitalizeWords;
+import static net.microfalx.heimdall.rest.api.RestConstants.SCRIPT_ATTR;
 
 @Controller("SystemLibraryController")
 @DataSet(model = RestLibrary.class, timeFilter = false, canAdd = false, canUpload = true)
@@ -37,9 +37,10 @@ public class RestLibraryController extends DataSetController<RestLibrary, Intege
             throw new DataSetException("Invalid library type '" + resource.getName() + "'");
         }
         try {
-            Resource storedResource = restService.registerResource(resource);
-            Library.Builder builder = new Library.Builder().resource(storedResource).type(simulation.getType());
-            builder.name(capitalizeWords(resource.getName()));
+            Resource storedResource = restService.registerResource(resource.withAttribute(SCRIPT_ATTR, Boolean.TRUE));
+            Library.Builder builder = new Library.Builder(simulation.getId()).resource(storedResource).type(simulation.getType())
+                    .path(resource.getFileName());
+            builder.tags(simulation.getTags()).name(simulation.getName()).description(simulation.getDescription());
             restService.registerLibrary(builder.build());
         } catch (IOException e) {
             ExceptionUtils.throwException(e);

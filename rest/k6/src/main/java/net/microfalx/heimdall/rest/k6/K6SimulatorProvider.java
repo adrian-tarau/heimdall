@@ -2,7 +2,9 @@ package net.microfalx.heimdall.rest.k6;
 
 import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.heimdall.rest.api.Simulator;
+import net.microfalx.lang.annotation.Provider;
 
+@Provider
 public class K6SimulatorProvider implements Simulator.Provider {
 
     @Override
