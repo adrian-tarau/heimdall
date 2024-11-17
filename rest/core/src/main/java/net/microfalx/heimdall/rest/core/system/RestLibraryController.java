@@ -1,5 +1,7 @@
 package net.microfalx.heimdall.rest.core.system;
 
+import net.microfalx.bootstrap.content.Content;
+import net.microfalx.bootstrap.content.ContentService;
 import net.microfalx.bootstrap.dataset.DataSetException;
 import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
@@ -19,14 +21,29 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.io.IOException;
 
 import static net.microfalx.heimdall.rest.api.RestConstants.SCRIPT_ATTR;
+import static net.microfalx.heimdall.rest.core.RestUtils.prepareContent;
 
 @Controller("SystemLibraryController")
-@DataSet(model = RestLibrary.class, timeFilter = false, canAdd = false, canUpload = true)
+@DataSet(model = RestLibrary.class, timeFilter = false, canAdd = false, canUpload = true,
+        viewTemplate = "rest/view_simulation_or_library", viewClasses = "modal-xl")
 @RequestMapping("/system/rest/library")
 public class RestLibraryController extends DataSetController<RestLibrary, Integer> {
 
     @Autowired
     private RestService restService;
+
+    @Autowired
+    private ContentService contentService;
+
+    @Override
+    protected void beforeView(net.microfalx.bootstrap.dataset.DataSet<RestLibrary, Field<RestLibrary>, Integer> dataSet, Model controllerModel, RestLibrary dataSetModel) {
+        super.beforeView(dataSet, controllerModel, dataSetModel);
+
+        Content content = prepareContent(contentService, dataSetModel.getNaturalId(), "simulation", dataSetModel.getResource(), dataSetModel.getType());
+        if (content != null) {
+            controllerModel.addAttribute("content", content);
+        }
+    }
 
     @Override
     protected void upload(net.microfalx.bootstrap.dataset.DataSet<RestLibrary, Field<RestLibrary>, Integer> dataSet, Model model, Resource resource) {

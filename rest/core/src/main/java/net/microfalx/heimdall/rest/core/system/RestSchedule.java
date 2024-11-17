@@ -47,11 +47,13 @@ public class RestSchedule extends TimestampAware {
     @Column(name = "expression", length = 100)
     @Description("The scheduling expression")
     @Position(25)
+    @Filterable
     private String expression;
 
     @Column(name = "interval", length = 100)
     @Description("The scheduling interval")
     @Position(30)
+    @Filterable
     private String interval;
 
     @Column(name = "description")
