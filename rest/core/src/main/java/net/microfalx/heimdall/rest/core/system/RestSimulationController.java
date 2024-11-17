@@ -6,7 +6,11 @@ import net.microfalx.bootstrap.dataset.DataSetException;
 import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.model.Field;
+import net.microfalx.bootstrap.web.component.Item;
+import net.microfalx.bootstrap.web.component.Menu;
+import net.microfalx.bootstrap.web.component.Separator;
 import net.microfalx.bootstrap.web.dataset.DataSetController;
+import net.microfalx.bootstrap.web.util.JsonResponse;
 import net.microfalx.heimdall.rest.api.RestService;
 import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.lang.ExceptionUtils;
@@ -14,6 +18,8 @@ import net.microfalx.resource.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.IOException;
@@ -32,6 +38,20 @@ public class RestSimulationController extends DataSetController<RestSimulation, 
 
     @Autowired
     private ContentService contentService;
+
+    @PostMapping("schedule/{id}")
+    public JsonResponse<?> schedule(@PathVariable("id") String id) {
+        Simulation simulation = restService.getSimulation(id);
+        return JsonResponse.success("The simulation '" + simulation.getName() + "' was scheduled to be executed");
+    }
+
+    @Override
+    protected void updateActions(Menu menu) {
+        super.updateActions(menu);
+        menu.add(new Separator());
+        menu.add(new Item().setAction("rest.simulation.run").setText("Run").setIcon("fa-solid fa-play").setDescription("Runs the simulation"));
+        menu.add(new Item().setAction("rest.simulation.design").setText("Design").setIcon("fa-solid fa-pen-nib").setDescription("Design the simulation"));
+    }
 
     @Override
     protected void beforeView(net.microfalx.bootstrap.dataset.DataSet<RestSimulation, Field<RestSimulation>, Integer> dataSet, Model controllerModel, RestSimulation dataSetModel) {

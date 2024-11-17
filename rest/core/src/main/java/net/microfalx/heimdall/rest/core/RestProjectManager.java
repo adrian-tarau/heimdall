@@ -9,9 +9,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
+import static java.util.concurrent.TimeUnit.MINUTES;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.FileUtils.validateDirectoryExists;
 import static net.microfalx.lang.StringUtils.SPACE;
 import static net.microfalx.lang.TimeUtils.ONE_MINUTE;
 import static net.microfalx.resource.ResourceUtils.toFile;
@@ -78,18 +79,18 @@ public class RestProjectManager {
     private void execute(Project project, List<String> arguments) throws IOException {
         File workspace = getWorkspace(project);
         if (!workspace.exists()) workspace = getWorkspace();
-        File error = File.createTempFile(project.getId(), ".log");
-        File output = File.createTempFile(project.getId(), ".log");
+        File output = File.createTempFile(project.getId(), ".out");
+        File error = File.createTempFile(project.getId(), ".error");
+        String command = String.join(SPACE, arguments);
         ProcessBuilder processBuilder = new ProcessBuilder(arguments).directory(workspace)
                 .redirectError(error).redirectOutput(output);
         Process process = null;
         try {
-            String commands = String.join(SPACE, arguments);
-            LOGGER.info("Start {}", commands);
+            LOGGER.info("Execute command '{}'", command);
             process = processBuilder.start();
             boolean timedOut = false;
             try {
-                timedOut = !process.waitFor(5, TimeUnit.SECONDS);
+                timedOut = !process.waitFor(5, MINUTES);
             } catch (InterruptedException e) {
                 ExceptionUtils.rethrowInterruptedException(e);
             }
@@ -98,7 +99,7 @@ public class RestProjectManager {
             }
             int exitValue = process.exitValue();
             if (exitValue != 0) {
-                throw new IOException("Execution of '" + commands + "' failed with error code = " + exitValue);
+                throw new IOException("Execution of '" + command + "' failed with error code = " + exitValue);
             } else {
                 LOGGER.info("The command was executed successfully");
             }
@@ -119,12 +120,13 @@ public class RestProjectManager {
             case GIT:
                 if (isUpdate) {
                     arguments.add("pull");
+                    arguments.add("-q");
                 } else {
                     arguments.add("clone");
+                    arguments.add("-q");
                     arguments.add(project.getUri().toASCIIString());
                     arguments.add(project.getId());
                 }
-                arguments.add("-q");
                 break;
             case SVN:
                 arguments.add("-q");
@@ -169,7 +171,7 @@ public class RestProjectManager {
      * @return a non-null instance
      */
     private File getWorkspace() {
-        return toFile(this.projectResource);
+        return validateDirectoryExists(toFile(this.projectResource));
     }
 
     /**

@@ -6,6 +6,9 @@ import net.microfalx.bootstrap.dataset.DataSetException;
 import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.model.Field;
+import net.microfalx.bootstrap.web.component.Item;
+import net.microfalx.bootstrap.web.component.Menu;
+import net.microfalx.bootstrap.web.component.Separator;
 import net.microfalx.bootstrap.web.dataset.DataSetController;
 import net.microfalx.heimdall.rest.api.Library;
 import net.microfalx.heimdall.rest.api.RestService;
@@ -34,6 +37,13 @@ public class RestLibraryController extends DataSetController<RestLibrary, Intege
 
     @Autowired
     private ContentService contentService;
+
+    @Override
+    protected void updateActions(Menu menu) {
+        super.updateActions(menu);
+        menu.add(new Separator());
+        menu.add(new Item().setAction("rest.library.design").setText("Design").setIcon("fa-solid fa-pen-nib").setDescription("Design the library"));
+    }
 
     @Override
     protected void beforeView(net.microfalx.bootstrap.dataset.DataSet<RestLibrary, Field<RestLibrary>, Integer> dataSet, Model controllerModel, RestLibrary dataSetModel) {

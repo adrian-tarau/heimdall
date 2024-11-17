@@ -1,9 +1,11 @@
 package net.microfalx.heimdall.rest.api;
 
+import net.microfalx.heimdall.infrastructure.api.Environment;
 import net.microfalx.resource.Resource;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.concurrent.Future;
 
 /**
  * A service which can simulate workloads against HTTP (Restful) endpoints.
@@ -39,6 +41,15 @@ public interface RestService {
      * @return a non-null instance
      */
     Collection<Simulation> getSimulations();
+
+    /**
+     * Returns a simulation by its identifier.
+     *
+     * @param id the simulation identifier.
+     * @return the simulation
+     * @throws RestNotFoundException if such a simulation does not exist
+     */
+    Simulation getSimulation(String id);
 
     /**
      * Registers a simulation.
@@ -88,6 +99,14 @@ public interface RestService {
      * @return a non-null instance
      */
     Simulation discover(Resource resource);
+
+    /**
+     * Executes a simulation.
+     *
+     * @param simulation the simulation
+     * @returna future which tracks the execution of the simulation
+     */
+    Future<Collection<Output>> simulate(Simulation simulation, Environment environment);
 
     /**
      * Reloads the rest definitions.

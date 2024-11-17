@@ -3,6 +3,7 @@ package net.microfalx.heimdall.rest.core;
 
 import lombok.extern.slf4j.Slf4j;
 import net.microfalx.bootstrap.resource.ResourceService;
+import net.microfalx.heimdall.infrastructure.api.Environment;
 import net.microfalx.heimdall.rest.api.*;
 import net.microfalx.lang.ClassUtils;
 import net.microfalx.lang.UriUtils;
@@ -12,11 +13,15 @@ import net.microfalx.resource.rocksdb.RocksDbResource;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Future;
 
 import static net.microfalx.heimdall.rest.api.RestConstants.*;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
@@ -37,6 +42,9 @@ public class RestServiceImpl implements RestService, InitializingBean {
     @Autowired
     private ResourceService resourceService;
 
+    @Autowired
+    private TaskExecutor taskExecutor;
+
     private final RestProjectManager projectManager = new RestProjectManager();
     private final RestSimulationScheduler simulationScheduler = new RestSimulationScheduler();
 
@@ -55,6 +63,7 @@ public class RestServiceImpl implements RestService, InitializingBean {
 
     @Override
     public Project getProject(String id) {
+        requireNonNull(id);
         return cache.getProject(id);
     }
 
@@ -68,6 +77,12 @@ public class RestServiceImpl implements RestService, InitializingBean {
     @Override
     public Collection<Simulation> getSimulations() {
         return cache.getSimulations();
+    }
+
+    @Override
+    public Simulation getSimulation(String id) {
+        requireNonNull(id);
+        return cache.getSimulation(id);
     }
 
     @Override
@@ -124,13 +139,18 @@ public class RestServiceImpl implements RestService, InitializingBean {
     }
 
     @Override
+    public Future<Collection<Output>> simulate(Simulation simulation, Environment environment) {
+        return CompletableFuture.completedFuture(Collections.emptyList());
+    }
+
+    @Override
     public void reload() {
         RestCache cache = new RestCache();
         cache.setApplicationContext(applicationContext);
         cache.load();
         this.cache = cache;
-        projectManager.reload();
-        simulationScheduler.reload();
+        taskExecutor.execute(() -> projectManager.initialize(this));
+        taskExecutor.execute(() -> simulationScheduler.initialize(this));
     }
 
     @Override

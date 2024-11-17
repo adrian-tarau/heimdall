@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.time.Duration.ofSeconds;
 import static java.util.Collections.unmodifiableCollection;
 import static net.microfalx.lang.CollectionUtils.setFromString;
 
@@ -41,6 +42,12 @@ class RestCache extends ApplicationContextSupport {
 
     Collection<Simulation> getSimulations() {
         return unmodifiableCollection(simulations.values());
+    }
+
+    Simulation getSimulation(String id) {
+        Simulation simulation = simulations.get(StringUtils.toIdentifier(id));
+        if (simulation == null) throw new RestNotFoundException("A simulation with identifier '" + id + "' does not exist");
+        return simulation;
     }
 
     Collection<Schedule> getSchedules() {
@@ -110,7 +117,9 @@ class RestCache extends ApplicationContextSupport {
         List<RestLibrary> librariesJPAs = getBean(RestLibraryRepository.class).findAll();
         librariesJPAs.forEach(restLibrary -> {
             Library.Builder builder = new Library.Builder(restLibrary.getNaturalId());
-            builder.project(projects.get(restLibrary.getProject().getNaturalId())).type(restLibrary.getType())
+            RestProject restProject = restLibrary.getProject();
+            if (restProject != null) builder.project(getProject(restProject.getNaturalId()));
+            builder.type(restLibrary.getType())
                     .resource(MemoryResource.create(restLibrary.getResource())).path(restLibrary.getPath())
                     .tags(setFromString(restLibrary.getTags()))
                     .name(restLibrary.getName()).description(restLibrary.getDescription()).build();
@@ -123,9 +132,9 @@ class RestCache extends ApplicationContextSupport {
         List<RestSimulation> simulationJPAs = getBean(RestSimulationRepository.class).findAll();
         simulationJPAs.forEach(restSimulation -> {
             Simulation.Builder builder = new Simulation.Builder(restSimulation.getNaturalId());
-            builder.project(projects.get(restSimulation.getProject().getNaturalId()))
-                    .resource(MemoryResource.create(restSimulation.getResource())).path(restSimulation.getPath())
-                    .timeout(Duration.ofSeconds(restSimulation.getTimeout()))
+            RestProject restProject = restSimulation.getProject();
+            if (restProject != null) builder.project(getProject(restProject.getNaturalId()));
+            builder.resource(MemoryResource.create(restSimulation.getResource())).path(restSimulation.getPath()).timeout(ofSeconds(restSimulation.getTimeout()))
                     .type(restSimulation.getType()).tag(restSimulation.getTags())
                     .name(restSimulation.getName()).description(restSimulation.getDescription()).build();
             Simulation simulation = builder.build();
