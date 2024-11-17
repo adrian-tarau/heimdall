@@ -2,16 +2,22 @@ package net.microfalx.heimdall.rest.core;
 
 import lombok.extern.slf4j.Slf4j;
 import net.microfalx.heimdall.rest.api.Project;
+import net.microfalx.lang.ExceptionUtils;
 import net.microfalx.resource.Resource;
-import net.microfalx.resource.ResourceUtils;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.StringUtils.SPACE;
 import static net.microfalx.lang.TimeUtils.ONE_MINUTE;
+import static net.microfalx.resource.ResourceUtils.toFile;
 
 /**
- * A manager for  {@link net.microfalx.heimdall.rest.api.Project}.
+ * A manager for  {@link Project}.
  * <p>
  * Projects have references to the repository where they reside, and simulation scripts (and libraries) are loaded
  * from various parts of the project.
@@ -28,6 +34,13 @@ public class RestProjectManager {
      * Reloads projects from the database.
      */
     void reload() {
+        for (Project project : restService.getProjects()) {
+            try {
+                reload(project);
+            } catch (Exception e) {
+                LOGGER.error("Failed to update project '" + project.getName() + "'", e);
+            }
+        }
     }
 
     /**
@@ -37,7 +50,7 @@ public class RestProjectManager {
      *
      * @param project the project
      */
-    void reload(Project project) {
+    void reload(Project project) throws IOException {
         requireNonNull(project);
         synchronize(project);
         discover(project);
@@ -48,8 +61,86 @@ public class RestProjectManager {
      *
      * @param project the project
      */
-    private void synchronize(Project project) {
+    private void synchronize(Project project) throws IOException {
+        List<String> arguments = new ArrayList<>();
+        arguments.add(getExecutable(project));
+        updateArguments(project, arguments);
+        execute(project, arguments);
+    }
 
+    /**
+     * Executes the OS process to update or checkout a project.
+     *
+     * @param project   the project
+     * @param arguments the source control tool + arguments
+     * @throws IOException
+     */
+    private void execute(Project project, List<String> arguments) throws IOException {
+        File workspace = getWorkspace(project);
+        if (!workspace.exists()) workspace = getWorkspace();
+        File error = File.createTempFile(project.getId(), ".log");
+        File output = File.createTempFile(project.getId(), ".log");
+        ProcessBuilder processBuilder = new ProcessBuilder(arguments).directory(workspace)
+                .redirectError(error).redirectOutput(output);
+        Process process = null;
+        try {
+            String commands = String.join(SPACE, arguments);
+            LOGGER.info("Start {}", commands);
+            process = processBuilder.start();
+            boolean timedOut = false;
+            try {
+                timedOut = !process.waitFor(5, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                ExceptionUtils.rethrowInterruptedException(e);
+            }
+            if (timedOut) {
+                throw new IOException("Timeout wait waiting for process to finish");
+            }
+            int exitValue = process.exitValue();
+            if (exitValue != 0) {
+                throw new IOException("Execution of '" + commands + "' failed with error code = " + exitValue);
+            } else {
+                LOGGER.info("The command was executed successfully");
+            }
+        } finally {
+            try {
+                process.destroy();
+            } catch (Exception e) {
+                LOGGER.warn("Failed to destroy the process: " + ExceptionUtils.getRootCauseMessage(e));
+            }
+            if (error.exists()) error.delete();
+            if (output.exists()) output.delete();
+        }
+    }
+
+    private void updateArguments(Project project, List<String> arguments) {
+        boolean isUpdate = getWorkspace(project).exists();
+        switch (project.getType()) {
+            case GIT:
+                if (isUpdate) {
+                    arguments.add("pull");
+                } else {
+                    arguments.add("clone");
+                    arguments.add(project.getUri().toASCIIString());
+                    arguments.add(project.getId());
+                }
+                arguments.add("-q");
+                break;
+            case SVN:
+                arguments.add("-q");
+                if (isUpdate) {
+                    arguments.add("update");
+                } else {
+                    arguments.add("checkout");
+                    arguments.add(project.getUri().toASCIIString());
+                    arguments.add(project.getId());
+                }
+                break;
+        }
+    }
+
+    private String getExecutable(Project project) {
+        return project.getType() == Project.Type.GIT ? "git" : "svn";
     }
 
     /**
@@ -58,6 +149,7 @@ public class RestProjectManager {
      * @param project the project
      */
     private void discover(Project project) {
+        File directory = getWorkspace(project);
 
     }
 
@@ -68,7 +160,16 @@ public class RestProjectManager {
      * @return the directory
      */
     private File getWorkspace(Project project) {
-        return new File(ResourceUtils.toFile(this.projectResource), project.getId());
+        return new File(getWorkspace(), project.getId());
+    }
+
+    /**
+     * Returns the directory in the local file system which will contain all the repositories.
+     *
+     * @return a non-null instance
+     */
+    private File getWorkspace() {
+        return toFile(this.projectResource);
     }
 
     /**
