@@ -2,14 +2,11 @@ package net.microfalx.heimdall.rest.core.system;
 
 import net.microfalx.bootstrap.content.Content;
 import net.microfalx.bootstrap.content.ContentService;
-import net.microfalx.bootstrap.dataset.DataSetException;
-import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.web.component.Item;
 import net.microfalx.bootstrap.web.component.Menu;
 import net.microfalx.bootstrap.web.component.Separator;
-import net.microfalx.bootstrap.web.dataset.DataSetController;
 import net.microfalx.heimdall.rest.api.RestService;
 import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.lang.ExceptionUtils;
@@ -21,20 +18,29 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.IOException;
 
-import static net.microfalx.heimdall.rest.api.RestConstants.SCRIPT_ATTR;
 import static net.microfalx.heimdall.rest.core.RestUtils.prepareContent;
 
 @Controller("SystemSimulationController")
 @DataSet(model = RestSimulation.class, timeFilter = false, canAdd = false, canUpload = true,
         viewTemplate = "rest/view_simulation_or_library", viewClasses = "modal-xl")
 @RequestMapping("/system/rest/simulation")
-public class RestSimulationController extends DataSetController<RestSimulation, Integer> {
+public class RestSimulationController extends AbstractLibraryController<RestSimulation> {
 
     @Autowired
     private RestService restService;
 
     @Autowired
     private ContentService contentService;
+
+    @Override
+    public RestService getRestService() {
+        return restService;
+    }
+
+    @Override
+    public ContentService getContentService() {
+        return contentService;
+    }
 
     @Override
     protected void updateActions(Menu menu) {
@@ -55,24 +61,15 @@ public class RestSimulationController extends DataSetController<RestSimulation, 
 
     @Override
     protected void upload(net.microfalx.bootstrap.dataset.DataSet<RestSimulation, Field<RestSimulation>, Integer> dataSet, Model model, Resource resource) {
-        Simulation simulation;
+        Simulation simulation = discover(resource);
         try {
-            simulation = restService.discover(resource);
-        } catch (Exception e) {
-            throw new DataSetException("Invalid simulation type '" + resource.getName() + "'");
-        }
-        try {
-            Resource storedResource = restService.registerResource(resource.withAttribute(SCRIPT_ATTR, Boolean.TRUE));
-            Simulation.Builder builder = new Simulation.Builder(simulation).resource(storedResource).path(resource.getFileName());
+            Resource storedResource = register(resource);
+            Simulation.Builder builder = new Simulation.Builder(simulation);
+            builder.resource(storedResource).path(resource.getFileName());
             restService.registerSimulation(builder.build());
         } catch (IOException e) {
             ExceptionUtils.throwException(e);
         }
     }
 
-    @Override
-    protected void afterPersist(net.microfalx.bootstrap.dataset.DataSet<RestSimulation, Field<RestSimulation>, Integer> dataSet, RestSimulation model, State state) {
-        super.afterPersist(dataSet, model, state);
-        restService.reload();
-    }
 }

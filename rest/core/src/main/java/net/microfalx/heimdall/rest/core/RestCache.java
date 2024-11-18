@@ -115,6 +115,7 @@ class RestCache extends ApplicationContextSupport {
             Project.Builder builder = new Project.Builder(URI.create(restProject.getUri()));
             builder.userName(restProject.getUserName()).password(restProject.getPassword())
                     .token(restProject.getToken()).type(restProject.getType())
+                    .libraryPath(restProject.getLibraryPath()).simulationPath(restProject.getSimulationPath())
                     .tags(setFromString(restProject.getTags()))
                     .name(restProject.getName()).description(restProject.getDescription())
                     .id(restProject.getNaturalId());
@@ -144,7 +145,8 @@ class RestCache extends ApplicationContextSupport {
             Simulation.Builder builder = new Simulation.Builder(restSimulation.getNaturalId());
             RestProject restProject = restSimulation.getProject();
             if (restProject != null) builder.project(getProject(restProject.getNaturalId()));
-            builder.resource(MemoryResource.create(restSimulation.getResource())).path(restSimulation.getPath()).timeout(ofSeconds(restSimulation.getTimeout()))
+            builder.timeout(ofSeconds(restSimulation.getTimeout()));
+            builder.resource(MemoryResource.create(restSimulation.getResource())).path(restSimulation.getPath())
                     .type(restSimulation.getType()).tag(restSimulation.getTags())
                     .name(restSimulation.getName()).description(restSimulation.getDescription()).build();
             Simulation simulation = builder.build();

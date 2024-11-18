@@ -170,8 +170,6 @@ public class RestServiceImpl implements RestService, InitializingBean {
         initResources();
         registerHeimdall();
         this.reload();
-        projectManager.initialize(this);
-        simulationScheduler.initialize(this);
     }
 
     RestProperties getProperties() {
@@ -211,7 +209,7 @@ public class RestServiceImpl implements RestService, InitializingBean {
     private void registerHeimdall() {
         if (!properties.isSelf()) return;
         Project project = (Project) Project.create(UriUtils.parseUri("https://github.com/adrian-tarau/heimdall.git")).type(Project.Type.GIT)
-                .libraryPath("**/test/resource/rest/library/*.js").simulationPath("**/test/resource/rest/simulation/*.js")
+                .libraryPath("/**/test/resources/rest/library/*.js").simulationPath("/**/test/resources/rest/simulation/*.js")
                 .tag(SELF_TAG).tag(AUTO_TAG).tag(LOCAL_TAG)
                 .name("Heimdall").description("A testing/monitoring tool for developers")
                 .build();

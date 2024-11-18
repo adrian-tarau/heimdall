@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.net.URI;
+import static net.microfalx.lang.UriUtils.parseUri;
 
 @Controller("SystemProjectController")
 @DataSet(model = RestProject.class, timeFilter = false)
@@ -41,7 +41,7 @@ public class RestProjectController extends DataSetController<RestProject, Intege
 
     @Override
     protected boolean beforePersist(net.microfalx.bootstrap.dataset.DataSet<RestProject, Field<RestProject>, Integer> dataSet, RestProject model, State state) {
-        model.setNaturalId(Project.getNaturalId(URI.create(model.getUri())));
+        model.setNaturalId(Project.getNaturalId(parseUri(model.getUri())));
         return super.beforePersist(dataSet, model, state);
     }
 

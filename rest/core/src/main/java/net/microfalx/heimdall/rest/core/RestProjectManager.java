@@ -6,15 +6,19 @@ import net.microfalx.heimdall.rest.api.Project;
 import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.heimdall.rest.api.SimulationException;
 import net.microfalx.lang.ExceptionUtils;
-import net.microfalx.lang.Hashing;
+import net.microfalx.lang.StringUtils;
+import net.microfalx.lang.TimeUtils;
 import net.microfalx.resource.FileResource;
 import net.microfalx.resource.Resource;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.util.PathMatcher;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static net.microfalx.heimdall.rest.api.RestConstants.SCRIPT_ATTR;
@@ -38,6 +42,7 @@ public class RestProjectManager {
 
     private RestServiceImpl restService;
     private Resource projectResource;
+    private final Map<String, Long> lastReload = new ConcurrentHashMap<>();
 
     /**
      * Reloads projects from the database.
@@ -58,9 +63,12 @@ public class RestProjectManager {
      * The project is validated (every 60s) if the repository has a different version compared with local repository.
      *
      * @param project the project
+     * @throws IOException if an I/O error occurs
      */
     void reload(Project project) throws IOException {
         requireNonNull(project);
+        Long lastLoaded = lastReload.computeIfAbsent(project.getId(), k -> TimeUtils.oneHourAgo());
+        if (TimeUtils.millisSince(lastLoaded) < RELOAD_INTERVAL) return;
         synchronize(project);
         discover(project);
     }
@@ -69,6 +77,7 @@ public class RestProjectManager {
      * Clones or updates a project in the local file system
      *
      * @param project the project
+     * @throws IOException if an I/O error occurs
      */
     private void synchronize(Project project) throws IOException {
         List<String> arguments = new ArrayList<>();
@@ -82,7 +91,7 @@ public class RestProjectManager {
      *
      * @param project   the project
      * @param arguments the source control tool + arguments
-     * @throws IOException
+     * @throws IOException if an I/O error occurs
      */
     private void execute(Project project, List<String> arguments) throws IOException {
         File workspace = getWorkspace(project);
@@ -157,6 +166,7 @@ public class RestProjectManager {
      * Scans the project directory for libraries and simulations.
      *
      * @param project the project
+     * @throws IOException if an I/O error occurs
      */
     private void discover(Project project) throws IOException {
         discover(project, DiscoveryType.LIBRARY, project.getLibraryPath());
@@ -188,24 +198,43 @@ public class RestProjectManager {
      * @param project       the project
      * @param discoveryType the enum which tells if we discover a library or a simulation
      * @param pathPattern   an Ant path matcher
+     * @throws IOException if an I/O error occurs
      */
     private void discover(Project project, DiscoveryType discoveryType, String pathPattern) throws IOException {
         AntPathMatcher pathMatcher = new AntPathMatcher();
-        String[] patterns = pathPattern.split(";");
+        String[] patterns = StringUtils.split(pathPattern, Library.PATH_SEPARATORS);
         Resource directory = FileResource.directory(getWorkspace(project));
         directory.walk((root, child) -> {
-            String resourcePath = child.getPath();
-            for (String pattern : patterns) {
-                if (pathMatcher.match(pattern, resourcePath)) {
-                    try {
-                        discover(project, child, discoveryType);
-                    } catch (SimulationException e) {
-                        LOGGER.warn("Invalid script type for '" + child.getPath() + "', root cause: " + getRootCauseMessage(e));
-                    }
-                }
+            if (child.isFile()) {
+                String resourcePath = child.getPath(root);
+                child = child.withAttribute(Resource.PATH_ATTR, resourcePath);
+                discover(project, discoveryType, child, pathMatcher, patterns);
             }
             return true;
         });
+    }
+
+    /**
+     * Validates whether the resource matches the required file patters.
+     *
+     * @param project       the project
+     * @param discoveryType the enum which tells if we discover a library or a simulation
+     * @param resource      the resource
+     * @param pathMatcher   the path matcher
+     * @param patterns      the patterns to validate files
+     * @throws IOException if an I/O error occurs
+     */
+    private void discover(Project project, DiscoveryType discoveryType, Resource resource, PathMatcher pathMatcher, String[] patterns) throws IOException {
+        String resourcePath = resource.getPath(true);
+        for (String pattern : patterns) {
+            if (pathMatcher.match(pattern, resourcePath)) {
+                try {
+                    discover(project, resource, discoveryType);
+                } catch (SimulationException e) {
+                    LOGGER.warn("Invalid script type for '" + resourcePath + "', root cause: " + getRootCauseMessage(e));
+                }
+            }
+        }
     }
 
     /**
@@ -213,22 +242,23 @@ public class RestProjectManager {
      *
      * @param resource      the file resource
      * @param discoveryType the enum which tells if we discover a library or a simulation
+     * @throws IOException if an I/O error occurs
      */
     private void discover(Project project, Resource resource, DiscoveryType discoveryType) throws IOException {
         Simulation discoveredSimulation = restService.discover(resource);
         Resource storedResource = restService.registerResource(resource.withAttribute(SCRIPT_ATTR, Boolean.TRUE));
-        String id = getId(project, discoveredSimulation);
+        String id = getId(project, discoveredSimulation.getType(), resource);
         if (discoveryType == DiscoveryType.LIBRARY) {
             Library.Builder builder = new Library.Builder(id).project(project)
                     .resource(storedResource);
-            builder.path(resource.getPath()).tags(discoveredSimulation.getTags())
+            builder.path(resource.getPath(true)).tags(discoveredSimulation.getTags())
                     .name(discoveredSimulation.getName()).description(discoveredSimulation.getDescription());
             builder.type(discoveredSimulation.getType());
             restService.registerLibrary(builder.build());
         } else if (discoveryType == DiscoveryType.SIMULATION) {
-            Simulation.Builder builder = new Simulation.Builder(id).project(project)
-                    .resource(storedResource);
-            builder.path(resource.getPath()).tags(discoveredSimulation.getTags())
+            Simulation.Builder builder = new Simulation.Builder(id);
+            builder.project(project).resource(storedResource);
+            builder.path(resource.getPath(true)).tags(discoveredSimulation.getTags())
                     .name(discoveredSimulation.getName()).description(discoveredSimulation.getDescription());
             builder.type(discoveredSimulation.getType());
             restService.registerSimulation(builder.build());
@@ -237,11 +267,8 @@ public class RestProjectManager {
         }
     }
 
-    private String getId(Project project, Simulation simulation) {
-        Hashing hashing = Hashing.create();
-        hashing.update(project.getId());
-        hashing.update(simulation.getId());
-        return hashing.asString();
+    private String getId(Project project, Simulation.Type type, Resource resource) {
+        return Library.getNaturalId(type, resource, project.getId());
     }
 
     /**

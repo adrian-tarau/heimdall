@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import static net.microfalx.lang.StringUtils.formatMessage;
 import static net.microfalx.lang.StringUtils.isEmpty;
 
 @Controller("SystemScheduleController")
@@ -34,7 +35,8 @@ public class RestScheduleController extends DataSetController<RestSchedule,Integ
     public JsonResponse<?> schedule(@PathVariable("id") String id) {
         Schedule schedule = restService.getSchedule(id);
         restService.simulate(schedule.getSimulation(), schedule.getEnvironment());
-        return JsonResponse.success("The simulation '" + schedule.getName() + "' was scheduled to be executed");
+        return JsonResponse.success(formatMessage("The simulation ''{0}'' was scheduled to be executed against environment ''{1}''",
+                schedule.getSimulation().getName(), schedule.getEnvironment().getName()));
     }
 
     @Override

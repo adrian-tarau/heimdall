@@ -1,18 +1,21 @@
 package net.microfalx.heimdall.rest.api;
 
 import lombok.ToString;
+import net.microfalx.lang.Hashing;
 import net.microfalx.lang.IdentityAware;
 import net.microfalx.lang.NamedAndTaggedIdentifyAware;
 import net.microfalx.resource.Resource;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
-import static net.microfalx.lang.StringUtils.isEmpty;
+import static net.microfalx.lang.StringUtils.*;
 
 /**
  * A group of functions/classes used in simulations.
  */
 @ToString
 public class Library extends NamedAndTaggedIdentifyAware<String> {
+
+    public static final String PATH_SEPARATORS = ";:,";
 
     private Resource resource;
     private Project project;
@@ -34,7 +37,7 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
      *
      * @return a non-null instance
      */
-    public String getPath() {
+    public final String getPath() {
         return path;
     }
 
@@ -43,7 +46,7 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
      *
      * @return a non-null instance
      */
-    public Resource getResource() {
+    public final Resource getResource() {
         return resource;
     }
 
@@ -52,7 +55,7 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
      *
      * @return a non-null instance
      */
-    public Project getProject() {
+    public final Project getProject() {
         return project;
     }
 
@@ -61,8 +64,26 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
      *
      * @return a non-null instance
      */
-    public Simulation.Type getType() {
+    public final Simulation.Type getType() {
         return type;
+    }
+
+    /**
+     * Returns the natural identifier for a resource associated with a library.
+     *
+     * @param type      the simulation type
+     * @param resource  the resource
+     * @param projectId the project identifier, it can be null
+     * @return a non-null instance
+     */
+    public static String getNaturalId(Simulation.Type type, Resource resource, String projectId) {
+        requireNonNull(type);
+        requireNonNull(resource);
+        Hashing hashing = Hashing.create();
+        hashing.update(projectId != null ? toIdentifier(projectId) : EMPTY_STRING);
+        hashing.update(type.name().toLowerCase());
+        hashing.update(resource.toHash());
+        return hashing.asString();
     }
 
 
@@ -80,26 +101,37 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
         public Builder() {
         }
 
-        public Builder resource(Resource resource) {
+        public Builder(Library library) {
+            super(library.getId());
+            this.tags(library.getTags())
+                    .name(library.getName())
+                    .description(library.getDescription());
+            this.type(library.getType())
+                    .path(library.getPath())
+                    .project(library.getProject())
+                    .resource(library.getResource());
+        }
+
+        public final Builder resource(Resource resource) {
             requireNonNull(resource);
             this.resource = resource;
             if (emptyName()) this.name(resource.getName());
-            if (isEmpty(path)) this.path = resource.getPath();
+            if (isEmpty(path)) this.path = resource.getPath(true);
             return this;
         }
 
-        public Builder project(Project project) {
+        public final Builder project(Project project) {
             this.project = project;
             return this;
         }
 
-        public Builder type(Simulation.Type type) {
+        public final Builder type(Simulation.Type type) {
             requireNonNull(type);
             this.type = type;
             return this;
         }
 
-        public Builder path(String path) {
+        public final Builder path(String path) {
             requireNonNull(path);
             this.path = path;
             return this;
@@ -111,9 +143,9 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
         }
 
         @Override
-        protected String updateId() {
+        protected final String updateId() {
             if (resource != null) {
-                return Simulation.getNaturalId(type, resource);
+                return Simulation.getNaturalId(type, resource, project != null ? project.getId() : null);
             } else {
                 return super.updateId();
             }

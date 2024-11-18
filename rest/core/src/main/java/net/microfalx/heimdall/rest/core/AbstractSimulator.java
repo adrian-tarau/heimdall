@@ -350,6 +350,7 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
                 log("Prepare libraries ({0})", context.getLibraries().size());
             }
             for (Library library : context.getLibraries()) {
+                if (simulation.getProject() != null && !simulation.getProject().equals(library.getProject())) continue;
                 log(" - ''{0}}' ({0})", library.getName(), formatBytes(library.getResource().length()));
                 copyResource(workspace, library.getResource());
             }

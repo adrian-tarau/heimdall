@@ -66,7 +66,7 @@ class K6SimulatorTest {
     }
 
     private Simulation createSimulation(String fileName) {
-        return Simulation.create(ClassPathResource.file("scripts/" + fileName)).type(Simulation.Type.K6).build();
+        return (Simulation) Simulation.create(ClassPathResource.file("scripts/" + fileName)).type(Simulation.Type.K6).build();
     }
 
 }

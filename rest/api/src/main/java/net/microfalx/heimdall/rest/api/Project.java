@@ -10,6 +10,7 @@ import java.net.URI;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.StringUtils.defaultIfEmpty;
+import static net.microfalx.lang.StringUtils.removeEndSlash;
 
 /**
  * A project (a source code repository) containing simulations related to the project.
@@ -112,7 +113,7 @@ public class Project extends NamedAndTaggedIdentifyAware<String> {
      */
     public static String getNaturalId(URI uri) {
         requireNonNull(uri);
-        return Hashing.hash(uri.toASCIIString());
+        return Hashing.hash(removeEndSlash(uri.toASCIIString()));
     }
 
     public enum Type {

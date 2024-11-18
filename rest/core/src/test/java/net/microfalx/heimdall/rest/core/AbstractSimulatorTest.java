@@ -39,7 +39,7 @@ class AbstractSimulatorTest {
     @BeforeEach
     void before() {
         Environment environment = Environment.create("test").attribute(InfrastructureConstants.API_KEY_VARIABLE, "key").build();
-        simulation = Simulation.create(MemoryResource.create("data", "sim1.js")).type(Simulation.Type.K6).build();
+        simulation = (Simulation) Simulation.create(MemoryResource.create("data", "sim1.js")).type(Simulation.Type.K6).build();
         List<Library> libraries = List.of(Library.create(MemoryResource.create("lib1", "lib1.js")).type(Simulation.Type.K6).build(),
                 Library.create(MemoryResource.create("lib2", "lib2.js")).type(Simulation.Type.K6).build());
         when(simulationContext.getLibraries()).thenReturn(libraries);
