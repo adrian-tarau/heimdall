@@ -20,9 +20,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Future;
 
 import static net.microfalx.heimdall.rest.api.RestConstants.*;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
@@ -149,8 +147,8 @@ public class RestServiceImpl implements RestService, InitializingBean {
     }
 
     @Override
-    public Future<Collection<Output>> simulate(Simulation simulation, Environment environment) {
-        return CompletableFuture.completedFuture(Collections.emptyList());
+    public Collection<Output> simulate(Simulation simulation, Environment environment) {
+        return Collections.emptyList();
     }
 
     @Override

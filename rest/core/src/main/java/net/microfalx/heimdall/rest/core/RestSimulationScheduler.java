@@ -1,12 +1,15 @@
 package net.microfalx.heimdall.rest.core;
 
+import net.microfalx.bootstrap.core.async.AsynchronousProperties;
 import net.microfalx.bootstrap.core.async.TaskExecutorFactory;
 import net.microfalx.heimdall.rest.api.Schedule;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.locks.Lock;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
@@ -17,7 +20,9 @@ class RestSimulationScheduler {
 
     private RestServiceImpl restService;
     private TaskScheduler scheduler;
+    private TaskExecutor executor;
     private final Map<Schedule, ScheduledFuture<?>> schedules = new ConcurrentHashMap<>();
+    private final Map<Schedule, Lock> locks = new ConcurrentHashMap<>();
 
     /**
      * Receives the required dependencies and creates the initial scheduler.
@@ -45,11 +50,14 @@ class RestSimulationScheduler {
      */
     void reload(Schedule schedule) {
         requireNonNull(schedule);
-
     }
 
     private void createScheduler() {
         RestProperties properties = restService.getProperties();
-        scheduler = TaskExecutorFactory.create(properties.getScheduler()).createScheduler();
+        AsynchronousProperties schedulerProperties = properties.getScheduler();
+        executor = TaskExecutorFactory.create(schedulerProperties).createExecutor();
+        schedulerProperties.setCoreThreads(schedulerProperties.getCoreThreads() / 4);
+        schedulerProperties.setSuffix(schedulerProperties.getSuffix() + "_scheduler");
+        scheduler = TaskExecutorFactory.create(schedulerProperties).createScheduler();
     }
 }

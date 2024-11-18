@@ -5,7 +5,6 @@ import net.microfalx.resource.Resource;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.concurrent.Future;
 
 /**
  * A service which can simulate workloads against HTTP (Restful) endpoints.
@@ -113,9 +112,9 @@ public interface RestService {
      * Executes a simulation.
      *
      * @param simulation the simulation
-     * @returna future which tracks the execution of the simulation
+     * @return future which tracks the execution of the simulation
      */
-    Future<Collection<Output>> simulate(Simulation simulation, Environment environment);
+    Collection<Output> simulate(Simulation simulation, Environment environment);
 
     /**
      * Reloads the rest definitions.
