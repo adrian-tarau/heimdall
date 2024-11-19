@@ -159,6 +159,7 @@ public class RestServiceImpl implements RestService, InitializingBean {
         this.cache = cache;
         taskExecutor.execute(() -> projectManager.initialize(this));
         taskExecutor.execute(() -> simulationScheduler.initialize(this));
+        taskExecutor.execute(() -> simulationScheduler.reload());
     }
 
     @Override
@@ -168,6 +169,7 @@ public class RestServiceImpl implements RestService, InitializingBean {
         initResources();
         registerHeimdall();
         this.reload();
+        simulationScheduler.initialize(this);
     }
 
     RestProperties getProperties() {
