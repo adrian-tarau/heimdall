@@ -128,8 +128,8 @@ create table rest_result
     logs_uri                     varchar(500),
     report_uri                   varchar(500),
     description                  varchar(1000),
-    constraint fk$rest_output$environment foreign key (environment_id) references infrastructure_environment (id),
-    constraint fk$rest_output$simulation foreign key (simulation_id) references rest_simulation (id)
+    constraint fk$rest_result$environment foreign key (environment_id) references infrastructure_environment (id),
+    constraint fk$rest_result$simulation foreign key (simulation_id) references rest_simulation (id)
 ) ENGINE = InnoDB;
 
 create index ix$rest_output$started on rest_output (started_at);
@@ -139,8 +139,8 @@ create table rest_output
     id                           bigint   not null auto_increment primary key,
     environment_id               integer  not null,
     simulation_id                integer  not null,
-    result_id                    integer  not null,
-    scenario_id integer                                  not null,
+    result_id                    bigint  not null,
+    scenario_id integer not null,
     status        enum ('SUCCESSFUL', 'FAILED','CANCELED') not null,
     started_at                   datetime not null,
     ended_at                     datetime not null,
