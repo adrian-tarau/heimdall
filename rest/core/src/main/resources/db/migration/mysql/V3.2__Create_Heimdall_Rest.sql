@@ -100,13 +100,12 @@ create table rest_schedule
     constraint fk$rest_schedule$simulation foreign key (simulation_id) references rest_simulation (id)
 ) ENGINE = InnoDB;
 
-create table rest_output
+create table rest_result
 (
     id                           bigint   not null auto_increment primary key,
     environment_id               integer  not null,
     simulation_id                integer  not null,
-    scenario_id integer                                  not null,
-    type        enum ('SUCCESSFUL', 'FAILED','CANCELED') not null,
+    status        enum ('SUCCESSFUL', 'FAILED','CANCELED') not null,
     started_at                   datetime not null,
     ended_at                     datetime not null,
     duration                     integer  not null,
@@ -130,7 +129,40 @@ create table rest_output
     report_uri                   varchar(500),
     description                  varchar(1000),
     constraint fk$rest_output$environment foreign key (environment_id) references infrastructure_environment (id),
+    constraint fk$rest_output$simulation foreign key (simulation_id) references rest_simulation (id)
+) ENGINE = InnoDB;
+
+create index ix$rest_output$started on rest_output (started_at);
+
+create table rest_output
+(
+    id                           bigint   not null auto_increment primary key,
+    environment_id               integer  not null,
+    simulation_id                integer  not null,
+    result_id                    integer  not null,
+    scenario_id integer                                  not null,
+    status        enum ('SUCCESSFUL', 'FAILED','CANCELED') not null,
+    started_at                   datetime not null,
+    ended_at                     datetime not null,
+    duration                     integer  not null,
+    data_received                float    not null,
+    data_sent                    float    not null,
+    iterations                   float    not null,
+    iteration_duration           float    not null,
+    vus                          float    not null,
+    vus_max                      float    not null,
+    http_request_blocked         float    not null,
+    http_request_connecting      float    not null,
+    http_Request_duration        float    not null,
+    http_request_failed          float    not null,
+    http_request_receiving       float    not null,
+    http_request_sending         float    not null,
+    http_request_tls_handshaking float    not null,
+    http_request_waiting         float    not null,
+    http_requests                float    not null,
+    constraint fk$rest_output$environment foreign key (environment_id) references infrastructure_environment (id),
     constraint fk$rest_output$simulation foreign key (simulation_id) references rest_simulation (id),
+    constraint fk$rest_output$result foreign key (result_id) references rest_result (id),
     constraint fk$rest_output$scenario foreign key (scenario_id) references rest_scenario (id)
 ) ENGINE = InnoDB;
 

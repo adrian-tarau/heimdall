@@ -32,6 +32,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static net.microfalx.heimdall.rest.api.RestConstants.LOG_ATTR;
+import static net.microfalx.heimdall.rest.api.RestConstants.REPORT_ATTR;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
 import static net.microfalx.lang.FormatterUtils.formatBytes;
@@ -46,9 +48,9 @@ import static net.microfalx.resource.ResourceUtils.toFile;
  * Base class for the simulator.
  */
 @Slf4j
-public abstract class AbstractSimulator implements Simulator, Identifiable<String>, Nameable, Comparable<AbstractSimulator> {
+public abstract class AbstractSimulator implements Simulator, Comparable<AbstractSimulator> {
 
-    private final String instanceId = UUID.randomUUID().toString();
+    private final String id = UUID.randomUUID().toString();
     private final Simulation simulation;
     private Options options;
     private Resource installWorkspace;
@@ -76,7 +78,7 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
 
     @Override
     public final String getId() {
-        return getOptions().getId();
+        return id;
     }
 
     @Override
@@ -155,7 +157,7 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
 
     @Override
     public int compareTo(@NotNull AbstractSimulator o) {
-        return instanceId.compareTo(o.instanceId);
+        return id.compareTo(o.id);
     }
 
     /**
@@ -219,7 +221,7 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
      *
      * @return a non-null instance
      */
-    protected final LocalDateTime getStartTime() {
+    public final LocalDateTime getStartTime() {
         return startTime;
     }
 
@@ -228,8 +230,19 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
      *
      * @return a non-null instance
      */
-    protected final LocalDateTime getEndTime() {
+    public final LocalDateTime getEndTime() {
         return endTime != null ? endTime : LocalDateTime.now();
+    }
+
+    /**
+     * Returns the duration of the simulation.
+     * <p>
+     * If the simulation is not completed, it returns the duration of the simulation until now.
+     *
+     * @return a non-null instance
+     */
+    public final Duration getDuration() {
+        return Duration.between(getStartTime(), getEndTime());
     }
 
     /**
@@ -239,7 +252,7 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
      */
     protected final void setReport(Resource resource) {
         requireNonNull(resource);
-        this.report = resource;
+        this.report = resource.withAttribute(REPORT_ATTR, Boolean.TRUE);
     }
 
     /**
@@ -252,7 +265,7 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
      */
     protected final void setLog(Resource resource) {
         requireNonNull(resource);
-        this.log = resource;
+        this.log = resource.withAttribute(LOG_ATTR, Boolean.TRUE);
     }
 
     /**

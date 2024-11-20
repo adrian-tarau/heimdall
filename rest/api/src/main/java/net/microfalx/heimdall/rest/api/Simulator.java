@@ -1,16 +1,19 @@
 package net.microfalx.heimdall.rest.api;
 
+import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.Nameable;
 import net.microfalx.resource.Resource;
 import org.atteo.classindex.IndexSubclasses;
 
 import java.net.URL;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 /**
  * A simulator which knows how to start, execute and complete a simulation and returns the simulation results (the output).
  */
-public interface Simulator {
+public interface Simulator extends Identifiable<String>, Nameable {
 
     /**
      * Returns the simulation.
@@ -32,6 +35,29 @@ public interface Simulator {
      * @return {@code true} if running, {@code false} otherwise
      */
     boolean isRunning();
+
+    /**
+     * Returns the time when the simulation was started.
+     *
+     * @return a non-null instance
+     */
+    LocalDateTime getStartTime();
+
+    /**
+     * Returns the time when the simulation has ended.
+     *
+     * @return a non-null instance
+     */
+    LocalDateTime getEndTime();
+
+    /**
+     * Returns the duration of the simulation.
+     * <p>
+     * If the simulation is not completed, it returns the duration of the simulation until now.
+     *
+     * @return a non-null instance
+     */
+    Duration getDuration();
 
     /**
      * Executes the simulation and returns the results of the simulation.

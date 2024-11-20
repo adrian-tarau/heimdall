@@ -15,5 +15,6 @@ public class RestProperties {
     private AsynchronousProperties scheduler = new AsynchronousProperties().setSuffix("rest").setCoreThreads(20)
             .setMaximumThreads(30);
 
+    private int historySize = 100;
     private boolean self;
 }

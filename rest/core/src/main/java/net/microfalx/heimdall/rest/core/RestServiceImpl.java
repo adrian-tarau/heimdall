@@ -20,11 +20,13 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static java.util.Collections.unmodifiableCollection;
 import static net.microfalx.heimdall.rest.api.RestConstants.*;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.NamedAndTaggedIdentifyAware.*;
@@ -57,6 +59,7 @@ public class RestServiceImpl implements RestService, InitializingBean {
     private final Collection<Simulation.Provider> simulationProviders = new CopyOnWriteArrayList<>();
     private final Collection<Simulator.Provider> simulatorProviders = new CopyOnWriteArrayList<>();
     private final Set<Simulator> running = new ConcurrentSkipListSet<>();
+    private final Queue<Simulator> history = new ConcurrentLinkedQueue<>();
     private Resource scriptResource;
     private Resource logsResource;
     private Resource reportResource;
@@ -152,7 +155,12 @@ public class RestServiceImpl implements RestService, InitializingBean {
 
     @Override
     public Collection<Simulator> getRunning() {
-        return List.of();
+        return unmodifiableCollection(running);
+    }
+
+    @Override
+    public Collection<Simulator> getHistory() {
+        return unmodifiableCollection(history);
     }
 
     @Override
@@ -165,6 +173,8 @@ public class RestServiceImpl implements RestService, InitializingBean {
             SimulationContext context = new SimulationContextImpl(environment, getLibraries());
             return simulator.execute(context);
         } finally {
+            history.offer(simulator);
+            if (history.size() > properties.getHistorySize()) history.poll();
             running.remove(simulator);
         }
     }

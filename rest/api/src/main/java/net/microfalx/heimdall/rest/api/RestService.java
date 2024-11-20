@@ -115,6 +115,13 @@ public interface RestService {
     Collection<Simulator> getRunning();
 
     /**
+     * Returns the last N (100 by default) simulators.
+     *
+     * @return a non-null instance
+     */
+    Collection<Simulator> getHistory();
+
+    /**
      * Executes a simulation.
      *
      * @param simulation the simulation
