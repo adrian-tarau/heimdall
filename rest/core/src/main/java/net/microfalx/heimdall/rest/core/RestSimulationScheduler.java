@@ -78,10 +78,10 @@ class RestSimulationScheduler {
     private void createScheduler() {
         RestProperties properties = restService.getProperties();
         AsynchronousProperties schedulerProperties = properties.getScheduler();
-        executor = TaskExecutorFactory.create(schedulerProperties).createExecutor();
+        if (executor == null) executor = TaskExecutorFactory.create(schedulerProperties).createExecutor();
         schedulerProperties.setCoreThreads(schedulerProperties.getCoreThreads() / 4);
         schedulerProperties.setSuffix(schedulerProperties.getSuffix() + "_scheduler");
-        scheduler = TaskExecutorFactory.create(schedulerProperties).createScheduler();
+        if (scheduler == null) scheduler = TaskExecutorFactory.create(schedulerProperties).createScheduler();
     }
 
     private Lock getLock(Schedule schedule) {
