@@ -2,10 +2,7 @@ package net.microfalx.heimdall.rest.k6;
 
 import net.microfalx.heimdall.infrastructure.api.Environment;
 import net.microfalx.heimdall.infrastructure.api.InfrastructureConstants;
-import net.microfalx.heimdall.rest.api.Library;
-import net.microfalx.heimdall.rest.api.Output;
-import net.microfalx.heimdall.rest.api.Simulation;
-import net.microfalx.heimdall.rest.api.SimulationContext;
+import net.microfalx.heimdall.rest.api.*;
 import net.microfalx.resource.ClassPathResource;
 import net.microfalx.resource.MemoryResource;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,7 +39,8 @@ class K6SimulatorTest {
     @Test
     void simpleSimulation() throws IOException {
         K6Simulator simulator = new K6Simulator(createSimulation("simple_simulation.js"));
-        Collection<Output> outputs = simulator.execute(simulationContext);
+        Result result = simulator.execute(simulationContext);
+        Collection<Output> outputs = result.getOutputs();
         assertEquals(1, outputs.size());
         Output output = outputs.iterator().next();
         assertEquals("Default", output.getName());
@@ -55,7 +53,8 @@ class K6SimulatorTest {
     @Test
     void scenariosSimulation() throws IOException {
         K6Simulator simulator = new K6Simulator(createSimulation("scenarios_simulation.js"));
-        Collection<Output> outputs = simulator.execute(simulationContext);
+        Result result = simulator.execute(simulationContext);
+        Collection<Output> outputs = result.getOutputs();
         assertEquals(2, outputs.size());
         Iterator<Output> iterator = outputs.iterator();
         Output output = iterator.next();

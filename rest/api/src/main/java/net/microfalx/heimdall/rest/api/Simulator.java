@@ -74,32 +74,6 @@ public interface Simulator {
      */
     Optional<URL> getDashboardUrl();
 
-    /**
-     * An enum for the status of a simulation
-     */
-    enum Status {
-
-        /**
-         * The simulation outcome is unknown.
-         */
-        UNKNOWN,
-
-        /**
-         * The simulation was successful.
-         */
-        SUCCESSFUL,
-
-        /**
-         * The simulation has failed
-         */
-        FAILED,
-
-        /**
-         * The simulation was canceled
-         */
-        CANCELED
-    }
-
     @IndexSubclasses
     interface Provider extends Nameable {
 

@@ -2,10 +2,7 @@ package net.microfalx.heimdall.rest.jmeter;
 
 import net.microfalx.heimdall.infrastructure.api.Environment;
 import net.microfalx.heimdall.infrastructure.api.InfrastructureConstants;
-import net.microfalx.heimdall.rest.api.Library;
-import net.microfalx.heimdall.rest.api.Output;
-import net.microfalx.heimdall.rest.api.Simulation;
-import net.microfalx.heimdall.rest.api.SimulationContext;
+import net.microfalx.heimdall.rest.api.*;
 import net.microfalx.resource.ClassPathResource;
 import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.Resource;
@@ -42,7 +39,8 @@ class JmeterSimulatorTest {
     @Test
     void simpleSimulation() throws IOException {
         JmeterSimulator simulator = new JmeterSimulator(createSimulation("simple_simulation.jmx"));
-        Collection<Output> output = simulator.execute(simulationContext);
+        Result result = simulator.execute(simulationContext);
+        Collection<Output> output = result.getOutputs();
         assertOutput(output.iterator().next());
         assertLogs(simulator.getLogs());
     }

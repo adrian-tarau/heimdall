@@ -1,10 +1,7 @@
 package net.microfalx.heimdall.rest.core;
 
 import lombok.ToString;
-import net.microfalx.heimdall.rest.api.Output;
-import net.microfalx.heimdall.rest.api.Result;
-import net.microfalx.heimdall.rest.api.Simulation;
-import net.microfalx.heimdall.rest.api.Simulator;
+import net.microfalx.heimdall.rest.api.*;
 import net.microfalx.resource.Resource;
 
 import java.util.ArrayList;
@@ -24,6 +21,11 @@ public class SimulationResult implements Result {
         requireNonNull(outputs);
         this.simulator = simulator;
         this.outputs.addAll(outputs);
+    }
+
+    @Override
+    public Status getStatus() {
+        return simulator.getStatus();
     }
 
     @Override

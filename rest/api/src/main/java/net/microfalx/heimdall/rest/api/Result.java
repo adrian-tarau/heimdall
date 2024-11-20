@@ -12,6 +12,13 @@ import java.util.Collection;
 public interface Result {
 
     /**
+     * Returns the status of the simulation.
+     *
+     * @return a non-null instance
+     */
+    Status getStatus();
+
+    /**
      * Returns the simulation.
      *
      * @return a non-null instance

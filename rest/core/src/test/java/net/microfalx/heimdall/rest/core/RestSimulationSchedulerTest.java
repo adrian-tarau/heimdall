@@ -1,6 +1,7 @@
 package net.microfalx.heimdall.rest.core;
 
 import net.microfalx.heimdall.infrastructure.api.Environment;
+import net.microfalx.heimdall.rest.api.Result;
 import net.microfalx.heimdall.rest.api.Schedule;
 import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.lang.UriUtils;
@@ -38,6 +39,9 @@ class RestSimulationSchedulerTest {
     @Mock
     private TaskExecutor executor;
 
+    @Mock
+    private Result result;
+
     @InjectMocks
     private RestSimulationScheduler restSimulationScheduler;
 
@@ -54,9 +58,10 @@ class RestSimulationSchedulerTest {
         schedule.name("This is a schedule name");
         schedule.tag("This isa schedule tag");
         schedule.id("09876");
+
         when(restService.getProperties()).thenReturn(new RestProperties());
         when(restService.getSchedules()).thenReturn(Collections.singletonList(schedule.build()));
-        when(restService.simulate(schedule.build().getSimulation(), schedule.build().getEnvironment())).thenReturn(Collections.emptyList());
+        when(restService.simulate(schedule.build().getSimulation(), schedule.build().getEnvironment())).thenReturn(result);
         restSimulationScheduler.initialize(restService);
     }
 
