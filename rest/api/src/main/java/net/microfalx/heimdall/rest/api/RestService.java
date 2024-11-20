@@ -109,12 +109,18 @@ public interface RestService {
     Simulation discover(Resource resource);
 
     /**
+     * Returns the running simulators.
+     * @return a non-null instance
+     */
+    Collection<Simulator> getRunning();
+
+    /**
      * Executes a simulation.
      *
      * @param simulation the simulation
      * @return future which tracks the execution of the simulation
      */
-    Collection<Output> simulate(Simulation simulation, Environment environment);
+    Result simulate(Simulation simulation, Environment environment);
 
     /**
      * Reloads the rest definitions.

@@ -2,10 +2,7 @@ package net.microfalx.heimdall.rest.core;
 
 import net.microfalx.heimdall.infrastructure.api.Environment;
 import net.microfalx.heimdall.infrastructure.api.InfrastructureConstants;
-import net.microfalx.heimdall.rest.api.Library;
-import net.microfalx.heimdall.rest.api.Output;
-import net.microfalx.heimdall.rest.api.Simulation;
-import net.microfalx.heimdall.rest.api.SimulationContext;
+import net.microfalx.heimdall.rest.api.*;
 import net.microfalx.resource.MemoryResource;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,9 +58,14 @@ class AbstractSimulatorTest {
 
     @Test
     void execute() throws IOException {
-        Collection<Output> output = simulator.execute(simulationContext);
-        assertEquals(1, output.size());
-        assertThat(output.iterator().next().getDataReceived().getValue().asDouble()).isEqualTo(12);
+        Result result = simulator.execute(simulationContext);
+        assertNotNull(result);
+        assertNotNull(result.getSimulation());
+        assertNotNull(result.getReport());
+        assertNotNull(result.getLogs());
+        Collection<Output> outputs = result.getOutputs();
+        assertEquals(1, outputs.size());
+        assertThat(outputs.iterator().next().getDataReceived().getValue().asDouble()).isEqualTo(12);
         assertTrue(simulator.getLogs().exists());
         Assertions.assertThat(simulator.getLogs().loadAsString()).contains("aaa");
     }

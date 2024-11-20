@@ -18,8 +18,11 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static net.microfalx.heimdall.rest.api.RestConstants.*;
@@ -53,6 +56,7 @@ public class RestServiceImpl implements RestService, InitializingBean {
     private final RestPersistence persistence = new RestPersistence();
     private final Collection<Simulation.Provider> simulationProviders = new CopyOnWriteArrayList<>();
     private final Collection<Simulator.Provider> simulatorProviders = new CopyOnWriteArrayList<>();
+    private final Set<Simulator> running = new ConcurrentSkipListSet<>();
     private Resource scriptResource;
     private Resource logsResource;
     private Resource reportResource;
@@ -147,8 +151,22 @@ public class RestServiceImpl implements RestService, InitializingBean {
     }
 
     @Override
-    public Collection<Output> simulate(Simulation simulation, Environment environment) {
-        return Collections.emptyList();
+    public Collection<Simulator> getRunning() {
+        return List.of();
+    }
+
+    @Override
+    public Result simulate(Simulation simulation, Environment environment) {
+        requireNonNull(simulation);
+        requireNonNull(environment);
+        Simulator simulator = createSimulator(simulation);
+        running.add(simulator);
+        try {
+            SimulationContext context = new SimulationContextImpl(environment, getLibraries());
+            return simulator.execute(context);
+        } finally {
+            running.remove(simulator);
+        }
     }
 
     @Override
@@ -271,6 +289,27 @@ public class RestServiceImpl implements RestService, InitializingBean {
     private void initProjectResources() {
         projectResource = resourceService.getPersisted("rest").resolve("project", Resource.Type.DIRECTORY);
         LOGGER.info("Rest projects are stored in: " + projectResource);
+    }
+
+    private Simulator createSimulator(Simulation simulation) {
+        for (Simulator.Provider provider : simulatorProviders) {
+            if (provider.supports(simulation)) {
+                return provider.create(simulation);
+            }
+        }
+        throw new SimulationException("A simulator cannot be provided for simulation: " + simulation.getName());
+    }
+
+    private Collection<Library> getLibraries(Simulation simulation) {
+        Collection<Library> libraries = new ArrayList<>();
+        for (Library library : cache.getLibraries()) {
+            boolean enabledByType = library.getType() == simulation.getType();
+            boolean enabledByProject = simulation.getProject() != null && simulation.getProject().equals(library.getProject());
+            if (enabledByType && enabledByProject) {
+                libraries.add(library);
+            }
+        }
+        return libraries;
     }
 
 }

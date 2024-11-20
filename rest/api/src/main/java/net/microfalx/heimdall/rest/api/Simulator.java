@@ -5,7 +5,6 @@ import net.microfalx.resource.Resource;
 import org.atteo.classindex.IndexSubclasses;
 
 import java.net.URL;
-import java.util.Collection;
 import java.util.Optional;
 
 /**
@@ -21,6 +20,13 @@ public interface Simulator {
     Simulation getSimulation();
 
     /**
+     * Returns the status of the simulation.
+     *
+     * @return a non-null instance
+     */
+    Status getStatus();
+
+    /**
      * Returns whether the simulator is actually running a simulation.
      *
      * @return {@code true} if running, {@code false} otherwise
@@ -33,7 +39,12 @@ public interface Simulator {
      * @param context the context in which the simulation runs
      * @return a non-null instance
      */
-    Collection<Output> execute(SimulationContext context);
+    Result execute(SimulationContext context);
+
+    /**
+     * Aborts a running simulation.
+     */
+    void abort();
 
     /**
      * Returns the report (the content) produced by the simulator.
@@ -62,6 +73,32 @@ public interface Simulator {
      * @return a non-null instance
      */
     Optional<URL> getDashboardUrl();
+
+    /**
+     * An enum for the status of a simulation
+     */
+    enum Status {
+
+        /**
+         * The simulation outcome is unknown.
+         */
+        UNKNOWN,
+
+        /**
+         * The simulation was successful.
+         */
+        SUCCESSFUL,
+
+        /**
+         * The simulation has failed
+         */
+        FAILED,
+
+        /**
+         * The simulation was canceled
+         */
+        CANCELED
+    }
 
     @IndexSubclasses
     interface Provider extends Nameable {

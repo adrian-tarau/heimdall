@@ -16,6 +16,7 @@ import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.lang3.ArrayUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.util.StreamUtils;
 
 import java.io.File;
@@ -45,8 +46,9 @@ import static net.microfalx.resource.ResourceUtils.toFile;
  * Base class for the simulator.
  */
 @Slf4j
-public abstract class AbstractSimulator implements Simulator, Identifiable<String>, Nameable {
+public abstract class AbstractSimulator implements Simulator, Identifiable<String>, Nameable, Comparable<AbstractSimulator> {
 
+    private final String instanceId = UUID.randomUUID().toString();
     private final Simulation simulation;
     private Options options;
     private Resource installWorkspace;
@@ -59,10 +61,11 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
     private LocalDateTime startTime = LocalDateTime.now();
     private LocalDateTime endTime;
     private volatile boolean running;
-    private volatile boolean successful;
+    private volatile Status status = Status.UNKNOWN;
     private Resource report = Resource.NULL;
     private Resource log = Resource.NULL;
-    private StringBuilder logger = new StringBuilder(8000);
+    private final StringBuilder logger = new StringBuilder(8000);
+    private volatile Process process;
 
     private static final Set<String> INSTALLED = new CopyOnWriteArraySet<>();
 
@@ -89,6 +92,11 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
     @Override
     public final boolean isRunning() {
         return running;
+    }
+
+    @Override
+    public Status getStatus() {
+        return status;
     }
 
     @Override
@@ -123,7 +131,7 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
     }
 
     @Override
-    public final Collection<Output> execute(SimulationContext context) {
+    public final Result execute(SimulationContext context) {
         Resource resource = doExecute(context);
         Collection<Output> outputs;
         try {
@@ -136,7 +144,18 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
         } catch (IOException e) {
             throw new SimulationException("Failed to complete simulation '" + simulation.getName() + "'", e);
         }
-        return outputs;
+        return new SimulationResult(this, outputs);
+    }
+
+    @Override
+    public void abort() {
+        status = Status.CANCELED;
+        if (process != null) process.destroyForcibly();
+    }
+
+    @Override
+    public int compareTo(@NotNull AbstractSimulator o) {
+        return instanceId.compareTo(o.instanceId);
     }
 
     /**
@@ -328,7 +347,7 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
             if (!output.exists()) {
                 String message = "An output is not available at the end of the simulation of " + simulation.getName();
                 log(message);
-                successful = false;
+                status = Status.FAILED;
                 throw new SimulationException(message);
             }
         } catch (SimulationExecutionException e) {
@@ -345,14 +364,14 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
         Resource workspace = getSessionWorkspace();
         try {
             log("Prepare script ''{0}'' ({0})", simulation.getName(), formatBytes(simulation.getResource().length()));
-            input = copyResource(workspace, simulation.getResource());
+            input = copyResource(workspace, simulation, null);
             if (!context.getLibraries().isEmpty()) {
                 log("Prepare libraries ({0})", context.getLibraries().size());
             }
             for (Library library : context.getLibraries()) {
                 if (simulation.getProject() != null && !simulation.getProject().equals(library.getProject())) continue;
                 log(" - ''{0}}' ({0})", library.getName(), formatBytes(library.getResource().length()));
-                copyResource(workspace, library.getResource());
+                copyResource(workspace, library, null);
             }
         } catch (IOException e) {
             throw new SimulationException("Filed to copy simulation or libraries to working space '" + workspace + "'", e);
@@ -372,7 +391,6 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
                 .redirectOutput(toFile(systemError));
         update(processBuilder, context);
         exportEnvironmentVariables(processBuilder, context);
-        Process process;
         running = true;
         try {
             log("Execute simulator, command like:\n  " + String.join(SPACE, arguments));
@@ -392,13 +410,17 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
                         + formatDuration(simulation.getTimeout()) + ")");
             }
             int exitValue = process.exitValue();
-            successful = exitValue == 0;
-            if (exitValue != 0) {
-                log("Execution of simulator '" + getName() + "' failed with error code = " + exitValue);
-                throw new SimulationExecutionException("Execution of simulator '" + getName() + "' failed with error code = "
-                        + exitValue + ", error stream: " + getErrorOutput());
+            if (status == Status.CANCELED) {
+                log("Simulation was aborted");
             } else {
-                log("Simulation completed successfully in " + formatDuration(Duration.between(getStartTime(), getEndTime())));
+                status = exitValue == 0 ? Status.SUCCESSFUL : Status.FAILED;
+                if (exitValue != 0) {
+                    log("Execution of simulator '" + getName() + "' failed with error code = " + exitValue);
+                    throw new SimulationExecutionException("Execution of simulator '" + getName() + "' failed with error code = "
+                            + exitValue + ", error stream: " + getErrorOutput());
+                } else {
+                    log("Simulation completed successfully in " + formatDuration(Duration.between(getStartTime(), getEndTime())));
+                }
             }
         } finally {
             running = false;
@@ -455,8 +477,10 @@ public abstract class AbstractSimulator implements Simulator, Identifiable<Strin
         }
     }
 
-    private Resource copyResource(Resource workspace, Resource script) throws IOException {
-        return workspace.resolve(script.getFileName()).copyFrom(script);
+    private Resource copyResource(Resource workspace, Library library, String fileName) throws IOException {
+        Resource resource = library.getResource();
+        if (fileName == null) fileName = FileUtils.getFileName(library.getPath());
+        return workspace.resolve(fileName).copyFrom(resource);
     }
 
     private boolean validatePackage() throws IOException {

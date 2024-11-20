@@ -10,7 +10,9 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 /**
- * The output of a simulation.
+ * The output of a scenario.
+ * <p>
+ * A simulation can have one or more scenarios.
  */
 public interface Output extends Identifiable<String>, Nameable {
 

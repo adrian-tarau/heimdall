@@ -60,9 +60,9 @@ create table rest_scenario
     natural_id    varchar(100) not null,
     simulation_id integer      not null,
     name          varchar(100) not null,
-    start_time    integer      not null,
-    gracefulStop  integer      not null,
-    `function` varchar(100) not null,
+    start_time   integer,
+    gracefulStop integer,
+    `function`   varchar(100),
     created_at    datetime     not null,
     modified_at   datetime,
     tags          varchar(100),
@@ -105,6 +105,8 @@ create table rest_output
     id                           bigint   not null auto_increment primary key,
     environment_id               integer  not null,
     simulation_id                integer  not null,
+    scenario_id integer                                  not null,
+    type        enum ('SUCCESSFUL', 'FAILED','CANCELED') not null,
     started_at                   datetime not null,
     ended_at                     datetime not null,
     duration                     integer  not null,
@@ -128,7 +130,8 @@ create table rest_output
     report_uri                   varchar(500),
     description                  varchar(1000),
     constraint fk$rest_output$environment foreign key (environment_id) references infrastructure_environment (id),
-    constraint fk$rest_output$simulation foreign key (simulation_id) references rest_simulation (id)
+    constraint fk$rest_output$simulation foreign key (simulation_id) references rest_simulation (id),
+    constraint fk$rest_output$scenario foreign key (scenario_id) references rest_scenario (id)
 ) ENGINE = InnoDB;
 
 create index ix$rest_output$started on rest_output (started_at);

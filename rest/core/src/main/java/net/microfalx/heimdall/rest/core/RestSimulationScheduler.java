@@ -3,7 +3,7 @@ package net.microfalx.heimdall.rest.core;
 import lombok.extern.slf4j.Slf4j;
 import net.microfalx.bootstrap.core.async.AsynchronousProperties;
 import net.microfalx.bootstrap.core.async.TaskExecutorFactory;
-import net.microfalx.heimdall.rest.api.Output;
+import net.microfalx.heimdall.rest.api.Result;
 import net.microfalx.heimdall.rest.api.Schedule;
 import net.microfalx.lang.ExceptionUtils;
 import org.springframework.core.task.TaskExecutor;
@@ -11,7 +11,6 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.scheduling.support.PeriodicTrigger;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
@@ -88,9 +87,8 @@ class RestSimulationScheduler {
         return locks.computeIfAbsent(schedule, s -> new ReentrantLock());
     }
 
-    private void persist(Schedule schedule, Collection<Output> outputs) {
+    private void persist(Schedule schedule, Result result) {
     }
-
 
     class ScheduleTask implements Runnable {
 
@@ -119,8 +117,8 @@ class RestSimulationScheduler {
             Lock lock = getLock(schedule);
             if (lock.tryLock()) {
                 try {
-                    Collection<Output> outputs = restService.simulate(schedule.getSimulation(), schedule.getEnvironment());
-                    persist(schedule, outputs);
+                    Result result = restService.simulate(schedule.getSimulation(), schedule.getEnvironment());
+                    persist(schedule, result);
                 } finally {
                     lock.unlock();
                 }
