@@ -3,14 +3,24 @@ package net.microfalx.heimdall.rest.core;
 import lombok.extern.slf4j.Slf4j;
 import net.microfalx.bootstrap.core.async.AsynchronousProperties;
 import net.microfalx.bootstrap.core.async.TaskExecutorFactory;
+import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
+import net.microfalx.heimdall.infrastructure.api.Environment;
+import net.microfalx.heimdall.infrastructure.api.InfrastructureService;
+import net.microfalx.heimdall.infrastructure.core.system.EnvironmentRepository;
+import net.microfalx.heimdall.rest.api.Output;
 import net.microfalx.heimdall.rest.api.Result;
 import net.microfalx.heimdall.rest.api.Schedule;
+import net.microfalx.heimdall.rest.core.system.RestResult;
+import net.microfalx.heimdall.rest.core.system.RestResultRepository;
+import net.microfalx.heimdall.rest.core.system.RestSimulationRepository;
 import net.microfalx.lang.ExceptionUtils;
+import net.microfalx.resource.Resource;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.scheduling.support.PeriodicTrigger;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
@@ -23,7 +33,7 @@ import static net.microfalx.lang.ArgumentUtils.requireNonNull;
  * Handles the simulation scheduling.
  */
 @Slf4j
-class RestSimulationScheduler {
+class RestSimulationScheduler extends ApplicationContextSupport {
 
     private RestServiceImpl restService;
     private TaskScheduler scheduler;
@@ -87,7 +97,45 @@ class RestSimulationScheduler {
         return locks.computeIfAbsent(schedule, s -> new ReentrantLock());
     }
 
-    private void persist(Schedule schedule, Result result) {
+    private void persist(Schedule schedule, Result result) throws IOException {
+        Resource resourceLogs = restService.registerResource(result.getLogs());
+        Resource resourceReport = restService.registerResource(result.getReport());
+        restService.registerResource(resourceReport);
+        restService.registerResource(resourceLogs);
+        RestResultRepository resultRepository = getBean(RestResultRepository.class);
+        SimulationResult simulationResult = (SimulationResult) result;
+        RestResult restResult= new RestResult();
+        simulationResult.getOutputs().forEach(output -> {
+            createRestResult(schedule, output, restResult, simulationResult);
+            resultRepository.save(restResult);
+        });
+    }
+
+    private void createRestResult(Schedule schedule, Output output, RestResult restResult, SimulationResult simulationResult) {
+        restResult.setLogsURI(simulationResult.getLogs().toURI().toASCIIString());
+        restResult.setReportURI(simulationResult.getReport().toURI().toASCIIString());
+        restResult.setStatus(simulationResult.getStatus());
+        Environment environment = getBean(InfrastructureService.class).getEnvironment(schedule.getEnvironment().getId());
+        restResult.setEnvironment(getBean(EnvironmentRepository.class).findByNaturalId(environment.getId()).get());
+        restResult.setSimulation(getBean(RestSimulationRepository.class).findByNaturalId(schedule.getId()).get());
+        restResult.setVusMax((float) output.getVusMax().getAverage().getAsDouble());
+        restResult.setVus((float) output.getVus().getAverage().getAsDouble());
+        restResult.setDataReceived(output.getDataReceived().getValue().asFloat());
+        restResult.setDuration(output.getDuration());
+        restResult.setStartedAt(output.getStartTime());
+        restResult.setEndedAt(output.getEndTime());
+        restResult.setIterationDuration((float) output.getIterationDuration().getAverage().getAsDouble());
+        restResult.setDataSent(output.getDataSent().getValue().asFloat());
+        restResult.setIterations(output.getIterations().getValue().asFloat());
+        restResult.setHttpRequestBlocked((float) output.getHttpRequestBlocked().getAverage().getAsDouble());
+        restResult.setHttpRequests(output.getHttpRequests().getValue().asFloat());
+        restResult.setHttpRequestConnecting((float) output.getHttpRequestConnecting().getAverage().getAsDouble());
+        restResult.setHttpRequestFailed(output.getHttpRequestFailed().getValue().asFloat());
+        restResult.setHttpRequestReceiving((float) output.getHttpRequestReceiving().getAverage().getAsDouble());
+        restResult.setHttpRequestDuration((float) output.getHttpRequestDuration().getAverage().getAsDouble());
+        restResult.setHttpRequestSending((float) output.getHttpRequestSending().getAverage().getAsDouble());
+        restResult.setHttpRequestTlsHandshaking((float) output.getHttpRequestTlsHandshaking().getAverage().getAsDouble());
+        restResult.setHttpRequestWaiting((float) output.getHttpRequestWaiting().getAverage().getAsDouble());
     }
 
     class ScheduleTask implements Runnable {
@@ -118,7 +166,11 @@ class RestSimulationScheduler {
             if (lock.tryLock()) {
                 try {
                     Result result = restService.simulate(schedule.getSimulation(), schedule.getEnvironment());
-                    persist(schedule, result);
+                    try {
+                        persist(schedule, result);
+                    } catch (Exception e) {
+                        LOGGER.error(ExceptionUtils.getRootCauseDescription(e));
+                    }
                 } finally {
                     lock.unlock();
                 }

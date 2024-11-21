@@ -193,6 +193,7 @@ public class RestServiceImpl implements RestService, InitializingBean {
     @Override
     public void afterPropertiesSet() {
         persistence.setApplicationContext(applicationContext);
+        simulationScheduler.setApplicationContext(applicationContext);
         initializeProviders();
         initResources();
         registerHeimdall();
