@@ -27,12 +27,14 @@ public class SimulationResult extends IdentityAware<Integer> {
     @ManyToOne
     @JoinColumn(name = "environment_id", nullable = false)
     @Description("The environment targeted by a simulation")
+    @Name
     @Position(10)
     private Environment environment;
 
     @ManyToOne
     @JoinColumn(name = "simulation_id", nullable = false)
     @Description("The simulation used to produce the output")
+    @Name
     @Position(15)
     private RestSimulation simulation;
 

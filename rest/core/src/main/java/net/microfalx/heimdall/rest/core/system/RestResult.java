@@ -26,12 +26,14 @@ public class RestResult extends IdentityAware<Long> {
     @ManyToOne
     @JoinColumn(name = "environment_id", nullable = false)
     @Description("The environment")
+    @Name
     @Position(5)
     private Environment environment;
 
     @ManyToOne
     @JoinColumn(name = "simulation_id", nullable = false)
     @Description("The simulation")
+    @Name
     @Position(10)
     private RestSimulation simulation;
 

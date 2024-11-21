@@ -29,12 +29,14 @@ public class RestSchedule extends TimestampAware {
     @ManyToOne
     @JoinColumn(name = "environment_id", nullable = false)
     @Description("The environment on which the simulation will be executed")
+    @Name
     @Position(10)
     private Environment environment;
 
     @ManyToOne
     @JoinColumn(name = "simulation_id", nullable = false)
     @Description("The simulation to be executed by this schedule")
+    @Name
     @Position(15)
     private RestSimulation simulation;
 
