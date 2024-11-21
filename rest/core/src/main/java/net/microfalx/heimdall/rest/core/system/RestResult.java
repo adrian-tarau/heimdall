@@ -1,61 +1,47 @@
-package net.microfalx.heimdall.rest.core.overview;
+package net.microfalx.heimdall.rest.core.system;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.microfalx.bootstrap.dataset.annotation.Component;
+import net.microfalx.bootstrap.dataset.annotation.Filterable;
 import net.microfalx.bootstrap.jdbc.entity.IdentityAware;
 import net.microfalx.heimdall.infrastructure.core.system.Environment;
 import net.microfalx.heimdall.rest.api.Status;
-import net.microfalx.heimdall.rest.core.system.RestResult;
-import net.microfalx.heimdall.rest.core.system.RestScenario;
-import net.microfalx.heimdall.rest.core.system.RestSimulation;
 import net.microfalx.lang.annotation.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "rest_output")
+@Table(name = "rest_result")
 @Name("Outputs")
 @ReadOnly
 @ToString
 @Getter
 @Setter
-public class SimulationResult extends IdentityAware<Integer> {
+public class RestResult extends IdentityAware<Long> {
 
     @ManyToOne
     @JoinColumn(name = "environment_id", nullable = false)
-    @Description("The environment targeted by a simulation")
-    @Position(10)
+    @Description("The environment")
+    @Position(5)
     private Environment environment;
 
     @ManyToOne
     @JoinColumn(name = "simulation_id", nullable = false)
-    @Description("The simulation used to produce the output")
-    @Position(15)
+    @Description("The simulation")
+    @Position(10)
     private RestSimulation simulation;
-
-    @OneToOne
-    @JoinColumn(name = "result_id", nullable = false)
-    @Description("The simulation result")
-    @Position(16)
-    private RestResult result;
-
-    @ManyToOne
-    @JoinColumn(name = "scenario_id",nullable = false)
-    @Description("The status of the simulation result")
-    @Position(17)
-    private RestScenario scenario;
 
     @Column(name = "status",nullable = false)
     @Enumerated(EnumType.STRING)
-    @Description("The status of the simulation result")
-    @Position(18)
+    @Description("The status of the simulation")
+    @Position(15)
     private Status status;
 
-    @Column(name = "started_at", nullable = false)
-    @Description("the start time of the simulation")
+    @Description("The start time of the simulation")
     @Position(20)
     private LocalDateTime startedAt;
 
@@ -158,4 +144,27 @@ public class SimulationResult extends IdentityAware<Integer> {
     @Position(100)
     @Visible(false)
     private float httpRequests;
+
+    @Column(name = "version", length = 50)
+    @Description("The version")
+    @Position(105)
+    private String version;
+
+    @Column(name = "logs_uri",length = 500)
+    @Description("A resource containing the log of the simulation")
+    @Position(110)
+    private String logsURI;
+
+    @Column(name = "report_uri",length = 500)
+    @Description("The resource containing the report of the simulation")
+    @Position(115)
+    private String reportURI;
+
+    @Column(name = "description")
+    @Position(1000)
+    @Component(Component.Type.TEXT_AREA)
+    @Description("A description for a {name}")
+    @Width("300px")
+    @Filterable()
+    private String description;
 }

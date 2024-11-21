@@ -132,7 +132,7 @@ create table rest_result
     constraint fk$rest_result$simulation foreign key (simulation_id) references rest_simulation (id)
 ) ENGINE = InnoDB;
 
-create index ix$rest_output$started on rest_output (started_at);
+create index ix$rest_result$started on rest_result (started_at);
 
 create table rest_output
 (

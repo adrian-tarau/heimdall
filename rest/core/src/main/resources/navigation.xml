@@ -12,6 +12,7 @@
             <item id="simulation" text="Simulations" action="/system/rest/simulation" icon="fa-solid fa-vials"/>
             <item id="library" text="Libraries" action="/system/rest/library" icon="fa-solid fa-book"/>
             <item id="schedule" text="Schedules" action="/system/rest/schedule" icon="fa-solid fa-clock"/>
+            <item id="result" text="Results" action="/system/rest/result" icon="fa-solid fa-square-poll-vertical"/>
         </menu>
     </menu>
 </navigations>
