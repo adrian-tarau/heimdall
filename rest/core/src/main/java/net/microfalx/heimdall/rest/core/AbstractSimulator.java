@@ -276,7 +276,7 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
     protected final Resource getWorkspace() {
         if (installWorkspace == null) {
             installWorkspace = Resource.workspace().resolve("simulator", Resource.Type.DIRECTORY)
-                    .resolve(getOptions().getId(), Resource.Type.DIRECTORY);
+                    .resolve(getSimulatorId(), Resource.Type.DIRECTORY);
         }
         return installWorkspace;
     }
@@ -376,22 +376,22 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
     private void prepareScripts(SimulationContext context) {
         Resource workspace = getSessionWorkspace();
         try {
-            log("Prepare script ''{0}'' ({0})", simulation.getName(), formatBytes(simulation.getResource().length()));
+            log("Prepare script ''{0}'' ({1})", simulation.getName(), formatBytes(simulation.getResource().length()));
             input = copyResource(workspace, simulation, null);
             if (!context.getLibraries().isEmpty()) {
                 log("Prepare libraries ({0})", context.getLibraries().size());
             }
             for (Library library : context.getLibraries()) {
                 if (simulation.getProject() != null && !simulation.getProject().equals(library.getProject())) continue;
-                log(" - ''{0}}' ({0})", library.getName(), formatBytes(library.getResource().length()));
+                log(" - ''{0}'' ({1})", library.getName(), formatBytes(library.getResource().length()));
                 copyResource(workspace, library, null);
             }
         } catch (IOException e) {
             throw new SimulationException("Filed to copy simulation or libraries to working space '" + workspace + "'", e);
         }
-        output = workspace.resolve(getId() + ".csv");
-        systemOutput = workspace.resolve(getId() + ".system.output");
-        systemError = workspace.resolve(getId() + ".system.error");
+        output = workspace.resolve(getSimulatorId() + ".csv");
+        systemOutput = workspace.resolve(getSimulatorId() + ".system.output");
+        systemError = workspace.resolve(getSimulatorId() + ".system.error");
     }
 
     private void runSimulation(SimulationContext context) {
@@ -430,7 +430,7 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
                 if (exitValue != 0) {
                     log("Execution of simulator '" + getName() + "' failed with error code = " + exitValue);
                     throw new SimulationExecutionException("Execution of simulator '" + getName() + "' failed with error code = "
-                            + exitValue + ", error stream: " + getErrorOutput());
+                            + exitValue + ", logs:\n " + getLogsAsText());
                 } else {
                     log("Simulation completed successfully in " + formatDuration(Duration.between(getStartTime(), getEndTime())));
                 }
@@ -496,8 +496,12 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
         return workspace.resolve(fileName).copyFrom(resource);
     }
 
+    private String getSimulatorId() {
+        return getOptions().getId();
+    }
+
     private boolean validatePackage() throws IOException {
-        if (INSTALLED.contains(getId())) return true;
+        if (INSTALLED.contains(getSimulatorId())) return true;
         Resource targetWorkspace = getWorkspace();
         if (!targetWorkspace.exists()) return false;
         Set<String> requiredFiles = getOptions().getRequiredFiles();
@@ -514,8 +518,16 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
             });
             if (fileCount.get() < minimumFileCount) return false;
         }
-        INSTALLED.add(getId());
+        INSTALLED.add(getSimulatorId());
         return true;
+    }
+
+    private String getLogsAsText() {
+        try {
+            return getLogs().loadAsString();
+        } catch (IOException e) {
+            return "#Error: " + ExceptionUtils.getRootCauseMessage(e);
+        }
     }
 
     @Setter
