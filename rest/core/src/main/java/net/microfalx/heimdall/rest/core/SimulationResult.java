@@ -4,6 +4,8 @@ import lombok.ToString;
 import net.microfalx.heimdall.rest.api.*;
 import net.microfalx.resource.Resource;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -21,6 +23,21 @@ public class SimulationResult implements Result {
         requireNonNull(outputs);
         this.simulator = simulator;
         this.outputs.addAll(outputs);
+    }
+
+    @Override
+    public LocalDateTime getStartTime() {
+        return simulator.getStartTime();
+    }
+
+    @Override
+    public LocalDateTime getEndTime() {
+        return simulator.getEndTime();
+    }
+
+    @Override
+    public Duration getDuration() {
+        return simulator.getDuration();
     }
 
     @Override

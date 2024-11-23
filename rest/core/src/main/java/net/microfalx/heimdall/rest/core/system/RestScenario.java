@@ -39,5 +39,5 @@ public class RestScenario extends NamedAndTaggedAndTimestampedIdentityAware<Inte
     @Column(name = "function",length = 100)
     @Description("The function")
     @Position(20)
-    private Integer function;
+    private String function;
 }
