@@ -244,7 +244,7 @@ public class RestServiceImpl implements RestService, InitializingBean {
         this.cache = cache;
         taskExecutor.execute(() -> projectManager.initialize(this));
         taskExecutor.execute(() -> simulationScheduler.initialize(this));
-        taskExecutor.execute(() -> simulationScheduler.reload());
+        taskExecutor.execute(simulationScheduler::reload);
     }
 
     @Override

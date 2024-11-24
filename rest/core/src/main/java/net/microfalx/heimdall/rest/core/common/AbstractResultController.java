@@ -3,6 +3,7 @@ package net.microfalx.heimdall.rest.core.common;
 import net.microfalx.bootstrap.content.Content;
 import net.microfalx.bootstrap.content.ContentService;
 import net.microfalx.bootstrap.web.dataset.DataSetController;
+import net.microfalx.bootstrap.web.util.TableGenerator;
 import net.microfalx.heimdall.rest.api.RestService;
 import net.microfalx.resource.Resource;
 import org.springframework.ui.Model;
@@ -27,7 +28,8 @@ public abstract class AbstractResultController<R extends AbstractResult> extends
     @GetMapping("/data/{id}")
     public String viewData(@PathVariable("id") int id, Model model) throws IOException {
         Resource data = getRestService().getData(id);
-        model.addAttribute("data", data.loadAsString());
+        TableGenerator tableGenerator = new TableGenerator().setSmall(true).addRows(data);
+        model.addAttribute("data", tableGenerator.generate());
         return "rest/view_result::#data-modal";
     }
 
