@@ -8,10 +8,7 @@ import net.microfalx.bootstrap.model.Attribute;
 import net.microfalx.heimdall.infrastructure.api.Environment;
 import net.microfalx.heimdall.rest.api.*;
 import net.microfalx.lang.*;
-import net.microfalx.resource.ClassPathResource;
-import net.microfalx.resource.FileResource;
-import net.microfalx.resource.MemoryResource;
-import net.microfalx.resource.Resource;
+import net.microfalx.resource.*;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
@@ -59,7 +56,7 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
     private Resource input;
     private Resource systemOutput;
     private Resource systemError;
-    private Resource output;
+    private Resource output = Resource.NULL;
 
     private LocalDateTime startTime = LocalDateTime.now();
     private LocalDateTime endTime;
@@ -145,6 +142,11 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
             finalLogs.append("\n\nFailed to retrieve logs: ").append(ExceptionUtils.getRootCauseMessage(e));
         }
         return MemoryResource.create(finalLogs.toString()).withAttribute(LOG_ATTR, Boolean.TRUE);
+    }
+
+    @Override
+    public Resource getData() {
+        return output;
     }
 
     @Override
@@ -434,7 +436,8 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
         } catch (IOException e) {
             throw new SimulationException("Filed to copy simulation or libraries to working space '" + workspace + "'", e);
         }
-        output = workspace.resolve(getSimulatorId() + ".csv");
+        output = workspace.resolve(getSimulatorId() + ".csv").withMimeType(MimeType.TEXT_CSV)
+                .withAttribute(RestConstants.DATA_ATTR, Boolean.TRUE);
         systemOutput = workspace.resolve(getSimulatorId() + ".system.output");
         systemError = workspace.resolve(getSimulatorId() + ".system.error");
     }

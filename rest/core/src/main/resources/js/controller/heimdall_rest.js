@@ -18,6 +18,12 @@ Application.bind("rest.simulation.view.logs", function (id) {
     });
 });
 
+Application.bind("rest.simulation.view.data", function (id) {
+    DataSet.get("data/" + id, {}, function (data) {
+        Application.loadModal("data-modal", data);
+    });
+});
+
 Application.bind("rest.simulation.view.report", function (id) {
     DataSet.get("report/" + id, {}, function (data) {
         Application.loadModal("report-modal", data);

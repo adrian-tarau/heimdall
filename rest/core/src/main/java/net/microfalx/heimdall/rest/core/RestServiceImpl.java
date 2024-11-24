@@ -68,6 +68,7 @@ public class RestServiceImpl implements RestService, InitializingBean {
     private Resource scriptResource;
     private Resource logsResource;
     private Resource reportResource;
+    private Resource dataResource;
     private Resource projectResource;
 
     @Override
@@ -140,6 +141,8 @@ public class RestServiceImpl implements RestService, InitializingBean {
             target = logsResource;
         } else if (resource.hasAttribute(REPORT_ATTR)) {
             target = reportResource;
+        } else if (resource.hasAttribute(DATA_ATTR)) {
+            target = dataResource;
         } else {
             throw new RestException("Expected attributes not found for resource " + resource.toURI());
         }
@@ -224,6 +227,16 @@ public class RestServiceImpl implements RestService, InitializingBean {
     }
 
     @Override
+    public Resource getData(int id) {
+        RestResult result = findOutput(id);
+        if (result.getLogsURI() != null) {
+            return ResourceFactory.resolve(UriUtils.parseUri(result.getDataURI())).withMimeType(MimeType.TEXT_CSV);
+        } else {
+            return MemoryResource.create("No data is available");
+        }
+    }
+
+    @Override
     public void reload() {
         RestCache cache = new RestCache();
         cache.setApplicationContext(applicationContext);
@@ -277,6 +290,7 @@ public class RestServiceImpl implements RestService, InitializingBean {
         initScriptResources(resource);
         initLogResources(resource);
         initReportResources(resource);
+        initDataResources(resource);
     }
 
     private void registerHeimdall() {
@@ -338,6 +352,23 @@ public class RestServiceImpl implements RestService, InitializingBean {
             ResourceFactory.registerSymlink("rest/report", dbReportResource);
         } else {
             LOGGER.info("Rest reports are stored in: " + reportResource);
+        }
+    }
+
+    private void initDataResources(Resource resource) {
+        dataResource = resource.resolve("data", Resource.Type.DIRECTORY);
+        if (dataResource.isLocal()) {
+            LOGGER.info("Rest data is stored in a RocksDB database: " + dataResource);
+            Resource dbDataResource = RocksDbResource.create(dataResource);
+            try {
+                dbDataResource.create();
+            } catch (IOException e) {
+                LOGGER.error("Failed to initialize statement store", e);
+                System.exit(10);
+            }
+            ResourceFactory.registerSymlink("rest/data", dbDataResource);
+        } else {
+            LOGGER.info("Rest data is stored in: " + dataResource);
         }
     }
 

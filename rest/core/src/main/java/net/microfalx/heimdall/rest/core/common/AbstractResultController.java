@@ -24,6 +24,13 @@ public abstract class AbstractResultController<R extends AbstractResult> extends
         return "rest/view_result::#log-modal";
     }
 
+    @GetMapping("/data/{id}")
+    public String viewData(@PathVariable("id") int id, Model model) throws IOException {
+        Resource data = getRestService().getData(id);
+        model.addAttribute("data", data.loadAsString());
+        return "rest/view_result::#data-modal";
+    }
+
     @GetMapping("/report/{id}")
     public String viewReport(@PathVariable("id") int id, Model model) throws IOException {
         Resource report = getRestService().getReport(id);

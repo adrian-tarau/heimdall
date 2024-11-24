@@ -116,7 +116,8 @@ class RestSimulationScheduler extends ApplicationContextSupport {
     private void persist(SimulationContext context, Result result) throws IOException {
         Resource resourceLogs = restService.registerResource(result.getLogs());
         Resource resourceReport = restService.registerResource(result.getReport());
-        RestResult restResult = persistRestResult(context, result, resourceLogs, resourceReport);
+        Resource dataReport = restService.registerResource(result.getData());
+        RestResult restResult = persistRestResult(context, result, resourceLogs, resourceReport, dataReport);
         result.getOutputs().forEach(output -> {
             RestScenario restScenario = persistRestScenario(output, restResult);
             persistRestOutput(restResult, restScenario, output);
@@ -164,7 +165,7 @@ class RestSimulationScheduler extends ApplicationContextSupport {
         return updater.findByNaturalIdOrCreate(restScenario);
     }
 
-    private RestResult persistRestResult(SimulationContext context, Result result, Resource resourceLogs, Resource resourceReport) {
+    private RestResult persistRestResult(SimulationContext context, Result result, Resource resourceLogs, Resource resourceReport, Resource dataReport) {
         RestResult restResult = new RestResult();
 
         Optional<RestSimulation> jpaSimulation = getBean(RestSimulationRepository.class).findByNaturalId(result.getSimulation().getId());
@@ -176,6 +177,7 @@ class RestSimulationScheduler extends ApplicationContextSupport {
         restResult.setErrorMessage(abbreviateMiddle(result.getErrorMessage(), 500));
         restResult.setLogsURI(ResourceUtils.toUri(resourceLogs));
         restResult.setReportURI(ResourceUtils.toUri(resourceReport));
+        restResult.setDataURI(ResourceUtils.toUri(dataReport));
         restResult.setStartedAt(result.getStartTime());
         restResult.setEndedAt(result.getEndTime());
         restResult.setDuration((int) result.getDuration().toMillis());

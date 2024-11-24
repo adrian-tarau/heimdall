@@ -83,4 +83,11 @@ public interface Result {
      * @return a non-null instance
      */
     Resource getLogs();
+
+    /**
+     * Returns a resource containing the data produced by the simulation.
+     *
+     * @return a non-null instance
+     */
+    Resource getData();
 }

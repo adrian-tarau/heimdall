@@ -128,6 +128,7 @@ create table rest_result
     version                      varchar(50),
     logs_uri                     varchar(500),
     report_uri                   varchar(500),
+    data_uri                   varchar(500),
     description                  varchar(1000),
     constraint fk$rest_result$environment foreign key (environment_id) references infrastructure_environment (id),
     constraint fk$rest_result$simulation foreign key (simulation_id) references rest_simulation (id)

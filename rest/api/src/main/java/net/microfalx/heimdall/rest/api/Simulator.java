@@ -111,6 +111,13 @@ public interface Simulator extends Identifiable<String>, Nameable {
     Resource getLogs();
 
     /**
+     * Returns a resource containing the data produced by the simulation.
+     *
+     * @return a non-null instance
+     */
+    Resource getData();
+
+    /**
      * Returns an optional URL to the live dashboard of the simulator.
      *
      * @return a non-null instance

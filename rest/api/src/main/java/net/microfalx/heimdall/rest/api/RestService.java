@@ -176,6 +176,14 @@ public interface RestService {
     Resource getReport(int id);
 
     /**
+     * Returns the data for a given simulation.
+     *
+     * @param id the identifier of the result
+     * @return a non-null instance
+     */
+    Resource getData(int id);
+
+    /**
      * Reloads the rest definitions.
      */
     void reload();

@@ -69,4 +69,9 @@ public class SimulationResult implements Result {
     public Resource getLogs() {
         return simulator.getLogs();
     }
+
+    @Override
+    public Resource getData() {
+        return simulator.getData();
+    }
 }

@@ -9,6 +9,7 @@ public interface RestConstants {
     String SCRIPT_ATTR = "script";
     String LOG_ATTR = "log";
     String REPORT_ATTR = "report";
+    String DATA_ATTR = "data";
 
     // various attributes used to inject into the simulation context
     String VIRTUAL_USERS_ATTR = "vus";

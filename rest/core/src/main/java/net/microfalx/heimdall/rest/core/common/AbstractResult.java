@@ -170,6 +170,14 @@ public abstract class AbstractResult extends IdentityAware<Long> {
     @Renderable(action = "rest.simulation.view.report", icon = "fa-solid fa-chart-line")
     private String reportURI;
 
+    @Label("Data")
+    @Column(name = "data_uri", length = 500)
+    @Description("The resource containing the data produced byt the simulation")
+    @Align(Align.Type.CENTER)
+    @Position(115)
+    @Renderable(action = "rest.simulation.view.data", icon = "fa-solid fa-file-csv")
+    private String dataURI;
+
     @Column(name = "version", length = 50)
     @Description("The version of the software available in the environment at the time of the simulation")
     @Position(200)
