@@ -29,7 +29,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <iframe class="w-100 p-1" style="height:400px" loading="lazy" th:src="${#content.getViewUri(content)}"></iframe>
+                <iframe class="w-100 p-1" style="height:650px" loading="lazy" th:src="${#content.getViewUri(content)}"></iframe>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary btn-sm" th:attr="onclick=|Application.closeModal()|">Close</button>

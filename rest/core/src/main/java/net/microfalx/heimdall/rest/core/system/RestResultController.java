@@ -1,24 +1,19 @@
 package net.microfalx.heimdall.rest.core.system;
 
-import net.microfalx.bootstrap.content.Content;
 import net.microfalx.bootstrap.content.ContentService;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
-import net.microfalx.bootstrap.web.dataset.DataSetController;
+import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.heimdall.rest.api.RestService;
-import net.microfalx.resource.Resource;
+import net.microfalx.heimdall.rest.core.common.AbstractResultController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import java.io.IOException;
 
 @Controller("SystemRestResultController")
 @DataSet(model = RestResult.class)
 @RequestMapping("/system/rest/result")
-public class RestResultController extends DataSetController<RestResult,Long> {
+@Help("rest/system/result")
+public class RestResultController extends AbstractResultController<RestResult> {
 
     @Autowired
     private RestService restService;
@@ -26,20 +21,11 @@ public class RestResultController extends DataSetController<RestResult,Long> {
     @Autowired
     private ContentService contentService;
 
-    @GetMapping("/log/{id}")
-    public String viewLog(@PathVariable("id") int id, Model model) throws IOException {
-        Resource log = restService.getLog(id);
-        model.addAttribute("log", log.loadAsString());
-        return "rest/view_result::#log-modal";
+    public RestService getRestService() {
+        return restService;
     }
 
-    @GetMapping("/report/{id}")
-    public String viewReport(@PathVariable("id") int id, Model model) throws IOException {
-        Resource report = restService.getReport(id);
-        Content content = Content.create(report);
-        contentService.registerContent(content);
-        model.addAttribute("content", content);
-        return "rest/view_result::#report-modal";
+    public ContentService getContentService() {
+        return contentService;
     }
-
 }

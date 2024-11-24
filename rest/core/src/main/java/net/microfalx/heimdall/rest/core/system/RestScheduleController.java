@@ -2,6 +2,7 @@ package net.microfalx.heimdall.rest.core.system;
 
 import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
+import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.web.component.Item;
 import net.microfalx.bootstrap.web.component.Menu;
@@ -11,6 +12,7 @@ import net.microfalx.bootstrap.web.util.JsonFormResponse;
 import net.microfalx.bootstrap.web.util.JsonResponse;
 import net.microfalx.heimdall.rest.api.RestService;
 import net.microfalx.heimdall.rest.api.Schedule;
+import net.microfalx.heimdall.rest.api.SimulationContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Controller;
@@ -25,17 +27,19 @@ import static net.microfalx.lang.StringUtils.isEmpty;
 @Controller("SystemScheduleController")
 @DataSet(model = RestSchedule.class, timeFilter = false)
 @RequestMapping("/system/rest/schedule")
+@Help("rest/system/schedule")
 public class RestScheduleController extends DataSetController<RestSchedule,Integer> {
 
     @Autowired
     private RestService restService;
 
-    @PostMapping("schedule/{id}")
+    @PostMapping("run/{id}")
     @ResponseBody
     public JsonResponse<?> schedule(@PathVariable("id") String id) {
         Schedule schedule = restService.getSchedule(id);
-        restService.simulate(schedule.getSimulation(), schedule.getEnvironment());
-        return JsonResponse.success(formatMessage("The simulation ''{0}'' was scheduled to be executed against environment ''{1}''",
+        SimulationContext context = restService.createContext(schedule.getEnvironment(), schedule.getSimulation());
+        restService.schedule(context);
+        return JsonResponse.success(formatMessage("The simulation ''{0}'' was scheduled to be executed using environment ''{1}''",
                 schedule.getSimulation().getName(), schedule.getEnvironment().getName()));
     }
 

@@ -22,13 +22,11 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Future;
 
 import static java.util.Collections.unmodifiableCollection;
 import static net.microfalx.heimdall.rest.api.RestConstants.*;
@@ -172,19 +170,37 @@ public class RestServiceImpl implements RestService, InitializingBean {
     }
 
     @Override
-    public Result simulate(Simulation simulation, Environment environment) {
-        requireNonNull(simulation);
-        requireNonNull(environment);
-        Simulator simulator = createSimulator(simulation);
+    public SimulationContext createContext(Environment environment, Simulation simulation) {
+        return createContext(environment, simulation, Collections.emptyList());
+    }
+
+    @Override
+    public SimulationContext createContext(Environment environment, Simulation simulation, Collection<Library> libraries) {
+        return new SimulationContextImpl(environment, simulation, libraries);
+    }
+
+    @Override
+    public Result simulate(SimulationContext context) {
+        requireNonNull(context);
+        LOGGER.info("Execute simulation '{}' using environment '{}'", context.getSimulation().getName(), context.getEnvironment().getName());
+        Simulator simulator = createSimulator(context.getSimulation());
+        if (context instanceof SimulationContextImpl contextImpl) {
+            contextImpl.addLibraries(getLibraries(context.getSimulation()));
+        }
         running.add(simulator);
         try {
-            SimulationContext context = new SimulationContextImpl(environment, getLibraries());
             return simulator.execute(context);
         } finally {
             history.offer(simulator);
             if (history.size() > properties.getHistorySize()) history.poll();
             running.remove(simulator);
         }
+    }
+
+    @Override
+    public Future<Result> schedule(SimulationContext context) {
+        requireNonNull(context);
+        return simulationScheduler.schedule(context);
     }
 
     @Override

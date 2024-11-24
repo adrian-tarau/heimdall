@@ -1,6 +1,5 @@
 package net.microfalx.heimdall.rest.core.overview;
 
-import com.google.common.collect.Iterables;
 import net.microfalx.bootstrap.dataset.DataSetFactory;
 import net.microfalx.bootstrap.dataset.MemoryDataSet;
 import net.microfalx.bootstrap.model.Metadata;
@@ -24,14 +23,18 @@ public class SimulationRunningDataSet extends MemoryDataSet<SimulationRunning, P
     @Override
     protected Iterable<SimulationRunning> extractModels() {
         RestService restService = getService(RestService.class);
-        return Iterables.concat(restService.getRunning().stream().map(this::from).collect(Collectors.toList()),
-                restService.getHistory().stream().map(this::from).collect(Collectors.toList()));
+        return restService.getRunning().stream().map(this::from).collect(Collectors.toList());
     }
 
     private SimulationRunning from(Simulator simulator) {
         Simulation simulation = simulator.getSimulation();
         SimulationRunning model = new SimulationRunning();
         model.setName(simulation.getName()).setDescription(simulation.getDescription()).setId(simulator.getId());
+        try {
+            model.setEnvironment(simulator.getEnvironment());
+        } catch (IllegalStateException e) {
+            // might not be available right away
+        }
         model.setStartedAt(simulator.getStartTime()).setDuration(simulator.getDuration());
         model.setScript(simulation.getPath());
         return model;

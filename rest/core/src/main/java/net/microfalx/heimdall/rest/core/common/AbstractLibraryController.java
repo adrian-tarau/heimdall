@@ -1,4 +1,4 @@
-package net.microfalx.heimdall.rest.core.system;
+package net.microfalx.heimdall.rest.core.common;
 
 import net.microfalx.bootstrap.content.ContentService;
 import net.microfalx.bootstrap.dataset.DataSet;

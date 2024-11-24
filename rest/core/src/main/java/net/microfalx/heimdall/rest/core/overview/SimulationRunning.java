@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.OrderBy;
 import net.microfalx.bootstrap.dataset.model.NamedIdentityAware;
+import net.microfalx.heimdall.infrastructure.api.Environment;
 import net.microfalx.lang.annotation.*;
 import org.springframework.data.annotation.CreatedDate;
 
@@ -14,9 +15,13 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
-@Name("Simulations")
+@Name("Running")
 @ReadOnly
 public class SimulationRunning extends NamedIdentityAware<String> {
+
+    @Position(4)
+    @Description("The environment used during simulation")
+    private Environment environment;
 
     @Position(100)
     @Visible(modes = {Visible.Mode.BROWSE})

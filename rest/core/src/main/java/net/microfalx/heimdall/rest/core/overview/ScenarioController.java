@@ -5,8 +5,8 @@ import net.microfalx.bootstrap.web.dataset.DataSetController;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-@Controller("OverviewSimulationController")
-@DataSet(model = Simulation.class)
-@RequestMapping("/rest/simulation")
-public class SimulationController extends DataSetController<Simulation,Integer> {
+@Controller("OverviewScenarioController")
+@DataSet(model = Scenario.class)
+@RequestMapping("/rest/scenario")
+public class ScenarioController extends DataSetController<Scenario,Integer> {
 }

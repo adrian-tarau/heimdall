@@ -26,7 +26,7 @@ Application.bind("rest.simulation.view.report", function (id) {
 
 Application.bind("rest.schedule.run", function () {
     Logger.info("Start simulation with id '" + DataSet.getId() + "'");
-    DataSet.post("schedule/" + DataSet.getId(), {}, function (json) {
+    DataSet.post("run/" + DataSet.getId(), {}, function (json) {
         Application.showInfoAlert("Simulation", json.message)
     }, {dataType: "json"});
 });

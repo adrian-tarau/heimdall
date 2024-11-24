@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
+import net.microfalx.heimdall.rest.core.common.AbstractLibrary;
 import net.microfalx.lang.annotation.Description;
 import net.microfalx.lang.annotation.Name;
 import net.microfalx.lang.annotation.Position;

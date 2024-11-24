@@ -3,8 +3,9 @@
     <menu id="primary">
         <menu id="rest" text="Rest API" position="100" action="/rest" icon="fa-solid fa-plug">
             <item id="simulation" text="Simulations" action="/rest/simulation" icon="fa-solid fa-vials"/>
+            <item id="scenario" text="Scenarios" action="/rest/scenario" icon="fa-solid fa-vials"/>
             <item id="running" text="Running" action="/rest/simulation/running" icon="fa-solid fa-gears"/>
-            <item id="result" text="Results" action="/rest/simulation/result" icon="fa-solid fa-vial-circle-check"/>
+            <item id="history" text="History" action="/rest/simulation/result" icon="fa-solid fa-vial-circle-check"/>
         </menu>
         <menu id="rest_admin" text="Rest API" position="100" parent="system" action="/system/rest"
               roles="admin" icon="fa-solid fa-plug">

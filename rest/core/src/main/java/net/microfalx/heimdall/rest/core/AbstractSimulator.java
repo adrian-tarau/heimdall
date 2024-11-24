@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import net.microfalx.bootstrap.model.Attribute;
+import net.microfalx.heimdall.infrastructure.api.Environment;
 import net.microfalx.heimdall.rest.api.*;
 import net.microfalx.lang.*;
 import net.microfalx.resource.ClassPathResource;
@@ -65,6 +66,7 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
     private volatile boolean running;
     private volatile Status status = Status.UNKNOWN;
     private volatile String errorMessage;
+    private volatile Environment environment;
     private Resource report = Resource.NULL;
     private Resource log = Resource.NULL;
     private final StringBuilder logger = new StringBuilder(8000);
@@ -85,6 +87,14 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
     @Override
     public final String getName() {
         return getOptions().getName();
+    }
+
+    @Override
+    public Environment getEnvironment() {
+        if (environment == null) {
+            throw new IllegalStateException("The environment is available only for started simulations");
+        }
+        return environment;
     }
 
     @Override
@@ -121,11 +131,15 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
             if (log.exists()) {
                 finalLogs.append(getHeader("Simulator Log")).append(LINE_SEPARATOR).append(log.loadAsString());
             }
-            if (systemOutput.exists()) {
-                finalLogs.append(getHeader("Simulator System Output")).append(LINE_SEPARATOR).append(systemOutput.loadAsString());
+            String output = EMPTY_STRING;
+            if (systemOutput.exists()) output = systemOutput.loadAsString();
+            if (isNotEmpty(output)) {
+                finalLogs.append(getHeader("Simulator Output")).append(LINE_SEPARATOR).append(output);
             }
-            if (systemError.exists()) {
-                finalLogs.append(getHeader("Simulator System Error")).append(LINE_SEPARATOR).append(systemError.loadAsString());
+            String error = EMPTY_STRING;
+            if (systemError.exists()) error = systemError.loadAsString();
+            if (isNotEmpty(error)) {
+                finalLogs.append(getHeader("Simulator Errors")).append(LINE_SEPARATOR).append(error);
             }
         } catch (IOException e) {
             finalLogs.append("\n\nFailed to retrieve logs: ").append(ExceptionUtils.getRootCauseMessage(e));
@@ -140,6 +154,8 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
 
     @Override
     public final Result execute(SimulationContext context) {
+        requireNonNull(context);
+        this.environment = context.getEnvironment();
         Resource resource = null;
         try {
             resource = doExecute(context);
@@ -429,8 +445,8 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
         arguments.add(executable.getAbsolutePath());
         update(arguments, toFile(input), toFile(output), context);
         ProcessBuilder processBuilder = new ProcessBuilder(arguments).directory(toFile(getSessionWorkspace()))
-                .redirectError(toFile(systemOutput))
-                .redirectOutput(toFile(systemError));
+                .redirectError(toFile(systemError))
+                .redirectOutput(toFile(systemOutput));
         update(processBuilder, context);
         exportEnvironmentVariables(processBuilder, context);
         running = true;
@@ -470,7 +486,7 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
     }
 
     private void exportEnvironmentVariables(ProcessBuilder processBuilder, SimulationContext context) {
-        for (Attribute attribute : context.getEnvironment().getAttributes(true)) {
+        for (Attribute attribute : context.getAttributes()) {
             String name = StringUtils.toIdentifier(attribute.getName()).toUpperCase();
             processBuilder.environment().put(name, ObjectUtils.toString(attribute.getValue()));
         }

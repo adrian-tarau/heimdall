@@ -4,6 +4,7 @@ import net.microfalx.heimdall.infrastructure.api.Environment;
 import net.microfalx.heimdall.rest.api.Result;
 import net.microfalx.heimdall.rest.api.Schedule;
 import net.microfalx.heimdall.rest.api.Simulation;
+import net.microfalx.heimdall.rest.api.SimulationContext;
 import net.microfalx.lang.UriUtils;
 import net.microfalx.resource.MemoryResource;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,6 +41,9 @@ class RestSimulationSchedulerTest {
     private TaskExecutor executor;
 
     @Mock
+    private SimulationContext simulationContext;
+
+    @Mock
     private Result result;
 
     @InjectMocks
@@ -49,19 +53,21 @@ class RestSimulationSchedulerTest {
     void setUp() {
         Simulation simulation = (Simulation) Simulation.create(MemoryResource.create("This is a simulation"))
                 .type(Simulation.Type.K6).build();
-        Environment.Builder builder = Environment.create();
-        builder.baseUri(UriUtils.parseUri("http://localhost:8080").toASCIIString());
-        builder.id("123456");
+        Environment environment = Environment.create()
+                .baseUri(UriUtils.parseUri("http://localhost:8080").toASCIIString()).build();
         Schedule.Builder schedule = new Schedule.Builder().simulation(simulation)
-                .environment(builder.build()).interval(Duration.of(5, ChronoUnit.SECONDS));
+                .environment(environment).interval(Duration.of(5, ChronoUnit.SECONDS));
         schedule.description("This is a schedule description");
         schedule.name("This is a schedule name");
         schedule.tag("This isa schedule tag");
         schedule.id("09876");
 
+        when(simulationContext.getSimulation()).thenReturn(simulation);
+        when(simulationContext.getEnvironment()).thenReturn(environment);
+
         when(restService.getProperties()).thenReturn(new RestProperties());
         when(restService.getSchedules()).thenReturn(Collections.singletonList(schedule.build()));
-        when(restService.simulate(schedule.build().getSimulation(), schedule.build().getEnvironment())).thenReturn(result);
+        when(restService.simulate(simulationContext)).thenReturn(result);
         restSimulationScheduler.initialize(restService);
     }
 

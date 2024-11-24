@@ -1,4 +1,4 @@
-package net.microfalx.heimdall.rest.core.system;
+package net.microfalx.heimdall.rest.core.common;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -7,6 +7,7 @@ import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
 import net.microfalx.heimdall.rest.api.Simulation;
+import net.microfalx.heimdall.rest.core.system.RestProject;
 import net.microfalx.lang.annotation.Description;
 import net.microfalx.lang.annotation.NaturalId;
 import net.microfalx.lang.annotation.Position;

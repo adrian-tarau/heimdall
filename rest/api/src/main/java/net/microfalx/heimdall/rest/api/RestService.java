@@ -5,6 +5,7 @@ import net.microfalx.resource.Resource;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.concurrent.Future;
 
 /**
  * A service which can simulate workloads against HTTP (Restful) endpoints.
@@ -122,12 +123,41 @@ public interface RestService {
     Collection<Simulator> getHistory();
 
     /**
+     * Creates a simulation context only on system defined libraries.
+     *
+     * @param environment the environment
+     * @param simulation  the simulation
+     * @return a non-null instance
+     */
+    SimulationContext createContext(Environment environment, Simulation simulation);
+
+    /**
+     * Creates a simulation context.
+     * <p>
+     * Additional libraries are used to create the context.
+     *
+     * @param environment the environment
+     * @param simulation  the simulation
+     * @param libraries   the libraries
+     * @return a non-null instance
+     */
+    SimulationContext createContext(Environment environment, Simulation simulation, Collection<Library> libraries);
+
+    /**
      * Executes a simulation.
      *
-     * @param simulation the simulation
+     * @param context the simulation context
      * @return future which tracks the execution of the simulation
      */
-    Result simulate(Simulation simulation, Environment environment);
+    Result simulate(SimulationContext context);
+
+    /**
+     * Schedules a simulation.
+     *
+     * @param context the simulation context
+     * @return future which tracks the execution of the simulation
+     */
+    Future<Result> schedule(SimulationContext context);
 
     /**
      * Returns the log for a given simulation.

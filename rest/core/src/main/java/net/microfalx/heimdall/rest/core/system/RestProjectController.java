@@ -2,6 +2,7 @@ package net.microfalx.heimdall.rest.core.system;
 
 import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
+import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.web.component.Button;
 import net.microfalx.bootstrap.web.component.Toolbar;
@@ -20,6 +21,7 @@ import static net.microfalx.lang.UriUtils.parseUri;
 @Controller("SystemProjectController")
 @DataSet(model = RestProject.class, timeFilter = false)
 @RequestMapping("/system/rest/project")
+@Help("rest/system/project")
 public class RestProjectController extends DataSetController<RestProject, Integer> {
 
     @Autowired

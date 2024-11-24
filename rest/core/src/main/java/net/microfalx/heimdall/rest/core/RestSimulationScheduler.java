@@ -5,29 +5,31 @@ import net.microfalx.bootstrap.core.async.AsynchronousProperties;
 import net.microfalx.bootstrap.core.async.TaskExecutorFactory;
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
 import net.microfalx.bootstrap.jdbc.jpa.NaturalIdEntityUpdater;
+import net.microfalx.bootstrap.metrics.Aggregation;
 import net.microfalx.bootstrap.metrics.Value;
 import net.microfalx.bootstrap.model.MetadataService;
 import net.microfalx.heimdall.infrastructure.core.system.EnvironmentRepository;
-import net.microfalx.heimdall.rest.api.Output;
-import net.microfalx.heimdall.rest.api.Result;
-import net.microfalx.heimdall.rest.api.Schedule;
-import net.microfalx.heimdall.rest.api.Status;
+import net.microfalx.heimdall.rest.api.*;
 import net.microfalx.heimdall.rest.core.system.*;
 import net.microfalx.lang.ExceptionUtils;
+import net.microfalx.lang.StringUtils;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceUtils;
-import org.springframework.core.task.TaskExecutor;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.scheduling.support.PeriodicTrigger;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
+import java.util.stream.DoubleStream;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.TextUtils.abbreviateMiddle;
@@ -40,7 +42,7 @@ class RestSimulationScheduler extends ApplicationContextSupport {
 
     private RestServiceImpl restService;
     private TaskScheduler scheduler;
-    private TaskExecutor executor;
+    private AsyncTaskExecutor executor;
     private final Map<Schedule, ScheduledFuture<?>> schedules = new ConcurrentHashMap<>();
     private final Map<Schedule, Lock> locks = new ConcurrentHashMap<>();
 
@@ -87,6 +89,17 @@ class RestSimulationScheduler extends ApplicationContextSupport {
         schedules.put(schedule, future);
     }
 
+    /**
+     * Schedules a simulation to run asynchronously.
+     *
+     * @param context the simulation context
+     * @return the future
+     */
+    Future<Result> schedule(SimulationContext context) {
+        requireNonNull(context);
+        return executor.submit(new SimulationTask(context, null));
+    }
+
     private void createScheduler() {
         RestProperties properties = restService.getProperties();
         AsynchronousProperties schedulerProperties = properties.getScheduler();
@@ -100,10 +113,10 @@ class RestSimulationScheduler extends ApplicationContextSupport {
         return locks.computeIfAbsent(schedule, s -> new ReentrantLock());
     }
 
-    private void persist(Schedule schedule, Result result) throws IOException {
+    private void persist(SimulationContext context, Result result) throws IOException {
         Resource resourceLogs = restService.registerResource(result.getLogs());
         Resource resourceReport = restService.registerResource(result.getReport());
-        RestResult restResult = persistRestResult(schedule, result, resourceLogs, resourceReport);
+        RestResult restResult = persistRestResult(context, result, resourceLogs, resourceReport);
         result.getOutputs().forEach(output -> {
             RestScenario restScenario = persistRestScenario(output, restResult);
             persistRestOutput(restResult, restScenario, output);
@@ -151,12 +164,12 @@ class RestSimulationScheduler extends ApplicationContextSupport {
         return updater.findByNaturalIdOrCreate(restScenario);
     }
 
-    private RestResult persistRestResult(Schedule schedule, Result result, Resource resourceLogs, Resource resourceReport) {
+    private RestResult persistRestResult(SimulationContext context, Result result, Resource resourceLogs, Resource resourceReport) {
         RestResult restResult = new RestResult();
 
         Optional<RestSimulation> jpaSimulation = getBean(RestSimulationRepository.class).findByNaturalId(result.getSimulation().getId());
         restResult.setSimulation(jpaSimulation.orElseThrow());
-        Optional<net.microfalx.heimdall.infrastructure.core.system.Environment> jpaEnvironment = getBean(EnvironmentRepository.class).findByNaturalId(schedule.getEnvironment().getId());
+        Optional<net.microfalx.heimdall.infrastructure.core.system.Environment> jpaEnvironment = getBean(EnvironmentRepository.class).findByNaturalId(context.getEnvironment().getId());
         restResult.setEnvironment(jpaEnvironment.orElseThrow());
 
         restResult.setStatus(result.getStatus());
@@ -170,10 +183,10 @@ class RestSimulationScheduler extends ApplicationContextSupport {
         if (result.getStatus() == Status.SUCCESSFUL) {
             restResult.setVus(extractMetricFromMatrix(result, output -> output.getVus().getAverage()));
             restResult.setVusMax(extractMetricFromMatrix(result, output -> output.getVusMax().getAverage()));
-            restResult.setIterations(extractMetricFromVector(result, output -> output.getIterations().getValue()));
+            restResult.setIterations(extractMetricFromVector(result, output -> output.getIterations().getValue(), Aggregation.Type.SUM));
             restResult.setIterationDuration(extractMetricFromMatrix(result, output -> output.getIterationDuration().getAverage()));
-            restResult.setDataSent(extractMetricFromVector(result, output -> output.getDataSent().getValue()));
-            restResult.setDataReceived(extractMetricFromVector(result, output -> output.getDataReceived().getValue()));
+            restResult.setDataSent(extractMetricFromVector(result, output -> output.getDataSent().getValue(), Aggregation.Type.SUM));
+            restResult.setDataReceived(extractMetricFromVector(result, output -> output.getDataReceived().getValue(), Aggregation.Type.SUM));
 
             restResult.setHttpRequestSending(extractMetricFromMatrix(result, output -> output.getHttpRequestSending().getAverage()));
             restResult.setHttpRequestFailed(extractMetricFromVector(result, output -> output.getHttpRequestFailed().getValue()));
@@ -192,19 +205,39 @@ class RestSimulationScheduler extends ApplicationContextSupport {
     }
 
     private float extractMetricFromVector(Result result, Function<Output, Value> function) {
+        return extractMetricFromVector(result, function, Aggregation.Type.AVG);
+    }
+
+    private float extractMetricFromVector(Result result, Function<Output, Value> function, Aggregation.Type aggType) {
         Collection<Value> values = new ArrayList<>();
         for (Output output : result.getOutputs()) {
             values.add(function.apply(output));
         }
-        return (float) values.stream().mapToDouble(Value::asDouble).average().orElse(0);
+        DoubleStream stream = values.stream().mapToDouble(Value::asDouble);
+        return switch (aggType) {
+            case AVG -> (float) stream.average().orElse(0);
+            case MIN -> (float) stream.min().orElse(0);
+            case MAX -> (float) stream.max().orElse(0);
+            case SUM -> (float) stream.sum();
+        };
     }
 
     private float extractMetricFromMatrix(Result result, Function<Output, OptionalDouble> function) {
+        return extractMetricFromMatrix(result, function, Aggregation.Type.AVG);
+    }
+
+    private float extractMetricFromMatrix(Result result, Function<Output, OptionalDouble> function, Aggregation.Type aggType) {
         Collection<Double> values = new ArrayList<>();
         for (Output output : result.getOutputs()) {
             values.add(function.apply(output).orElse(0));
         }
-        return (float) values.stream().mapToDouble(Double::doubleValue).average().orElse(0);
+        DoubleStream stream = values.stream().mapToDouble(Double::doubleValue);
+        return switch (aggType) {
+            case AVG -> (float) stream.average().orElse(0);
+            case MIN -> (float) stream.min().orElse(0);
+            case MAX -> (float) stream.max().orElse(0);
+            case SUM -> (float) stream.sum();
+        };
     }
 
     class ScheduleTask implements Runnable {
@@ -217,40 +250,52 @@ class RestSimulationScheduler extends ApplicationContextSupport {
 
         @Override
         public void run() {
-            executor.execute(new SimulationTask(schedule));
+            SimulationContext context = restService.createContext(schedule.getEnvironment(), schedule.getSimulation());
+            context.getAttributes().copyFrom(schedule.getAttributes(true));
+            executor.submit(new SimulationTask(context, schedule));
         }
     }
 
-    class SimulationTask implements Runnable {
+    class SimulationTask implements Callable<Result> {
 
+        private final SimulationContext context;
         private final Schedule schedule;
 
-        public SimulationTask(Schedule schedule) {
+        public SimulationTask(SimulationContext context, Schedule schedule) {
+            this.context = context;
             this.schedule = schedule;
         }
 
+
         @Override
-        public void run() {
-            Lock lock = getLock(schedule);
-            if (lock.tryLock()) {
+        public Result call() throws Exception {
+            Lock lock = schedule != null ? getLock(schedule) : null;
+            if (lock != null && lock.tryLock()) {
                 try {
-                    Result result = null;
-                    try {
-                        result = restService.simulate(schedule.getSimulation(), schedule.getEnvironment());
-                    } catch (Exception e) {
-                        LOGGER.error("Failed to run simulation '{}' using environment '{}'",
-                                schedule.getSimulation().getName(), schedule.getEnvironment().getName(), e);
-                    }
-                    try {
-                        if (result != null) persist(schedule, result);
-                    } catch (IOException e) {
-                        LOGGER.error("Failed to run simulation '{}' using environment '{}'",
-                                schedule.getSimulation().getName(), schedule.getEnvironment().getName(), e);
-                    }
+                    return execute();
                 } finally {
                     lock.unlock();
                 }
+            } else {
+                return execute();
             }
+        }
+
+        private Result execute() {
+            Result result;
+            try {
+                result = restService.simulate(context);
+            } catch (Exception e) {
+                throw new SimulationException(StringUtils.formatMessage("Failed to run simulation ''{0}'' using environment ''{1}''",
+                        context.getSimulation().getName(), context.getEnvironment().getName(), e));
+            }
+            try {
+                if (result != null) persist(context, result);
+            } catch (IOException e) {
+                LOGGER.error("Failed to run simulation '{}' using environment '{}'",
+                        context.getSimulation().getName(), context.getEnvironment().getName(), e);
+            }
+            return result;
         }
     }
 }

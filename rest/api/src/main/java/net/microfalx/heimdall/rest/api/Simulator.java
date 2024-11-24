@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.rest.api;
 
+import net.microfalx.heimdall.infrastructure.api.Environment;
 import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.Nameable;
 import net.microfalx.resource.Resource;
@@ -14,6 +15,16 @@ import java.util.Optional;
  * A simulator which knows how to start, execute and complete a simulation and returns the simulation results (the output).
  */
 public interface Simulator extends Identifiable<String>, Nameable {
+
+    /**
+     * Returns the environment on which the simulation is executed.
+     * <p>
+     * The environment is available only once the simulation is running
+     *
+     * @return a non-null instance
+     * @see #isRunning()
+     */
+    Environment getEnvironment();
 
     /**
      * Returns the simulation.
