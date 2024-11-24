@@ -43,6 +43,8 @@ public class K6Simulator extends AbstractSimulator {
         arguments.add("run");
         arguments.add("--out");
         arguments.add("csv=" + output.getName());
+        arguments.add("--no-usage-report");
+        arguments.add("--insecure-skip-tls-verify");
         arguments.add(input.getName());
     }
 

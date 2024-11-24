@@ -14,6 +14,13 @@ import java.util.Collection;
 public interface Result {
 
     /**
+     * Returns the simulation.
+     *
+     * @return a non-null instance
+     */
+    Simulation getSimulation();
+
+    /**
      * Returns the time when the simulation was started.
      *
      * @return a non-null instance
@@ -44,11 +51,10 @@ public interface Result {
     Status getStatus();
 
     /**
-     * Returns the simulation.
-     *
-     * @return a non-null instance
+     * Returns the error message (a short description) for the reason why the simulation failed.
+     * @return the error message, null if not available
      */
-    Simulation getSimulation();
+    String getErrorMessage();
 
     /**
      * Returns the output of one scenario.
@@ -58,9 +64,16 @@ public interface Result {
     Collection<Output> getOutputs();
 
     /**
-     * Returns the resource containing the report of the simulation.
+     * Returns the report (the content) produced by the simulator.
+     * <p>
+     * At least a text report will be produced by most simulators. An HTML report can be available with some simulators.
+     * If the simulator can produce an HTML and text report, the HTML report will be returned.
+     * <p>
+     * Some simulators would generate multiple reports. In this case, the resource will contain an archive that will contain
+     * all the reports. It is expected that the archive has a file in the root called <code>index.html</code> or
+     * <code>report.txt</code> with the entry point of the reports.
      *
-     * @return a non-null instance
+     * @return a non-ull instance
      */
     Resource getReport();
 

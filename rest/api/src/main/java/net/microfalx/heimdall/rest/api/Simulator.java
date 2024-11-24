@@ -30,6 +30,12 @@ public interface Simulator extends Identifiable<String>, Nameable {
     Status getStatus();
 
     /**
+     * Returns the error message (a short description) for the reason why the simulation failed.
+     * @return the error message, null if not available
+     */
+    String getErrorMessage();
+
+    /**
      * Returns whether the simulator is actually running a simulation.
      *
      * @return {@code true} if running, {@code false} otherwise

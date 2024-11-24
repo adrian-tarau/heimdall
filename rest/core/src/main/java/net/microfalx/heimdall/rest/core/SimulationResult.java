@@ -46,6 +46,11 @@ public class SimulationResult implements Result {
     }
 
     @Override
+    public String getErrorMessage() {
+        return simulator.getErrorMessage();
+    }
+
+    @Override
     public Simulation getSimulation() {
         return simulator.getSimulation();
     }

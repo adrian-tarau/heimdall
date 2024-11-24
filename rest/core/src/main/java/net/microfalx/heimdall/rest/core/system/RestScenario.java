@@ -6,18 +6,24 @@ import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
 import net.microfalx.lang.annotation.Description;
+import net.microfalx.lang.annotation.Name;
 import net.microfalx.lang.annotation.Position;
+import net.microfalx.lang.annotation.Visible;
+import org.hibernate.annotations.NaturalId;
 
 @Entity
 @Table(name = "rest_scenario")
+@Name("Scenarios")
 @ToString
 @Getter
 @Setter
 public class RestScenario extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
 
     @Column(name = "natural_id", nullable = false,length = 100)
+    @NaturalId
     @Description("The natural key of the scenario")
     @Position(2)
+    @Visible(false)
     private String naturalId;
 
     @ManyToOne

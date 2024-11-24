@@ -6,8 +6,12 @@ import net.microfalx.bootstrap.resource.ResourceService;
 import net.microfalx.heimdall.infrastructure.api.Environment;
 import net.microfalx.heimdall.infrastructure.api.InfrastructureService;
 import net.microfalx.heimdall.rest.api.*;
+import net.microfalx.heimdall.rest.core.system.RestResult;
+import net.microfalx.heimdall.rest.core.system.RestResultRepository;
 import net.microfalx.lang.ClassUtils;
 import net.microfalx.lang.UriUtils;
+import net.microfalx.resource.MemoryResource;
+import net.microfalx.resource.MimeType;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceFactory;
 import net.microfalx.resource.rocksdb.RocksDbResource;
@@ -48,6 +52,9 @@ public class RestServiceImpl implements RestService, InitializingBean {
 
     @Autowired
     private InfrastructureService infrastructureService;
+
+    @Autowired
+    private RestResultRepository restResultRepository;
 
     @Autowired
     private TaskExecutor taskExecutor;
@@ -127,6 +134,7 @@ public class RestServiceImpl implements RestService, InitializingBean {
     @Override
     public Resource registerResource(Resource resource) throws IOException {
         requireNonNull(resource);
+        if (!resource.exists()) return resource;
         Resource target;
         if (resource.hasAttribute(SCRIPT_ATTR)) {
             target = scriptResource;
@@ -176,6 +184,26 @@ public class RestServiceImpl implements RestService, InitializingBean {
             history.offer(simulator);
             if (history.size() > properties.getHistorySize()) history.poll();
             running.remove(simulator);
+        }
+    }
+
+    @Override
+    public Resource getLog(int id) {
+        RestResult result = findOutput(id);
+        if (result.getLogsURI() != null) {
+            return ResourceFactory.resolve(UriUtils.parseUri(result.getLogsURI())).withMimeType(MimeType.TEXT_PLAIN);
+        } else {
+            return MemoryResource.create("No logs are available");
+        }
+    }
+
+    @Override
+    public Resource getReport(int id) {
+        RestResult result = findOutput(id);
+        if (result.getLogsURI() != null) {
+            return ResourceFactory.resolve(UriUtils.parseUri(result.getReportURI())).withMimeType(MimeType.TEXT_HTML);
+        } else {
+            return MemoryResource.create("No report are available");
         }
     }
 
@@ -321,6 +349,14 @@ public class RestServiceImpl implements RestService, InitializingBean {
             }
         }
         return libraries;
+    }
+
+    private RestResult findOutput(int id) {
+        RestResult restResult = restResultRepository.findById(id).orElse(null);
+        if (restResult == null) {
+            throw new SimulationException("A simulation output with identifier " + id + " does not exist");
+        }
+        return restResult;
     }
 
 }

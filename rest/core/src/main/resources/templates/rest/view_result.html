@@ -1,0 +1,42 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="log" id="log-modal" tabindex="-1"
+     class="modal fade modal-xl" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Logs</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="dataset-text-mono" th:text="${log}"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" th:attr="onclick=|Application.closeModal()|">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:fragment="report" id="report-modal" tabindex="-1"
+     class="modal fade modal-xl" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Report</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <iframe class="w-100 p-1" style="height:400px" loading="lazy" th:src="${#content.getViewUri(content)}"></iframe>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" th:attr="onclick=|Application.closeModal()|">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

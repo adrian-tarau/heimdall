@@ -6,7 +6,8 @@ import net.microfalx.heimdall.infrastructure.api.InfrastructureService;
 import net.microfalx.heimdall.rest.api.*;
 import net.microfalx.heimdall.rest.core.system.*;
 import net.microfalx.lang.StringUtils;
-import net.microfalx.resource.MemoryResource;
+import net.microfalx.resource.Resource;
+import net.microfalx.resource.ResourceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -127,11 +128,12 @@ class RestCache extends ApplicationContextSupport {
     private void loadLibraries() {
         List<RestLibrary> librariesJPAs = getBean(RestLibraryRepository.class).findAll();
         librariesJPAs.forEach(restLibrary -> {
+            Resource resource = ResourceFactory.resolve(restLibrary.getResource());
             Library.Builder builder = new Library.Builder(restLibrary.getNaturalId());
             RestProject restProject = restLibrary.getProject();
             if (restProject != null) builder.project(getProject(restProject.getNaturalId()));
             builder.type(restLibrary.getType())
-                    .resource(MemoryResource.create(restLibrary.getResource())).path(restLibrary.getPath())
+                    .resource(resource).path(restLibrary.getPath())
                     .tags(setFromString(restLibrary.getTags()))
                     .name(restLibrary.getName()).description(restLibrary.getDescription()).build();
             Library library = builder.build();
@@ -142,11 +144,12 @@ class RestCache extends ApplicationContextSupport {
     private void loadSimulations() {
         List<RestSimulation> simulationJPAs = getBean(RestSimulationRepository.class).findAll();
         simulationJPAs.forEach(restSimulation -> {
+            Resource resource = ResourceFactory.resolve(restSimulation.getResource());
             Simulation.Builder builder = new Simulation.Builder(restSimulation.getNaturalId());
             RestProject restProject = restSimulation.getProject();
             if (restProject != null) builder.project(getProject(restProject.getNaturalId()));
             builder.timeout(ofSeconds(restSimulation.getTimeout()));
-            builder.resource(MemoryResource.create(restSimulation.getResource())).path(restSimulation.getPath())
+            builder.resource(resource).path(restSimulation.getPath())
                     .type(restSimulation.getType()).tag(restSimulation.getTags())
                     .name(restSimulation.getName()).description(restSimulation.getDescription()).build();
             Simulation simulation = builder.build();

@@ -130,6 +130,22 @@ public interface RestService {
     Result simulate(Simulation simulation, Environment environment);
 
     /**
+     * Returns the log for a given simulation.
+     *
+     * @param id the identifier of the result
+     * @return a non-null instance
+     */
+    Resource getLog(int id);
+
+    /**
+     * Returns the report for a given simulation.
+     *
+     * @param id the identifier of the result
+     * @return a non-null instance
+     */
+    Resource getReport(int id);
+
+    /**
      * Reloads the rest definitions.
      */
     void reload();

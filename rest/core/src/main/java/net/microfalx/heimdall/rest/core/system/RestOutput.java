@@ -4,12 +4,12 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.jdbc.entity.IdentityAware;
 import net.microfalx.heimdall.infrastructure.core.system.Environment;
 import net.microfalx.heimdall.rest.api.Status;
 import net.microfalx.lang.annotation.*;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Entity
@@ -66,7 +66,8 @@ public class RestOutput extends IdentityAware<Integer> {
     @Column(name = "duration", nullable = false)
     @Description("The duration of the output")
     @Position(30)
-    private Duration duration;
+    @Formattable(unit = Formattable.Unit.MILLI_SECOND)
+    private int duration;
 
     @Column(name = "data_received", nullable = false)
     @Description("The amount of received data")
@@ -80,28 +81,29 @@ public class RestOutput extends IdentityAware<Integer> {
     @Visible(false)
     private float dataSent;
 
+    @Label(group = "Iterations", value = "Count")
     @Column(name = "iterations", nullable = false)
     @Description("the aggregate number of times the VUs execute the script")
     @Position(40)
-    @Visible(false)
     private float iterations;
 
+    @Label(group = "Iterations", value = "Duration")
     @Column(name = "iteration_duration", nullable = false)
     @Description("The time to complete one full iteration, including time spent in setup and teardown")
     @Position(45)
-    @Visible(false)
+    @Formattable(unit = Formattable.Unit.MILLI_SECOND)
     private float iterationDuration;
 
+    @Label(group = "Users", value = "Active")
     @Column(name = "vus", nullable = false)
     @Description("The current number of active virtual users")
     @Position(50)
-    @Visible(false)
     private float vus;
 
+    @Label(group = "Users", value = "Maximum")
     @Column(name = "vus_max", nullable = false)
     @Description("The maximum possible number of virtual users")
     @Position(55)
-    @Visible(false)
     private float vusMax;
 
     @Column(name = "http_request_blocked", nullable = false)

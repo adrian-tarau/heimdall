@@ -4,19 +4,20 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import net.microfalx.bootstrap.dataset.annotation.Component;
-import net.microfalx.bootstrap.dataset.annotation.Filterable;
+import net.microfalx.bootstrap.dataset.Alert;
+import net.microfalx.bootstrap.dataset.annotation.OrderBy;
+import net.microfalx.bootstrap.dataset.annotation.*;
 import net.microfalx.bootstrap.jdbc.entity.IdentityAware;
+import net.microfalx.bootstrap.model.Field;
 import net.microfalx.heimdall.infrastructure.core.system.Environment;
 import net.microfalx.heimdall.rest.api.Status;
 import net.microfalx.lang.annotation.*;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "rest_result")
-@Name("Outputs")
+@Name("Results")
 @ReadOnly
 @ToString
 @Getter
@@ -41,10 +42,14 @@ public class RestResult extends IdentityAware<Long> {
     @Enumerated(EnumType.STRING)
     @Description("The status of the simulation")
     @Position(15)
+    @Formattable(alert = AlertProvider.class)
     private Status status;
 
     @Description("The start time of the simulation")
     @Position(20)
+    @Timestamp
+    @CreatedAt
+    @OrderBy(OrderBy.Direction.DESC)
     private LocalDateTime startedAt;
 
     @Column(name = "ended_at", nullable = false)
@@ -55,118 +60,148 @@ public class RestResult extends IdentityAware<Long> {
     @Column(name = "duration", nullable = false)
     @Description("The duration of the output")
     @Position(30)
-    private Duration duration;
+    @Formattable(unit = Formattable.Unit.MILLI_SECOND)
+    private int duration;
 
-    @Column(name = "data_received", nullable = false)
+    @Column(name = "data_received")
     @Description("The amount of received data")
     @Position(35)
     @Visible(false)
-    private float dataReceived;
+    private Float dataReceived;
 
-    @Column(name = "data_sent", nullable = false)
+    @Column(name = "data_sent")
     @Description("the amount of data sent")
     @Position(35)
     @Visible(false)
-    private float dataSent;
+    private Float dataSent;
 
-    @Column(name = "iterations", nullable = false)
+    @Label(group = "Iterations", value = "Count")
+    @Column(name = "iterations")
     @Description("the aggregate number of times the VUs execute the script")
     @Position(40)
-    @Visible(false)
-    private float iterations;
+    private Float iterations;
 
-    @Column(name = "iteration_duration", nullable = false)
+    @Label(group = "Iterations", value = "Duration")
+    @Column(name = "iteration_duration")
     @Description("The time to complete one full iteration, including time spent in setup and teardown")
     @Position(45)
-    @Visible(false)
-    private float iterationDuration;
+    @Formattable(unit = Formattable.Unit.MILLI_SECOND)
+    private Float iterationDuration;
 
-    @Column(name = "vus", nullable = false)
-    @Description("The current number of active virtual users")
+    @Label(group = "Users", value = "Active")
+    @Column(name = "vus")
+    @Description("The number of active virtual users")
     @Position(50)
-    @Visible(false)
-    private float vus;
+    private Float vus;
 
-    @Column(name = "vus_max", nullable = false)
+    @Label(group = "Users", value = "Maximum")
+    @Column(name = "vus_max")
     @Description("The maximum possible number of virtual users")
     @Position(55)
-    @Visible(false)
-    private float vusMax;
+    private Float vusMax;
 
-    @Column(name = "http_request_blocked", nullable = false)
+    @Column(name = "http_request_blocked")
     @Description("The time spent blocked (waiting for a free TCP connection slot) before initiating the request")
     @Position(60)
     @Visible(false)
-    private float httpRequestBlocked;
+    private Float httpRequestBlocked;
 
-    @Column(name = "http_request_connecting", nullable = false)
+    @Column(name = "http_request_connecting")
     @Description("The time spent establishing TCP connection to the remote host")
     @Position(65)
     @Visible(false)
-    private float httpRequestConnecting;
+    private Float httpRequestConnecting;
 
-    @Column(name = "http_Request_duration", nullable = false)
+    @Column(name = "http_Request_duration")
     @Description("Returns the total time for the request")
     @Position(70)
     @Visible(false)
-    private float httpRequestDuration;
+    private Float httpRequestDuration;
 
-    @Column(name = "http_request_failed", nullable = false)
+    @Column(name = "http_request_failed")
     @Description("The rate of failed requests")
     @Position(75)
     @Visible(false)
-    private float httpRequestFailed;
+    private Float httpRequestFailed;
 
-    @Column(name = "http_request_receiving", nullable = false)
+    @Column(name = "http_request_receiving")
     @Description("The time spent receiving response data from the remote host")
     @Position(80)
     @Visible(false)
-    private float httpRequestReceiving;
+    private Float httpRequestReceiving;
 
-    @Column(name = "http_request_sending", nullable = false)
+    @Column(name = "http_request_sending")
     @Description("The time spent receiving response data from the remote host")
     @Position(85)
     @Visible(false)
-    private float httpRequestSending;
+    private Float httpRequestSending;
 
-    @Column(name = "http_request_tls_handshaking", nullable = false)
+    @Column(name = "http_request_tls_handshaking")
     @Description("The time spent handshaking TLS session with remote host")
     @Position(90)
     @Visible(false)
-    private float httpRequestTlsHandshaking;
+    private Float httpRequestTlsHandshaking;
 
-    @Column(name = "http_request_waiting", nullable = false)
+    @Column(name = "http_request_waiting")
     @Description("The time spent waiting for response from remote host (a.k.a. “time to first byte”, or “TTFB”)")
     @Position(95)
     @Visible(false)
-    private float httpRequestWaiting;
+    private Float httpRequestWaiting;
 
-    @Column(name = "http_requests", nullable = false)
+    @Column(name = "http_requests")
     @Description("The total amount of HTTP requests generated")
     @Position(100)
     @Visible(false)
-    private float httpRequests;
+    private Float httpRequests;
 
-    @Column(name = "version", length = 50)
-    @Description("The version")
-    @Position(105)
-    private String version;
-
+    @Label("Logs")
     @Column(name = "logs_uri",length = 500)
     @Description("A resource containing the log of the simulation")
-    @Position(110)
+    @Align(Align.Type.CENTER)
+    @Position(105)
+    @Renderable(action = "rest.simulation.view.logs", icon = "fa-regular fa-file-lines")
     private String logsURI;
 
+    @Label("Report")
     @Column(name = "report_uri",length = 500)
     @Description("The resource containing the report of the simulation")
-    @Position(115)
+    @Align(Align.Type.CENTER)
+    @Position(110)
+    @Renderable(action = "rest.simulation.view.report", icon = "fa-solid fa-chart-line")
     private String reportURI;
+
+    @Column(name = "version", length = 50)
+    @Description("The version of the software available in the environment at the time of the simulation")
+    @Position(200)
+    private String version;
 
     @Column(name = "description")
     @Position(1000)
     @Component(Component.Type.TEXT_AREA)
     @Description("A description for a {name}")
     @Width("300px")
+    @Visible(false)
     @Filterable()
     private String description;
+
+    @Column(name = "error_message")
+    @Visible(false)
+    @Width("300px")
+    private String errorMessage;
+
+
+    public static class AlertProvider implements Formattable.AlertProvider<RestResult, Field<RestResult>, Status> {
+
+        @Override
+        public Alert provide(Status value, Field<RestResult> field, RestResult model) {
+            Alert.Type type = switch (value) {
+                case SUCCESSFUL -> Alert.Type.SUCCESS;
+                case FAILED -> Alert.Type.DANGER;
+                case CANCELED -> Alert.Type.DARK;
+                case UNKNOWN -> Alert.Type.LIGHT;
+            };
+            return Alert.builder().type(type).message(model.getErrorMessage()).build();
+        }
+
+    }
 }

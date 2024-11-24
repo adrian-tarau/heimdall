@@ -12,6 +12,18 @@ Application.bind("rest.simulation.design", function (id) {
 
 });
 
+Application.bind("rest.simulation.view.logs", function (id) {
+    DataSet.get("log/" + id, {}, function (data) {
+        Application.loadModal("log-modal", data);
+    });
+});
+
+Application.bind("rest.simulation.view.report", function (id) {
+    DataSet.get("report/" + id, {}, function (data) {
+        Application.loadModal("report-modal", data);
+    });
+});
+
 Application.bind("rest.schedule.run", function () {
     Logger.info("Start simulation with id '" + DataSet.getId() + "'");
     DataSet.post("schedule/" + DataSet.getId(), {}, function (json) {

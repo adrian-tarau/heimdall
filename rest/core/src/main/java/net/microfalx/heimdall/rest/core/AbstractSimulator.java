@@ -64,6 +64,7 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
     private LocalDateTime endTime;
     private volatile boolean running;
     private volatile Status status = Status.UNKNOWN;
+    private volatile String errorMessage;
     private Resource report = Resource.NULL;
     private Resource log = Resource.NULL;
     private final StringBuilder logger = new StringBuilder(8000);
@@ -102,6 +103,11 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
     }
 
     @Override
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    @Override
     public Resource getReport() {
         return report;
     }
@@ -124,7 +130,7 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
         } catch (IOException e) {
             finalLogs.append("\n\nFailed to retrieve logs: ").append(ExceptionUtils.getRootCauseMessage(e));
         }
-        return MemoryResource.create(finalLogs.toString());
+        return MemoryResource.create(finalLogs.toString()).withAttribute(LOG_ATTR, Boolean.TRUE);
     }
 
     @Override
@@ -134,17 +140,28 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
 
     @Override
     public final Result execute(SimulationContext context) {
-        Resource resource = doExecute(context);
-        Collection<Output> outputs;
+        Resource resource = null;
         try {
-            outputs = parseOutput(context, resource);
+            resource = doExecute(context);
+        } catch (SimulationException e) {
+            appendError(e, e.getMessage());
         } catch (Exception e) {
-            throw new SimulationException("Failed to parse simulation output '" + simulation.getName() + "'", e);
+            appendError(e, "Failed to execute simulation ''{0}''", simulation.getName());
         }
-        try {
-            completion();
-        } catch (IOException e) {
-            throw new SimulationException("Failed to complete simulation '" + simulation.getName() + "'", e);
+        Collection<Output> outputs = Collections.emptyList();
+        if (resource != null) {
+            try {
+                outputs = parseOutput(context, resource);
+            } catch (Exception e) {
+                appendError(e, "Failed to parse simulation output ''{0}''", simulation.getName());
+            }
+            try {
+                completion();
+            } catch (IOException e) {
+                appendError(e, "Failed to complete simulation ''{0}''", simulation.getName(), e);
+            }
+        } else {
+            status = Status.FAILED;
         }
         return new SimulationResult(this, outputs);
     }
@@ -340,6 +357,19 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
     }
 
     /**
+     * Appends an exception to the log
+     *
+     * @param throwable the exception
+     * @param format    the format
+     * @param args      the arguments
+     */
+    protected final void appendError(Throwable throwable, String format, Object... args) {
+        errorMessage = ExceptionUtils.getRootCauseMessage(throwable);
+        log(format, args);
+        appendLog(", stack trace\n" + TextUtils.insertSpaces(ExceptionUtils.getStackTrace(throwable), 5));
+    }
+
+    /**
      * Executes the simulation and returns the resource containing the data produced by the simulation.
      *
      * @param context the simulation context
@@ -358,15 +388,14 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
         try {
             runSimulation(context);
             if (!output.exists()) {
-                String message = "An output is not available at the end of the simulation of " + simulation.getName();
-                log(message);
+                output = null;
                 status = Status.FAILED;
-                throw new SimulationException(message);
+                throw new SimulationException("An output is not available at the end of the simulation of " + simulation.getName());
             }
-        } catch (SimulationExecutionException e) {
+        } catch (SimulationException e) {
             throw e;
         } catch (Exception e) {
-            throw new SimulationExecutionException("Failed to execute simulation '" + simulation.getName() + "'", e);
+            throw new SimulationException("Failed to execute simulation '" + simulation.getName() + "'", e);
         } finally {
             endTime = LocalDateTime.now();
         }
@@ -410,16 +439,16 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
             try {
                 process = processBuilder.start();
             } catch (IOException e) {
-                throw new SimulationExecutionException("Failed to start simulator, executable '" + executable + "'", e);
+                throw new SimulationException("Failed to start simulator, executable '" + executable + "'", e);
             }
             boolean timedOut;
             try {
                 timedOut = !process.waitFor(simulation.getTimeout().toMillis(), TimeUnit.MILLISECONDS);
             } catch (InterruptedException e) {
-                throw new SimulationExecutionException("Execution of simulator '" + getName() + "' was interrupted", e);
+                throw new SimulationException("Execution of simulator '" + getName() + "' was interrupted", e);
             }
             if (timedOut) {
-                throw new SimulationExecutionException("Execution of simulator '" + getName() + "' timed out ("
+                throw new SimulationException("Execution of simulator '" + getName() + "' timed out ("
                         + formatDuration(simulation.getTimeout()) + ")");
             }
             int exitValue = process.exitValue();
@@ -429,8 +458,8 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
                 status = exitValue == 0 ? Status.SUCCESSFUL : Status.FAILED;
                 if (exitValue != 0) {
                     log("Execution of simulator '" + getName() + "' failed with error code = " + exitValue);
-                    throw new SimulationExecutionException("Execution of simulator '" + getName() + "' failed with error code = "
-                            + exitValue + ", logs:\n " + getLogsAsText());
+                    throw new SimulationException("Execution of simulator '" + getName() + "' failed with error code = "
+                            + exitValue);
                 } else {
                     log("Simulation completed successfully in " + formatDuration(Duration.between(getStartTime(), getEndTime())));
                 }
@@ -444,20 +473,6 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
         for (Attribute attribute : context.getEnvironment().getAttributes(true)) {
             String name = StringUtils.toIdentifier(attribute.getName()).toUpperCase();
             processBuilder.environment().put(name, ObjectUtils.toString(attribute.getValue()));
-        }
-    }
-
-    private String getErrorOutput() {
-        try {
-            if (systemError.exists()) {
-                return systemError.loadAsString();
-            } else if (systemOutput.exists()) {
-                return systemOutput.loadAsString();
-            } else {
-                return "N/A";
-            }
-        } catch (IOException e) {
-            return "Error: " + ExceptionUtils.getRootCauseMessage(e);
         }
     }
 
