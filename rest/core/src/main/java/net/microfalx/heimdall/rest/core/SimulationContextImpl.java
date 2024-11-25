@@ -11,6 +11,7 @@ import net.microfalx.heimdall.rest.api.SimulationContext;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Optional;
 
 import static java.util.Collections.unmodifiableCollection;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
@@ -46,5 +47,9 @@ class SimulationContextImpl implements SimulationContext {
     public void addLibraries(Collection<Library> libraries) {
         requireNonNull(libraries);
         this.libraries.addAll(libraries);
+    }
+
+    public Optional<String> getUser() {
+        return Optional.ofNullable(user);
     }
 }
