@@ -4,7 +4,9 @@ import net.microfalx.heimdall.infrastructure.api.Environment;
 import net.microfalx.resource.Resource;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.Future;
 
 /**
@@ -158,6 +160,15 @@ public interface RestService {
      * @return future which tracks the execution of the simulation
      */
     Future<Result> schedule(SimulationContext context);
+
+    /**
+     * Returns the last time when a simulation was executed for a given environment.
+     *
+     * @param simulation  the simulation
+     * @param environment the environment
+     * @return a non-null instance
+     */
+    Optional<LocalDateTime> getLastRun(Simulation simulation, Environment environment);
 
     /**
      * Returns the log for a given simulation.

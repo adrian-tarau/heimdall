@@ -1,4 +1,4 @@
-package net.microfalx.heimdall.rest.core.system;
+package net.microfalx.heimdall.rest.core.overview;
 
 import lombok.extern.slf4j.Slf4j;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
@@ -9,12 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-@Controller("SystemScheduleController")
-@DataSet(model = RestSchedule.class, timeFilter = false)
-@RequestMapping("/system/rest/schedule")
+@Controller("OverviewScheduleController")
+@DataSet(model = Schedule.class, timeFilter = false)
+@RequestMapping("/rest/schedule")
 @Help("rest/system/schedule")
 @Slf4j
-public class RestScheduleController extends AbstractScheduleController<RestSchedule> {
+public class ScheduleController extends AbstractScheduleController<Schedule> {
 
     @Autowired
     private RestService restService;
@@ -23,5 +23,4 @@ public class RestScheduleController extends AbstractScheduleController<RestSched
     protected RestService getRestService() {
         return restService;
     }
-
 }

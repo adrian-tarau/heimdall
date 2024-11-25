@@ -24,12 +24,10 @@ public class SimulationRunning extends NamedIdentityAware<String> {
     private Environment environment;
 
     @Position(100)
-    @Visible(modes = {Visible.Mode.BROWSE})
     @Description("The script executed during simulation")
     private String script;
 
     @Position(500)
-    @Visible(modes = {Visible.Mode.BROWSE})
     @Description("The timestamp when the simulation was started")
     @OrderBy(OrderBy.Direction.DESC)
     @CreatedDate
@@ -37,7 +35,10 @@ public class SimulationRunning extends NamedIdentityAware<String> {
     private LocalDateTime startedAt;
 
     @Position(501)
-    @Visible(modes = {Visible.Mode.BROWSE})
     @Description("The duration of the simulation")
     private Duration duration;
+
+    @Position(501)
+    @Description("The user that triggered the simulation (if not present, it was triggered by a scheduler)")
+    private String user;
 }

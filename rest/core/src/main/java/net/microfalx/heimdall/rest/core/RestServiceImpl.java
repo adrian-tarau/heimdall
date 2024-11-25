@@ -22,11 +22,9 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 import static java.util.Collections.unmodifiableCollection;
 import static net.microfalx.heimdall.rest.api.RestConstants.*;
@@ -65,6 +63,7 @@ public class RestServiceImpl implements RestService, InitializingBean {
     private final Collection<Simulator.Provider> simulatorProviders = new CopyOnWriteArrayList<>();
     private final Set<Simulator> running = new ConcurrentSkipListSet<>();
     private final Queue<Simulator> history = new ConcurrentLinkedQueue<>();
+    private final Map<String, LocalDateTime> lastScheduled = new ConcurrentHashMap<>();
     private Resource scriptResource;
     private Resource logsResource;
     private Resource reportResource;
@@ -190,6 +189,8 @@ public class RestServiceImpl implements RestService, InitializingBean {
         if (context instanceof SimulationContextImpl contextImpl) {
             contextImpl.addLibraries(getLibraries(context.getSimulation()));
         }
+        String simulationKey = getKey(context.getSimulation(), context.getEnvironment());
+        if (!context.isManual()) lastScheduled.put(simulationKey, LocalDateTime.now());
         running.add(simulator);
         try {
             return simulator.execute(context);
@@ -204,6 +205,14 @@ public class RestServiceImpl implements RestService, InitializingBean {
     public Future<Result> schedule(SimulationContext context) {
         requireNonNull(context);
         return simulationScheduler.schedule(context);
+    }
+
+    @Override
+    public Optional<LocalDateTime> getLastRun(Simulation simulation, Environment environment) {
+        requireNonNull(simulation);
+        requireNonNull(environment);
+        String simulationKey = getKey(simulation, environment);
+        return Optional.ofNullable(lastScheduled.put(simulationKey, LocalDateTime.now()));
     }
 
     @Override
@@ -404,6 +413,10 @@ public class RestServiceImpl implements RestService, InitializingBean {
             throw new SimulationException("A simulation output with identifier " + id + " does not exist");
         }
         return restResult;
+    }
+
+    private String getKey(Simulation simulation, Environment environment) {
+        return environment.getId() + "_" + simulation.getId();
     }
 
 }

@@ -4,11 +4,42 @@ import net.microfalx.bootstrap.model.Attributes;
 import net.microfalx.heimdall.infrastructure.api.Environment;
 
 import java.util.Collection;
+import java.util.Optional;
 
 /**
  * A context in which the simulation runs.
  */
 public interface SimulationContext {
+
+    /**
+     * Returns whether the simulation was triggered manually.
+     *
+     * @return {@code true} if manual, {@code false} otherwise
+     */
+    boolean isManual();
+
+    /**
+     * Changes whether the simulation was triggered manually.
+     *
+     * @param manual {@code true} if manual, {@code false} otherwise
+     * @return self
+     */
+    SimulationContext setManual(boolean manual);
+
+    /**
+     * Returns the optional user which triggered the context.
+     *
+     * @return a non-null instance
+     */
+    Optional<String> getUser();
+
+    /**
+     * Sets the user which triggered the simulation.
+     *
+     * @param user the user
+     * @return self
+     */
+    SimulationContext setUser(String user);
 
     /**
      * Returns the simulation to be executed.

@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface SimulationResultRepository extends JpaRepository<SimulationResult,Integer>,JpaSpecificationExecutor<SimulationResult> {
+public interface ScheduleRepository extends JpaRepository<Schedule, Integer>, JpaSpecificationExecutor<Schedule> {
 }

@@ -4,6 +4,7 @@
         <menu id="rest" text="Rest API" position="100" action="/rest" icon="fa-solid fa-plug">
             <item id="simulation" text="Simulations" action="/rest/simulation" icon="fa-solid fa-vials"/>
             <item id="scenario" text="Scenarios" action="/rest/scenario" icon="fa-solid fa-vials"/>
+            <item id="schedule" text="Schedules" action="/rest/schedule" icon="fa-solid fa-clock"/>
             <item id="running" text="Running" action="/rest/simulation/running" icon="fa-solid fa-gears"/>
             <item id="history" text="History" action="/rest/simulation/result" icon="fa-solid fa-vial-circle-check"/>
         </menu>
