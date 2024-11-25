@@ -59,9 +59,15 @@ public abstract class AbstractSchedule extends TimestampAware {
     @Filterable
     private String interval;
 
+    @Column(name = "active")
+    @Description("Indicates whether a schedule is enabled")
+    @Position(35)
+    private boolean active = true;
+
     @Transient
     @Description("The timestamp when the next simulation will be triggered")
-    @Position(31)
+    @Position(32)
+    @Visible(modes = Visible.Mode.BROWSE)
     private LocalDateTime nextRunAt;
 
     @Column(name = "description")

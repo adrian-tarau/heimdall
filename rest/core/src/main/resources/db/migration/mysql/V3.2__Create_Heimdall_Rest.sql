@@ -93,6 +93,7 @@ create table rest_schedule
     type           ENUM ('EXPRESSION', 'INTERVAL') not null,
     expression     varchar(100),
     `interval`     varchar(100),
+    active         boolean default true,
     created_at     datetime                        not null,
     modified_at    datetime,
     description    varchar(1000),

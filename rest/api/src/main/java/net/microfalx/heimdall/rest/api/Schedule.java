@@ -25,6 +25,7 @@ public class Schedule extends NamedAndTaggedIdentifyAware<String> {
 
     private String expression;
     private Duration interval;
+    private boolean active;
 
     private Duration duration;
     private Integer vus;
@@ -124,6 +125,15 @@ public class Schedule extends NamedAndTaggedIdentifyAware<String> {
         return interval;
     }
 
+    /**
+     * Returns whether the schedule is active.
+     *
+     * @return {@code true} of the schedule is active, {@code false} otherwise
+     */
+    public boolean isActive() {
+        return active;
+    }
+
     private void updateAttributes(Attributes<?> attributes) {
         if (vus != null) attributes.addIfAbsent(RestConstants.VIRTUAL_USERS_ATTR, vus);
         if (duration != null) attributes.addIfAbsent(RestConstants.DURATION_ATTR, duration);
@@ -154,6 +164,7 @@ public class Schedule extends NamedAndTaggedIdentifyAware<String> {
 
         private String expression;
         private Duration interval;
+        private boolean active = true;
 
         private Duration duration;
         private Integer vus;
@@ -194,17 +205,22 @@ public class Schedule extends NamedAndTaggedIdentifyAware<String> {
             return this;
         }
 
-        public Builder setDuration(Duration duration) {
+        public Builder duration(Duration duration) {
             this.duration = duration;
             return this;
         }
 
-        public Builder setVus(Integer vus) {
+        public Builder active(boolean active) {
+            this.active = active;
+            return this;
+        }
+
+        public Builder vus(Integer vus) {
             this.vus = vus;
             return this;
         }
 
-        public Builder setIterations(Integer iterations) {
+        public Builder iterations(Integer iterations) {
             this.iterations = iterations;
             return this;
         }
@@ -231,6 +247,7 @@ public class Schedule extends NamedAndTaggedIdentifyAware<String> {
             if (environment == null) throw new IllegalArgumentException("Environment  is required");
             if (simulation == null) throw new IllegalArgumentException("Simulation  is required");
             schedule.type = type;
+            schedule.active = active;
             schedule.environment = environment;
             schedule.simulation = simulation;
             schedule.expression = expression;

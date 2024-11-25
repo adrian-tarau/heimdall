@@ -80,13 +80,15 @@ class RestSimulationScheduler extends ApplicationContextSupport {
         requireNonNull(schedule);
         ScheduledFuture<?> future = this.schedules.remove(schedule);
         if (future != null) future.cancel(false);
-        ScheduleTask task = new ScheduleTask(schedule);
-        if (schedule.getType() == Schedule.Type.EXPRESSION) {
-            future = scheduler.schedule(task, new CronTrigger(schedule.getExpression()));
-        } else {
-            future = scheduler.schedule(task, new PeriodicTrigger(schedule.getInterval()));
+        if (schedule.isActive()){
+            ScheduleTask task = new ScheduleTask(schedule);
+            if (schedule.getType() == Schedule.Type.EXPRESSION) {
+                future = scheduler.schedule(task, new CronTrigger(schedule.getExpression()));
+            } else {
+                future = scheduler.schedule(task, new PeriodicTrigger(schedule.getInterval()));
+            }
+            schedules.put(schedule, future);
         }
-        schedules.put(schedule, future);
     }
 
     /**

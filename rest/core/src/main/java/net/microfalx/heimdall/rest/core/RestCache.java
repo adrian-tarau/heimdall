@@ -163,7 +163,8 @@ class RestCache extends ApplicationContextSupport {
             Environment environment = getBean(InfrastructureService.class).
                     getEnvironment(restSchedule.getEnvironment().getNaturalId());
             Schedule.Builder builder = new Schedule.Builder(Integer.toString(restSchedule.getId()));
-            builder.simulation(getSimulation(restSchedule.getSimulation().getNaturalId())).environment(environment);
+            builder.simulation(getSimulation(restSchedule.getSimulation().getNaturalId())).environment(environment)
+                    .active(restSchedule.isActive());
             switch (restSchedule.getType()) {
                 case EXPRESSION:
                     builder.expression(restSchedule.getExpression());
