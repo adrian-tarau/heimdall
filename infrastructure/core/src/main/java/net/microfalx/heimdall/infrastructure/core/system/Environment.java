@@ -70,6 +70,11 @@ public class Environment extends NamedAndTaggedAndTimestampedIdentityAware<Integ
     @Description("The number of servers part of an environment")
     private int serverCount;
 
+    @Column(name = "version",length = 50)
+    @Description("The version of the environment")
+    @Position(100)
+    private String version;
+
     @Visible(value = false)
     @ManyToMany()
     @JoinTable(name="infrastructure_environment_to_cluster", joinColumns = @JoinColumn(name = "environment_id"), inverseJoinColumns = @JoinColumn(name = "cluster_id"))

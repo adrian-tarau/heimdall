@@ -30,6 +30,7 @@ public class Environment extends NamedAndTaggedIdentifyAware<String> implements 
     private URI baseUri;
     private String appPath;
     private String apiPath;
+    private String version;
 
     /**
      * Creates a builder for an environment.
@@ -132,6 +133,15 @@ public class Environment extends NamedAndTaggedIdentifyAware<String> implements 
     }
 
     /**
+     * Return the version of the environment
+     *
+     * @return a non-null instance
+     */
+    public String getVersion() {
+        return version;
+    }
+
+    /**
      * Returns all servers part of this environment.
      * <p>
      * This method returns a union of all server assigned to this environment, and all servers from all clusters assigned
@@ -203,6 +213,7 @@ public class Environment extends NamedAndTaggedIdentifyAware<String> implements 
         private String baseUri;
         private String appPath;
         private String apiPath;
+        private String version;
 
         public Builder(String id) {
             super(id);
@@ -255,6 +266,11 @@ public class Environment extends NamedAndTaggedIdentifyAware<String> implements 
             return this;
         }
 
+        public Builder version(String version) {
+            this.version = version;
+            return this;
+        }
+
         @Override
         public Environment build() {
             if (StringUtils.isEmpty(baseUri)) throw new IllegalArgumentException("Base URI is required");
@@ -265,6 +281,7 @@ public class Environment extends NamedAndTaggedIdentifyAware<String> implements 
             environment.baseUri = parseUri(baseUri);
             environment.appPath = defaultIfEmpty(appPath, SLASH);
             environment.apiPath = defaultIfEmpty(apiPath, SLASH);
+            environment.version = version;
             return environment;
         }
     }

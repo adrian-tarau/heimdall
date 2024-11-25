@@ -92,6 +92,7 @@ create table infrastructure_environment
     app_path    varchar(100),
     api_path    varchar(100),
     tags        varchar(500),
+    version varchar(50),
     created_at  datetime     not null,
     modified_at datetime,
     description varchar(1000),

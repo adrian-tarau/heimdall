@@ -80,7 +80,7 @@ class RestSimulationScheduler extends ApplicationContextSupport {
         requireNonNull(schedule);
         ScheduledFuture<?> future = this.schedules.remove(schedule);
         if (future != null) future.cancel(false);
-        if (schedule.isActive()){
+        if (schedule.isActive()) {
             ScheduleTask task = new ScheduleTask(schedule);
             if (schedule.getType() == Schedule.Type.EXPRESSION) {
                 future = scheduler.schedule(task, new CronTrigger(schedule.getExpression()));
@@ -174,6 +174,7 @@ class RestSimulationScheduler extends ApplicationContextSupport {
         restResult.setSimulation(jpaSimulation.orElseThrow());
         Optional<net.microfalx.heimdall.infrastructure.core.system.Environment> jpaEnvironment = getBean(EnvironmentRepository.class).findByNaturalId(context.getEnvironment().getId());
         restResult.setEnvironment(jpaEnvironment.orElseThrow());
+        restResult.setVersion(restResult.getEnvironment().getVersion());
 
         restResult.setStatus(result.getStatus());
         restResult.setErrorMessage(abbreviateMiddle(result.getErrorMessage(), 500));
