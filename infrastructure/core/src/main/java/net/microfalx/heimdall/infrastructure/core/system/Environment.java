@@ -73,6 +73,7 @@ public class Environment extends NamedAndTaggedAndTimestampedIdentityAware<Integ
     @Column(name = "version",length = 50)
     @Description("The version of the environment")
     @Position(100)
+    @Filterable
     private String version;
 
     @Visible(value = false)

@@ -22,6 +22,7 @@ class InfrastructurePersistence extends ApplicationContextSupport {
         jpaEnvironment.setApiPath(environment.getApiPath());
         jpaEnvironment.setTags(setToString(environment.getTags()));
         jpaEnvironment.setDescription(environment.getDescription());
+        jpaEnvironment.setVersion(environment.getVersion());
         jpaEnvironment.setAttributes(ExceptionUtils.doAndRethrow(() -> environment.getAttributes(false).toProperties().loadAsString()));
         updater.findByNaturalIdAndUpdate(jpaEnvironment);
     }

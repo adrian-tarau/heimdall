@@ -52,8 +52,9 @@ class InfrastructureProvisioning implements Runnable {
     }
 
     private void provisionEnvironments() {
+        String version = ((InfrastructureServiceImpl) infrastructureService).getApplicationProperties().getVersion();
         infrastructureService.registerEnvironment((Environment) Environment.create("heimdall")
-                .server(Server.get()).baseUri("http://localhost:8080")
+                .server(Server.get()).baseUri("http://localhost:8080").version(version)
                 .tag(AUTO_TAG).tag("heimdall")
                 .name("Heimdall").description("The environment represented by this instance of Heimdel")
                 .build());

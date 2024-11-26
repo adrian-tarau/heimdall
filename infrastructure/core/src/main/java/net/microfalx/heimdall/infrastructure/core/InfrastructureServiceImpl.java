@@ -2,6 +2,7 @@ package net.microfalx.heimdall.infrastructure.core;
 
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
 import net.microfalx.bootstrap.metrics.Series;
+import net.microfalx.bootstrap.web.application.ApplicationProperties;
 import net.microfalx.heimdall.infrastructure.api.*;
 import net.microfalx.heimdall.infrastructure.core.util.HealthSummary;
 import net.microfalx.lang.ClassUtils;
@@ -47,6 +48,9 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
 
     @Autowired
     private InfrastructureHealth health;
+
+    @Autowired
+    private ApplicationProperties applicationProperties;
 
     private volatile InfrastructureCache cache = new InfrastructureCache(this);
     private final InfrastructureDns dns = new InfrastructureDns();
@@ -211,6 +215,10 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
 
     public InfrastructureHealth getHealth() {
         return health;
+    }
+
+    public ApplicationProperties getApplicationProperties() {
+        return applicationProperties;
     }
 
     @SuppressWarnings("unchecked")

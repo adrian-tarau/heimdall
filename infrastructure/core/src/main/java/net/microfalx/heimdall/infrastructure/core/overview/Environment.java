@@ -3,6 +3,7 @@ package net.microfalx.heimdall.infrastructure.core.overview;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.microfalx.bootstrap.dataset.annotation.Filterable;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.dataset.annotation.OrderBy;
 import net.microfalx.bootstrap.web.chart.Type;
@@ -54,4 +55,9 @@ public class Environment extends InfrastructureElement {
     @Formattable(alert = HealthCountAlertProvider.class)
     @Chartable(width = TREND_CHART_WIDTH, height = TREND_CHART_HEIGHT, provider = HealthBarChartProvider.class)
     private int degradedCount;
+
+    @Position(100)
+    @Description("The version of the environment")
+    @Filterable
+    private String version;
 }

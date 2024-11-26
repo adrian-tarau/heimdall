@@ -40,6 +40,7 @@ public class EnvironmentDataSet extends MemoryDataSet<Environment, PojoField<Env
         newEnvironment.setUnavailableCount(healthSummary.getUnavailableCount());
         newEnvironment.setDegradedCount(healthSummary.getDegradedCount());
         newEnvironment.setUnhealthyCount(healthSummary.getUnhealthyCount());
+        newEnvironment.setVersion(environment.getVersion());
         return newEnvironment;
     }
 }
