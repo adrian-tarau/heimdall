@@ -64,6 +64,31 @@ public abstract class AbstractSchedule extends TimestampAware {
     @Position(35)
     private boolean active = true;
 
+    @Column(name = "vus")
+    @Description("The number of virtual users")
+    @Position(40)
+    @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})
+    private Integer vus;
+
+    @Column(name = "duration",length = 50)
+    @Description("The duration")
+    @Position(45)
+    @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})
+    private String duration;
+
+    @Column(name = "iterations")
+    @Description("The iterations")
+    @Position(50)
+    @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})
+    private Integer iterations;
+
+    @Column(name = "attributes",length = 4000)
+    @Description("The attributes")
+    @Position(55)
+    @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})
+    @Component(Component.Type.TEXT_AREA)
+    private String attributes;
+
     @Transient
     @Description("The timestamp when the next simulation will be triggered")
     @Position(32)

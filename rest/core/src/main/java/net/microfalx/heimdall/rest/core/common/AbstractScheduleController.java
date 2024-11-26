@@ -45,6 +45,7 @@ public abstract class AbstractScheduleController<T extends AbstractSchedule> ext
         SimulationContext context = getRestService().createContext(schedule.getEnvironment(), schedule.getSimulation())
                 .setManual(true);
         if (authentication != null) context.setUser(authentication.getName());
+        context.getAttributes().copyFrom(schedule.getAttributes(true));
         getRestService().schedule(context);
         return JsonResponse.success(formatMessage("The simulation ''{0}'' was scheduled to be executed using environment ''{1}''",
                 schedule.getSimulation().getName(), schedule.getEnvironment().getName()));

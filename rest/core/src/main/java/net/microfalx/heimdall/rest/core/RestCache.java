@@ -6,6 +6,7 @@ import net.microfalx.heimdall.infrastructure.api.InfrastructureService;
 import net.microfalx.heimdall.rest.api.*;
 import net.microfalx.heimdall.rest.core.system.*;
 import net.microfalx.lang.StringUtils;
+import net.microfalx.lang.TimeUtils;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceFactory;
 import org.slf4j.Logger;
@@ -164,7 +165,9 @@ class RestCache extends ApplicationContextSupport {
                     getEnvironment(restSchedule.getEnvironment().getNaturalId());
             Schedule.Builder builder = new Schedule.Builder(Integer.toString(restSchedule.getId()));
             builder.simulation(getSimulation(restSchedule.getSimulation().getNaturalId())).environment(environment)
-                    .active(restSchedule.isActive());
+                    .active(restSchedule.isActive()).vus(restSchedule.getVus())
+                    .iterations(restSchedule.getIterations())
+                    .duration(TimeUtils.parseDuration(restSchedule.getDuration()));
             switch (restSchedule.getType()) {
                 case EXPRESSION:
                     builder.expression(restSchedule.getExpression());

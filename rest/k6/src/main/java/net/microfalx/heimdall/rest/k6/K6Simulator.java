@@ -1,14 +1,18 @@
 package net.microfalx.heimdall.rest.k6;
 
+import net.microfalx.bootstrap.model.Attribute;
+import net.microfalx.bootstrap.model.Attributes;
 import net.microfalx.heimdall.rest.api.Output;
 import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.heimdall.rest.api.SimulationContext;
 import net.microfalx.heimdall.rest.core.AbstractSimulator;
+import net.microfalx.lang.TimeUtils;
 import net.microfalx.resource.Resource;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -41,11 +45,8 @@ public class K6Simulator extends AbstractSimulator {
     @Override
     protected void update(List<String> arguments, File input, File output, SimulationContext context) {
         arguments.add("run");
-        arguments.add("--out");
-        arguments.add("csv=" + output.getName());
-        arguments.add("--no-usage-report");
-        arguments.add("--insecure-skip-tls-verify");
-        arguments.add(input.getName());
+        updateCoreArguments(arguments, input, output, context);
+        updateAdditionalArguments(arguments, context);
     }
 
     @Override
@@ -72,5 +73,33 @@ public class K6Simulator extends AbstractSimulator {
     @Override
     protected Collection<Output> parseOutput(SimulationContext context, Resource resource) throws IOException {
         return new K6OutputParser(this, getSimulation(), context, resource).parse();
+    }
+
+    private void updateCoreArguments(List<String> arguments, File input, File output, SimulationContext context) {
+        arguments.add("--out");
+        arguments.add("csv=" + output.getName());
+        arguments.add("--no-usage-report");
+        arguments.add("--insecure-skip-tls-verify");
+        arguments.add(input.getName());
+    }
+
+    private void updateAdditionalArguments(List<String> arguments, SimulationContext context) {
+        Attributes<?> attributes = context.getAttributes();
+        Attribute vus = attributes.get("vus");
+        if (!vus.isEmpty()) {
+            arguments.add("--vus");
+            arguments.add(vus.asString());
+        }
+        Attribute iterations = attributes.get("iterations");
+        if (!iterations.isEmpty()) {
+            arguments.add("--iterations");
+            arguments.add(iterations.asString());
+        }
+        Attribute duration = attributes.get("duration");
+        if (!duration.isEmpty()) {
+            arguments.add("--duration");
+            Duration value = (Duration) duration.getValue();
+            arguments.add(TimeUtils.toString(value));
+        }
     }
 }

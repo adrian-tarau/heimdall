@@ -137,7 +137,7 @@ public class Schedule extends NamedAndTaggedIdentifyAware<String> {
     private void updateAttributes(Attributes<?> attributes) {
         if (vus != null) attributes.addIfAbsent(RestConstants.VIRTUAL_USERS_ATTR, vus);
         if (duration != null) attributes.addIfAbsent(RestConstants.DURATION_ATTR, duration);
-        if (iterations != null) attributes.addIfAbsent(RestConstants.DURATION_ATTR, iterations);
+        if (iterations != null) attributes.addIfAbsent(RestConstants.ITERATIONS_ATTR, iterations);
     }
 
     /**
@@ -253,6 +253,9 @@ public class Schedule extends NamedAndTaggedIdentifyAware<String> {
             schedule.expression = expression;
             schedule.interval = interval;
             schedule.attributes = attributes;
+            schedule.vus=vus;
+            schedule.duration=duration;
+            schedule.iterations=iterations;
             return schedule;
         }
     }

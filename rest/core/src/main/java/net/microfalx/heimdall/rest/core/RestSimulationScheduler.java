@@ -289,6 +289,7 @@ class RestSimulationScheduler extends ApplicationContextSupport {
         private Result execute() {
             Result result;
             try {
+                context.getAttributes().copyFrom(schedule.getAttributes(true));
                 result = restService.simulate(context);
             } catch (Exception e) {
                 throw new SimulationException(StringUtils.formatMessage("Failed to run simulation ''{0}'' using environment ''{1}''",
