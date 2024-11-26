@@ -8,6 +8,7 @@ import net.microfalx.heimdall.rest.api.SimulationException;
 import net.microfalx.lang.ExceptionUtils;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.TimeUtils;
+import net.microfalx.lang.UriUtils;
 import net.microfalx.resource.FileResource;
 import net.microfalx.resource.Resource;
 import org.springframework.util.AntPathMatcher;
@@ -15,10 +16,13 @@ import org.springframework.util.PathMatcher;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static net.microfalx.heimdall.rest.api.RestConstants.SCRIPT_ATTR;
@@ -26,7 +30,9 @@ import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ExceptionUtils.getRootCauseMessage;
 import static net.microfalx.lang.FileUtils.validateDirectoryExists;
 import static net.microfalx.lang.StringUtils.SPACE;
-import static net.microfalx.lang.TimeUtils.ONE_MINUTE;
+import static net.microfalx.lang.StringUtils.isNotEmpty;
+import static net.microfalx.lang.TimeUtils.FIVE_MINUTE;
+import static net.microfalx.lang.TimeUtils.millisSince;
 import static net.microfalx.resource.ResourceUtils.toFile;
 
 /**
@@ -38,11 +44,12 @@ import static net.microfalx.resource.ResourceUtils.toFile;
 @Slf4j
 public class RestProjectManager {
 
-    private static final long RELOAD_INTERVAL = ONE_MINUTE;
+    private static final long RELOAD_INTERVAL = FIVE_MINUTE;
 
     private RestServiceImpl restService;
     private Resource projectResource;
     private final Map<String, Long> lastReload = new ConcurrentHashMap<>();
+    private final Map<String, Lock> lock = new ConcurrentHashMap<>();
 
     /**
      * Reloads projects from the database.
@@ -67,10 +74,17 @@ public class RestProjectManager {
      */
     void reload(Project project) throws IOException {
         requireNonNull(project);
-        Long lastLoaded = lastReload.computeIfAbsent(project.getId(), k -> TimeUtils.oneHourAgo());
-        if (TimeUtils.millisSince(lastLoaded) < RELOAD_INTERVAL) return;
-        synchronize(project);
-        discover(project);
+        Lock lock = getLock(project);
+        if (!lock.tryLock()) return;
+        try {
+            Long lastLoaded = lastReload.computeIfAbsent(project.getId(), k -> TimeUtils.oneHourAgo());
+            if (millisSince(lastLoaded) > RELOAD_INTERVAL) {
+                synchronize(project);
+                discover(project);
+            }
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -141,7 +155,7 @@ public class RestProjectManager {
                 } else {
                     arguments.add("clone");
                     arguments.add("-q");
-                    arguments.add(project.getUri().toASCIIString());
+                    arguments.add(getGitUri(project).toASCIIString());
                     arguments.add(project.getId());
                 }
                 break;
@@ -269,6 +283,24 @@ public class RestProjectManager {
 
     private String getId(Project project, Simulation.Type type, Resource resource) {
         return Library.getNaturalId(type, resource, project.getId());
+    }
+
+    private URI getGitUri(Project project) {
+        URI uri = project.getUri();
+        if (isNotEmpty(project.getToken())) {
+            StringBuilder builder = new StringBuilder();
+            builder.append(uri.getScheme()).append("://")
+                    .append(project.getUserName()).append(':').append(project.getToken()).append('@').append(uri.getHost());
+            if (uri.getPort() > 0) builder.append(":").append(uri.getPort());
+            builder.append(uri.getPath());
+            return UriUtils.parseUri(builder.toString());
+        } else {
+            return uri;
+        }
+    }
+
+    private Lock getLock(Project project) {
+        return lock.computeIfAbsent(project.getId(), s -> new ReentrantLock());
     }
 
     /**

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.microfalx.bootstrap.dataset.annotation.Filterable;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
 import net.microfalx.heimdall.rest.api.Simulation;
@@ -39,8 +40,9 @@ public abstract class AbstractLibrary extends NamedAndTaggedAndTimestampedIdenti
 
     @Column(name = "path", nullable = false, length = 2000)
     @Description("The path of the script")
-    @Formattable(maximumLength = 60)
+    @Formattable(maximumLength = 50)
     @Position(15)
+    @Filterable
     private String path;
 
     @Column(name = "override", nullable = false)

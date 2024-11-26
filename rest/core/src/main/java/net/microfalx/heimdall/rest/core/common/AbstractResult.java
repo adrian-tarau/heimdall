@@ -181,6 +181,7 @@ public abstract class AbstractResult extends IdentityAware<Long> {
     @Column(name = "version", length = 50)
     @Description("The version of the software available in the environment at the time of the simulation")
     @Position(200)
+    @Filterable
     private String version;
 
     @Column(name = "description")

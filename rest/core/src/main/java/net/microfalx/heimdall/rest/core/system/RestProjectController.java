@@ -7,6 +7,7 @@ import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.web.component.Button;
 import net.microfalx.bootstrap.web.component.Toolbar;
 import net.microfalx.bootstrap.web.dataset.DataSetController;
+import net.microfalx.bootstrap.web.util.JsonFormResponse;
 import net.microfalx.bootstrap.web.util.JsonResponse;
 import net.microfalx.heimdall.rest.api.Project;
 import net.microfalx.heimdall.rest.api.RestService;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import static net.microfalx.lang.StringUtils.isEmpty;
+import static net.microfalx.lang.StringUtils.isNotEmpty;
 import static net.microfalx.lang.UriUtils.parseUri;
 
 @Controller("SystemProjectController")
@@ -39,6 +42,21 @@ public class RestProjectController extends DataSetController<RestProject, Intege
         super.updateToolbar(toolbar);
         toolbar.add(new Button().setAction("rest.project.sync").setText("Synchronize").setIcon("fa-solid fa-rotate")
                 .setDescription("Synchronizes the projects (libraries and simulations) from their code repositories"));
+    }
+
+    @Override
+    protected void validate(RestProject model, State state, JsonFormResponse<?> response) {
+        super.validate(model, state, response);
+        if (isNotEmpty(model.getToken()) && isEmpty(model.getUserName())) {
+            response.addError("userName", "User name is required when token is present");
+        }
+        if (isNotEmpty(model.getPassword()) && isEmpty(model.getUserName())) {
+            response.addError("password", "User name is required when password is present");
+        }
+        if (isNotEmpty(model.getUserName()) && (isEmpty(model.getPassword()) && isEmpty(model.getToken()))) {
+            response.addError("token", "Token or password is required when user name is present");
+            response.addError("password", "Token or password is required when user name is present");
+        }
     }
 
     @Override
