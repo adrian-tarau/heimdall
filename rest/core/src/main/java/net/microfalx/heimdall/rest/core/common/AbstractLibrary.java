@@ -7,6 +7,7 @@ import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Filterable;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
+import net.microfalx.bootstrap.jdbc.jpa.UpdateStrategy;
 import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.heimdall.rest.core.system.RestProject;
 import net.microfalx.lang.annotation.Description;
@@ -18,6 +19,7 @@ import net.microfalx.lang.annotation.Visible;
 @ToString
 @Getter
 @Setter
+@UpdateStrategy(fieldNames = {"name", "description", "tags", "override"})
 public abstract class AbstractLibrary extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
 
     @Column(name = "natural_id", nullable = false, length = 100, unique = true)

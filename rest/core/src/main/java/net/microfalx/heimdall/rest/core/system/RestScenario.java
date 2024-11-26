@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
+import net.microfalx.bootstrap.jdbc.jpa.UpdateStrategy;
 import net.microfalx.lang.annotation.Description;
 import net.microfalx.lang.annotation.Name;
 import net.microfalx.lang.annotation.Position;
@@ -17,6 +18,7 @@ import org.hibernate.annotations.NaturalId;
 @ToString
 @Getter
 @Setter
+@UpdateStrategy(fieldNames = {"name", "description", "tags"})
 public class RestScenario extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
 
     @Column(name = "natural_id", nullable = false,length = 100)

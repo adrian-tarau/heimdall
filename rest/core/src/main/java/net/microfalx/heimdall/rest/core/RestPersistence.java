@@ -53,7 +53,6 @@ public class RestPersistence extends ApplicationContextSupport {
         jpaSimulation.setProject(loadProject(simulation.getProject()));
         jpaSimulation.setResource(simulation.getResource().toURI().toASCIIString());
         jpaSimulation.setPath(simulation.getPath());
-        jpaSimulation.setOverride(true);
         jpaSimulation.setTags(CollectionUtils.setToString(simulation.getTags()));
         jpaSimulation.setDescription(simulation.getDescription());
         updater.findByNaturalIdAndUpdate(jpaSimulation);

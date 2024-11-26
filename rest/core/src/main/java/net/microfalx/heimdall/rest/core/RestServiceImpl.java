@@ -309,7 +309,11 @@ public class RestServiceImpl implements RestService, InitializingBean {
                 .tag(SELF_TAG).tag(AUTO_TAG).tag(LOCAL_TAG)
                 .name("Heimdall").description("A testing/monitoring tool for developers")
                 .build();
-        registerProject(project);
+        try {
+            registerProject(project);
+        } catch (Exception e) {
+            LOGGER.error("Failed to register Heimdall project", e);
+        }
     }
 
     private void initScriptResources(Resource resource) {
