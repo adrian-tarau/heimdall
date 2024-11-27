@@ -17,11 +17,8 @@
                 <div class="col-md-8"><span class="fw-bold">Description: </span><span class="fst-italic" th:text="${model.description}"></span></div>
             </div>
         </div>
-        <div class="row mb-1 p-1 fs-6">
-            <div>
-                <iframe class="w-100 pt-3 pb-3" style="height:600px" loading="lazy" th:src="${#content.getViewUri(content)}"></iframe>
-            </div>
-
+        <div class="row p-0 fs-6">
+            <iframe class="w-100 p-0" style="height:600px" loading="lazy" th:src="${#content.getViewUri(content)}"></iframe>
         </div>
     </div>
 </div>

@@ -10,8 +10,8 @@
                 <h5 class="modal-title">Report</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" th:attr="libraryId=${id}">
-                <iframe class="w-100 p-1" style="height:650px" loading="lazy" th:src="${#content.getEditUri(content)}"></iframe>
+            <div class="modal-body p-0" th:attr="libraryId=${id}">
+                <iframe class="w-100 p-0" style="height:650px" loading="lazy" th:src="${#content.getEditUri(content)}"></iframe>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary btn-sm" th:attr="onclick=|Application.closeModal()|">Save</button>
