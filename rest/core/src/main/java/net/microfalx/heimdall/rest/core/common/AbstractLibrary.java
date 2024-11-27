@@ -57,4 +57,9 @@ public abstract class AbstractLibrary extends NamedAndTaggedAndTimestampedIdenti
     @Column(name = "hash")
     @Visible(value = false)
     private String hash;
+
+    @Column(name = "version")
+    @Description("The version of the library")
+    @Position(30)
+    private Integer version;
 }
