@@ -5,11 +5,15 @@ Application.bind("rest.project.sync", function () {
 });
 
 Application.bind("rest.library.design", function () {
-
+    DataSet.get("design/" + DataSet.getId(), {}, function (data) {
+        Application.loadModal("design-modal", data);
+    });
 });
 
-Application.bind("rest.simulation.design", function (id) {
-
+Application.bind("rest.simulation.design", function () {
+    DataSet.get("design/" + DataSet.getId(), {}, function (data) {
+        Application.loadModal("design-modal", data);
+    });
 });
 
 Application.bind("rest.simulation.view.logs", function (id) {

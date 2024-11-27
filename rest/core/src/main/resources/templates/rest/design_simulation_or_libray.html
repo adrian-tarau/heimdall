@@ -1,0 +1,25 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="design" id="design-modal" tabindex="-1"
+     class="modal fade modal-xl" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Report</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" th:attr="libraryId=${id}">
+                <iframe class="w-100 p-1" style="height:650px" loading="lazy" th:src="${#content.getEditUri(content)}"></iframe>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary btn-sm" th:attr="onclick=|Application.closeModal()|">Save</button>
+                <button type="button" class="btn btn-secondary btn-sm" th:attr="onclick=|Application.closeModal()|">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

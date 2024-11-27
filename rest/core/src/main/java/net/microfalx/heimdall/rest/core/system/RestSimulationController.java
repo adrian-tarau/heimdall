@@ -1,14 +1,12 @@
 package net.microfalx.heimdall.rest.core.system;
 
 import net.microfalx.bootstrap.content.Content;
-import net.microfalx.bootstrap.content.ContentService;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.web.component.Item;
 import net.microfalx.bootstrap.web.component.Menu;
 import net.microfalx.bootstrap.web.component.Separator;
-import net.microfalx.heimdall.rest.api.RestService;
 import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.heimdall.rest.core.common.AbstractLibraryController;
 import net.microfalx.lang.ExceptionUtils;
@@ -30,19 +28,11 @@ import static net.microfalx.heimdall.rest.core.RestUtils.prepareContent;
 public class RestSimulationController extends AbstractLibraryController<RestSimulation> {
 
     @Autowired
-    private RestService restService;
-
-    @Autowired
-    private ContentService contentService;
+    private RestSimulationRepository repository;
 
     @Override
-    public RestService getRestService() {
-        return restService;
-    }
-
-    @Override
-    public ContentService getContentService() {
-        return contentService;
+    protected RestSimulation getLibrary(int id) {
+        return repository.findById(id).orElseThrow();
     }
 
     @Override

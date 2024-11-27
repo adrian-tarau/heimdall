@@ -12,6 +12,7 @@ import net.microfalx.bootstrap.web.util.JsonResponse;
 import net.microfalx.heimdall.rest.api.RestService;
 import net.microfalx.heimdall.rest.api.Schedule;
 import net.microfalx.heimdall.rest.api.SimulationContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.scheduling.support.PeriodicTrigger;
@@ -35,18 +36,19 @@ import static net.microfalx.lang.TimeUtils.parseDuration;
 @Slf4j
 public abstract class AbstractScheduleController<T extends AbstractSchedule> extends DataSetController<T, Integer> {
 
-    protected abstract RestService getRestService();
+    @Autowired
+    protected RestService restService;
 
     @PostMapping("run/{id}")
     @ResponseBody
     public JsonResponse<?> schedule(@PathVariable("id") String id) {
-        Schedule schedule = getRestService().getSchedule(id);
+        Schedule schedule = restService.getSchedule(id);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        SimulationContext context = getRestService().createContext(schedule.getEnvironment(), schedule.getSimulation())
+        SimulationContext context = restService.createContext(schedule.getEnvironment(), schedule.getSimulation())
                 .setManual(true);
         if (authentication != null) context.setUser(authentication.getName());
         context.getAttributes().copyFrom(schedule.getAttributes(true));
-        getRestService().schedule(context);
+        restService.schedule(context);
         return JsonResponse.success(formatMessage("The simulation ''{0}'' was scheduled to be executed using environment ''{1}''",
                 schedule.getSimulation().getName(), schedule.getEnvironment().getName()));
     }
@@ -79,7 +81,7 @@ public abstract class AbstractScheduleController<T extends AbstractSchedule> ext
     @Override
     protected void afterPersist(net.microfalx.bootstrap.dataset.DataSet<T, Field<T>, Integer> dataSet, T model, State state) {
         super.afterPersist(dataSet, model, state);
-        getRestService().reload();
+        restService.reload();
     }
 
     private Trigger createTrigger(T model, JsonFormResponse<?> response) {
@@ -108,10 +110,10 @@ public abstract class AbstractScheduleController<T extends AbstractSchedule> ext
     }
 
     private LocalDateTime getNextRun(T model) {
-        Schedule schedule = getRestService().getSchedule(Integer.toString(model.getId()));
+        Schedule schedule = restService.getSchedule(Integer.toString(model.getId()));
         JsonFormResponse<?> response = JsonFormResponse.success();
         Trigger trigger = createTrigger(model, response);
-        ZonedDateTime lastRun = getRestService().getLastRun(schedule.getSimulation(), schedule.getEnvironment()).orElse(STARTUP_TIME)
+        ZonedDateTime lastRun = restService.getLastRun(schedule.getSimulation(), schedule.getEnvironment()).orElse(STARTUP_TIME)
                 .atZone(ZoneId.systemDefault());
         switch (schedule.getType()) {
             case EXPRESSION:

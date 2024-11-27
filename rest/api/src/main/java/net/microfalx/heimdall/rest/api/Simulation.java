@@ -9,6 +9,7 @@ import org.atteo.classindex.IndexSubclasses;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.StringJoiner;
 
 import static java.time.Duration.ofMinutes;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
@@ -70,17 +71,40 @@ public class Simulation extends Library {
         /**
          * A tool to do load testing from <a href="https://grafana.com/docs/k6/latest/">Grafana</a>.
          */
-        K6,
+        K6("text/javascript"),
 
         /**
          * A tool to do load testing from <a href="https://jmeter.apache.org/">Apache</a>.
          */
-        JMETER,
+        JMETER("text/xml"),
 
         /**
          * A load testing tool which runs on <a href="https://docs.gatling.io/reference/script/core/simulation/">Java, Scala or Kotlin</a>.
          */
-        GATLING
+        GATLING("text/java");
+
+        private final String mimeType;
+
+        Type(String mimeType) {
+            this.mimeType = mimeType;
+        }
+
+        /**
+         * Returns the mime type associated with the simulation type
+         *
+         * @return a non-null instance
+         */
+        public String getMimeType() {
+            return mimeType;
+        }
+
+        @Override
+        public String toString() {
+            return new StringJoiner(", ", Type.class.getSimpleName() + "[", "]")
+                    .add("name='" + name() + "'")
+                    .add("mimeType='" + mimeType + "'")
+                    .toString();
+        }
     }
 
     /**

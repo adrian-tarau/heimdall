@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.rest.core.common;
 
+import net.microfalx.bootstrap.content.Content;
 import net.microfalx.bootstrap.content.ContentService;
 import net.microfalx.bootstrap.dataset.DataSet;
 import net.microfalx.bootstrap.dataset.DataSetException;
@@ -10,29 +11,58 @@ import net.microfalx.heimdall.rest.api.RestService;
 import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.io.IOException;
 
 import static net.microfalx.heimdall.rest.api.Library.getNaturalId;
 import static net.microfalx.heimdall.rest.api.RestConstants.SCRIPT_ATTR;
 
+/**
+ * Base class for all controllers dealing with a library.
+ *
+ * @param <T> the library type
+ */
 public abstract class AbstractLibraryController<T extends AbstractLibrary> extends DataSetController<T, Integer> {
 
-    protected abstract RestService getRestService();
+    @Autowired
+    protected RestService restService;
 
-    protected abstract ContentService getContentService();
+    @Autowired
+    protected ContentService contentService;
+
+    /**
+     * Returns a library by its identifier.
+     *
+     * @param id the identifier
+     * @return a non-null instance
+     */
+    protected abstract T getLibrary(int id);
+
+    @GetMapping("/design/{id}")
+    public String design(@PathVariable("id") int id, Model model) throws IOException {
+        T library = getLibrary(id);
+        Resource resource = ResourceFactory.resolve(library.getResource()).withMimeType(library.getType().getMimeType());
+        Content content = Content.create(resource);
+        contentService.registerContent(content);
+        model.addAttribute("content", content);
+        model.addAttribute("id", id);
+        return "rest/design_simulation_or_libray::#design-modal";
+    }
 
     protected final Simulation discover(Resource resource) {
         try {
-            return getRestService().discover(resource);
+            return restService.discover(resource);
         } catch (Exception e) {
             throw new DataSetException("Invalid library type '" + resource.getName() + "'");
         }
     }
 
     protected final Resource register(Resource resource) throws IOException {
-        return getRestService().registerResource(resource.withAttribute(SCRIPT_ATTR, Boolean.TRUE));
+        return restService.registerResource(resource.withAttribute(SCRIPT_ATTR, Boolean.TRUE));
     }
 
     @Override
@@ -53,6 +83,6 @@ public abstract class AbstractLibraryController<T extends AbstractLibrary> exten
     @Override
     protected void afterPersist(DataSet<T, Field<T>, Integer> dataSet, T model, State state) {
         super.afterPersist(dataSet, model, state);
-        getRestService().reload();
+        restService.reload();
     }
 }
