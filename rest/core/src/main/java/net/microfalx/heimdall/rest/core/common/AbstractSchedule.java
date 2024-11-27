@@ -41,6 +41,11 @@ public abstract class AbstractSchedule extends TimestampAware {
     @Position(15)
     private RestSimulation simulation;
 
+    @Column(name = "active")
+    @Description("Indicates whether a schedule is enabled")
+    @Position(16)
+    private boolean active = true;
+
     @Column(name = "type", length = 100, nullable = false)
     @Enumerated(EnumType.STRING)
     @Description("The type of the scheduler")
@@ -58,11 +63,6 @@ public abstract class AbstractSchedule extends TimestampAware {
     @Position(30)
     @Filterable
     private String interval;
-
-    @Column(name = "active")
-    @Description("Indicates whether a schedule is enabled")
-    @Position(35)
-    private boolean active = true;
 
     @Column(name = "vus")
     @Description("The number of virtual users")

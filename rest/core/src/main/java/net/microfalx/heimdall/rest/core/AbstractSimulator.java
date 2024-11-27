@@ -415,6 +415,7 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
         } catch (Exception e) {
             throw new SimulationException("Failed to execute simulation '" + simulation.getName() + "'", e);
         } finally {
+            cleanupWorkspace();
             endTime = LocalDateTime.now();
         }
         return output;
@@ -554,6 +555,16 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
         }
         INSTALLED.add(getSimulatorId());
         return true;
+    }
+
+    private void cleanupWorkspace() {
+        if (getStatus() != Status.SUCCESSFUL) return;
+        try {
+            File directory = toFile(getSessionWorkspace());
+            org.apache.commons.io.FileUtils.deleteDirectory(directory);
+        } catch (Exception e) {
+            log("Failed to cleanup workspace, root cause: {0}", ExceptionUtils.getRootCauseMessage(e));
+        }
     }
 
     private String getLogsAsText() {
