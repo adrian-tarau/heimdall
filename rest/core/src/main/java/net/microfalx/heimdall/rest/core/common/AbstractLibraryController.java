@@ -10,6 +10,7 @@ import net.microfalx.heimdall.rest.api.RestService;
 import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceFactory;
+import org.springframework.ui.Model;
 
 import java.io.IOException;
 
@@ -32,6 +33,12 @@ public abstract class AbstractLibraryController<T extends AbstractLibrary> exten
 
     protected final Resource register(Resource resource) throws IOException {
         return getRestService().registerResource(resource.withAttribute(SCRIPT_ATTR, Boolean.TRUE));
+    }
+
+    @Override
+    protected boolean beforeEdit(DataSet<T, Field<T>, Integer> dataSet, Model controllerModel, T dataSetModel) {
+        if (dataSetModel.getProject() != null) setReadOnlyExcept("name", "description", "tags", "override");
+        return super.beforeEdit(dataSet, controllerModel, dataSetModel);
     }
 
     @Override

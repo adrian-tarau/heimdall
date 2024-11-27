@@ -56,7 +56,6 @@ public class RestLibraryController extends AbstractLibraryController<RestLibrary
     @Override
     protected void beforeView(net.microfalx.bootstrap.dataset.DataSet<RestLibrary, Field<RestLibrary>, Integer> dataSet, Model controllerModel, RestLibrary dataSetModel) {
         super.beforeView(dataSet, controllerModel, dataSetModel);
-
         Content content = prepareContent(contentService, dataSetModel.getNaturalId(), "simulation", dataSetModel.getResource(), dataSetModel.getType());
         if (content != null) {
             controllerModel.addAttribute("content", content);

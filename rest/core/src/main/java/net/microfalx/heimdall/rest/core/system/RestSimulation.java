@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
+import net.microfalx.bootstrap.jdbc.jpa.UpdateStrategy;
 import net.microfalx.heimdall.rest.core.common.AbstractLibrary;
 import net.microfalx.lang.annotation.Description;
 import net.microfalx.lang.annotation.Name;
@@ -18,6 +19,7 @@ import net.microfalx.lang.annotation.Position;
 @ToString
 @Getter
 @Setter
+@UpdateStrategy(fieldNames = {"name", "description", "tags", "override", "timeout"})
 public class RestSimulation extends AbstractLibrary {
 
     @Column(name = "timeout", nullable = false)

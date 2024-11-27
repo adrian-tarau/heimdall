@@ -117,7 +117,7 @@ public class RestProjectManager {
                 .redirectError(error).redirectOutput(output);
         Process process = null;
         try {
-            LOGGER.info("Execute command '{}'", command);
+            LOGGER.info("Execute command '{}' for project '{}'", command, project.getName());
             process = processBuilder.start();
             boolean timedOut = false;
             try {
@@ -130,7 +130,7 @@ public class RestProjectManager {
             }
             int exitValue = process.exitValue();
             if (exitValue != 0) {
-                throw new IOException("Execution of '" + command + "' failed with error code = " + exitValue);
+                throw new IOException("Execution of '" + command + "' failed with error code = " + exitValue + " for project " + project.getName());
             } else {
                 LOGGER.info("The command was executed successfully");
             }
@@ -156,7 +156,7 @@ public class RestProjectManager {
                     arguments.add("clone");
                     arguments.add("-q");
                     arguments.add(getGitUri(project).toASCIIString());
-                    arguments.add(project.getId());
+                    arguments.add(getDirectoryName(project));
                 }
                 break;
             case SVN:
@@ -166,7 +166,7 @@ public class RestProjectManager {
                 } else {
                     arguments.add("checkout");
                     arguments.add(project.getUri().toASCIIString());
-                    arguments.add(project.getId());
+                    arguments.add(getDirectoryName(project));
                 }
                 break;
         }
@@ -297,6 +297,10 @@ public class RestProjectManager {
         } else {
             return uri;
         }
+    }
+
+    private String getDirectoryName(Project project) {
+        return StringUtils.toIdentifier(project.getName()) + "_" + project.getId();
     }
 
     private Lock getLock(Project project) {

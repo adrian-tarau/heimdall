@@ -7,19 +7,14 @@ import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Filterable;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
-import net.microfalx.bootstrap.jdbc.jpa.UpdateStrategy;
 import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.heimdall.rest.core.system.RestProject;
-import net.microfalx.lang.annotation.Description;
-import net.microfalx.lang.annotation.NaturalId;
-import net.microfalx.lang.annotation.Position;
-import net.microfalx.lang.annotation.Visible;
+import net.microfalx.lang.annotation.*;
 
 @MappedSuperclass
 @ToString
 @Getter
 @Setter
-@UpdateStrategy(fieldNames = {"name", "description", "tags", "override"})
 public abstract class AbstractLibrary extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
 
     @Column(name = "natural_id", nullable = false, length = 100, unique = true)
@@ -32,18 +27,21 @@ public abstract class AbstractLibrary extends NamedAndTaggedAndTimestampedIdenti
     @JoinColumn(name = "project_id")
     @Description("The project repository")
     @Position(3)
+    @ReadOnly(modes = ReadOnly.Mode.EDIT)
     private RestProject project;
 
     @Column(name = "type", nullable = false)
     @Enumerated(EnumType.STRING)
     @Description("The type of simulation")
     @Position(10)
+    @ReadOnly(modes = ReadOnly.Mode.EDIT)
     private Simulation.Type type;
 
     @Column(name = "path", nullable = false, length = 2000)
     @Description("The path of the script")
-    @Formattable(maximumLength = 50)
+    @Formattable(maximumLength = 40)
     @Position(15)
+    @ReadOnly(modes = ReadOnly.Mode.EDIT)
     @Filterable
     private String path;
 
