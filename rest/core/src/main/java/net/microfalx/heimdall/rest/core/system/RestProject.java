@@ -30,7 +30,7 @@ public class RestProject extends NamedAndTaggedAndTimestampedIdentityAware<Integ
     @Position(10)
     private Project.Type type;
 
-    @Column(name = "uri", nullable = false, length = 2000)
+    @Column(name = "uri", length = 2000)
     @Description("The URI to the project repository")
     @Position(15)
     @Filterable

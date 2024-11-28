@@ -8,6 +8,7 @@ import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.web.dataset.DataSetController;
 import net.microfalx.bootstrap.web.util.CodeEditor;
 import net.microfalx.bootstrap.web.util.JsonResponse;
+import net.microfalx.heimdall.rest.api.Project;
 import net.microfalx.heimdall.rest.api.RestService;
 import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.resource.Resource;
@@ -20,6 +21,7 @@ import java.io.IOException;
 
 import static net.microfalx.heimdall.rest.api.Library.getNaturalId;
 import static net.microfalx.heimdall.rest.api.RestConstants.SCRIPT_ATTR;
+import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
 /**
  * Base class for all controllers dealing with a library.
@@ -78,6 +80,12 @@ public abstract class AbstractLibraryController<T extends AbstractLibrary> exten
         return restService.registerResource(resource.withAttribute(SCRIPT_ATTR, Boolean.TRUE));
     }
 
+    protected final void reloadProject(String id) {
+        requireNonNull(id);
+        Project project = restService.getProject(id);
+        restService.reload(project);
+    }
+
     @Override
     protected boolean beforeEdit(DataSet<T, Field<T>, Integer> dataSet, Model controllerModel, T dataSetModel) {
         if (dataSetModel.getProject() != null) setReadOnlyExcept("name", "description", "tags", "override");
@@ -98,4 +106,5 @@ public abstract class AbstractLibraryController<T extends AbstractLibrary> exten
         super.afterPersist(dataSet, model, state);
         restService.reload();
     }
+
 }

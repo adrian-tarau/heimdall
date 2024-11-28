@@ -84,8 +84,8 @@ public class RestServiceImpl implements RestService, InitializingBean {
     @Override
     public void registerProject(Project project) {
         requireNonNull(project);
-        cache.registerProject(project, null);
         persistence.save(project);
+        cache.registerProject(project, null);
     }
 
     @Override
@@ -102,8 +102,8 @@ public class RestServiceImpl implements RestService, InitializingBean {
     @Override
     public void registerSimulation(Simulation simulation) {
         requireNonNull(simulation);
-        cache.registerSimulation(simulation, null);
         persistence.save(simulation);
+        cache.registerSimulation(simulation, null);
     }
 
     @Override
@@ -131,8 +131,8 @@ public class RestServiceImpl implements RestService, InitializingBean {
     @Override
     public void registerLibrary(Library library) {
         requireNonNull(library);
-        cache.registerLibrary(library, null);
         persistence.save(library);
+        cache.registerLibrary(library, null);
     }
 
     @Override
@@ -263,12 +263,22 @@ public class RestServiceImpl implements RestService, InitializingBean {
     }
 
     @Override
+    public void reload(Project project) {
+        requireNonNull(project);
+        try {
+            projectManager.reload(project);
+        } catch (IOException e) {
+            LOGGER.error("Failed to reload project '" + project.getName() + "'", e);
+        }
+    }
+
+    @Override
     public void afterPropertiesSet() {
         persistence.setApplicationContext(applicationContext);
         simulationScheduler.setApplicationContext(applicationContext);
         initializeProviders();
         initResources();
-        registerHeimdall();
+        registerProjects();
         this.reload();
         simulationScheduler.initialize(this);
     }
@@ -308,7 +318,12 @@ public class RestServiceImpl implements RestService, InitializingBean {
         initDataResources(resource);
     }
 
-    private void registerHeimdall() {
+    private void registerProjects() {
+        try {
+            registerProject(Project.DEFAULT);
+        } catch (Exception e) {
+            LOGGER.error("Failed to register default project", e);
+        }
         if (!properties.isSelf()) return;
         Project project = (Project) Project.create(UriUtils.parseUri("https://github.com/adrian-tarau/heimdall.git")).type(Project.Type.GIT)
                 .libraryPath("/**/test/resources/rest/library/*.js").simulationPath("/**/test/resources/rest/simulation/*.js")

@@ -1,6 +1,7 @@
 package net.microfalx.heimdall.rest.core.system;
 
 import net.microfalx.bootstrap.content.Content;
+import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.model.Field;
@@ -8,6 +9,7 @@ import net.microfalx.bootstrap.web.component.Item;
 import net.microfalx.bootstrap.web.component.Menu;
 import net.microfalx.bootstrap.web.component.Separator;
 import net.microfalx.heimdall.rest.api.Library;
+import net.microfalx.heimdall.rest.api.Project;
 import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.heimdall.rest.core.common.AbstractLibraryController;
 import net.microfalx.lang.ExceptionUtils;
@@ -39,7 +41,7 @@ public class RestLibraryController extends AbstractLibraryController<RestLibrary
     @Override
     protected void save(int id, Resource resource) {
         Library library = restService.getLibrary(Integer.toString(id));
-        library = library.withResource(resource);
+        library = library.withResource(resource).withOverride(true);
         restService.registerLibrary(library);
     }
 
@@ -61,12 +63,20 @@ public class RestLibraryController extends AbstractLibraryController<RestLibrary
     }
 
     @Override
+    protected void afterPersist(net.microfalx.bootstrap.dataset.DataSet<RestLibrary, Field<RestLibrary>, Integer> dataSet, RestLibrary model, State state) {
+        super.afterPersist(dataSet, model, state);
+        if (model.getProject() != null && !model.isOverride()) {
+            reloadProject(model.getProject().getNaturalId());
+        }
+    }
+
+    @Override
     protected void upload(net.microfalx.bootstrap.dataset.DataSet<RestLibrary, Field<RestLibrary>, Integer> dataSet, Model model, Resource resource) {
         Simulation simulation = discover(resource);
         try {
             Resource storedResource = register(resource);
             Library.Builder builder = new Library.Builder(simulation.getId()).resource(storedResource).type(simulation.getType())
-                    .path(resource.getFileName());
+                    .project(Project.DEFAULT).path(resource.getFileName());
             builder.tags(simulation.getTags()).name(simulation.getName()).description(simulation.getDescription());
             restService.registerLibrary(builder.build());
         } catch (IOException e) {

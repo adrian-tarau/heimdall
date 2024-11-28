@@ -59,7 +59,7 @@ public class RestProjectManager {
             try {
                 reload(project);
             } catch (Exception e) {
-                LOGGER.error("Failed to update project '" + project.getName() + "'", e);
+                LOGGER.error("Failed to reload project '" + project.getName() + "'", e);
             }
         }
     }
@@ -74,6 +74,7 @@ public class RestProjectManager {
      */
     void reload(Project project) throws IOException {
         requireNonNull(project);
+        if (project.getType() == Project.Type.NONE) return;
         Lock lock = getLock(project);
         if (!lock.tryLock()) return;
         try {

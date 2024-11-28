@@ -21,6 +21,7 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
     private Project project;
     private String path;
     private Simulation.Type type;
+    private boolean override;
 
     /**
      * Creates a library builder out of a resource.
@@ -69,6 +70,15 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
     }
 
     /**
+     * Returns whether the library (content) indicates an override (UI change).
+     *
+     * @return {@code true} if content override, {@code false} otherwise, {@code NULL} of override is undefined
+     */
+    public Boolean getOverride() {
+        return override;
+    }
+
+    /**
      * Returns a new instance of this library with a different resource.
      *
      * @param resource the new resource
@@ -77,6 +87,18 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
     public final Library withResource(Resource resource) {
         Library copy = (Library) copy();
         copy.resource = requireNonNull(resource);
+        return copy;
+    }
+
+    /**
+     * Returns a new instance of this library with a different override.
+     *
+     * @param override {@code true} if content override, {@code false} otherwise
+     * @return a new instance
+     */
+    public final Library withOverride(Boolean override) {
+        Library copy = (Library) copy();
+        copy.override = override;
         return copy;
     }
 
@@ -102,9 +124,11 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
     public static class Builder extends NamedAndTaggedIdentifyAware.Builder<String> {
 
         private Resource resource;
-        private Project project;
+        private Project project = Project.DEFAULT;
         private String path;
         private Simulation.Type type;
+
+        private Boolean override;
 
         public Builder(String id) {
             super(id);
@@ -115,13 +139,8 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
 
         public Builder(Library library) {
             super(library.getId());
-            this.tags(library.getTags())
-                    .name(library.getName())
-                    .description(library.getDescription());
-            this.type(library.getType())
-                    .path(library.getPath())
-                    .project(library.getProject())
-                    .resource(library.getResource());
+            this.tags(library.getTags()).name(library.getName()).description(library.getDescription());
+            this.project(library.getProject()).type(library.getType()).path(library.getPath()).resource(library.getResource());
         }
 
         public final Builder resource(Resource resource) {
@@ -133,6 +152,7 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
         }
 
         public final Builder project(Project project) {
+            requireNonNull(project);
             this.project = project;
             return this;
         }
@@ -146,6 +166,11 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
         public final Builder path(String path) {
             requireNonNull(path);
             this.path = path;
+            return this;
+        }
+
+        public final Builder override(Boolean override) {
+            this.override = override;
             return this;
         }
 
@@ -172,6 +197,7 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
             library.type = type;
             library.project = project;
             library.path = path;
+            library.override = override;
             return library;
         }
     }

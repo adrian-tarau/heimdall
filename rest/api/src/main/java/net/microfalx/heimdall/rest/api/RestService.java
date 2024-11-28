@@ -204,7 +204,14 @@ public interface RestService {
     Resource getData(int id);
 
     /**
-     * Reloads the rest definitions.
+     * Reloads all projects.
      */
     void reload();
+
+    /**
+     * Reloads a project.
+     *
+     * @param project the project
+     */
+    void reload(Project project);
 }

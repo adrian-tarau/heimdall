@@ -10,6 +10,7 @@ import net.microfalx.heimdall.rest.api.Project;
 import net.microfalx.heimdall.rest.api.SimulationException;
 import net.microfalx.heimdall.rest.core.system.*;
 import net.microfalx.lang.CollectionUtils;
+import net.microfalx.lang.UriUtils;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceFactory;
 import net.microfalx.resource.ResourceUtils;
@@ -25,20 +26,22 @@ public class RestPersistence extends ApplicationContextSupport {
         jpaProject.setName(project.getName());
         jpaProject.setType(project.getType());
         jpaProject.setNaturalId(project.getId());
-        jpaProject.setUri(project.getUri().toASCIIString());
+        jpaProject.setUri(UriUtils.toString(project.getUri()));
         jpaProject.setUserName(project.getUserName());
         jpaProject.setPassword(project.getPassword());
         jpaProject.setToken(project.getToken());
         jpaProject.setTags(CollectionUtils.setToString(project.getTags()));
-        jpaProject.setLibraryPath(project.getLibraryPath());
-        jpaProject.setSimulationPath(project.getSimulationPath());
+        if (project.getType() != Project.Type.NONE) {
+            jpaProject.setLibraryPath(project.getLibraryPath());
+            jpaProject.setSimulationPath(project.getSimulationPath());
+        }
         jpaProject.setDescription(project.getDescription());
         restLibraryUpdater.findByNaturalIdAndUpdate(jpaProject);
     }
 
     void save(Library library) {
         RestLibraryRepository restLibraryRepository = getBean(RestLibraryRepository.class);
-        NaturalIdEntityUpdater<RestLibrary, Integer> restLibraryUpdater = getUpdater(RestLibraryRepository.class);
+        NaturalIdEntityUpdater<RestLibrary, Integer> updater = getUpdater(RestLibraryRepository.class);
         int version = 1;
         RestLibrary previousJpaLibrary = restLibraryRepository.findByNaturalId(library.getId()).orElse(null);
         if (previousJpaLibrary != null) {
@@ -54,10 +57,14 @@ public class RestPersistence extends ApplicationContextSupport {
         jpaLibrary.setProject(loadProject(library.getProject()));
         jpaLibrary.setResource(library.getResource().toURI().toASCIIString());
         jpaLibrary.setPath(library.getPath());
+        if (library.getOverride() != null) {
+            updater.setUpdatable("override", true);
+            jpaLibrary.setOverride(library.getOverride());
+        }
+        jpaLibrary.setVersion(version);
         jpaLibrary.setTags(CollectionUtils.setToString(library.getTags()));
         jpaLibrary.setDescription(library.getDescription());
-        jpaLibrary.setVersion(version);
-        restLibraryUpdater.findByNaturalIdAndUpdate(jpaLibrary);
+        updater.findByNaturalIdAndUpdate(jpaLibrary);
     }
 
     void saveHistory(RestLibrary restLibrary) {
@@ -92,6 +99,10 @@ public class RestPersistence extends ApplicationContextSupport {
         jpaSimulation.setResource(simulation.getResource().toURI().toASCIIString());
         jpaSimulation.setPath(simulation.getPath());
         jpaSimulation.setVersion(version);
+        if (simulation.getOverride() != null) {
+            updater.setUpdatable("override", true);
+            jpaSimulation.setOverride(simulation.getOverride());
+        }
         jpaSimulation.setTags(CollectionUtils.setToString(simulation.getTags()));
         jpaSimulation.setDescription(simulation.getDescription());
         updater.findByNaturalIdAndUpdate(jpaSimulation);

@@ -12,7 +12,6 @@ import net.microfalx.resource.ResourceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +20,9 @@ import java.util.Map;
 import static java.time.Duration.ofSeconds;
 import static java.util.Collections.unmodifiableCollection;
 import static net.microfalx.lang.CollectionUtils.setFromString;
+import static net.microfalx.lang.StringUtils.isNotEmpty;
 import static net.microfalx.lang.TimeUtils.parseDuration;
+import static net.microfalx.lang.UriUtils.parseUri;
 
 class RestCache extends ApplicationContextSupport {
 
@@ -120,11 +121,14 @@ class RestCache extends ApplicationContextSupport {
     private void loadProjects() {
         List<RestProject> projectsJPAs = getBean(RestProjectRepository.class).findAll();
         projectsJPAs.forEach(restProject -> {
-            Project.Builder builder = new Project.Builder(URI.create(restProject.getUri()));
-            builder.userName(restProject.getUserName()).password(restProject.getPassword())
-                    .token(restProject.getToken()).type(restProject.getType())
-                    .libraryPath(restProject.getLibraryPath()).simulationPath(restProject.getSimulationPath())
-                    .tags(setFromString(restProject.getTags()))
+            Project.Builder builder = isNotEmpty(restProject.getUri()) ? Project.create(parseUri(restProject.getUri())) :
+                    Project.create();
+            if (restProject.getType() != Project.Type.NONE) {
+                builder.userName(restProject.getUserName()).password(restProject.getPassword())
+                        .token(restProject.getToken()).type(restProject.getType())
+                        .libraryPath(restProject.getLibraryPath()).simulationPath(restProject.getSimulationPath());
+            }
+            builder.tags(setFromString(restProject.getTags()))
                     .name(restProject.getName()).description(restProject.getDescription())
                     .id(restProject.getNaturalId());
             Project project = builder.build();
@@ -140,7 +144,7 @@ class RestCache extends ApplicationContextSupport {
             RestProject restProject = restLibrary.getProject();
             if (restProject != null) builder.project(getProject(restProject.getNaturalId()));
             builder.type(restLibrary.getType())
-                    .resource(resource).path(restLibrary.getPath())
+                    .resource(resource).path(restLibrary.getPath()).override(restLibrary.isOverride())
                     .tags(setFromString(restLibrary.getTags()))
                     .name(restLibrary.getName()).description(restLibrary.getDescription()).build();
             Library library = builder.build();
@@ -157,6 +161,7 @@ class RestCache extends ApplicationContextSupport {
             if (restProject != null) builder.project(getProject(restProject.getNaturalId()));
             builder.timeout(ofSeconds(restSimulation.getTimeout()));
             builder.resource(resource).path(restSimulation.getPath())
+                    .override(restSimulation.isOverride())
                     .type(restSimulation.getType()).tag(restSimulation.getTags())
                     .name(restSimulation.getName()).description(restSimulation.getDescription()).build();
             Simulation simulation = builder.build();

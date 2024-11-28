@@ -1,10 +1,7 @@
 package net.microfalx.heimdall.rest.api;
 
 import lombok.ToString;
-import net.microfalx.lang.Hashing;
-import net.microfalx.lang.IdentityAware;
-import net.microfalx.lang.NamedAndTaggedIdentifyAware;
-import net.microfalx.lang.UriUtils;
+import net.microfalx.lang.*;
 
 import java.net.URI;
 
@@ -28,8 +25,17 @@ public class Project extends NamedAndTaggedIdentifyAware<String> {
     private String libraryPath;
     private String simulationPath;
 
+    public static Project DEFAULT = (Project) Project.create()
+            .tag(SELF_TAG).tag(AUTO_TAG).tag(LOCAL_TAG)
+            .name("Default").description("A default project")
+            .build();
+
     public static Builder create(URI uri) {
         return new Builder(uri);
+    }
+
+    public static Builder create() {
+        return new Builder(Type.NONE);
     }
 
     /**
@@ -44,7 +50,7 @@ public class Project extends NamedAndTaggedIdentifyAware<String> {
     /**
      * Returns the URI to access the project repository.
      *
-     * @return a non-null instance
+     * @return the URI if the project is external, null otherwise
      */
     public URI getUri() {
         return uri;
@@ -117,6 +123,12 @@ public class Project extends NamedAndTaggedIdentifyAware<String> {
     }
 
     public enum Type {
+
+        /**
+         * The project is not from version control
+         */
+        NONE,
+
         /**
          * The GIT version control
          */
@@ -130,7 +142,7 @@ public class Project extends NamedAndTaggedIdentifyAware<String> {
 
     public static class Builder extends NamedAndTaggedIdentifyAware.Builder<String> {
 
-        private final URI uri;
+        private URI uri;
         private Type type = Type.GIT;
         private String userName;
         private String password;
@@ -139,10 +151,16 @@ public class Project extends NamedAndTaggedIdentifyAware<String> {
         private String libraryPath = UriUtils.SLASH;
         private String simulationPath = UriUtils.SLASH;
 
-        public Builder(URI uri) {
+        Builder(URI uri) {
             super();
             requireNonNull(uri);
             this.uri = uri;
+        }
+
+        Builder(Type type) {
+            super();
+            requireNonNull(type);
+            this.type = type;
         }
 
         public Builder userName(String userName) {
@@ -185,7 +203,11 @@ public class Project extends NamedAndTaggedIdentifyAware<String> {
 
         @Override
         protected String updateId() {
-            return getNaturalId(uri);
+            if (uri != null) {
+                return getNaturalId(uri);
+            } else {
+                return StringUtils.toIdentifier(name());
+            }
         }
 
         @Override
