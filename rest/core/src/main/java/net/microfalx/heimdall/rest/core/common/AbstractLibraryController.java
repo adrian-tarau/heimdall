@@ -1,20 +1,20 @@
 package net.microfalx.heimdall.rest.core.common;
 
-import net.microfalx.bootstrap.content.Content;
 import net.microfalx.bootstrap.content.ContentService;
 import net.microfalx.bootstrap.dataset.DataSet;
 import net.microfalx.bootstrap.dataset.DataSetException;
 import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.web.dataset.DataSetController;
+import net.microfalx.bootstrap.web.util.CodeEditor;
+import net.microfalx.bootstrap.web.util.JsonResponse;
 import net.microfalx.heimdall.rest.api.RestService;
 import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
@@ -42,15 +42,28 @@ public abstract class AbstractLibraryController<T extends AbstractLibrary> exten
      */
     protected abstract T getLibrary(int id);
 
+    /**
+     * Saves the content of the library
+     *
+     * @param id       the identifier
+     * @param resource the content
+     */
+    protected abstract void save(int id, Resource resource);
+
     @GetMapping("/design/{id}")
     public String design(@PathVariable("id") int id, Model model) throws IOException {
         T library = getLibrary(id);
-        Resource resource = ResourceFactory.resolve(library.getResource()).withMimeType(library.getType().getMimeType());
-        Content content = Content.create(resource);
-        contentService.registerContent(content);
-        model.addAttribute("content", content);
-        model.addAttribute("id", id);
-        return "rest/design_simulation_or_libray::#design-modal";
+        Resource resource = ResourceFactory.resolve(library.getResource()).withName("Design")
+                .withMimeType(library.getType().getMimeType());
+        return new CodeEditor<Integer>(contentService, resource, this).getEditorDialog(id, model);
+    }
+
+    @PostMapping("/design/{id}")
+    @ResponseBody()
+    public JsonResponse<?> design(@PathVariable("id") int id, @RequestBody String content, Model model) throws IOException {
+        Resource resource = register(Resource.text(content));
+        save(id, resource);
+        return JsonResponse.success();
     }
 
     protected final Simulation discover(Resource resource) {

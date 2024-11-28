@@ -4,16 +4,20 @@ Application.bind("rest.project.sync", function () {
     }, {dataType: "json"});
 });
 
+Application.bind("rest.library.history", function () {
+    Application.showInfoAlert("Library", "Show history");
+});
+
+Application.bind("rest.simulation.history", function () {
+    Application.showInfoAlert("Simulation", "Show history");
+});
+
 Application.bind("rest.library.design", function () {
-    DataSet.get("design/" + DataSet.getId(), {}, function (data) {
-        Application.loadModal("design-modal", data);
-    });
+    CodeEditor.loadModal("design/" + DataSet.getId());
 });
 
 Application.bind("rest.simulation.design", function () {
-    DataSet.get("design/" + DataSet.getId(), {}, function (data) {
-        Application.loadModal("design-modal", data);
-    });
+    CodeEditor.loadModal("design/" + DataSet.getId());
 });
 
 Application.bind("rest.simulation.view.logs", function (id) {

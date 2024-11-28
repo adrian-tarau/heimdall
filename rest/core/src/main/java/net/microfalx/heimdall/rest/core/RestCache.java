@@ -66,6 +66,12 @@ class RestCache extends ApplicationContextSupport {
         return unmodifiableCollection(libraries.values());
     }
 
+    Library getLibrary(String id) {
+        Library library = libraries.get(StringUtils.toIdentifier(id));
+        if (library == null) throw new RestNotFoundException("A library with identifier '" + id + "' does not exist");
+        return library;
+    }
+
     void registerProject(Project project, Integer key) {
         projects.put(StringUtils.toIdentifier(project.getId()), project);
         if (key != null) projects.put(Integer.toString(key), project);

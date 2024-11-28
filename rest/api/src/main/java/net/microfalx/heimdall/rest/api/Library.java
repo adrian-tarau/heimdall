@@ -69,6 +69,18 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
     }
 
     /**
+     * Returns a new instance of this library with a different resource.
+     *
+     * @param resource the new resource
+     * @return a new instance
+     */
+    public final Library withResource(Resource resource) {
+        Library copy = (Library) copy();
+        copy.resource = requireNonNull(resource);
+        return copy;
+    }
+
+    /**
      * Returns the natural identifier for a resource associated with a library.
      *
      * @param type      the simulation type

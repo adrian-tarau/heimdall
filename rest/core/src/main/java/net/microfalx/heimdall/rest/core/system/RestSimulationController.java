@@ -36,10 +36,18 @@ public class RestSimulationController extends AbstractLibraryController<RestSimu
     }
 
     @Override
+    protected void save(int id, Resource resource) {
+        Simulation simulation = restService.getSimulation(Integer.toString(id));
+        simulation = (Simulation) simulation.withResource(resource);
+        restService.registerSimulation(simulation);
+    }
+
+    @Override
     protected void updateActions(Menu menu) {
         super.updateActions(menu);
         menu.add(new Separator());
         menu.add(new Item().setAction("rest.simulation.design").setText("Design").setIcon("fa-solid fa-pen-nib").setDescription("Design the simulation"));
+        menu.add(new Item().setAction("rest.simulation.history").setText("History").setIcon("fa-solid fa-timeline").setDescription("Show the history of the simulation"));
     }
 
     @Override

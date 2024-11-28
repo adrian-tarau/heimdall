@@ -111,7 +111,7 @@ public class RestPersistence extends ApplicationContextSupport {
     private boolean hasResourceChanged(String previousUri, Resource currentResource) {
         Resource previousResource = ResourceFactory.resolve(previousUri);
         try {
-            return ResourceUtils.hasSameContent(previousResource, currentResource);
+            return !ResourceUtils.hasSameContent(previousResource, currentResource);
         } catch (IOException e) {
             LOGGER.error("Failed to compare resources '{}' with '{}'", previousUri, currentResource.toURI());
             return false;

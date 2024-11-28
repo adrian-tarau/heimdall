@@ -84,6 +84,15 @@ public interface RestService {
     Collection<Library> getLibraries();
 
     /**
+     * Returns a library by its identifier.
+     *
+     * @param id the library identifier.
+     * @return the library
+     * @throws RestNotFoundException if such a library does not exist
+     */
+    Library getLibrary(String id);
+
+    /**
      * Registers a library.
      *
      * @param library the library

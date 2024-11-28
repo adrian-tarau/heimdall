@@ -123,6 +123,12 @@ public class RestServiceImpl implements RestService, InitializingBean {
     }
 
     @Override
+    public Library getLibrary(String id) {
+        requireNonNull(id);
+        return cache.getLibrary(id);
+    }
+
+    @Override
     public void registerLibrary(Library library) {
         requireNonNull(library);
         cache.registerLibrary(library, null);
