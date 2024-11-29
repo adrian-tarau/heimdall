@@ -21,7 +21,7 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
     private Project project;
     private String path;
     private Simulation.Type type;
-    private boolean override;
+    private Boolean override;
 
     /**
      * Creates a library builder out of a resource.

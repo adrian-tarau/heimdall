@@ -69,6 +69,8 @@ public class RestServiceImpl implements RestService, InitializingBean {
     private Resource reportResource;
     private Resource dataResource;
     private Resource projectResource;
+    private Resource simulatorResource;
+    private Resource simulationsResource;
 
     @Override
     public Collection<Project> getProjects() {
@@ -253,10 +255,7 @@ public class RestServiceImpl implements RestService, InitializingBean {
 
     @Override
     public void reload() {
-        RestCache cache = new RestCache();
-        cache.setApplicationContext(applicationContext);
-        cache.load();
-        this.cache = cache;
+        reloadCache();
         taskExecutor.execute(() -> projectManager.initialize(this));
         taskExecutor.execute(() -> simulationScheduler.initialize(this));
         taskExecutor.execute(simulationScheduler::reload);
@@ -267,6 +266,7 @@ public class RestServiceImpl implements RestService, InitializingBean {
         requireNonNull(project);
         try {
             projectManager.reload(project);
+            reloadCache();
         } catch (IOException e) {
             LOGGER.error("Failed to reload project '" + project.getName() + "'", e);
         }
@@ -289,6 +289,14 @@ public class RestServiceImpl implements RestService, InitializingBean {
 
     Resource getProjectResource() {
         return projectResource;
+    }
+
+    Resource getSimulatorResource() {
+        return simulatorResource;
+    }
+
+    Resource getSimulationsResource() {
+        return simulationsResource;
     }
 
     private void initializeProviders() {
@@ -407,8 +415,13 @@ public class RestServiceImpl implements RestService, InitializingBean {
     }
 
     private void initProjectResources() {
-        projectResource = resourceService.getPersisted("rest").resolve("project", Resource.Type.DIRECTORY);
-        LOGGER.info("Rest projects are stored in: " + projectResource);
+        Resource persisted = resourceService.getPersisted("rest");
+        projectResource = persisted.resolve("project", Resource.Type.DIRECTORY);
+        LOGGER.info("Rest projects are stored in: {}", projectResource);
+        simulatorResource = persisted.resolve("project", Resource.Type.DIRECTORY);
+        LOGGER.info("Rest simulators are stored in: {}", simulatorResource);
+        simulationsResource = persisted.resolve("project", Resource.Type.DIRECTORY);
+        LOGGER.info("Rest simulations are stored in: {}", simulationsResource);
     }
 
     private Simulator createSimulator(Simulation simulation) {
@@ -430,6 +443,13 @@ public class RestServiceImpl implements RestService, InitializingBean {
             }
         }
         return libraries;
+    }
+
+    private void reloadCache() {
+        RestCache cache = new RestCache();
+        cache.setApplicationContext(applicationContext);
+        cache.load();
+        this.cache = cache;
     }
 
     private RestResult findOutput(int id) {

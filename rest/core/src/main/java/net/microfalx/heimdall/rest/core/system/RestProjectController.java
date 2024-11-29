@@ -12,6 +12,7 @@ import net.microfalx.bootstrap.web.util.JsonResponse;
 import net.microfalx.heimdall.rest.api.Project;
 import net.microfalx.heimdall.rest.api.RestService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,6 +30,9 @@ public class RestProjectController extends DataSetController<RestProject, Intege
 
     @Autowired
     private RestService restService;
+
+    @Autowired
+    private AsyncTaskExecutor executor;
 
     @PostMapping("sync")
     @ResponseBody
@@ -68,6 +72,7 @@ public class RestProjectController extends DataSetController<RestProject, Intege
     @Override
     protected void afterPersist(net.microfalx.bootstrap.dataset.DataSet<RestProject, Field<RestProject>, Integer> dataSet, RestProject model, State state) {
         super.afterPersist(dataSet, model, state);
-        restService.reload();
+        Project project = restService.getProject(model.getNaturalId());
+        executor.execute(() -> restService.reload(project));
     }
 }

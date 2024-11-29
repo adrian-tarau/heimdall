@@ -14,6 +14,7 @@ import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,6 +36,9 @@ public abstract class AbstractLibraryController<T extends AbstractLibrary> exten
 
     @Autowired
     protected ContentService contentService;
+
+    @Autowired
+    private TaskExecutor executor;
 
     /**
      * Returns a library by its identifier.
@@ -83,7 +87,7 @@ public abstract class AbstractLibraryController<T extends AbstractLibrary> exten
     protected final void reloadProject(String id) {
         requireNonNull(id);
         Project project = restService.getProject(id);
-        restService.reload(project);
+        executor.execute(() -> restService.reload(project));
     }
 
     @Override
@@ -104,7 +108,7 @@ public abstract class AbstractLibraryController<T extends AbstractLibrary> exten
     @Override
     protected void afterPersist(DataSet<T, Field<T>, Integer> dataSet, T model, State state) {
         super.afterPersist(dataSet, model, state);
-        restService.reload();
+        executor.execute(restService::reload);
     }
 
 }

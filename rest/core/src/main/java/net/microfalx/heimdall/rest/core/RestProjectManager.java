@@ -31,6 +31,7 @@ import static net.microfalx.lang.ExceptionUtils.getRootCauseMessage;
 import static net.microfalx.lang.FileUtils.validateDirectoryExists;
 import static net.microfalx.lang.StringUtils.SPACE;
 import static net.microfalx.lang.StringUtils.isNotEmpty;
+import static net.microfalx.lang.TextUtils.insertSpaces;
 import static net.microfalx.lang.TimeUtils.FIVE_MINUTE;
 import static net.microfalx.lang.TimeUtils.millisSince;
 import static net.microfalx.resource.ResourceUtils.toFile;
@@ -131,19 +132,31 @@ public class RestProjectManager {
             }
             int exitValue = process.exitValue();
             if (exitValue != 0) {
-                throw new IOException("Execution of '" + command + "' failed with error code = " + exitValue + " for project " + project.getName());
+                throw new IOException("Execution of '" + command + "' failed with error code = " + exitValue
+                        + " for project " + project.getName() + ", logs\n" + insertSpaces(getLogs(output, error), 5));
             } else {
                 LOGGER.info("The command was executed successfully");
             }
         } finally {
             try {
-                process.destroy();
+                if (process != null) process.destroy();
             } catch (Exception e) {
-                LOGGER.warn("Failed to destroy the process: " + getRootCauseMessage(e));
+                LOGGER.warn("Failed to destroy the process: {}", getRootCauseMessage(e));
             }
             if (error.exists()) error.delete();
             if (output.exists()) output.delete();
         }
+    }
+
+    private String getLogs(File output, File error) {
+        StringBuilder builder = new StringBuilder();
+        try {
+            builder.append(Resource.file(output).loadAsString()).append('\n');
+            builder.append(Resource.file(error).loadAsString()).append('\n');
+        } catch (IOException e) {
+            builder.append("Error: ").append(ExceptionUtils.getRootCauseMessage(e));
+        }
+        return builder.toString();
     }
 
     private void updateArguments(Project project, List<String> arguments) {
@@ -195,7 +208,7 @@ public class RestProjectManager {
      * @return the directory
      */
     private File getWorkspace(Project project) {
-        return new File(getWorkspace(), project.getId());
+        return new File(getWorkspace(), getDirectoryName(project));
     }
 
     /**

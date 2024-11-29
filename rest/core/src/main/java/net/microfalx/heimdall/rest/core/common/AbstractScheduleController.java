@@ -13,6 +13,7 @@ import net.microfalx.heimdall.rest.api.RestService;
 import net.microfalx.heimdall.rest.api.Schedule;
 import net.microfalx.heimdall.rest.api.SimulationContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.scheduling.support.PeriodicTrigger;
@@ -38,6 +39,9 @@ public abstract class AbstractScheduleController<T extends AbstractSchedule> ext
 
     @Autowired
     protected RestService restService;
+
+    @Autowired
+    private TaskExecutor executor;
 
     @PostMapping("run/{id}")
     @ResponseBody
@@ -81,7 +85,7 @@ public abstract class AbstractScheduleController<T extends AbstractSchedule> ext
     @Override
     protected void afterPersist(net.microfalx.bootstrap.dataset.DataSet<T, Field<T>, Integer> dataSet, T model, State state) {
         super.afterPersist(dataSet, model, state);
-        restService.reload();
+        executor.execute(restService::reload);
     }
 
     private Trigger createTrigger(T model, JsonFormResponse<?> response) {

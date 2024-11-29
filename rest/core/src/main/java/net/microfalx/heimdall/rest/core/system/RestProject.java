@@ -41,6 +41,7 @@ public class RestProject extends NamedAndTaggedAndTimestampedIdentityAware<Integ
     @Description("The username to the project repository")
     @Position(20)
     @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})
+    @Formattable()
     @Filterable
     private String userName;
 
@@ -49,6 +50,7 @@ public class RestProject extends NamedAndTaggedAndTimestampedIdentityAware<Integ
     @Position(25)
     @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})
     @Component(Component.Type.PASSWORD)
+    @Formattable()
     @Filterable
     private String password;
 
@@ -57,6 +59,7 @@ public class RestProject extends NamedAndTaggedAndTimestampedIdentityAware<Integ
     @Position(30)
     @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})
     @Component(Component.Type.PASSWORD)
+    @Formattable()
     @Filterable
     private String token;
 

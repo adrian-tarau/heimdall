@@ -310,7 +310,8 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
      */
     protected final Resource getWorkspace() {
         if (installWorkspace == null) {
-            installWorkspace = Resource.workspace().resolve("simulator", Resource.Type.DIRECTORY)
+            installWorkspace = Resource.workspace().resolve("rest", Resource.Type.DIRECTORY)
+                    .resolve("simulator", Resource.Type.DIRECTORY)
                     .resolve(getSimulatorId(), Resource.Type.DIRECTORY);
         }
         return installWorkspace;
@@ -346,7 +347,8 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
      */
     protected final Resource getSessionWorkspace() {
         if (sessionWorkspace == null) {
-            sessionWorkspace = Resource.workspace().resolve("simulation", Resource.Type.DIRECTORY)
+            sessionWorkspace = Resource.workspace().resolve("rest", Resource.Type.DIRECTORY)
+                    .resolve("simulation", Resource.Type.DIRECTORY)
                     .resolve(UUID.randomUUID().toString(), Resource.Type.DIRECTORY);
         }
         return sessionWorkspace;

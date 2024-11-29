@@ -45,9 +45,10 @@ public class RestPersistence extends ApplicationContextSupport {
         int version = 1;
         RestLibrary previousJpaLibrary = restLibraryRepository.findByNaturalId(library.getId()).orElse(null);
         if (previousJpaLibrary != null) {
-            version = previousJpaLibrary.getVersion() + 1;
+            version = previousJpaLibrary.getVersion();
             if (hasResourceChanged(previousJpaLibrary.getResource(), library.getResource())) {
                 saveHistory(previousJpaLibrary);
+                version++;
             }
         }
         RestLibrary jpaLibrary = new RestLibrary();
@@ -84,9 +85,10 @@ public class RestPersistence extends ApplicationContextSupport {
         int version = 1;
         RestSimulation previousJpaSimulation = restSimulationRepository.findByNaturalId(simulation.getId()).orElse(null);
         if (previousJpaSimulation != null) {
-            version = previousJpaSimulation.getVersion() + 1;
+            version = previousJpaSimulation.getVersion();
             if (hasResourceChanged(previousJpaSimulation.getResource(), simulation.getResource())) {
                 saveHistory(previousJpaSimulation);
+                version++;
             }
         }
         NaturalIdEntityUpdater<RestSimulation, Integer> updater = getUpdater(RestSimulationRepository.class);
