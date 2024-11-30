@@ -74,4 +74,9 @@ public class SimulationResult implements Result {
     public Resource getData() {
         return simulator.getData();
     }
+
+    @Override
+    public void release() {
+        simulator.release();
+    }
 }

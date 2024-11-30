@@ -195,6 +195,11 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
         return id.compareTo(o.id);
     }
 
+    @Override
+    public void release() {
+        cleanupWorkspace();
+    }
+
     /**
      * Returns the options about simulator (executable, timeouts, etc).
      *
@@ -417,7 +422,6 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
         } catch (Exception e) {
             throw new SimulationException("Failed to execute simulation '" + simulation.getName() + "'", e);
         } finally {
-            cleanupWorkspace();
             endTime = LocalDateTime.now();
         }
         return output;

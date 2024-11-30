@@ -3,6 +3,7 @@ package net.microfalx.heimdall.rest.api;
 import net.microfalx.heimdall.infrastructure.api.Environment;
 import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.Nameable;
+import net.microfalx.lang.Releasable;
 import net.microfalx.resource.Resource;
 import org.atteo.classindex.IndexSubclasses;
 
@@ -14,7 +15,7 @@ import java.util.Optional;
 /**
  * A simulator which knows how to start, execute and complete a simulation and returns the simulation results (the output).
  */
-public interface Simulator extends Identifiable<String>, Nameable {
+public interface Simulator extends Identifiable<String>, Nameable, Releasable {
 
     /**
      * Returns the environment on which the simulation is executed.

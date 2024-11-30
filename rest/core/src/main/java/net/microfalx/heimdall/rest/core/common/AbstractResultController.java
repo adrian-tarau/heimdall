@@ -5,6 +5,7 @@ import net.microfalx.bootstrap.content.ContentService;
 import net.microfalx.bootstrap.web.dataset.DataSetController;
 import net.microfalx.bootstrap.web.util.TableGenerator;
 import net.microfalx.heimdall.rest.api.RestService;
+import net.microfalx.resource.MimeType;
 import net.microfalx.resource.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
@@ -46,6 +47,14 @@ public abstract class AbstractResultController<R extends AbstractResult> extends
         Resource report = restService.getReport(id);
         Content content = Content.create(report);
         contentService.registerContent(content);
+        String dialogCss;
+        if (!MimeType.get(report.getMimeType()).isText()) {
+            dialogCss = "modal-sm";
+            model.addAttribute("message", "The report can be viewed in the browser.");
+        } else {
+            dialogCss = "modal-xl";
+        }
+        model.addAttribute("css", dialogCss);
         model.addAttribute("content", content);
         return "rest/view_result::#report-modal";
     }

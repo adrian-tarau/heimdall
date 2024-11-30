@@ -21,7 +21,7 @@
 </div>
 
 <div th:fragment="report" id="report-modal" tabindex="-1"
-     class="modal fade modal-xl" data-bs-backdrop="static" data-bs-keyboard="false">
+     th:class="|modal fade ${css}|" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
@@ -29,7 +29,12 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <iframe class="w-100 p-1" style="height:650px" loading="lazy" th:src="${#content.getViewUri(content)}"></iframe>
+                <div class="alert alert-warning" th:if="${message}">
+                    <span th:text="${message}"></span>
+                    <span>Click the <a th:href="${#content.getDownloadUri(content)}">link</a> to download the content.</span>
+                </div>
+                <iframe th:unless="${message}" class="w-100 p-1" style="height:650px" loading="lazy"
+                        th:src="${#content.getViewUri(content)}"></iframe>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary btn-sm" th:attr="onclick=|Application.closeModal()|">Close</button>

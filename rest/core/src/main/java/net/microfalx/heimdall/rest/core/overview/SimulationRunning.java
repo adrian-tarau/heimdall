@@ -3,6 +3,7 @@ package net.microfalx.heimdall.rest.core.overview;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.dataset.annotation.OrderBy;
 import net.microfalx.bootstrap.dataset.model.NamedIdentityAware;
 import net.microfalx.heimdall.infrastructure.api.Environment;
@@ -24,6 +25,7 @@ public class SimulationRunning extends NamedIdentityAware<String> {
     private Environment environment;
 
     @Position(100)
+    @Formattable(maximumLength = 40)
     @Description("The script executed during simulation")
     private String script;
 

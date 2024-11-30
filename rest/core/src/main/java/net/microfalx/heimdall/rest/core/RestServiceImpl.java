@@ -14,6 +14,7 @@ import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.MimeType;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceFactory;
+import net.microfalx.resource.archive.ArchiveUtils;
 import net.microfalx.resource.rocksdb.RocksDbResource;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,8 @@ import static java.util.Collections.unmodifiableCollection;
 import static net.microfalx.heimdall.rest.api.RestConstants.*;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.NamedAndTaggedIdentifyAware.*;
+import static net.microfalx.lang.StringUtils.toIdentifier;
+import static net.microfalx.resource.Resource.FILE_NAME_ATTR;
 
 @Service
 @Slf4j
@@ -237,7 +240,23 @@ public class RestServiceImpl implements RestService, InitializingBean {
     public Resource getReport(int id) {
         RestResult result = findOutput(id);
         if (result.getLogsURI() != null) {
-            return ResourceFactory.resolve(UriUtils.parseUri(result.getReportURI())).withMimeType(MimeType.TEXT_HTML);
+            Resource resource = ResourceFactory.resolve(UriUtils.parseUri(result.getReportURI()));
+            boolean archive = false;
+            boolean compressed = false;
+            try {
+                archive = ArchiveUtils.isArchived(resource);
+                compressed = ArchiveUtils.isCompressed(resource);
+            } catch (IOException e) {
+                // ignore and consider is not an archive or compressed
+            }
+            if (archive || compressed) {
+                String extension = compressed ? "gz" : "zip";
+                String fileName = toIdentifier(result.getEnvironment().getName() + "_" + result.getSimulation().getName()) + "." + extension;
+                resource = resource.withAttribute(FILE_NAME_ATTR, fileName);
+            } else {
+                resource = resource.withMimeType(MimeType.TEXT_HTML);
+            }
+            return resource;
         } else {
             return MemoryResource.create("No report are available");
         }

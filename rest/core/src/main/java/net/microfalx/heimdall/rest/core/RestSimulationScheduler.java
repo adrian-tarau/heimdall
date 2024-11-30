@@ -99,7 +99,7 @@ class RestSimulationScheduler extends ApplicationContextSupport {
      */
     Future<Result> schedule(SimulationContext context) {
         requireNonNull(context);
-        return executor.submit(new SimulationTask(context, null));
+        return executor.submit(new SimulationTask(context, null, false));
     }
 
     private void createScheduler() {
@@ -257,7 +257,7 @@ class RestSimulationScheduler extends ApplicationContextSupport {
         public void run() {
             SimulationContext context = restService.createContext(schedule.getEnvironment(), schedule.getSimulation());
             context.getAttributes().copyFrom(schedule.getAttributes(true));
-            executor.submit(new SimulationTask(context, schedule));
+            executor.submit(new SimulationTask(context, schedule, true));
         }
     }
 
@@ -265,12 +265,13 @@ class RestSimulationScheduler extends ApplicationContextSupport {
 
         private final SimulationContext context;
         private final Schedule schedule;
+        private final boolean release;
 
-        public SimulationTask(SimulationContext context, Schedule schedule) {
+        public SimulationTask(SimulationContext context, Schedule schedule, boolean release) {
             this.context = context;
             this.schedule = schedule;
+            this.release = release;
         }
-
 
         @Override
         public Result call() throws Exception {
@@ -289,7 +290,7 @@ class RestSimulationScheduler extends ApplicationContextSupport {
         private Result execute() {
             Result result;
             try {
-                context.getAttributes().copyFrom(schedule.getAttributes(true));
+                if (schedule != null) context.getAttributes().copyFrom(schedule.getAttributes(true));
                 result = restService.simulate(context);
             } catch (Exception e) {
                 throw new SimulationException(StringUtils.formatMessage("Failed to run simulation ''{0}'' using environment ''{1}''",
@@ -297,9 +298,17 @@ class RestSimulationScheduler extends ApplicationContextSupport {
             }
             try {
                 if (result != null) persist(context, result);
-            } catch (IOException e) {
-                LOGGER.error("Failed to run simulation '{}' using environment '{}'",
-                        context.getSimulation().getName(), context.getEnvironment().getName(), e);
+            } catch (Exception e) {
+                LOGGER.atError().setCause(e).log("Failed to run simulation '{}' using environment '{}'",
+                        context.getSimulation().getName(), context.getEnvironment().getName());
+            }
+            if (result != null && release) {
+                try {
+                    result.release();
+                } catch (Exception e) {
+                    LOGGER.atError().setCause(e).log("Failed to cleanup simulation '{}' using environment '{}'",
+                            context.getSimulation().getName(), context.getEnvironment().getName());
+                }
             }
             return result;
         }

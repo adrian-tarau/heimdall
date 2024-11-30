@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.rest.api;
 
+import net.microfalx.lang.Releasable;
 import net.microfalx.resource.Resource;
 
 import java.time.Duration;
@@ -11,7 +12,7 @@ import java.util.Collection;
  * <p>
  * The result of the simulation holds one {@link Output} for each scenario.
  */
-public interface Result {
+public interface Result extends Releasable {
 
     /**
      * Returns the simulation.
