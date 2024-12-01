@@ -1,16 +1,13 @@
 package net.microfalx.heimdall.rest.core;
 
 import lombok.extern.slf4j.Slf4j;
-import net.microfalx.heimdall.rest.api.Library;
-import net.microfalx.heimdall.rest.api.Project;
-import net.microfalx.heimdall.rest.api.Simulation;
-import net.microfalx.heimdall.rest.api.SimulationException;
+import net.microfalx.heimdall.rest.api.*;
 import net.microfalx.lang.ExceptionUtils;
 import net.microfalx.lang.StringUtils;
-import net.microfalx.lang.TimeUtils;
 import net.microfalx.lang.UriUtils;
 import net.microfalx.resource.FileResource;
 import net.microfalx.resource.Resource;
+import net.microfalx.resource.ResourceUtils;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 
@@ -24,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static net.microfalx.heimdall.rest.api.RestConstants.SCRIPT_ATTR;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
@@ -32,8 +30,7 @@ import static net.microfalx.lang.FileUtils.validateDirectoryExists;
 import static net.microfalx.lang.StringUtils.SPACE;
 import static net.microfalx.lang.StringUtils.isNotEmpty;
 import static net.microfalx.lang.TextUtils.insertSpaces;
-import static net.microfalx.lang.TimeUtils.FIVE_MINUTE;
-import static net.microfalx.lang.TimeUtils.millisSince;
+import static net.microfalx.lang.TimeUtils.*;
 import static net.microfalx.resource.ResourceUtils.toFile;
 
 /**
@@ -79,10 +76,14 @@ public class RestProjectManager {
         Lock lock = getLock(project);
         if (!lock.tryLock()) return;
         try {
-            Long lastLoaded = lastReload.computeIfAbsent(project.getId(), k -> TimeUtils.oneHourAgo());
+            Long lastLoaded = lastReload.computeIfAbsent(project.getId(), k -> oneHourAgo());
             if (millisSince(lastLoaded) > RELOAD_INTERVAL) {
-                synchronize(project);
-                discover(project);
+                try {
+                    synchronize(project);
+                    discover(project);
+                } finally {
+                    lastReload.put(project.getId(), currentTimeMillis());
+                }
             }
         } finally {
             lock.unlock();
@@ -282,16 +283,39 @@ public class RestProjectManager {
             builder.path(resource.getPath(true)).tags(discoveredSimulation.getTags())
                     .name(discoveredSimulation.getName()).description(discoveredSimulation.getDescription());
             builder.type(discoveredSimulation.getType());
-            restService.registerLibrary(builder.build());
+            Library library = builder.build();
+            if (!canRegister(library)) restService.registerLibrary(library);
         } else if (discoveryType == DiscoveryType.SIMULATION) {
             Simulation.Builder builder = new Simulation.Builder(id);
             builder.project(project).resource(storedResource);
             builder.path(resource.getPath(true)).tags(discoveredSimulation.getTags())
                     .name(discoveredSimulation.getName()).description(discoveredSimulation.getDescription());
             builder.type(discoveredSimulation.getType());
-            restService.registerSimulation(builder.build());
+            Simulation simulation = builder.build();
+            if (canRegister(simulation)) restService.registerSimulation(simulation);
         } else {
             throw new IllegalStateException("Unhandled discovery type: " + discoveryType);
+        }
+    }
+
+    private boolean canRegister(Library newLibrary) {
+        requireNonNull(newLibrary);
+        Library currentLibrary = null;
+        try {
+            if (newLibrary instanceof Simulation) {
+                currentLibrary = restService.getSimulation(newLibrary.getId());
+            } else {
+                currentLibrary = restService.getLibrary(newLibrary.getId());
+            }
+        } catch (RestNotFoundException e) {
+            // does not exist
+        }
+        if (currentLibrary != null && Boolean.TRUE.equals(currentLibrary.getOverride())) return false;
+        try {
+            return !ResourceUtils.hasSameContent(newLibrary.getResource(), currentLibrary.getResource());
+        } catch (IOException e) {
+            LOGGER.error("Failed to compare resources for library '{}'", newLibrary.getName());
+            return false;
         }
     }
 

@@ -14,7 +14,8 @@
                 <div class="dataset-text-mono" th:text="${log}"></div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary btn-sm" th:attr="onclick=|Application.closeModal()|">Close</button>
+                <button type="button" class="btn btn-secondary btn-sm dataset-btn-sm" th:attr="onclick=|Application.closeModal()|">Download</button>
+                <button type="button" class="btn btn-secondary btn-sm dataset-btn-sm" th:attr="onclick=|Application.closeModal()|">Close</button>
             </div>
         </div>
     </div>
@@ -37,7 +38,8 @@
                         th:src="${#content.getViewUri(content)}"></iframe>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary btn-sm" th:attr="onclick=|Application.closeModal()|">Close</button>
+                <button type="button" class="btn btn-secondary btn-sm dataset-btn-sm" th:attr="onclick=|Application.closeModal()|">Download</button>
+                <button type="button" class="btn btn-secondary btn-sm dataset-btn-sm" th:attr="onclick=|Application.closeModal()|">Close</button>
             </div>
         </div>
     </div>
@@ -55,7 +57,8 @@
                 <div class="dataset-text-mono" th:utext="${data}"></div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary btn-sm" th:attr="onclick=|Application.closeModal()|">Close</button>
+                <button type="button" class="btn btn-secondary btn-sm dataset-btn-sm" th:attr="onclick=|Application.closeModal()|">Download</button>
+                <button type="button" class="btn btn-secondary btn-sm dataset-btn-sm" th:attr="onclick=|Application.closeModal()|">Close</button>
             </div>
         </div>
     </div>

@@ -12,6 +12,8 @@ import net.microfalx.lang.annotation.Provider;
 import java.time.Duration;
 import java.util.stream.Collectors;
 
+import static net.microfalx.resource.ResourceUtils.toUri;
+
 @Provider
 public class SimulationRunningDataSet extends MemoryDataSet<SimulationRunning, PojoField<SimulationRunning>, String> {
 
@@ -37,6 +39,9 @@ public class SimulationRunningDataSet extends MemoryDataSet<SimulationRunning, P
         }
         model.setStartedAt(simulator.getStartTime()).setDuration(simulator.getDuration());
         model.setScript(simulation.getPath());
+        model.setLogsURI(toUri(simulator.getLogs()));
+        model.setReportURI(toUri(simulator.getReport()));
+        model.setDataURI(toUri(simulator.getData()));
         return model;
     }
 }

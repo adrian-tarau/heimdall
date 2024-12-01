@@ -189,6 +189,13 @@ public class RestServiceImpl implements RestService, InitializingBean {
 
     @Override
     public SimulationContext createContext(Environment environment, Simulation simulation, Collection<Library> libraries) {
+        requireNonNull(simulation);
+        reload(simulation.getProject());
+        try {
+            simulation = getSimulation(simulation.getId());
+        } catch (RestNotFoundException e) {
+            // if not present in the database, use whatever is given
+        }
         return new SimulationContextImpl(environment, simulation, libraries);
     }
 
@@ -241,25 +248,16 @@ public class RestServiceImpl implements RestService, InitializingBean {
         RestResult result = findOutput(id);
         if (result.getLogsURI() != null) {
             Resource resource = ResourceFactory.resolve(UriUtils.parseUri(result.getReportURI()));
-            boolean archive = false;
-            boolean compressed = false;
-            try {
-                archive = ArchiveUtils.isArchived(resource);
-                compressed = ArchiveUtils.isCompressed(resource);
-            } catch (IOException e) {
-                // ignore and consider is not an archive or compressed
-            }
-            if (archive || compressed) {
-                String extension = compressed ? "gz" : "zip";
-                String fileName = toIdentifier(result.getEnvironment().getName() + "_" + result.getSimulation().getName()) + "." + extension;
-                resource = resource.withAttribute(FILE_NAME_ATTR, fileName);
-            } else {
-                resource = resource.withMimeType(MimeType.TEXT_HTML);
-            }
-            return resource;
+            return getLiveReport(resource, result.getEnvironment().getName(), result.getSimulation().getName());
         } else {
             return MemoryResource.create("No report are available");
         }
+    }
+
+    @Override
+    public Resource getReport(Simulator simulator) {
+        requireNonNull(simulator);
+        return getLiveReport(simulator.getReport(), simulator.getEnvironment().getName(), simulator.getSimulation().getName());
     }
 
     @Override
@@ -477,6 +475,25 @@ public class RestServiceImpl implements RestService, InitializingBean {
             throw new SimulationException("A simulation output with identifier " + id + " does not exist");
         }
         return restResult;
+    }
+
+    private Resource getLiveReport(Resource resource, String environment, String simulation) {
+        boolean archive = false;
+        boolean compressed = false;
+        try {
+            archive = ArchiveUtils.isArchived(resource);
+            compressed = ArchiveUtils.isCompressed(resource);
+        } catch (IOException e) {
+            // ignore and consider is not an archive or compressed
+        }
+        if (archive || compressed) {
+            String extension = compressed ? "gz" : "zip";
+            String fileName = toIdentifier(environment + "_" + simulation) + "." + extension;
+            resource = resource.withAttribute(FILE_NAME_ATTR, fileName);
+        } else {
+            resource = resource.withMimeType(MimeType.TEXT_HTML);
+        }
+        return resource;
     }
 
     private String getKey(Simulation simulation, Environment environment) {

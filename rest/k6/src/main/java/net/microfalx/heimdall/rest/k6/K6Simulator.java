@@ -24,7 +24,7 @@ import static net.microfalx.lang.UriUtils.parseUrl;
 public class K6Simulator extends AbstractSimulator {
 
     private Resource htmlReport;
-    private int port;
+    private volatile int port;
 
     public K6Simulator(Simulation simulation) {
         super(simulation);
@@ -56,7 +56,7 @@ public class K6Simulator extends AbstractSimulator {
         String port = process.environment().get("K6_WEB_DASHBOARD_PORT");
         if (port == null) port = Integer.toString(getNextAvailablePort(40_000));
         this.port = Integer.parseInt(port);
-        process.environment().put("K6_WEB_DASHBOARD_PORT", port);
+        if (this.port > 0) process.environment().put("K6_WEB_DASHBOARD_PORT", port);
         String simulationFileName = removeFileExtension(getSimulation().getResource().getFileName());
         process.environment().put("K6_WEB_DASHBOARD_EXPORT", simulationFileName + ".html");
         process.environment().put("K6_WEB_DASHBOARD_PERIOD", "5s");

@@ -139,13 +139,15 @@ public interface RestService {
      * @param environment the environment
      * @param simulation  the simulation
      * @return a non-null instance
+     * @see #createContext(Environment, Simulation, Collection)
      */
     SimulationContext createContext(Environment environment, Simulation simulation);
 
     /**
      * Creates a simulation context.
      * <p>
-     * Additional libraries are used to create the context.
+     * If the simulation comes from a code repository, the simulation is refreshed and a newer version is used, if
+     * available in the database.
      *
      * @param environment the environment
      * @param simulation  the simulation
@@ -194,6 +196,14 @@ public interface RestService {
      * @return a non-null instance
      */
     Resource getReport(int id);
+
+    /**
+     * Returns the live report for a given simulation.
+     *
+     * @param simulator the simulator
+     * @return a non-null instance
+     */
+    Resource getReport(Simulator simulator);
 
     /**
      * Returns the data for a given simulation.

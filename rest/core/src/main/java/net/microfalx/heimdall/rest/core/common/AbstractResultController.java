@@ -1,12 +1,8 @@
 package net.microfalx.heimdall.rest.core.common;
 
-import net.microfalx.bootstrap.content.Content;
 import net.microfalx.bootstrap.content.ContentService;
 import net.microfalx.bootstrap.web.dataset.DataSetController;
-import net.microfalx.bootstrap.web.util.TableGenerator;
 import net.microfalx.heimdall.rest.api.RestService;
-import net.microfalx.resource.MimeType;
-import net.microfalx.resource.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,33 +25,20 @@ public abstract class AbstractResultController<R extends AbstractResult> extends
 
     @GetMapping("/log/{id}")
     public String viewLog(@PathVariable("id") int id, Model model) throws IOException {
-        Resource log = restService.getLog(id);
-        model.addAttribute("log", log.loadAsString());
-        return "rest/view_result::#log-modal";
+        return getHelper(id, model).viewLog();
     }
 
     @GetMapping("/data/{id}")
     public String viewData(@PathVariable("id") int id, Model model) throws IOException {
-        Resource data = restService.getData(id);
-        TableGenerator tableGenerator = new TableGenerator().setSmall(true).addRows(data);
-        model.addAttribute("data", tableGenerator.generate());
-        return "rest/view_result::#data-modal";
+        return getHelper(id, model).viewData();
     }
 
     @GetMapping("/report/{id}")
     public String viewReport(@PathVariable("id") int id, Model model) throws IOException {
-        Resource report = restService.getReport(id);
-        Content content = Content.create(report);
-        contentService.registerContent(content);
-        String dialogCss;
-        if (!MimeType.get(report.getMimeType()).isText()) {
-            dialogCss = "modal-sm";
-            model.addAttribute("message", "The report can be viewed in the browser.");
-        } else {
-            dialogCss = "modal-xl";
-        }
-        model.addAttribute("css", dialogCss);
-        model.addAttribute("content", content);
-        return "rest/view_result::#report-modal";
+        return getHelper(id, model).viewReport();
+    }
+
+    private SimulationControllerHelper getHelper(int id, Model model) {
+        return new SimulationControllerHelper(restService, contentService, model).setResult(id);
     }
 }

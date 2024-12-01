@@ -91,12 +91,14 @@ public abstract class AbstractResult extends IdentityAware<Long> {
     @Label(group = "Users", value = "Active")
     @Column(name = "vus")
     @Description("The number of active virtual users")
+    @Formattable
     @Position(50)
     private Float vus;
 
     @Label(group = "Users", value = "Maximum")
     @Column(name = "vus_max")
     @Description("The maximum possible number of virtual users")
+    @Formattable
     @Position(55)
     private Float vusMax;
 

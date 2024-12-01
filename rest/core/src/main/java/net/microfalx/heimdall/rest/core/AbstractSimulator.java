@@ -34,6 +34,7 @@ import static net.microfalx.heimdall.rest.api.RestConstants.LOG_ATTR;
 import static net.microfalx.heimdall.rest.api.RestConstants.REPORT_ATTR;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
+import static net.microfalx.lang.ExceptionUtils.getRootCauseMessage;
 import static net.microfalx.lang.FormatterUtils.formatBytes;
 import static net.microfalx.lang.FormatterUtils.formatDuration;
 import static net.microfalx.lang.JvmUtils.isWindows;
@@ -59,13 +60,13 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
     private Resource output = Resource.NULL;
 
     private LocalDateTime startTime = LocalDateTime.now();
-    private LocalDateTime endTime;
+    private volatile LocalDateTime endTime;
     private volatile boolean running;
     private volatile Status status = Status.UNKNOWN;
     private volatile String errorMessage;
     private volatile Environment environment;
-    private Resource report = Resource.NULL;
-    private Resource log = Resource.NULL;
+    private volatile Resource report = Resource.NULL;
+    private volatile Resource log = Resource.NULL;
     private final StringBuilder logger = new StringBuilder(8000);
     private volatile Process process;
 
@@ -139,7 +140,7 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
                 finalLogs.append(getHeader("Simulator Errors")).append(LINE_SEPARATOR).append(error);
             }
         } catch (IOException e) {
-            finalLogs.append("\n\nFailed to retrieve logs: ").append(ExceptionUtils.getRootCauseMessage(e));
+            finalLogs.append("\n\nFailed to retrieve logs: ").append(getRootCauseMessage(e));
         }
         return MemoryResource.create(finalLogs.toString()).withAttribute(LOG_ATTR, Boolean.TRUE);
     }
@@ -389,7 +390,7 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
      * @param args      the arguments
      */
     protected final void appendError(Throwable throwable, String format, Object... args) {
-        errorMessage = ExceptionUtils.getRootCauseMessage(throwable);
+        errorMessage = getRootCauseMessage(throwable);
         log(format, args);
         appendLog(", stack trace\n" + TextUtils.insertSpaces(ExceptionUtils.getStackTrace(throwable), 5));
     }
@@ -569,7 +570,7 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
             File directory = toFile(getSessionWorkspace());
             org.apache.commons.io.FileUtils.deleteDirectory(directory);
         } catch (Exception e) {
-            log("Failed to cleanup workspace, root cause: {0}", ExceptionUtils.getRootCauseMessage(e));
+            log("Failed to cleanup workspace, root cause: {0}", getRootCauseMessage(e));
         }
     }
 
@@ -577,7 +578,7 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
         try {
             return getLogs().loadAsString();
         } catch (IOException e) {
-            return "#Error: " + ExceptionUtils.getRootCauseMessage(e);
+            return "#Error: " + getRootCauseMessage(e);
         }
     }
 
