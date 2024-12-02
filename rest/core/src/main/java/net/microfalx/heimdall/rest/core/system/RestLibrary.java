@@ -22,7 +22,7 @@ import net.microfalx.lang.annotation.Position;
 public class RestLibrary extends AbstractLibrary {
 
     @Column(name = "global",nullable = false)
-    @Description("Indicates if the project is discover at classpath")
+    @Description("Indicates if the library is sharded by all projects")
     @Position(17)
     private boolean global;
 }

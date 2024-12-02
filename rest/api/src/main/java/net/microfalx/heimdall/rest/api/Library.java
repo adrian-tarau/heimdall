@@ -22,7 +22,7 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
     private String path;
     private Simulation.Type type;
     private Boolean override;
-    private Boolean global;
+    private boolean global;
 
     /**
      * Creates a library builder out of a resource.
@@ -80,9 +80,9 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
     }
 
     /**
-     * Returns whenther the library is discovered at the classpath
+     * Indicates whether the library is shared by all projects
      *
-     * @return {@code true} if library is discovered at the classpath, {@code false} otherwise
+     * @return {@code true} if library is shared by all projects, {@code false} otherwise
      */
     public Boolean getGlobal() {
         return global;
@@ -138,7 +138,7 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
         private String path;
         private Simulation.Type type;
         private Boolean override;
-        private Boolean global;
+        private boolean global;
 
         public Builder(String id) {
             super(id);
@@ -184,7 +184,7 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
             return this;
         }
 
-        public final Builder global(Boolean global) {
+        public final Builder global(boolean global) {
             this.global = global;
             return this;
         }
@@ -213,7 +213,7 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
             library.project = project;
             library.path = path;
             library.override = override;
-            library.global=global;
+            library.global = global;
             return library;
         }
     }
