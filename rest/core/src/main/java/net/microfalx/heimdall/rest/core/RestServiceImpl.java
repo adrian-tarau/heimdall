@@ -10,10 +10,7 @@ import net.microfalx.heimdall.rest.core.system.RestResult;
 import net.microfalx.heimdall.rest.core.system.RestResultRepository;
 import net.microfalx.lang.ClassUtils;
 import net.microfalx.lang.UriUtils;
-import net.microfalx.resource.MemoryResource;
-import net.microfalx.resource.MimeType;
-import net.microfalx.resource.Resource;
-import net.microfalx.resource.ResourceFactory;
+import net.microfalx.resource.*;
 import net.microfalx.resource.archive.ArchiveUtils;
 import net.microfalx.resource.rocksdb.RocksDbResource;
 import org.springframework.beans.factory.InitializingBean;
@@ -296,6 +293,7 @@ public class RestServiceImpl implements RestService, InitializingBean {
         initializeProviders();
         initResources();
         registerProjects();
+        discoverGlobalLibraries();
         this.reload();
         simulationScheduler.initialize(this);
     }
@@ -346,6 +344,11 @@ public class RestServiceImpl implements RestService, InitializingBean {
     private void registerProjects() {
         try {
             registerProject(Project.DEFAULT);
+        } catch (Exception e) {
+            LOGGER.error("Failed to register default project", e);
+        }
+        try {
+            registerProject(Project.GLOBAL);
         } catch (Exception e) {
             LOGGER.error("Failed to register default project", e);
         }
@@ -500,4 +503,27 @@ public class RestServiceImpl implements RestService, InitializingBean {
         return environment.getId() + "_" + simulation.getId();
     }
 
+    private void discoverGlobalLibraries() {
+        try {
+            ClassPathResource.directory("rest/global").walk((root, child) -> {
+                if (child.isFile()) discoverGlobalLibrary(child);
+                return true;
+            });
+        } catch (Exception e) {
+            LOGGER.error("Failed to discover global libraries", e);
+        }
+    }
+
+    private void discoverGlobalLibrary(Resource resource) {
+        try {
+            Simulation simulation = discover(resource);
+            Resource storedResource = registerResource(resource.withAttribute(SCRIPT_ATTR, Boolean.TRUE));
+            Library.Builder builder = new Library.Builder(storedResource.getId()).resource(storedResource).type(simulation.getType())
+                    .project(Project.GLOBAL).path(storedResource.getPath()).global(Boolean.TRUE);
+            builder.tags(simulation.getTags()).name(storedResource.getName()).description(storedResource.getDescription());
+            registerLibrary(builder.build());
+        } catch (Exception e) {
+            LOGGER.atError().setCause(e).log("Failed to register global library {}", resource.toURI());
+        }
+    }
 }

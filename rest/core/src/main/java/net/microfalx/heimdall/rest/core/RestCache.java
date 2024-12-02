@@ -145,6 +145,7 @@ class RestCache extends ApplicationContextSupport {
             if (restProject != null) builder.project(getProject(restProject.getNaturalId()));
             builder.type(restLibrary.getType())
                     .resource(resource).path(restLibrary.getPath()).override(restLibrary.isOverride())
+                    .global(restLibrary.isGlobal())
                     .tags(setFromString(restLibrary.getTags()))
                     .name(restLibrary.getName()).description(restLibrary.getDescription()).build();
             Library library = builder.build();

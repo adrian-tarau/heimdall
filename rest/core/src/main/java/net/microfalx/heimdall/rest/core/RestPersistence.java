@@ -62,6 +62,7 @@ public class RestPersistence extends ApplicationContextSupport {
             updater.setUpdatable("override", true);
             jpaLibrary.setOverride(library.getOverride());
         }
+        jpaLibrary.setGlobal(library.getGlobal());
         jpaLibrary.setVersion(version);
         jpaLibrary.setTags(CollectionUtils.setToString(library.getTags()));
         jpaLibrary.setDescription(library.getDescription());

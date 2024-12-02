@@ -26,6 +26,7 @@ create table rest_library
     path     varchar(2000)         not null,
     resource    varchar(2000)       not null,
     override boolean default false not null,
+    `global` boolean default false not null,
     hash     varchar(64),
     version int default 1 not null,
     created_at  datetime            not null,
