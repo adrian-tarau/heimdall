@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<content xmlns="https://net.microfalx/xsd/content-1.0.xsd">
+
+    <editor>
+        <!-- Examples -->
+        <fragment id="rest.k6.auth.basic" name="Basic Authentication" group="Authentication/Authorization"
+                  language="javascript" type="example" resource="k6/example/auth_basic.js"/>
+        <fragment id="rest.k6.auth.bearer" name="Bearer Authentication" group="Authentication/Authorization"
+                  language="javascript" type="example" resource="k6/example/auth_bearer.js"/>
+
+        <fragment id="rest.k6.misc.scenario" name="Scenarios" group="Miscellaneous"
+                  language="javascript" type="example" resource="k6/example/scenario.js"/>
+        <fragment id="rest.k6.misc.group" name="Groups" group="Miscellaneous"
+                  language="javascript" type="example" resource="k6/example/group.js"/>
+        <fragment id="rest.k6.misc.form" name="Form" group="Miscellaneous"
+                  language="javascript" type="example" resource="k6/example/form.js"/>
+        <fragment id="rest.k6.misc.tag" name="Tags" group="Miscellaneous"
+                  language="javascript" type="example" resource="k6/example/tag.js"/>
+    </editor>
+
+</content>
