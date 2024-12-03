@@ -518,9 +518,9 @@ public class RestServiceImpl implements RestService, InitializingBean {
         try {
             Simulation simulation = discover(resource);
             Resource storedResource = registerResource(resource.withAttribute(SCRIPT_ATTR, Boolean.TRUE));
-            Library.Builder builder = new Library.Builder(storedResource.getId()).resource(storedResource).type(simulation.getType())
-                    .project(Project.GLOBAL).path(storedResource.getPath()).global(Boolean.TRUE);
-            builder.tags(simulation.getTags()).name(storedResource.getName()).description(storedResource.getDescription());
+            Library.Builder builder = new Library.Builder(resource.getId()).resource(storedResource).type(simulation.getType())
+                    .project(Project.GLOBAL).path(resource.getPath()).global(Boolean.TRUE);
+            builder.name(resource.getName());
             registerLibrary(builder.build());
         } catch (Exception e) {
             LOGGER.atError().setCause(e).log("Failed to register global library {}", resource.toURI());

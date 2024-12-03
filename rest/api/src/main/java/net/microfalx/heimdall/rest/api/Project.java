@@ -25,12 +25,12 @@ public class Project extends NamedAndTaggedIdentifyAware<String> {
     private String libraryPath;
     private String simulationPath;
 
-    public static Project DEFAULT = (Project) Project.create()
+    public static final Project DEFAULT = (Project) Project.create()
             .tag(SELF_TAG).tag(AUTO_TAG).tag(LOCAL_TAG)
             .name("Default").description("A default project")
             .build();
 
-    public static Project GLOBAL = (Project) Project.create()
+    public static final Project GLOBAL = (Project) Project.create()
             .tag(SELF_TAG).tag(AUTO_TAG).tag(LOCAL_TAG)
             .name("Global").description("A project for global (shared across all projects) libraries")
             .build();

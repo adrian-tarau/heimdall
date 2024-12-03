@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.rest.core.system;
 
+import net.microfalx.bootstrap.dataset.DataSetException;
 import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
@@ -14,6 +15,7 @@ import net.microfalx.heimdall.rest.api.RestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -39,6 +41,18 @@ public class RestProjectController extends DataSetController<RestProject, Intege
     public JsonResponse<?> sync() {
         restService.reload();
         return JsonResponse.success("The projects synchronization was scheduled to be executed");
+    }
+
+    @Override
+    protected boolean beforeEdit(net.microfalx.bootstrap.dataset.DataSet<RestProject, Field<RestProject>, Integer> dataSet, Model controllerModel, RestProject dataSetModel) {
+        restrictPrivateProjects(dataSetModel);
+        return super.beforeEdit(dataSet, controllerModel, dataSetModel);
+    }
+
+    @Override
+    protected boolean beforeDelete(net.microfalx.bootstrap.dataset.DataSet<RestProject, Field<RestProject>, Integer> dataSet, Model controllerModel, RestProject dataSetModel) {
+        restrictPrivateProjects(dataSetModel);
+        return super.beforeDelete(dataSet, controllerModel, dataSetModel);
     }
 
     @Override
@@ -74,5 +88,14 @@ public class RestProjectController extends DataSetController<RestProject, Intege
         super.afterPersist(dataSet, model, state);
         Project project = restService.getProject(model.getNaturalId());
         executor.execute(() -> restService.reload(project));
+    }
+
+    private void restrictPrivateProjects(RestProject dataSetModel) {
+        if (Project.DEFAULT.getId().equals(dataSetModel.getNaturalId())) {
+            throw new DataSetException("The default project cannot be removed");
+        }
+        if (Project.GLOBAL.getId().equals(dataSetModel.getNaturalId())) {
+            throw new DataSetException("The global project cannot be removed");
+        }
     }
 }

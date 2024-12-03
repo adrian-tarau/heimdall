@@ -92,7 +92,9 @@ public abstract class AbstractLibraryController<T extends AbstractLibrary> exten
 
     @Override
     protected boolean beforeEdit(DataSet<T, Field<T>, Integer> dataSet, Model controllerModel, T dataSetModel) {
-        if (dataSetModel.getProject() != null) setReadOnlyExcept("name", "description", "tags", "override");
+        if (dataSetModel.getProject().getType() != Project.Type.NONE) {
+            setReadOnlyExcept("name", "description", "tags", "override");
+        }
         return super.beforeEdit(dataSet, controllerModel, dataSetModel);
     }
 
