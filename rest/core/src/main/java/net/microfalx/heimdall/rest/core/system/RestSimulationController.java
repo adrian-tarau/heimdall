@@ -1,7 +1,6 @@
 package net.microfalx.heimdall.rest.core.system;
 
 import net.microfalx.bootstrap.content.Content;
-import net.microfalx.bootstrap.dataset.DataSetException;
 import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
@@ -56,7 +55,6 @@ public class RestSimulationController extends AbstractLibraryController<RestSimu
     @Override
     protected void beforeView(net.microfalx.bootstrap.dataset.DataSet<RestSimulation, Field<RestSimulation>, Integer> dataSet, Model controllerModel, RestSimulation dataSetModel) {
         super.beforeView(dataSet, controllerModel, dataSetModel);
-
         Content content = prepareContent(contentService, dataSetModel.getNaturalId(), "simulation", dataSetModel.getResource(), dataSetModel.getType());
         if (content != null) {
             controllerModel.addAttribute("content", content);
@@ -65,7 +63,7 @@ public class RestSimulationController extends AbstractLibraryController<RestSimu
 
     @Override
     protected boolean beforeDelete(net.microfalx.bootstrap.dataset.DataSet<RestSimulation, Field<RestSimulation>, Integer> dataSet, Model controllerModel, RestSimulation dataSetModel) {
-        if (dataSetModel.getProject().getType() != Project.Type.NONE) throw new DataSetException("A simulation hosted in VCS cannot be deleted");
+        if (dataSetModel.getProject().getType() != Project.Type.NONE) return cancel(controllerModel,"A simulation hosted in VCS cannot be deleted");
         return super.beforeDelete(dataSet, controllerModel, dataSetModel);
     }
 

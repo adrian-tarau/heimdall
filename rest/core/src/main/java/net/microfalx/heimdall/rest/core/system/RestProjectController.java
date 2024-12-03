@@ -1,6 +1,5 @@
 package net.microfalx.heimdall.rest.core.system;
 
-import net.microfalx.bootstrap.dataset.DataSetException;
 import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
@@ -45,13 +44,13 @@ public class RestProjectController extends DataSetController<RestProject, Intege
 
     @Override
     protected boolean beforeEdit(net.microfalx.bootstrap.dataset.DataSet<RestProject, Field<RestProject>, Integer> dataSet, Model controllerModel, RestProject dataSetModel) {
-        restrictPrivateProjects(dataSetModel);
+        if (!restrictPrivateProjects(controllerModel, dataSetModel)) return false;
         return super.beforeEdit(dataSet, controllerModel, dataSetModel);
     }
 
     @Override
     protected boolean beforeDelete(net.microfalx.bootstrap.dataset.DataSet<RestProject, Field<RestProject>, Integer> dataSet, Model controllerModel, RestProject dataSetModel) {
-        restrictPrivateProjects(dataSetModel);
+        if (!restrictPrivateProjects(controllerModel, dataSetModel)) return false;
         return super.beforeDelete(dataSet, controllerModel, dataSetModel);
     }
 
@@ -90,12 +89,13 @@ public class RestProjectController extends DataSetController<RestProject, Intege
         executor.execute(() -> restService.reload(project));
     }
 
-    private void restrictPrivateProjects(RestProject dataSetModel) {
+    private boolean restrictPrivateProjects(Model controllerModel, RestProject dataSetModel) {
         if (Project.DEFAULT.getId().equals(dataSetModel.getNaturalId())) {
-            throw new DataSetException("The default project cannot be removed");
+            return cancel(controllerModel, "The default project cannot be removed");
         }
         if (Project.GLOBAL.getId().equals(dataSetModel.getNaturalId())) {
-            throw new DataSetException("The global project cannot be removed");
+            return cancel(controllerModel, "The global project cannot be removed");
         }
+        return true;
     }
 }

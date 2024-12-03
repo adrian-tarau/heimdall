@@ -11,6 +11,7 @@ import org.springframework.ui.Model;
 
 import java.io.IOException;
 
+import static net.microfalx.bootstrap.web.controller.PageController.MESSAGE_ATTR;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
 
@@ -79,7 +80,7 @@ public class SimulationControllerHelper {
         String dialogCss;
         if (!MimeType.get(report.getMimeType()).isText()) {
             dialogCss = "modal-sm";
-            model.addAttribute("message", "The report can be viewed in the browser.");
+            model.addAttribute(MESSAGE_ATTR, "The report can be viewed in the browser.");
         } else {
             dialogCss = "modal-xl";
         }

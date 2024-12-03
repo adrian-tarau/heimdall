@@ -33,9 +33,9 @@ public class SnmpController extends ProtocolController<SnmpEvent> {
     protected void beforeView(net.microfalx.bootstrap.dataset.DataSet<SnmpEvent, Field<SnmpEvent>, Integer> dataSet, Model controllerModel, SnmpEvent dataSetModel) {
         Resource messageResource = ResourceFactory.resolve(dataSetModel.getMessage().getResource());
         try {
-            controllerModel.addAttribute("message", messageResource.loadAsString());
+            controllerModel.addAttribute(MESSAGE_ATTR, messageResource.loadAsString());
         } catch (IOException e) {
-            controllerModel.addAttribute("message", "#ERROR: " + e.getMessage());
+            controllerModel.addAttribute(MESSAGE_ATTR, "#ERROR: " + e.getMessage());
         }
         Attributes<?> attributes = snmpService.getAttributes(dataSetModel);
         controllerModel.addAttribute("attributes", attributes);
