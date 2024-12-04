@@ -27,8 +27,7 @@ import static net.microfalx.heimdall.rest.api.RestConstants.SCRIPT_ATTR;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ExceptionUtils.getRootCauseMessage;
 import static net.microfalx.lang.FileUtils.validateDirectoryExists;
-import static net.microfalx.lang.StringUtils.SPACE;
-import static net.microfalx.lang.StringUtils.isNotEmpty;
+import static net.microfalx.lang.StringUtils.*;
 import static net.microfalx.lang.TextUtils.insertSpaces;
 import static net.microfalx.lang.TimeUtils.*;
 import static net.microfalx.resource.ResourceUtils.toFile;
@@ -338,7 +337,7 @@ public class RestProjectManager {
     }
 
     private String getDirectoryName(Project project) {
-        return StringUtils.toIdentifier(project.getName()) + "_" + project.getId();
+        return toIdentifier(project.getName());
     }
 
     private Lock getLock(Project project) {

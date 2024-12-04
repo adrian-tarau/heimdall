@@ -11,6 +11,7 @@ import net.microfalx.bootstrap.web.util.JsonFormResponse;
 import net.microfalx.bootstrap.web.util.JsonResponse;
 import net.microfalx.heimdall.rest.api.Project;
 import net.microfalx.heimdall.rest.api.RestService;
+import net.microfalx.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Controller;
@@ -39,18 +40,18 @@ public class RestProjectController extends DataSetController<RestProject, Intege
     @ResponseBody
     public JsonResponse<?> sync() {
         restService.reload();
-        return JsonResponse.success("The projects synchronization was scheduled to be executed");
+        return JsonResponse.success("The projects synchronization was scheduled");
     }
 
     @Override
     protected boolean beforeEdit(net.microfalx.bootstrap.dataset.DataSet<RestProject, Field<RestProject>, Integer> dataSet, Model controllerModel, RestProject dataSetModel) {
-        if (!restrictPrivateProjects(controllerModel, dataSetModel)) return false;
+        if (!restrictPrivateProjects(controllerModel, dataSetModel, "changed")) return false;
         return super.beforeEdit(dataSet, controllerModel, dataSetModel);
     }
 
     @Override
     protected boolean beforeDelete(net.microfalx.bootstrap.dataset.DataSet<RestProject, Field<RestProject>, Integer> dataSet, Model controllerModel, RestProject dataSetModel) {
-        if (!restrictPrivateProjects(controllerModel, dataSetModel)) return false;
+        if (!restrictPrivateProjects(controllerModel, dataSetModel, "removed")) return false;
         return super.beforeDelete(dataSet, controllerModel, dataSetModel);
     }
 
@@ -78,7 +79,11 @@ public class RestProjectController extends DataSetController<RestProject, Intege
 
     @Override
     protected boolean beforePersist(net.microfalx.bootstrap.dataset.DataSet<RestProject, Field<RestProject>, Integer> dataSet, RestProject model, State state) {
-        model.setNaturalId(Project.getNaturalId(parseUri(model.getUri())));
+        if (StringUtils.isNotEmpty(model.getUri())) {
+            model.setNaturalId(Project.getNaturalId(parseUri(model.getUri())));
+        } else {
+            model.setNaturalId(StringUtils.toIdentifier(model.getName()));
+        }
         return super.beforePersist(dataSet, model, state);
     }
 
@@ -89,12 +94,12 @@ public class RestProjectController extends DataSetController<RestProject, Intege
         executor.execute(() -> restService.reload(project));
     }
 
-    private boolean restrictPrivateProjects(Model controllerModel, RestProject dataSetModel) {
+    private boolean restrictPrivateProjects(Model controllerModel, RestProject dataSetModel, String action) {
         if (Project.DEFAULT.getId().equals(dataSetModel.getNaturalId())) {
-            return cancel(controllerModel, "The default project cannot be removed");
+            return cancel(controllerModel, "The default project cannot be " + action);
         }
         if (Project.GLOBAL.getId().equals(dataSetModel.getNaturalId())) {
-            return cancel(controllerModel, "The global project cannot be removed");
+            return cancel(controllerModel, "The global project cannot be " + action);
         }
         return true;
     }

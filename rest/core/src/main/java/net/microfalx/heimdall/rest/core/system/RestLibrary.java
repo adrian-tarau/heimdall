@@ -11,6 +11,7 @@ import net.microfalx.heimdall.rest.core.common.AbstractLibrary;
 import net.microfalx.lang.annotation.Description;
 import net.microfalx.lang.annotation.Name;
 import net.microfalx.lang.annotation.Position;
+import net.microfalx.lang.annotation.ReadOnly;
 
 @Entity
 @Name("Library")
@@ -24,5 +25,6 @@ public class RestLibrary extends AbstractLibrary {
     @Column(name = "global",nullable = false)
     @Description("Indicates if the library is sharded by all projects")
     @Position(17)
+    @ReadOnly
     private boolean global;
 }

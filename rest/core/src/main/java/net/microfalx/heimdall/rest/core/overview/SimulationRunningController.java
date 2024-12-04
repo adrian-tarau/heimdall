@@ -1,6 +1,7 @@
 package net.microfalx.heimdall.rest.core.overview;
 
 import net.microfalx.bootstrap.content.ContentService;
+import net.microfalx.bootstrap.dataset.DataSetNotFoundException;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.web.dataset.DataSetController;
 import net.microfalx.heimdall.rest.api.RestService;
@@ -42,7 +43,8 @@ public class SimulationRunningController extends DataSetController<SimulationRun
     }
 
     private SimulationControllerHelper getHelper(String id, Model model) {
-        Simulator selectedSimulator = restService.getRunning().stream().filter(simulator -> simulator.getId().equals(id)).findFirst().orElseThrow();
+        Simulator selectedSimulator = restService.getRunning().stream().filter(simulator -> simulator.getId().equals(id))
+                .findFirst().orElseThrow(() -> new DataSetNotFoundException("Simulation is no longer running"));
         return new SimulationControllerHelper(restService, contentService, model).setSimulator(selectedSimulator);
     }
 }

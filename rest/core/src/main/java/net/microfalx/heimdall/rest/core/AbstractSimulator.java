@@ -437,7 +437,7 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
                 log("Prepare libraries ({0})", context.getLibraries().size());
             }
             for (Library library : context.getLibraries()) {
-                if (simulation.getProject() != null && !simulation.getProject().equals(library.getProject())) continue;
+                if (!simulation.getProject().equals(library.getProject())) continue;
                 log(" - ''{0}'' ({1})", library.getName(), formatBytes(library.getResource().length()));
                 copyResource(workspace, library, null);
             }

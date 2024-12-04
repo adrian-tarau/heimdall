@@ -457,8 +457,9 @@ public class RestServiceImpl implements RestService, InitializingBean {
         Collection<Library> libraries = new ArrayList<>();
         for (Library library : cache.getLibraries()) {
             boolean enabledByType = library.getType() == simulation.getType();
-            boolean enabledByProject = simulation.getProject() != null && simulation.getProject().equals(library.getProject());
-            if (enabledByType && enabledByProject) {
+            boolean enabledByGlobal = library.isGlobal();
+            boolean enabledByProject = simulation.getProject().equals(library.getProject());
+            if (enabledByType && (enabledByGlobal || enabledByProject)) {
                 libraries.add(library);
             }
         }

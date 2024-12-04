@@ -82,9 +82,9 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
     /**
      * Indicates whether the library is shared by all projects
      *
-     * @return {@code true} if library is shared by all projects, {@code false} otherwise
+     * @return {@code true} if the library is shared by all projects, {@code false} otherwise
      */
-    public Boolean getGlobal() {
+    public boolean isGlobal() {
         return global;
     }
 
