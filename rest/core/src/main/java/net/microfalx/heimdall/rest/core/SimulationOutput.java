@@ -8,14 +8,13 @@ import net.microfalx.bootstrap.metrics.Vector;
 import net.microfalx.heimdall.infrastructure.api.Environment;
 import net.microfalx.heimdall.rest.api.Metrics;
 import net.microfalx.heimdall.rest.api.Output;
+import net.microfalx.heimdall.rest.api.Scenario;
 import net.microfalx.heimdall.rest.api.Simulation;
-import net.microfalx.lang.StringUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
-import static net.microfalx.lang.StringUtils.toIdentifier;
 
 @Getter
 @Setter
@@ -23,9 +22,7 @@ import static net.microfalx.lang.StringUtils.toIdentifier;
 public class SimulationOutput implements Output {
 
     @ToString.Include
-    private final String id;
-    @ToString.Include
-    private final String name;
+    private final Scenario scenario;
     @ToString.Include
     private final Environment environment;
     @ToString.Include
@@ -54,22 +51,21 @@ public class SimulationOutput implements Output {
     private Matrix httpRequestWaiting;
     private Vector httpRequests;
 
-    public SimulationOutput(String name, Environment environment, Simulation simulation) {
-        requireNonNull(name);
+    public SimulationOutput(Scenario scenario, Environment environment, Simulation simulation) {
+        requireNonNull(scenario);
         requireNonNull(environment);
         requireNonNull(simulation);
-        this.id = toIdentifier(name);
-        this.name = StringUtils.capitalizeWords(name);
+        this.scenario = scenario;
         this.environment = environment;
         this.simulation = simulation;
     }
 
     public String getId() {
-        return id;
+        return scenario.getId();
     }
 
     public String getName() {
-        return name;
+        return scenario.getName();
     }
 
     @Override
@@ -135,5 +131,10 @@ public class SimulationOutput implements Output {
 
     public Vector getHttpRequests() {
         return httpRequests != null ? httpRequests : Vector.empty(Metrics.HTTP_REQS);
+    }
+
+    @Override
+    public float getApdex() {
+        return RestUtils.getApdexScore(scenario, getIterationDuration().getValues());
     }
 }

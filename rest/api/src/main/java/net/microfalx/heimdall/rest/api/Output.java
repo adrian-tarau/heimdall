@@ -17,6 +17,13 @@ import java.time.LocalDateTime;
 public interface Output extends Identifiable<String>, Nameable {
 
     /**
+     * Returns the scenario which produced this output.
+     *
+     * @return a non-null instance
+     */
+    Scenario getScenario();
+
+    /**
      * Returns the environment targeted by a simulation.
      *
      * @return a non-null instance
@@ -157,4 +164,11 @@ public interface Output extends Identifiable<String>, Nameable {
      * @return a non-null instance
      */
     Vector getHttpRequests();
+
+    /**
+     * The APDEX score for the scenario
+     *
+     * @return a non-null instance
+     */
+    float getApdex();
 }

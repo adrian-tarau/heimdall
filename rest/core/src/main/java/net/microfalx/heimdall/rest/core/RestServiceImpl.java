@@ -110,6 +110,23 @@ public class RestServiceImpl implements RestService, InitializingBean {
     }
 
     @Override
+    public Collection<Scenario> getScenarios() {
+        return cache.getScenarios();
+    }
+
+    @Override
+    public Scenario getScenario(String id) {
+        return cache.getScenario(id);
+    }
+
+    @Override
+    public void registerScenario(Scenario scenario) {
+        requireNonNull(scenario);
+        persistence.save(scenario);
+        cache.registerScenario(scenario, null);
+    }
+
+    @Override
     public Collection<Schedule> getSchedules() {
         return cache.getSchedules();
     }

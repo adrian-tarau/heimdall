@@ -69,6 +69,12 @@ public class RestOutput extends IdentityAware<Integer> {
     @Formattable(unit = Formattable.Unit.MILLI_SECOND)
     private int duration;
 
+    @Column(name = "apdex", nullable = false)
+    @Description("The APDEX score of the scenario")
+    @Position(32)
+    @Formattable()
+    private float apdex;
+
     @Column(name = "data_received", nullable = false)
     @Description("The amount of received data")
     @Position(35)

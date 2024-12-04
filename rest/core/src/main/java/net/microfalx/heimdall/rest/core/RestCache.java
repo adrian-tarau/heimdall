@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.time.Duration.ofMillis;
 import static java.time.Duration.ofSeconds;
 import static java.util.Collections.unmodifiableCollection;
 import static net.microfalx.lang.CollectionUtils.setFromString;
@@ -30,6 +31,7 @@ class RestCache extends ApplicationContextSupport {
 
     private volatile Map<String, Project> projects = new HashMap<>();
     private volatile Map<String, Simulation> simulations = new HashMap<>();
+    private volatile Map<String, Scenario> scernarios = new HashMap<>();
     private volatile Map<String, Schedule> schedules = new HashMap<>();
     private volatile Map<String, Library> libraries = new HashMap<>();
 
@@ -49,8 +51,20 @@ class RestCache extends ApplicationContextSupport {
 
     Simulation getSimulation(String id) {
         Simulation simulation = simulations.get(StringUtils.toIdentifier(id));
-        if (simulation == null) throw new RestNotFoundException("A simulation with identifier '" + id + "' does not exist");
+        if (simulation == null)
+            throw new RestNotFoundException("A simulation with identifier '" + id + "' does not exist");
         return simulation;
+    }
+
+    Collection<Scenario> getScenarios() {
+        return unmodifiableCollection(scernarios.values());
+    }
+
+    Scenario getScenario(String id) {
+        Scenario scenario = scernarios.get(StringUtils.toIdentifier(id));
+        if (scenario == null)
+            throw new RestNotFoundException("A simulation with identifier '" + id + "' does not exist");
+        return scenario;
     }
 
     Collection<Schedule> getSchedules() {
@@ -83,6 +97,11 @@ class RestCache extends ApplicationContextSupport {
         if (key != null) simulations.put(Integer.toString(key), simulation);
     }
 
+    void registerScenario(Scenario scenario, Integer key) {
+        scernarios.put(StringUtils.toIdentifier(scenario.getId()), scenario);
+        if (key != null) scernarios.put(Integer.toString(key), scenario);
+    }
+
     void registerSchedule(Schedule schedule, Integer key) {
         schedules.put(StringUtils.toIdentifier(schedule.getId()), schedule);
         if (key != null) schedules.put(Integer.toString(key), schedule);
@@ -108,6 +127,11 @@ class RestCache extends ApplicationContextSupport {
             loadSimulations();
         } catch (Exception e) {
             LOGGER.error("Failed to load simulations", e);
+        }
+        try {
+            loadScenarios();
+        } catch (Exception e) {
+            LOGGER.error("Failed to load scenarios", e);
         }
         try {
             loadSchedules();
@@ -167,6 +191,22 @@ class RestCache extends ApplicationContextSupport {
                     .name(restSimulation.getName()).description(restSimulation.getDescription()).build();
             Simulation simulation = builder.build();
             registerSimulation(simulation, restSimulation.getId());
+        });
+    }
+
+    private void loadScenarios() {
+        List<RestScenario> scenarioJPAs = getBean(RestScenarioRepository.class).findAll();
+        scenarioJPAs.forEach(restScenario -> {
+            Scenario.Builder builder = new Scenario.Builder(restScenario.getNaturalId());
+            builder.simulation(getSimulation(restScenario.getSimulation().getNaturalId()))
+                    .frustratingThreshold(ofMillis(restScenario.getFrustratingThreshold()))
+                    .function(restScenario.getFunction()).
+                    gracefulStop(ofMillis(restScenario.getGracefulStop()))
+                    .startTime(ofMillis(restScenario.getStartTime()))
+                    .toleratingThreshold(ofMillis(restScenario.getToleratingThreshold()))
+                    .name(restScenario.getName()).description(restScenario.getDescription());
+            Scenario scenario = builder.build();
+            registerScenario(scenario, restScenario.getId());
         });
     }
 

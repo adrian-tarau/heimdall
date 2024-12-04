@@ -309,6 +309,7 @@ public class RestProjectManager {
         } catch (RestNotFoundException e) {
             // does not exist
         }
+        if (currentLibrary == null) return true;
         if (currentLibrary != null && Boolean.TRUE.equals(currentLibrary.getOverride())) return false;
         try {
             return !ResourceUtils.hasSameContent(newLibrary.getResource(), currentLibrary.getResource());

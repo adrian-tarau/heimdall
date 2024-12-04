@@ -130,7 +130,6 @@ public class Library extends NamedAndTaggedIdentifyAware<String> {
         return hashing.asString();
     }
 
-
     public static class Builder extends NamedAndTaggedIdentifyAware.Builder<String> {
 
         private Resource resource;

@@ -7,6 +7,7 @@ import net.microfalx.bootstrap.jdbc.jpa.NaturalJpaRepository;
 import net.microfalx.bootstrap.model.MetadataService;
 import net.microfalx.heimdall.rest.api.Library;
 import net.microfalx.heimdall.rest.api.Project;
+import net.microfalx.heimdall.rest.api.Scenario;
 import net.microfalx.heimdall.rest.api.SimulationException;
 import net.microfalx.heimdall.rest.core.system.*;
 import net.microfalx.lang.CollectionUtils;
@@ -69,6 +70,18 @@ public class RestPersistence extends ApplicationContextSupport {
         updater.findByNaturalIdAndUpdate(jpaLibrary);
     }
 
+    void save(Scenario scenario) {
+        RestScenarioRepository restScenarioRepository = getBean(RestScenarioRepository.class);
+        NaturalIdEntityUpdater<RestScenario, Integer> updater = new NaturalIdEntityUpdater<>(getBean(MetadataService.class), restScenarioRepository);
+        RestScenario restScenario = new RestScenario();
+        restScenario.setNaturalId(scenario.getId());
+        restScenario.setName(scenario.getName());
+        restScenario.setSimulation(save(scenario.getSimulation()));
+        restScenario.setToleratingThreshold((int) scenario.getToleratingThreshold().toMillis());
+        restScenario.setFrustratingThreshold((int) scenario.getFrustratingThreshold().toMillis());
+        updater.findByNaturalIdOrCreate(restScenario);
+    }
+
     void saveHistory(RestLibrary restLibrary) {
         RestLibraryHistory restLibraryHistory = new RestLibraryHistory();
         restLibraryHistory.setRestLibrary(restLibrary);
@@ -80,8 +93,7 @@ public class RestPersistence extends ApplicationContextSupport {
         restSimulationHistoryRepository.save(restLibraryHistory);
     }
 
-
-    void save(net.microfalx.heimdall.rest.api.Simulation simulation) {
+    RestSimulation save(net.microfalx.heimdall.rest.api.Simulation simulation) {
         RestSimulationRepository restSimulationRepository = getBean(RestSimulationRepository.class);
         int version = 1;
         RestSimulation previousJpaSimulation = restSimulationRepository.findByNaturalId(simulation.getId()).orElse(null);
@@ -109,6 +121,7 @@ public class RestPersistence extends ApplicationContextSupport {
         jpaSimulation.setTags(CollectionUtils.setToString(simulation.getTags()));
         jpaSimulation.setDescription(simulation.getDescription());
         updater.findByNaturalIdAndUpdate(jpaSimulation);
+        return jpaSimulation;
     }
 
     void saveHistory(RestSimulation jpaSimulation) {

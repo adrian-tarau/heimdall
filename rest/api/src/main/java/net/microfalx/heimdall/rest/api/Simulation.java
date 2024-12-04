@@ -24,6 +24,8 @@ public class Simulation extends Library {
 
     private Duration timeout;
     private Collection<Scenario> scenarios;
+    private float apdex;
+
 
     /**
      * Creates a simulation builder out of a simulation identifier.
@@ -61,6 +63,14 @@ public class Simulation extends Library {
      */
     public Duration getTimeout() {
         return timeout;
+    }
+
+    /**
+     * The APDEX score for the simulation
+     * @return a non-null instance
+     */
+    public float getApdex(){
+        return apdex;
     }
 
     /**
@@ -134,6 +144,8 @@ public class Simulation extends Library {
 
         private final Collection<Scenario> scenarios = new ArrayList<>();
         private Duration timeout = ofMinutes(15);
+        private float apdex;
+
 
         public Builder() {
         }
@@ -164,11 +176,17 @@ public class Simulation extends Library {
             return this;
         }
 
+        public Builder apdex(float apdex) {
+            this.apdex = apdex;
+            return this;
+        }
+
         @Override
         public Simulation build() {
             Simulation simulation = (Simulation) super.build();
             simulation.scenarios = scenarios;
             simulation.timeout = timeout;
+            simulation.apdex=apdex;
             return simulation;
         }
     }

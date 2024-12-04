@@ -4,10 +4,7 @@ import net.microfalx.bootstrap.metrics.Matrix;
 import net.microfalx.bootstrap.metrics.Metric;
 import net.microfalx.bootstrap.metrics.Value;
 import net.microfalx.bootstrap.metrics.Vector;
-import net.microfalx.heimdall.rest.api.Metrics;
-import net.microfalx.heimdall.rest.api.Output;
-import net.microfalx.heimdall.rest.api.Simulation;
-import net.microfalx.heimdall.rest.api.SimulationContext;
+import net.microfalx.heimdall.rest.api.*;
 import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.Nameable;
 import net.microfalx.resource.Resource;
@@ -96,8 +93,9 @@ public abstract class AbstractOutputParser {
      */
     protected final SimulationOutput getOutput(String name) {
         requireNonNull(name);
+        Scenario scenario = Scenario.create(simulation, name).build();
         return outputs.computeIfAbsent(name.toLowerCase(),
-                s -> new SimulationOutput(name, simulationContext.getEnvironment(), simulation));
+                s -> new SimulationOutput(scenario, simulationContext.getEnvironment(), simulation));
     }
 
     /**

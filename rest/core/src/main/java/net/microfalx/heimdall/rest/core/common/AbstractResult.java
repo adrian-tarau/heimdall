@@ -64,6 +64,12 @@ public abstract class AbstractResult extends IdentityAware<Long> {
     @Formattable(unit = Formattable.Unit.MILLI_SECOND)
     private int duration;
 
+    @Column(name = "apdex", nullable = false)
+    @Description("The APDEX score of the simulation")
+    @Position(32)
+    @Formattable()
+    private float apdex;
+
     @Column(name = "data_received")
     @Description("The amount of received data")
     @Position(35)

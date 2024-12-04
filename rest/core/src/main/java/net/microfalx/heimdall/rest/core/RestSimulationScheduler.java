@@ -4,10 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.microfalx.bootstrap.core.async.AsynchronousProperties;
 import net.microfalx.bootstrap.core.async.TaskExecutorFactory;
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
-import net.microfalx.bootstrap.jdbc.jpa.NaturalIdEntityUpdater;
 import net.microfalx.bootstrap.metrics.Aggregation;
 import net.microfalx.bootstrap.metrics.Value;
-import net.microfalx.bootstrap.model.MetadataService;
 import net.microfalx.heimdall.infrastructure.core.system.EnvironmentRepository;
 import net.microfalx.heimdall.rest.api.*;
 import net.microfalx.heimdall.rest.core.system.*;
@@ -121,7 +119,7 @@ class RestSimulationScheduler extends ApplicationContextSupport {
         Resource dataReport = restService.registerResource(result.getData());
         RestResult restResult = persistRestResult(context, result, resourceLogs, resourceReport, dataReport);
         result.getOutputs().forEach(output -> {
-            RestScenario restScenario = persistRestScenario(output, restResult);
+            RestScenario restScenario = persistRestScenario(output);
             persistRestOutput(restResult, restScenario, output);
         });
     }
@@ -136,6 +134,7 @@ class RestSimulationScheduler extends ApplicationContextSupport {
         restOutput.setStartedAt(output.getStartTime());
         restOutput.setEndedAt(output.getEndTime());
         restOutput.setDuration((int) output.getDuration().toMillis());
+        restOutput.setApdex(output.getApdex());
         restOutput.setStatus(restResult.getStatus());
 
         restOutput.setVus((float) output.getVus().getAverage().orElse(0));
@@ -157,14 +156,10 @@ class RestSimulationScheduler extends ApplicationContextSupport {
         restOutputRepository.save(restOutput);
     }
 
-    private RestScenario persistRestScenario(Output output, RestResult restResult) {
+    private RestScenario persistRestScenario(Output output) {
+        restService.registerScenario(output.getScenario());
         RestScenarioRepository restScenarioRepository = getBean(RestScenarioRepository.class);
-        NaturalIdEntityUpdater<RestScenario, Integer> updater = new NaturalIdEntityUpdater<>(getBean(MetadataService.class), restScenarioRepository);
-        RestScenario restScenario = new RestScenario();
-        restScenario.setNaturalId(output.getId());
-        restScenario.setName(output.getName());
-        restScenario.setSimulation(restResult.getSimulation());
-        return updater.findByNaturalIdOrCreate(restScenario);
+        return restScenarioRepository.findByNaturalId(output.getScenario().getId()).orElseThrow();
     }
 
     private RestResult persistRestResult(SimulationContext context, Result result, Resource resourceLogs, Resource resourceReport, Resource dataReport) {
@@ -184,6 +179,7 @@ class RestSimulationScheduler extends ApplicationContextSupport {
         restResult.setStartedAt(result.getStartTime());
         restResult.setEndedAt(result.getEndTime());
         restResult.setDuration((int) result.getDuration().toMillis());
+        restResult.setApdex(result.getApdex());
 
         if (result.getStatus() == Status.SUCCESSFUL) {
             restResult.setVus(extractMetricFromMatrix(result, output -> output.getVus().getAverage()));

@@ -91,4 +91,11 @@ public interface Result extends Releasable {
      * @return a non-null instance
      */
     Resource getData();
+
+    /**
+     * The APDEX score for the scenario
+     *
+     * @return a non-null instance
+     */
+    float getApdex();
 }

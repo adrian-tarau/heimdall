@@ -65,6 +65,29 @@ public interface RestService {
      *
      * @return a non-null instance
      */
+    Collection<Scenario> getScenarios();
+
+    /**
+     * Returns a simulation by its identifier.
+     *
+     * @param id the simulation identifier.
+     * @return the simulation
+     * @throws RestNotFoundException if such a simulation does not exist
+     */
+    Scenario getScenario(String id);
+
+    /**
+     * Registers a simulation.
+     *
+     * @param scenario the scenario
+     */
+    void registerScenario(Scenario scenario);
+
+    /**
+     * Returns a collection of registered schedules.
+     *
+     * @return a non-null instance
+     */
     Collection<Schedule> getSchedules();
 
     /**
@@ -122,6 +145,7 @@ public interface RestService {
 
     /**
      * Returns the running simulators.
+     *
      * @return a non-null instance
      */
     Collection<Simulator> getRunning();

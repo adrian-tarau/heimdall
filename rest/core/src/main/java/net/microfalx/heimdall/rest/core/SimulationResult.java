@@ -76,6 +76,11 @@ public class SimulationResult implements Result {
     }
 
     @Override
+    public float getApdex() {
+        return (float) outputs.stream().mapToDouble(Output::getApdex).average().orElse(0f);
+    }
+
+    @Override
     public void release() {
         simulator.release();
     }

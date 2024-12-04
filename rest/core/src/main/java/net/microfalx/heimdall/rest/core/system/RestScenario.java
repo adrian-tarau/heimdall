@@ -48,4 +48,14 @@ public class RestScenario extends NamedAndTaggedAndTimestampedIdentityAware<Inte
     @Description("The function")
     @Position(20)
     private String function;
+
+    @Column(name = "tolerating_threshold", nullable = false)
+    @Description("The threshold that the users will tolerate the service")
+    @Position(25)
+    private int toleratingThreshold;
+
+    @Column(name = "frustrating_threshold", nullable = false)
+    @Description("The threshold that the users will be frustrated and stop using the service")
+    @Position(30)
+    private int frustratingThreshold;
 }

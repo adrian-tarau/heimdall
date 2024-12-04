@@ -53,17 +53,18 @@ class RestSimulationSchedulerTest {
     void setUp() {
         Simulation simulation = (Simulation) Simulation.create(MemoryResource.create("This is a simulation"))
                 .type(Simulation.Type.K6).build();
-        Environment environment = Environment.create()
-                .baseUri(UriUtils.parseUri("http://localhost:8080").toASCIIString()).build();
+        Environment.Builder environment = Environment.create()
+                .baseUri(UriUtils.parseUri("http://localhost:8080").toASCIIString());
+        environment.id("45678");
         Schedule.Builder schedule = new Schedule.Builder().simulation(simulation)
-                .environment(environment).interval(Duration.of(5, ChronoUnit.SECONDS));
+                .environment(environment.build()).interval(Duration.of(5, ChronoUnit.SECONDS));
         schedule.description("This is a schedule description");
         schedule.name("This is a schedule name");
         schedule.tag("This isa schedule tag");
         schedule.id("09876");
 
         when(simulationContext.getSimulation()).thenReturn(simulation);
-        when(simulationContext.getEnvironment()).thenReturn(environment);
+        when(simulationContext.getEnvironment()).thenReturn(environment.build());
 
         when(restService.getProperties()).thenReturn(new RestProperties());
         when(restService.getSchedules()).thenReturn(Collections.singletonList(schedule.build()));

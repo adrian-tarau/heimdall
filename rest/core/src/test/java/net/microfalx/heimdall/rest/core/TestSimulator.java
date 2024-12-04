@@ -2,10 +2,7 @@ package net.microfalx.heimdall.rest.core;
 
 import net.microfalx.bootstrap.metrics.Value;
 import net.microfalx.bootstrap.metrics.Vector;
-import net.microfalx.heimdall.rest.api.Metrics;
-import net.microfalx.heimdall.rest.api.Output;
-import net.microfalx.heimdall.rest.api.Simulation;
-import net.microfalx.heimdall.rest.api.SimulationContext;
+import net.microfalx.heimdall.rest.api.*;
 import net.microfalx.resource.Resource;
 
 import java.io.File;
@@ -35,7 +32,8 @@ public class TestSimulator extends AbstractSimulator {
 
     @Override
     protected Collection<Output> parseOutput(SimulationContext context, Resource resource) throws IOException {
-        return Collections.singleton(new SimulationOutput("Test", context.getEnvironment(), getSimulation())
+        Scenario scenario = Scenario.create(getSimulation(), "Test").build();
+        return Collections.singleton(new SimulationOutput(scenario, context.getEnvironment(), getSimulation())
                 .setDataReceived(Vector.create(Metrics.DATA_RECEIVED, Value.create(12))));
     }
 }

@@ -3,6 +3,8 @@ package net.microfalx.heimdall.rest.core;
 import net.microfalx.bootstrap.content.Content;
 import net.microfalx.bootstrap.content.ContentLocator;
 import net.microfalx.bootstrap.content.ContentService;
+import net.microfalx.bootstrap.metrics.Value;
+import net.microfalx.heimdall.rest.api.Scenario;
 import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.lang.Hashing;
 import net.microfalx.lang.Nameable;
@@ -12,6 +14,7 @@ import net.microfalx.resource.MimeType;
 import net.microfalx.resource.Resource;
 
 import java.net.URI;
+import java.util.Collection;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
@@ -82,5 +85,30 @@ public class RestUtils {
         requireNonNull(simulation);
         requireNotEmpty(extension);
         return toIdentifier(environment.getName() + "_" + simulation.getName()) + "." + extension;
+    }
+
+    /**
+     * Calculates the APDEX score for a time series (of durations) within a scenario (thresholds).
+     *
+     * @param scenario the scenario
+     * @param values   the values to threshold on
+     * @return the score
+     */
+    public static float getApdexScore(Scenario scenario, Collection<Value> values) {
+        long toleratingThreshold = scenario.getToleratingThreshold().toMillis();
+        long frustratingThreshold = scenario.getFrustratingThreshold().toMillis();
+        float numberOfSatisfiedUsers = 0;
+        float numberOfToleratingUsers = 0;
+        for (Value value : values) {
+            double valueDouble = value.asDouble();
+            if (valueDouble < toleratingThreshold) {
+                numberOfSatisfiedUsers++;
+            } else if (valueDouble >= toleratingThreshold && valueDouble <= frustratingThreshold) {
+                numberOfToleratingUsers++;
+            }
+        }
+        // numberOfFrustratedUsers (above frustrating threshold)
+        // would be multiplied by 0 in the formula, which equals 0
+        return (float) ((numberOfSatisfiedUsers + (0.5 * numberOfToleratingUsers)) / (float) values.size());
     }
 }
