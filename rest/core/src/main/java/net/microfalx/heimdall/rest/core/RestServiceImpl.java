@@ -9,6 +9,7 @@ import net.microfalx.heimdall.rest.api.*;
 import net.microfalx.heimdall.rest.core.system.RestResult;
 import net.microfalx.heimdall.rest.core.system.RestResultRepository;
 import net.microfalx.lang.ClassUtils;
+import net.microfalx.lang.Nameable;
 import net.microfalx.lang.UriUtils;
 import net.microfalx.resource.*;
 import net.microfalx.resource.archive.ArchiveUtils;
@@ -26,9 +27,9 @@ import java.util.concurrent.*;
 
 import static java.util.Collections.unmodifiableCollection;
 import static net.microfalx.heimdall.rest.api.RestConstants.*;
+import static net.microfalx.heimdall.rest.core.RestUtils.getFileName;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.NamedAndTaggedIdentifyAware.*;
-import static net.microfalx.lang.StringUtils.toIdentifier;
 import static net.microfalx.resource.Resource.FILE_NAME_ATTR;
 
 @Service
@@ -234,7 +235,8 @@ public class RestServiceImpl implements RestService, InitializingBean {
     public Resource getLog(int id) {
         RestResult result = findOutput(id);
         if (result.getLogsURI() != null) {
-            return ResourceFactory.resolve(UriUtils.parseUri(result.getLogsURI())).withMimeType(MimeType.TEXT_PLAIN);
+            return ResourceFactory.resolve(UriUtils.parseUri(result.getLogsURI())).withMimeType(MimeType.TEXT_PLAIN)
+                    .withAttribute(FILE_NAME_ATTR, getFileName(result.getEnvironment(), result.getSimulation(), "csv"));
         } else {
             return MemoryResource.create("No logs are available");
         }
@@ -245,7 +247,7 @@ public class RestServiceImpl implements RestService, InitializingBean {
         RestResult result = findOutput(id);
         if (result.getLogsURI() != null) {
             Resource resource = ResourceFactory.resolve(UriUtils.parseUri(result.getReportURI()));
-            return getLiveReport(resource, result.getEnvironment().getName(), result.getSimulation().getName());
+            return getLiveReport(resource, result.getEnvironment(), result.getSimulation());
         } else {
             return MemoryResource.create("No report are available");
         }
@@ -254,14 +256,15 @@ public class RestServiceImpl implements RestService, InitializingBean {
     @Override
     public Resource getReport(Simulator simulator) {
         requireNonNull(simulator);
-        return getLiveReport(simulator.getReport(), simulator.getEnvironment().getName(), simulator.getSimulation().getName());
+        return getLiveReport(simulator.getReport(), simulator.getEnvironment(), simulator.getSimulation());
     }
 
     @Override
     public Resource getData(int id) {
         RestResult result = findOutput(id);
         if (result.getLogsURI() != null) {
-            return ResourceFactory.resolve(UriUtils.parseUri(result.getDataURI())).withMimeType(MimeType.TEXT_CSV);
+            return ResourceFactory.resolve(UriUtils.parseUri(result.getDataURI())).withMimeType(MimeType.TEXT_CSV)
+                    .withAttribute(FILE_NAME_ATTR, getFileName(result.getEnvironment(), result.getSimulation(), "csv"));
         } else {
             return MemoryResource.create("No data is available");
         }
@@ -481,7 +484,7 @@ public class RestServiceImpl implements RestService, InitializingBean {
         return restResult;
     }
 
-    private Resource getLiveReport(Resource resource, String environment, String simulation) {
+    private Resource getLiveReport(Resource resource, Nameable environment, Nameable simulation) {
         boolean archive = false;
         boolean compressed = false;
         try {
@@ -492,8 +495,7 @@ public class RestServiceImpl implements RestService, InitializingBean {
         }
         if (archive || compressed) {
             String extension = compressed ? "gz" : "zip";
-            String fileName = toIdentifier(environment + "_" + simulation) + "." + extension;
-            resource = resource.withAttribute(FILE_NAME_ATTR, fileName);
+            resource = resource.withAttribute(FILE_NAME_ATTR, getFileName(environment, simulation, extension));
         } else {
             resource = resource.withMimeType(MimeType.TEXT_HTML);
         }

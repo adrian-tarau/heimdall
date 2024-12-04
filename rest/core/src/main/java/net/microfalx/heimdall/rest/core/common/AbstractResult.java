@@ -42,6 +42,7 @@ public abstract class AbstractResult extends IdentityAware<Long> {
     @Enumerated(EnumType.STRING)
     @Description("The status of the simulation")
     @Position(15)
+    @Align(Align.Type.CENTER)
     @Formattable(alert = RestResult.AlertProvider.class)
     private Status status;
 

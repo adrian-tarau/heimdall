@@ -147,7 +147,8 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
 
     @Override
     public Resource getData() {
-        return output;
+        String fileName = toIdentifier(getEnvironment().getName() + "_" + getSimulation().getName()) + ".csv";
+        return output.withAttribute(Resource.FILE_NAME_ATTR, fileName);
     }
 
     @Override

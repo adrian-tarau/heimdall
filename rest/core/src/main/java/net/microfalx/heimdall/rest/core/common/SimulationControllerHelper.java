@@ -52,6 +52,7 @@ public class SimulationControllerHelper {
         } else {
             log = simulator.getLogs();
         }
+        registerContent(log);
         model.addAttribute("log", log.loadAsString());
         return "rest/view_result::#log-modal";
     }
@@ -63,6 +64,7 @@ public class SimulationControllerHelper {
         } else {
             data = simulator.getData();
         }
+        registerContent(data);
         TableGenerator tableGenerator = new TableGenerator().setSmall(true).setStrict(false).setLinks(true).addRows(data);
         model.addAttribute("data", tableGenerator.generate());
         return "rest/view_result::#data-modal";
@@ -75,8 +77,7 @@ public class SimulationControllerHelper {
         } else {
             report = restService.getReport(simulator);
         }
-        Content content = Content.create(report);
-        contentService.registerContent(content);
+        registerContent(report);
         String dialogCss;
         if (!MimeType.get(report.getMimeType()).isText()) {
             dialogCss = "modal-sm";
@@ -85,7 +86,13 @@ public class SimulationControllerHelper {
             dialogCss = "modal-xl";
         }
         model.addAttribute("css", dialogCss);
-        model.addAttribute("content", content);
         return "rest/view_result::#report-modal";
+    }
+
+    private void registerContent(Resource resource) {
+        Content content = Content.create(resource);
+        String contentId = contentService.registerContent(content);
+        model.addAttribute("content", content);
+        model.addAttribute("contentId", contentId);
     }
 }

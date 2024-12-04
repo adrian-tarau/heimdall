@@ -5,6 +5,7 @@ import net.microfalx.bootstrap.content.ContentLocator;
 import net.microfalx.bootstrap.content.ContentService;
 import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.lang.Hashing;
+import net.microfalx.lang.Nameable;
 import net.microfalx.lang.UriUtils;
 import net.microfalx.metrics.Metrics;
 import net.microfalx.resource.MimeType;
@@ -13,6 +14,7 @@ import net.microfalx.resource.Resource;
 import java.net.URI;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
 import static net.microfalx.lang.StringUtils.toIdentifier;
 
 public class RestUtils {
@@ -65,5 +67,20 @@ public class RestUtils {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Creates a file name based on environment & simulation name.
+     *
+     * @param environment the environment name
+     * @param simulation  the simulation name
+     * @param extension   the file extension
+     * @return a non-null instance
+     */
+    public static String getFileName(Nameable environment, Nameable simulation, String extension) {
+        requireNonNull(environment);
+        requireNonNull(simulation);
+        requireNotEmpty(extension);
+        return toIdentifier(environment.getName() + "_" + simulation.getName()) + "." + extension;
     }
 }
