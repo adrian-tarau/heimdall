@@ -70,6 +70,8 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
     private final StringBuilder logger = new StringBuilder(8000);
     private volatile Process process;
 
+    private RestService restService;
+
     private static final Set<String> INSTALLED = new CopyOnWriteArraySet<>();
 
     public AbstractSimulator(Simulation simulation) {
@@ -394,6 +396,30 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
         errorMessage = getRootCauseMessage(throwable);
         log(format, args);
         appendLog(", stack trace\n" + TextUtils.insertSpaces(ExceptionUtils.getStackTrace(throwable), 5));
+    }
+
+    /**
+     * Returns a scenario based on its name.
+     *
+     * @param name the name of the scenario
+     * @return a non-null instance
+     */
+    final Scenario getScenario(String name) {
+        name = capitalizeWords(name);
+        if (restService != null) {
+            return restService.getScenario(simulation, name);
+        } else {
+            return Scenario.create(simulation, name).build();
+        }
+    }
+
+    /**
+     * Sets the rest service
+     *
+     * @param restService the service instance
+     */
+    final void setRestService(RestService restService) {
+        this.restService = restService;
     }
 
     /**

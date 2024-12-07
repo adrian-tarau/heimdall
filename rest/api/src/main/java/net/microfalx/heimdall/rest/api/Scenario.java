@@ -194,6 +194,7 @@ public class Scenario extends NamedAndTaggedIdentifyAware<String> {
                         + ") must be larger than tolerating threshold (" + toleratingThreshold + ")");
             }
             Scenario scenario = (Scenario) super.build();
+            scenario.simulation = simulation;
             scenario.steps = steps;
             scenario.startTime = startTime;
             scenario.gracefulStop = gracefulStop;

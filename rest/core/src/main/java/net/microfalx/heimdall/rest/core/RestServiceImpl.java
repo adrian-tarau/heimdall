@@ -29,6 +29,7 @@ import static java.util.Collections.unmodifiableCollection;
 import static net.microfalx.heimdall.rest.api.RestConstants.*;
 import static net.microfalx.heimdall.rest.core.RestUtils.getFileName;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
 import static net.microfalx.lang.NamedAndTaggedIdentifyAware.*;
 import static net.microfalx.resource.Resource.FILE_NAME_ATTR;
 
@@ -117,6 +118,24 @@ public class RestServiceImpl implements RestService, InitializingBean {
     @Override
     public Scenario getScenario(String id) {
         return cache.getScenario(id);
+    }
+
+    @Override
+    public Scenario getScenario(Simulation simulation, String name) {
+        requireNotEmpty(simulation);
+        requireNotEmpty(name);
+        String id = Scenario.getNaturalId(simulation, name);
+        Scenario scenario = null;
+        try {
+            scenario = cache.getScenario(id);
+        } catch (RestNotFoundException e) {
+            // ignore
+        }
+        if (scenario == null) {
+            scenario = Scenario.create(simulation, name).build();
+            registerScenario(scenario);
+        }
+        return scenario;
     }
 
     @Override
@@ -221,6 +240,9 @@ public class RestServiceImpl implements RestService, InitializingBean {
         Simulator simulator = createSimulator(context.getSimulation());
         if (context instanceof SimulationContextImpl contextImpl) {
             contextImpl.addLibraries(getLibraries(context.getSimulation()));
+        }
+        if (simulator instanceof AbstractSimulator simulatorImpl) {
+            simulatorImpl.setRestService(this);
         }
         String simulationKey = getKey(context.getSimulation(), context.getEnvironment());
         if (!context.isManual()) lastScheduled.put(simulationKey, LocalDateTime.now());

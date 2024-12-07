@@ -77,6 +77,9 @@ public class RestPersistence extends ApplicationContextSupport {
         restScenario.setNaturalId(scenario.getId());
         restScenario.setName(scenario.getName());
         restScenario.setSimulation(save(scenario.getSimulation()));
+        restScenario.setFunction(scenario.getFunction());
+        restScenario.setStartTime((int)scenario.getStartTime().toMillis());
+        restScenario.setGracefulStop((int)scenario.getGracefulStop().toMillis());
         restScenario.setToleratingThreshold((int) scenario.getToleratingThreshold().toMillis());
         restScenario.setFrustratingThreshold((int) scenario.getFrustratingThreshold().toMillis());
         updater.findByNaturalIdOrCreate(restScenario);
@@ -120,8 +123,7 @@ public class RestPersistence extends ApplicationContextSupport {
         }
         jpaSimulation.setTags(CollectionUtils.setToString(simulation.getTags()));
         jpaSimulation.setDescription(simulation.getDescription());
-        updater.findByNaturalIdAndUpdate(jpaSimulation);
-        return jpaSimulation;
+        return updater.findByNaturalIdAndUpdate(jpaSimulation);
     }
 
     void saveHistory(RestSimulation jpaSimulation) {

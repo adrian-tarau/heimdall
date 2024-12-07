@@ -11,11 +11,14 @@ import net.microfalx.bootstrap.jdbc.entity.IdentityAware;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.heimdall.infrastructure.core.system.Environment;
 import net.microfalx.heimdall.rest.api.Status;
+import net.microfalx.heimdall.rest.core.RestProperties;
 import net.microfalx.heimdall.rest.core.system.RestResult;
 import net.microfalx.heimdall.rest.core.system.RestSimulation;
 import net.microfalx.lang.annotation.*;
 
 import java.time.LocalDateTime;
+
+import static net.microfalx.lang.FormatterUtils.formatNumber;
 
 @MappedSuperclass
 @ReadOnly
@@ -67,7 +70,7 @@ public abstract class AbstractResult extends IdentityAware<Long> {
     @Column(name = "apdex", nullable = false)
     @Description("The APDEX score of the simulation")
     @Position(32)
-    @Formattable()
+    @Formattable(minimumFractionDigits = 2, alert = ApdexProvider.class)
     private float apdex;
 
     @Column(name = "data_received")
@@ -219,6 +222,39 @@ public abstract class AbstractResult extends IdentityAware<Long> {
                 case UNKNOWN -> Alert.Type.LIGHT;
             };
             return Alert.builder().type(type).message(model.getErrorMessage()).build();
+        }
+
+    }
+
+    private static RestProperties properties = new RestProperties();
+
+    public static class ApdexProvider implements Formattable.AlertProvider<AbstractResult, Field<AbstractResult>, Float> {
+
+        private String formatMessage(String prefix, float min, float max) {
+            return prefix + " (Range: " + formatNumber(min, 2) + " - " + formatNumber(max, 2) + ")";
+        }
+
+        @Override
+        public Alert provide(Float value, Field<AbstractResult> field, AbstractResult model) {
+            Alert.Type type;
+            String message;
+            if (value >= properties.getApdexExcelent()) {
+                type = Alert.Type.SUCCESS;
+                message = formatMessage("Excellent", properties.getApdexExcelent(), 1);
+            } else if (value >= properties.getApdexGood()) {
+                type = Alert.Type.SUCCESS;
+                message = formatMessage("Good", properties.getApdexGood(), properties.getApdexExcelent());
+            } else if (value >= properties.getApdexFair()) {
+                type = Alert.Type.WARNING;
+                message = formatMessage("Fair", properties.getApdexFair(), properties.getApdexGood());
+            } else if (value >= properties.getApdexPoor()) {
+                type = Alert.Type.DARK;
+                message = formatMessage("Poor", properties.getApdexPoor(), properties.getApdexFair());
+            } else {
+                type = Alert.Type.DANGER;
+                message = formatMessage("Unacceptable", 0, properties.getApdexPoor());
+            }
+            return Alert.builder().type(type).icon(Alert.Icon.INFORMATION).message(message).build();
         }
 
     }

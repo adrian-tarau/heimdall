@@ -62,8 +62,7 @@ class RestCache extends ApplicationContextSupport {
 
     Scenario getScenario(String id) {
         Scenario scenario = scernarios.get(StringUtils.toIdentifier(id));
-        if (scenario == null)
-            throw new RestNotFoundException("A simulation with identifier '" + id + "' does not exist");
+        if (scenario == null) throw new RestNotFoundException("A scenario with identifier '" + id + "' does not exist");
         return scenario;
     }
 
@@ -200,11 +199,11 @@ class RestCache extends ApplicationContextSupport {
             Scenario.Builder builder = new Scenario.Builder(restScenario.getNaturalId());
             builder.simulation(getSimulation(restScenario.getSimulation().getNaturalId()))
                     .frustratingThreshold(ofMillis(restScenario.getFrustratingThreshold()))
-                    .function(restScenario.getFunction()).
-                    gracefulStop(ofMillis(restScenario.getGracefulStop()))
-                    .startTime(ofMillis(restScenario.getStartTime()))
-                    .toleratingThreshold(ofMillis(restScenario.getToleratingThreshold()))
-                    .name(restScenario.getName()).description(restScenario.getDescription());
+                    .toleratingThreshold(ofMillis(restScenario.getToleratingThreshold()));
+            if (isNotEmpty(restScenario.getFunction())) builder.function(restScenario.getFunction());
+            if (restScenario.getGracefulStop() != null) builder.gracefulStop(ofMillis(restScenario.getGracefulStop()));
+            if (restScenario.getStartTime() != null) builder.startTime(ofMillis(restScenario.getStartTime()));
+            builder.name(restScenario.getName()).description(restScenario.getDescription());
             Scenario scenario = builder.build();
             registerScenario(scenario, restScenario.getId());
         });

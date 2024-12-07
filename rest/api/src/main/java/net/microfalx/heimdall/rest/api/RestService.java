@@ -77,6 +77,18 @@ public interface RestService {
     Scenario getScenario(String id);
 
     /**
+     * Returns the simulation by its name.
+     * <p>
+     * If the scenario does not exist, it is registered.
+     *
+     * @param simulation the simulation which owns the scenario
+     * @param name       the name of the scenario
+     * @return the scenario
+     * @throws RestNotFoundException if such a simulation does not exist
+     */
+    Scenario getScenario(Simulation simulation, String name);
+
+    /**
      * Registers a simulation.
      *
      * @param scenario the scenario

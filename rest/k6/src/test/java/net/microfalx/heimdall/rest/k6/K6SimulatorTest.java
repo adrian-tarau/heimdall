@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.rest.k6;
 
+import net.microfalx.bootstrap.model.Attributes;
 import net.microfalx.heimdall.infrastructure.api.Environment;
 import net.microfalx.heimdall.infrastructure.api.InfrastructureConstants;
 import net.microfalx.heimdall.rest.api.*;
@@ -34,19 +35,23 @@ class K6SimulatorTest {
                 Library.create(MemoryResource.create("lib2", "lib2.js")).type(Simulation.Type.K6).build());
         when(simulationContext.getLibraries()).thenReturn(libraries);
         when(simulationContext.getEnvironment()).thenReturn(environment);
+        when(simulationContext.getAttributes()).thenReturn(Attributes.create());
     }
 
     @Test
     void simpleSimulation() throws IOException {
         K6Simulator simulator = new K6Simulator(createSimulation("simple_simulation.js"));
         Result result = simulator.execute(simulationContext);
+        assertEquals(Status.SUCCESSFUL, simulator.getStatus(), simulator.getLogs().loadAsString());
         Collection<Output> outputs = result.getOutputs();
         assertEquals(1, outputs.size());
         Output output = outputs.iterator().next();
         assertEquals("Default", output.getName());
         assertEquals(2, output.getVus().getMaximum().orElse(0));
+        assertEquals(2, output.getVus().getMaximum().orElse(0));
         assertEquals(2, output.getVusMax().getMaximum().orElse(0));
-        assertEquals(1, output.getHttpRequests().getValue().getValue());
+        assertEquals(20, output.getHttpRequests().getValue().getValue());
+        assertTrue(output.getApdex() > 0);
         assertTrue(output.getHttpRequestDuration().getAverage().orElse(0) > 0);
     }
 
@@ -54,13 +59,14 @@ class K6SimulatorTest {
     void scenariosSimulation() throws IOException {
         K6Simulator simulator = new K6Simulator(createSimulation("scenarios_simulation.js"));
         Result result = simulator.execute(simulationContext);
+        assertEquals(Status.SUCCESSFUL, simulator.getStatus(), simulator.getLogs().loadAsString());
         Collection<Output> outputs = result.getOutputs();
         assertEquals(2, outputs.size());
         Iterator<Output> iterator = outputs.iterator();
         Output output = iterator.next();
-        assertEquals(1, output.getHttpRequests().getValue().getValue());
+        assertEquals(10, output.getHttpRequests().getValue().getValue());
         output = iterator.next();
-        assertEquals(1, output.getHttpRequests().getValue().getValue());
+        assertEquals(15, output.getHttpRequests().getValue().getValue());
 
     }
 

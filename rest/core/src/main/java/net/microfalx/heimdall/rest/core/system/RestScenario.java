@@ -4,12 +4,10 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
 import net.microfalx.bootstrap.jdbc.jpa.UpdateStrategy;
-import net.microfalx.lang.annotation.Description;
-import net.microfalx.lang.annotation.Name;
-import net.microfalx.lang.annotation.Position;
-import net.microfalx.lang.annotation.Visible;
+import net.microfalx.lang.annotation.*;
 import org.hibernate.annotations.NaturalId;
 
 @Entity
@@ -34,28 +32,36 @@ public class RestScenario extends NamedAndTaggedAndTimestampedIdentityAware<Inte
     @Position(3)
     private RestSimulation simulation;
 
-    @Column(name = "start_time")
-    @Description("The start time for the scenario")
-    @Position(10)
-    private Integer startTime;
-
-    @Column(name = "gracefulStop")
-    @Description("The grace stop of the scenario")
-    @Position(15)
-    private Integer gracefulStop;
-
-    @Column(name = "function",length = 100)
-    @Description("The function")
-    @Position(20)
-    private String function;
-
     @Column(name = "tolerating_threshold", nullable = false)
     @Description("The threshold that the users will tolerate the service")
-    @Position(25)
+    @Position(10)
+    @Formattable(unit = Formattable.Unit.MILLI_SECOND)
+    @UpdateStrategy()
+    @Label(group = "Thresholds", value = "Tolerating")
     private int toleratingThreshold;
 
     @Column(name = "frustrating_threshold", nullable = false)
     @Description("The threshold that the users will be frustrated and stop using the service")
-    @Position(30)
+    @Position(11)
+    @Formattable(unit = Formattable.Unit.MILLI_SECOND)
+    @UpdateStrategy()
+    @Label(group = "Thresholds", value = "Frustrating")
     private int frustratingThreshold;
+
+    @Column(name = "start_time")
+    @Description("The start time for the scenario")
+    @Position(20)
+    @Formattable(unit = Formattable.Unit.MILLI_SECOND)
+    private Integer startTime;
+
+    @Column(name = "gracefulStop")
+    @Description("The grace stop of the scenario")
+    @Position(21)
+    @Formattable(unit = Formattable.Unit.MILLI_SECOND)
+    private Integer gracefulStop;
+
+    @Column(name = "function", length = 100)
+    @Description("The function")
+    @Position(22)
+    private String function;
 }

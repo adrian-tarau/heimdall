@@ -93,7 +93,7 @@ public abstract class AbstractOutputParser {
      */
     protected final SimulationOutput getOutput(String name) {
         requireNonNull(name);
-        Scenario scenario = Scenario.create(simulation, name).build();
+        Scenario scenario = simulator.getScenario(name);
         return outputs.computeIfAbsent(name.toLowerCase(),
                 s -> new SimulationOutput(scenario, simulationContext.getEnvironment(), simulation));
     }
@@ -107,9 +107,7 @@ public abstract class AbstractOutputParser {
     protected Metric getMetric(String name) {
         String identifier = toIdentifier(name);
         Metric metric = metrics.get(identifier);
-        if (metric == null) {
-            metric = Metric.create(name);
-        }
+        if (metric == null) metric = Metric.create(name);
         return metric;
     }
 
@@ -165,18 +163,18 @@ public abstract class AbstractOutputParser {
             output.setStartTime(getStartTime());
             output.setEndTime(getEndTime());
 
-            output.setDataSent(getTimeSeries(scenario, Metrics.DATA_SENT).getVector());
-            output.setDataReceived(getTimeSeries(scenario, Metrics.DATA_RECEIVED).getVector());
+            output.setDataSent(getTimeSeries(scenario, Metrics.DATA_SENT).getVector(false));
+            output.setDataReceived(getTimeSeries(scenario, Metrics.DATA_RECEIVED).getVector(false));
             output.setVus(getTimeSeries(scenario, Metrics.VUS).getMatrix());
             output.setVusMax(getTimeSeries(scenario, Metrics.VUS_MAX).getMatrix());
             output.setIterationDuration(getTimeSeries(scenario, Metrics.ITERATION_DURATION).getMatrix());
-            output.setIterations(getTimeSeries(scenario, Metrics.ITERATIONS).getVector());
+            output.setIterations(getTimeSeries(scenario, Metrics.ITERATIONS).getVector(false));
 
-            output.setHttpRequests(getTimeSeries(scenario, Metrics.HTTP_REQS).getVector());
+            output.setHttpRequests(getTimeSeries(scenario, Metrics.HTTP_REQS).getVector(false));
             output.setHttpRequestBlocked(getTimeSeries(scenario, Metrics.HTTP_REQ_BLOCKED).getMatrix());
             output.setHttpRequestConnecting(getTimeSeries(scenario, Metrics.HTTP_REQ_CONNECTING).getMatrix());
             output.setHttpRequestDuration(getTimeSeries(scenario, Metrics.HTTP_REQ_DURATION).getMatrix());
-            output.setHttpRequestFailed(getTimeSeries(scenario, Metrics.HTTP_REQ_FAILED).getVector());
+            output.setHttpRequestFailed(getTimeSeries(scenario, Metrics.HTTP_REQ_FAILED).getVector(false));
             output.setHttpRequestSending(getTimeSeries(scenario, Metrics.HTTP_REQ_SENDING).getMatrix());
             output.setHttpRequestTlsHandshaking(getTimeSeries(scenario, Metrics.HTTP_REQ_TLS_HANDSHAKING).getMatrix());
             output.setHttpRequestWaiting(getTimeSeries(scenario, Metrics.HTTP_REQ_WAITING).getMatrix());
@@ -232,12 +230,16 @@ public abstract class AbstractOutputParser {
         }
 
         public Vector getVector() {
+            return getVector(true);
+        }
+
+        public Vector getVector(boolean average) {
             Matrix matrix = getMatrix();
             if (matrix.getValues().isEmpty()) {
                 return Vector.empty(metric);
             } else {
-                Value last = matrix.getLast().get();
-                return Vector.create(metric, Value.create(last.getTimestamp(), matrix.getAverage().getAsDouble()));
+                Value last = matrix.getLast().orElseThrow();
+                return Vector.create(metric, Value.create(last.getTimestamp(), average ? matrix.getAverage().orElseThrow() : matrix.getSum()));
             }
         }
 

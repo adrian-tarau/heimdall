@@ -17,4 +17,8 @@ public class RestProperties {
 
     private int historySize = 100;
     private boolean self;
+    private float apdexExcelent = 0.95f;
+    private float apdexGood = 0.85f;
+    private float apdexFair = 0.7f;
+    private float apdexPoor = 0.5f;
 }
