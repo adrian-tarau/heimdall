@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.jdbc.entity.IdentityAware;
+import net.microfalx.lang.annotation.Description;
 
 import java.time.LocalDateTime;
 
@@ -25,6 +26,10 @@ public class RestSimulationHistory extends IdentityAware<Integer> {
 
     @Column(name = "version")
     private Integer version;
+
+    @Column(name = "modified_by",length = 100)
+    @Description("The user who modified the simulation")
+    private String modifiedBy;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @NotNull

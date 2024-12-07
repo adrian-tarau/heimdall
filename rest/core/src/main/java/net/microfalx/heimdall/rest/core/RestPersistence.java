@@ -88,6 +88,7 @@ public class RestPersistence extends ApplicationContextSupport {
     void saveHistory(RestLibrary restLibrary) {
         RestLibraryHistory restLibraryHistory = new RestLibraryHistory();
         restLibraryHistory.setRestLibrary(restLibrary);
+        restLibraryHistory.setModifiedBy(restLibrary.getModifiedBy());
         restLibraryHistory.setVersion(restLibrary.getVersion());
         restLibraryHistory.setResource(restLibrary.getResource());
         restLibraryHistory.setCreatedAt(restLibrary.getCreatedAt());
@@ -129,6 +130,7 @@ public class RestPersistence extends ApplicationContextSupport {
     void saveHistory(RestSimulation jpaSimulation) {
         RestSimulationHistory restSimulationHistory = new RestSimulationHistory();
         restSimulationHistory.setRestSimulation(jpaSimulation);
+        restSimulationHistory.setModifiedBy(jpaSimulation.getModifiedBy());
         restSimulationHistory.setVersion(jpaSimulation.getVersion());
         restSimulationHistory.setResource(jpaSimulation.getResource());
         restSimulationHistory.setCreatedAt(jpaSimulation.getCreatedAt());

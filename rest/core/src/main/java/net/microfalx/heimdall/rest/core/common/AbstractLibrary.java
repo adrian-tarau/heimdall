@@ -62,4 +62,14 @@ public abstract class AbstractLibrary extends NamedAndTaggedAndTimestampedIdenti
     @Description("The version of the library")
     @Position(30)
     private Integer version;
+
+    @Column(name = "created_by",length = 100)
+    @Description("The user that created the service")
+    @Position(35)
+    private String createdBy;
+
+    @Column(name = "modified_by",length = 100)
+    @Description("The user that modified the service")
+    @Position(40)
+    private String modifiedBy;
 }

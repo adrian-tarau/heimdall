@@ -29,6 +29,8 @@ create table rest_library
     `global` boolean default false not null,
     hash     varchar(64),
     version int default 1 not null,
+    created_by         varchar(100),
+    modified_by        varchar(100),
     created_at  datetime            not null,
     modified_at datetime,
     tags        varchar(100),
@@ -42,6 +44,7 @@ create table rest_library_history
     rest_library_id    int                      not null,
     resource           varchar(1000)            not null,
     version            int,
+    modified_by        varchar(100),
     created_at         datetime                 not null,
     modified_at        datetime,
     constraint fk$rest_library$id foreign key (rest_library_id) references rest_library (id)
@@ -60,6 +63,8 @@ create table rest_simulation
     override boolean default false not null,
     hash varchar(64),
     version int default 1 not null,
+    created_by         varchar(100),
+    modified_by        varchar(100),
     created_at  datetime                        not null,
     modified_at datetime,
     tags        varchar(100),
@@ -74,6 +79,7 @@ create table rest_simulation_history
     rest_simulation_id int                      not null,
     resource           varchar(1000)            not null,
     version            int,
+    modified_by        varchar(100),
     created_at         datetime                 not null,
     modified_at        datetime,
     constraint fk$rest_simulation$id foreign key (rest_simulation_id) references rest_simulation (id)
