@@ -1,0 +1,25 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="history" id="history-modal" tabindex="-1"
+     class="modal fade modal-xl" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" th:text="${library.name}"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0" th:attr="contentId=${library.id}">
+                # add the history table here by processing $items
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm dataset-btn-sm" th:attr="onclick=|Application.closeDialog()|">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>

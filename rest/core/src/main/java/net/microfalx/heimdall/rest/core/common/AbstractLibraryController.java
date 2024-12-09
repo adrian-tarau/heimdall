@@ -19,6 +19,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.Collection;
 
 import static net.microfalx.heimdall.rest.api.Library.getNaturalId;
 import static net.microfalx.heimdall.rest.api.RestConstants.SCRIPT_ATTR;
@@ -49,6 +50,14 @@ public abstract class AbstractLibraryController<T extends AbstractLibrary> exten
     protected abstract T getLibrary(int id);
 
     /**
+     * Extracts the history of a library.
+     *
+     * @param library the library
+     * @return a list of history objects
+     */
+    protected abstract Collection<?> extractHistory(T library);
+
+    /**
      * Saves the content of the library
      *
      * @param id       the identifier
@@ -62,6 +71,14 @@ public abstract class AbstractLibraryController<T extends AbstractLibrary> exten
         Resource resource = ResourceFactory.resolve(library.getResource()).withName("Design")
                 .withMimeType(library.getType().getMimeType());
         return new CodeEditor<Integer>(contentService, resource, this).getEditorDialog(id, model);
+    }
+
+    @GetMapping("/history/{id}")
+    public String history(@PathVariable("id") int id, Model model) throws IOException {
+        T library = getLibrary(id);
+        model.addAttribute("library", library);
+        model.addAttribute("items", extractHistory(library));
+        return "rest/view_simulation_or_library_history::#history-modal";
     }
 
     @PostMapping("/design/{id}")
@@ -83,6 +100,7 @@ public abstract class AbstractLibraryController<T extends AbstractLibrary> exten
     protected final Resource register(Resource resource) throws IOException {
         return restService.registerResource(resource.withAttribute(SCRIPT_ATTR, Boolean.TRUE));
     }
+
 
     protected final void reloadProject(String id) {
         requireNonNull(id);
