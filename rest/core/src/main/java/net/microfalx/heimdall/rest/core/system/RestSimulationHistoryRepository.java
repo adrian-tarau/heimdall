@@ -7,7 +7,13 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface RestSimulationHistoryRepository extends JpaRepository<RestSimulationHistory,Integer>, JpaSpecificationExecutor<RestSimulationHistory> {
+public interface RestSimulationHistoryRepository extends JpaRepository<RestSimulationHistory, Integer>, JpaSpecificationExecutor<RestSimulationHistory> {
 
+    /**
+     * Find the history for the simulation
+     *
+     * @param restSimulation the history of the simulation
+     * @return the history for the simulation
+     */
     List<RestSimulationHistory> findAllByRestSimulation(RestSimulation restSimulation);
 }

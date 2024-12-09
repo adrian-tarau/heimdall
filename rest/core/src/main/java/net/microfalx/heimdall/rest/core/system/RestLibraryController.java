@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
 
 import static net.microfalx.heimdall.rest.core.RestUtils.prepareContent;
 
@@ -35,6 +34,9 @@ public class RestLibraryController extends AbstractLibraryController<RestLibrary
     @Autowired
     private RestLibraryRepository repository;
 
+    @Autowired
+    private RestLibraryHistoryRepository restLibraryHistoryRepository;
+
     @Override
     protected RestLibrary getLibrary(int id) {
         return repository.findById(id).orElseThrow();
@@ -42,7 +44,7 @@ public class RestLibraryController extends AbstractLibraryController<RestLibrary
 
     @Override
     protected Collection<?> extractHistory(RestLibrary library) {
-        return Collections.emptyList();
+        return restLibraryHistoryRepository.findAllByRestLibrary(library);
     }
 
     @Override
@@ -72,7 +74,8 @@ public class RestLibraryController extends AbstractLibraryController<RestLibrary
     @Override
     protected boolean beforeDelete(net.microfalx.bootstrap.dataset.DataSet<RestLibrary, Field<RestLibrary>, Integer> dataSet, Model controllerModel, RestLibrary dataSetModel) {
         if (dataSetModel.isGlobal()) return cancel(controllerModel, "A global library cannot be deleted");
-        if (dataSetModel.getProject().getType() != Project.Type.NONE) return cancel(controllerModel,"A library hosted in VCS cannot be deleted");
+        if (dataSetModel.getProject().getType() != Project.Type.NONE)
+            return cancel(controllerModel, "A library hosted in VCS cannot be deleted");
         return super.beforeDelete(dataSet, controllerModel, dataSetModel);
     }
 

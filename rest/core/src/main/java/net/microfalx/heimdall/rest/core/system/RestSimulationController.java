@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
 
 import static net.microfalx.heimdall.rest.core.RestUtils.prepareContent;
 
@@ -34,6 +33,9 @@ public class RestSimulationController extends AbstractLibraryController<RestSimu
     @Autowired
     private RestSimulationRepository repository;
 
+    @Autowired
+    private RestSimulationHistoryRepository restSimulationHistoryRepository;
+
     @Override
     protected RestSimulation getLibrary(int id) {
         return repository.findById(id).orElseThrow();
@@ -41,7 +43,7 @@ public class RestSimulationController extends AbstractLibraryController<RestSimu
 
     @Override
     protected Collection<?> extractHistory(RestSimulation library) {
-        return Collections.emptyList();
+        return restSimulationHistoryRepository.findAllByRestSimulation(library);
     }
 
     @Override
@@ -70,7 +72,8 @@ public class RestSimulationController extends AbstractLibraryController<RestSimu
 
     @Override
     protected boolean beforeDelete(net.microfalx.bootstrap.dataset.DataSet<RestSimulation, Field<RestSimulation>, Integer> dataSet, Model controllerModel, RestSimulation dataSetModel) {
-        if (dataSetModel.getProject().getType() != Project.Type.NONE) return cancel(controllerModel,"A simulation hosted in VCS cannot be deleted");
+        if (dataSetModel.getProject().getType() != Project.Type.NONE)
+            return cancel(controllerModel, "A simulation hosted in VCS cannot be deleted");
         return super.beforeDelete(dataSet, controllerModel, dataSetModel);
     }
 

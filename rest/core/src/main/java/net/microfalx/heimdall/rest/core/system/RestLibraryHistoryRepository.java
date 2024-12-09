@@ -9,5 +9,11 @@ import java.util.List;
 @Repository
 public interface RestLibraryHistoryRepository extends JpaRepository<RestLibraryHistory, Integer>, JpaSpecificationExecutor<RestLibraryHistory> {
 
+    /**
+     * Find the history for the library
+     *
+     * @param restLibrary the history of the library
+     * @return the history for the library
+     */
     List<RestLibraryHistory> findAllByRestLibrary(RestLibrary restLibrary);
 }

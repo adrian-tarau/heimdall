@@ -91,7 +91,6 @@ public class RestPersistence extends ApplicationContextSupport {
         restLibraryHistory.setModifiedBy(restLibrary.getModifiedBy());
         restLibraryHistory.setVersion(restLibrary.getVersion());
         restLibraryHistory.setResource(restLibrary.getResource());
-        restLibraryHistory.setCreatedAt(restLibrary.getCreatedAt());
         restLibraryHistory.setModifiedAt(restLibrary.getModifiedAt());
         RestLibraryHistoryRepository restSimulationHistoryRepository = getBean(RestLibraryHistoryRepository.class);
         restSimulationHistoryRepository.save(restLibraryHistory);
@@ -133,7 +132,6 @@ public class RestPersistence extends ApplicationContextSupport {
         restSimulationHistory.setModifiedBy(jpaSimulation.getModifiedBy());
         restSimulationHistory.setVersion(jpaSimulation.getVersion());
         restSimulationHistory.setResource(jpaSimulation.getResource());
-        restSimulationHistory.setCreatedAt(jpaSimulation.getCreatedAt());
         restSimulationHistory.setModifiedAt(jpaSimulation.getModifiedAt());
         RestSimulationHistoryRepository restSimulationHistoryRepository = getBean(RestSimulationHistoryRepository.class);
         restSimulationHistoryRepository.save(restSimulationHistory);

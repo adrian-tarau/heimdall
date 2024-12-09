@@ -1,7 +1,6 @@
 package net.microfalx.heimdall.rest.core.system;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -30,10 +29,6 @@ public class RestLibraryHistory extends IdentityAware<Integer> {
     @Column(name = "modified_by",length = 100)
     @Description("The user who modified the library")
     private String modifiedBy;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    @NotNull
-    private LocalDateTime createdAt;
 
     @Column(name = "modified_at")
     private LocalDateTime modifiedAt;

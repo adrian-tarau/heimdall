@@ -45,7 +45,6 @@ create table rest_library_history
     resource           varchar(1000)            not null,
     version            int,
     modified_by        varchar(100),
-    created_at         datetime                 not null,
     modified_at        datetime,
     constraint fk$rest_library$id foreign key (rest_library_id) references rest_library (id)
 ) ENGINE = InnoDB;
@@ -80,7 +79,6 @@ create table rest_simulation_history
     resource           varchar(1000)            not null,
     version            int,
     modified_by        varchar(100),
-    created_at         datetime                 not null,
     modified_at        datetime,
     constraint fk$rest_simulation$id foreign key (rest_simulation_id) references rest_simulation (id)
 ) ENGINE = InnoDB;
