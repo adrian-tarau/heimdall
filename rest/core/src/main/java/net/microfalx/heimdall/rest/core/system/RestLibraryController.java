@@ -20,6 +20,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 
 import static net.microfalx.heimdall.rest.core.RestUtils.prepareContent;
 
@@ -36,6 +38,11 @@ public class RestLibraryController extends AbstractLibraryController<RestLibrary
     @Override
     protected RestLibrary getLibrary(int id) {
         return repository.findById(id).orElseThrow();
+    }
+
+    @Override
+    protected Collection<?> extractHistory(RestLibrary library) {
+        return Collections.emptyList();
     }
 
     @Override

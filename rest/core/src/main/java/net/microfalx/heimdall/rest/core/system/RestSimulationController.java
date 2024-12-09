@@ -19,6 +19,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 
 import static net.microfalx.heimdall.rest.core.RestUtils.prepareContent;
 
@@ -35,6 +37,11 @@ public class RestSimulationController extends AbstractLibraryController<RestSimu
     @Override
     protected RestSimulation getLibrary(int id) {
         return repository.findById(id).orElseThrow();
+    }
+
+    @Override
+    protected Collection<?> extractHistory(RestSimulation library) {
+        return Collections.emptyList();
     }
 
     @Override
