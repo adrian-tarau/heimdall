@@ -6,7 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Filterable;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
-import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
+import net.microfalx.bootstrap.jdbc.entity.NamedAndOwnedAndTaggedAndTimestampedIdentityAware;
 import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.heimdall.rest.core.system.RestProject;
 import net.microfalx.lang.annotation.*;
@@ -15,7 +15,7 @@ import net.microfalx.lang.annotation.*;
 @ToString
 @Getter
 @Setter
-public abstract class AbstractLibrary extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
+public abstract class AbstractLibrary extends NamedAndOwnedAndTaggedAndTimestampedIdentityAware<Integer> {
 
     @Column(name = "natural_id", nullable = false, length = 100, unique = true)
     @NaturalId
@@ -61,15 +61,6 @@ public abstract class AbstractLibrary extends NamedAndTaggedAndTimestampedIdenti
     @Column(name = "version")
     @Description("The version of the library")
     @Position(30)
+    @Visible(modes = Visible.Mode.BROWSE)
     private Integer version;
-
-    @Column(name = "created_by",length = 100)
-    @Description("The user that created the service")
-    @Position(35)
-    private String createdBy;
-
-    @Column(name = "modified_by",length = 100)
-    @Description("The user that modified the service")
-    @Position(40)
-    private String modifiedBy;
 }
