@@ -254,7 +254,7 @@ public abstract class AbstractResult extends IdentityAware<Long> {
                 type = Alert.Type.DANGER;
                 message = formatMessage("Unacceptable", 0, properties.getApdexPoor());
             }
-            return Alert.builder().type(type).icon(Alert.Icon.INFORMATION).message(message).build();
+            return Alert.builder().type(type).tooltip(true).message(message).build();
         }
 
     }

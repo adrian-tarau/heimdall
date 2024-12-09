@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static net.microfalx.lang.FileUtils.removeFileExtension;
-import static net.microfalx.lang.JvmUtils.getNextAvailablePort;
 import static net.microfalx.lang.UriUtils.parseUrl;
 
 public class K6Simulator extends AbstractSimulator {
@@ -54,7 +53,7 @@ public class K6Simulator extends AbstractSimulator {
         super.update(process, context);
         process.environment().put("K6_WEB_DASHBOARD", "true");
         String port = process.environment().get("K6_WEB_DASHBOARD_PORT");
-        if (port == null) port = Integer.toString(getNextAvailablePort(40_000));
+        if (port == null) port = Integer.toString(getNextAvailablePort());
         this.port = Integer.parseInt(port);
         if (this.port > 0) process.environment().put("K6_WEB_DASHBOARD_PORT", port);
         String simulationFileName = removeFileExtension(getSimulation().getResource().getFileName());

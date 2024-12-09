@@ -27,6 +27,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -48,6 +49,8 @@ import static net.microfalx.resource.ResourceUtils.toFile;
  */
 @Slf4j
 public abstract class AbstractSimulator implements Simulator, Comparable<AbstractSimulator> {
+
+    private static final int START_PORT = 40_000;
 
     private final String id = UUID.randomUUID().toString();
     private final Simulation simulation;
@@ -73,6 +76,8 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
     private RestService restService;
 
     private static final Set<String> INSTALLED = new CopyOnWriteArraySet<>();
+    private static final Queue<Integer> PORTS = new LinkedBlockingQueue<>();
+    private static final AtomicInteger NEXT_PORT = new AtomicInteger(START_PORT);
 
     public AbstractSimulator(Simulation simulation) {
         requireNonNull(simulation);
@@ -396,6 +401,25 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
         errorMessage = getRootCauseMessage(throwable);
         log(format, args);
         appendLog(", stack trace\n" + TextUtils.insertSpaces(ExceptionUtils.getStackTrace(throwable), 5));
+    }
+
+    /**
+     * Returns the next available port.
+     *
+     * @return the port, -1 if not available
+     */
+    protected static int getNextAvailablePort() {
+        synchronized (PORTS) {
+            for (int i = 0; i < 100; i++) {
+                int port = JvmUtils.getNextAvailablePort(NEXT_PORT.getAndIncrement());
+                if (!PORTS.contains(port)) {
+                    PORTS.add(port);
+                    if (PORTS.size() > 20) PORTS.poll();
+                    return port;
+                }
+            }
+            return -1;
+        }
     }
 
     /**
