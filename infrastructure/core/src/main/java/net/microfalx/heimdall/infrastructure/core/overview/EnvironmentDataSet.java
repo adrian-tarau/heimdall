@@ -2,6 +2,7 @@ package net.microfalx.heimdall.infrastructure.core.overview;
 
 import net.microfalx.bootstrap.dataset.DataSetFactory;
 import net.microfalx.bootstrap.dataset.MemoryDataSet;
+import net.microfalx.bootstrap.model.Filter;
 import net.microfalx.bootstrap.model.Metadata;
 import net.microfalx.bootstrap.model.MetadataService;
 import net.microfalx.bootstrap.model.PojoField;
@@ -20,7 +21,7 @@ public class EnvironmentDataSet extends MemoryDataSet<Environment, PojoField<Env
     }
 
     @Override
-    protected Iterable<Environment> extractModels() {
+    protected Iterable<Environment> extractModels(Filter filterable) {
         InfrastructureService infrastructureService = getService(InfrastructureService.class);
         MetadataService metadataService = getService(MetadataService.class);
         return infrastructureService.getEnvironments().stream()

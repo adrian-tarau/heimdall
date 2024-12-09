@@ -2,6 +2,7 @@ package net.microfalx.heimdall.infrastructure.ping.overview;
 
 import net.microfalx.bootstrap.dataset.DataSetFactory;
 import net.microfalx.bootstrap.dataset.MemoryDataSet;
+import net.microfalx.bootstrap.model.Filter;
 import net.microfalx.bootstrap.model.Metadata;
 import net.microfalx.bootstrap.model.PojoField;
 import net.microfalx.heimdall.infrastructure.ping.PingHealth;
@@ -19,7 +20,7 @@ public class PingDataSet extends MemoryDataSet<Ping, PojoField<Ping>, String> {
     }
 
     @Override
-    protected Iterable<Ping> extractModels() {
+    protected Iterable<Ping> extractModels(Filter filterable) {
         PingHealth pingHealth = getService(PingHealth.class);
         PingService pingService = getService(PingService.class);
         List<Ping> pings = new ArrayList<>();

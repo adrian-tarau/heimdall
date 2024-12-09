@@ -6,7 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller("OverviewSimulationController")
-@DataSet(model = Simulation.class)
+@DataSet(model = Simulation.class, range = {"last week", "today"})
 @RequestMapping("/rest/simulation")
 public class SimulationController extends DataSetController<Simulation,Integer> {
 }

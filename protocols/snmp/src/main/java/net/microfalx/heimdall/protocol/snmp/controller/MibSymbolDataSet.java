@@ -2,6 +2,7 @@ package net.microfalx.heimdall.protocol.snmp.controller;
 
 import net.microfalx.bootstrap.dataset.DataSetFactory;
 import net.microfalx.bootstrap.dataset.MemoryDataSet;
+import net.microfalx.bootstrap.model.Filter;
 import net.microfalx.bootstrap.model.Metadata;
 import net.microfalx.bootstrap.model.PojoField;
 import net.microfalx.heimdall.protocol.snmp.mib.MibService;
@@ -18,7 +19,7 @@ public class MibSymbolDataSet extends MemoryDataSet<MibSymbol, PojoField<MibSymb
     }
 
     @Override
-    protected Collection<MibSymbol> extractModels() {
+    protected Collection<MibSymbol> extractModels(Filter filterable) {
         return getService(MibService.class).getSymbols();
     }
 }

@@ -24,11 +24,11 @@ public class Simulation extends IdentityAware<String> {
     @Description("The environment used during simulation")
     private Environment environment;
 
-    @Position(10)
+    @Position(11)
     @Description("The executed simulation (test plan)")
     private net.microfalx.heimdall.rest.api.Simulation simulation;
 
-    @Position(502)
+    @Position(20)
     @Description("The average duration of the simulation")
     private Duration duration;
 
@@ -46,10 +46,12 @@ public class Simulation extends IdentityAware<String> {
     private LocalDateTime lastExecutionAt;
 
     @Position(502)
-    @Description("The number of executions ")
+    @Description("The number of executions")
+    @Label(group = "Executions", value = "Total")
     private int executionCount;
 
     @Position(502)
     @Description("The number of times the simulation has failed")
+    @Label(group = "Executions", value = "Failed")
     private int failureCount;
 }

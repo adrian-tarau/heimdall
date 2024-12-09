@@ -2,6 +2,7 @@ package net.microfalx.heimdall.infrastructure.core.overview;
 
 import net.microfalx.bootstrap.dataset.DataSetFactory;
 import net.microfalx.bootstrap.dataset.MemoryDataSet;
+import net.microfalx.bootstrap.model.Filter;
 import net.microfalx.bootstrap.model.Metadata;
 import net.microfalx.bootstrap.model.MetadataService;
 import net.microfalx.bootstrap.model.PojoField;
@@ -19,7 +20,7 @@ public class ClusterDataSet extends MemoryDataSet<Cluster, PojoField<Cluster>, S
     }
 
     @Override
-    protected Iterable<Cluster> extractModels() {
+    protected Iterable<Cluster> extractModels(Filter filterable) {
         InfrastructureService infrastructureService = getService(InfrastructureService.class);
         MetadataService metadataService = getService(MetadataService.class);
         return infrastructureService.getClusters().stream()

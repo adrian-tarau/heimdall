@@ -2,6 +2,7 @@ package net.microfalx.heimdall.rest.core.overview;
 
 import net.microfalx.bootstrap.dataset.DataSetFactory;
 import net.microfalx.bootstrap.dataset.MemoryDataSet;
+import net.microfalx.bootstrap.model.Filter;
 import net.microfalx.bootstrap.model.Metadata;
 import net.microfalx.bootstrap.model.PojoField;
 import net.microfalx.heimdall.rest.api.RestService;
@@ -23,7 +24,7 @@ public class SimulationRunningDataSet extends MemoryDataSet<SimulationRunning, P
     }
 
     @Override
-    protected Iterable<SimulationRunning> extractModels() {
+    protected Iterable<SimulationRunning> extractModels(Filter filterable) {
         RestService restService = getService(RestService.class);
         return restService.getRunning().stream().map(this::from).collect(Collectors.toList());
     }

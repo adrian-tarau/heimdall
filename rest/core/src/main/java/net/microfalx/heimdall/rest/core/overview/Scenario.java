@@ -24,11 +24,11 @@ public class Scenario extends IdentityAware<String> {
     @Description("The environment used during simulation")
     private Environment environment;
 
-    @Position(10)
+    @Position(11)
     @Description("The executed simulation (test plan)")
     private net.microfalx.heimdall.rest.api.Simulation simulation;
 
-    @Position(10)
+    @Position(12)
     @Description("The script executed during simulation")
     private net.microfalx.heimdall.rest.api.Scenario scenario;
 
@@ -51,9 +51,11 @@ public class Scenario extends IdentityAware<String> {
 
     @Position(502)
     @Description("The number of executions ")
+    @Label(group = "Executions", value = "Total")
     private int executionCount;
 
     @Position(502)
     @Description("The number of times the simulation has failed")
+    @Label(group = "Executions", value = "Failed")
     private int failureCount;
 }
