@@ -5,9 +5,6 @@ import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.model.Field;
-import net.microfalx.bootstrap.web.component.Item;
-import net.microfalx.bootstrap.web.component.Menu;
-import net.microfalx.bootstrap.web.component.Separator;
 import net.microfalx.heimdall.rest.api.Library;
 import net.microfalx.heimdall.rest.api.Project;
 import net.microfalx.heimdall.rest.api.Simulation;
@@ -48,18 +45,15 @@ public class RestLibraryController extends AbstractLibraryController<RestLibrary
     }
 
     @Override
+    protected String getName() {
+        return "Library";
+    }
+
+    @Override
     protected void save(int id, Resource resource) {
         Library library = restService.getLibrary(Integer.toString(id));
         library = library.withResource(resource).withOverride(true);
         restService.registerLibrary(library);
-    }
-
-    @Override
-    protected void updateActions(Menu menu) {
-        super.updateActions(menu);
-        menu.add(new Separator());
-        menu.add(new Item().setAction("rest.library.design").setText("Design").setIcon("fa-solid fa-pen-nib").setDescription("Design the library"));
-        menu.add(new Item().setAction("rest.library.history").setText("History").setIcon("fa-solid fa-timeline").setDescription("Show the history of the library"));
     }
 
     @Override

@@ -5,9 +5,6 @@ import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.model.Field;
-import net.microfalx.bootstrap.web.component.Item;
-import net.microfalx.bootstrap.web.component.Menu;
-import net.microfalx.bootstrap.web.component.Separator;
 import net.microfalx.heimdall.rest.api.Project;
 import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.heimdall.rest.core.common.AbstractLibraryController;
@@ -47,18 +44,15 @@ public class RestSimulationController extends AbstractLibraryController<RestSimu
     }
 
     @Override
+    protected String getName() {
+        return "Simulation";
+    }
+
+    @Override
     protected void save(int id, Resource resource) {
         Simulation simulation = restService.getSimulation(Integer.toString(id));
         simulation = (Simulation) simulation.withResource(resource).withOverride(true);
         restService.registerSimulation(simulation);
-    }
-
-    @Override
-    protected void updateActions(Menu menu) {
-        super.updateActions(menu);
-        menu.add(new Separator());
-        menu.add(new Item().setAction("rest.library.design").setText("Design").setIcon("fa-solid fa-pen-nib").setDescription("Design the simulation"));
-        menu.add(new Item().setAction("rest.library.history").setText("History").setIcon("fa-solid fa-timeline").setDescription("Show the history of the simulation"));
     }
 
     @Override

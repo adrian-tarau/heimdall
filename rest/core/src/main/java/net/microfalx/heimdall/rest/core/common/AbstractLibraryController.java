@@ -5,12 +5,16 @@ import net.microfalx.bootstrap.dataset.DataSet;
 import net.microfalx.bootstrap.dataset.DataSetException;
 import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.model.Field;
+import net.microfalx.bootstrap.web.component.Item;
+import net.microfalx.bootstrap.web.component.Menu;
+import net.microfalx.bootstrap.web.component.Separator;
 import net.microfalx.bootstrap.web.dataset.DataSetController;
 import net.microfalx.bootstrap.web.util.CodeEditor;
 import net.microfalx.bootstrap.web.util.JsonResponse;
 import net.microfalx.heimdall.rest.api.Project;
 import net.microfalx.heimdall.rest.api.RestService;
 import net.microfalx.heimdall.rest.api.Simulation;
+import net.microfalx.lang.StringUtils;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +69,13 @@ public abstract class AbstractLibraryController<T extends AbstractLibrary> exten
      */
     protected abstract void save(int id, Resource resource);
 
+    /**
+     * Returns the name used in labels and descriptions.
+     *
+     * @return a non-null instance
+     */
+    protected abstract String getName();
+
     @GetMapping("/design/{id}")
     public String design(@PathVariable("id") int id, Model model) throws IOException {
         T library = getLibrary(id);
@@ -87,6 +98,15 @@ public abstract class AbstractLibraryController<T extends AbstractLibrary> exten
         Resource resource = register(Resource.text(content));
         save(id, resource);
         return JsonResponse.success();
+    }
+
+    @Override
+    protected void updateActions(Menu menu) {
+        super.updateActions(menu);
+        menu.add(new Separator());
+        String name = StringUtils.uncapitalizeFirst(getName());
+        menu.add(new Item().setAction("rest.library.design").setText("Design").setIcon("fa-solid fa-pen-nib").setDescription("Design the " + name + " script"));
+        menu.add(new Item().setAction("rest.library.history").setText("History").setIcon("fa-solid fa-timeline").setDescription("Show the history of the " + name));
     }
 
     protected final Simulation discover(Resource resource) {
