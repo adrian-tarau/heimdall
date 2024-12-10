@@ -57,8 +57,8 @@ public class RestSimulationController extends AbstractLibraryController<RestSimu
     protected void updateActions(Menu menu) {
         super.updateActions(menu);
         menu.add(new Separator());
-        menu.add(new Item().setAction("rest.simulation.design").setText("Design").setIcon("fa-solid fa-pen-nib").setDescription("Design the simulation"));
-        menu.add(new Item().setAction("rest.simulation.history").setText("History").setIcon("fa-solid fa-timeline").setDescription("Show the history of the simulation"));
+        menu.add(new Item().setAction("rest.library.design").setText("Design").setIcon("fa-solid fa-pen-nib").setDescription("Design the simulation"));
+        menu.add(new Item().setAction("rest.library.history").setText("History").setIcon("fa-solid fa-timeline").setDescription("Show the history of the simulation"));
     }
 
     @Override

@@ -1,9 +1,9 @@
 <!DOCTYPE HTML>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:component="https://net.microfalx/component">
 <body>
 
 <div th:fragment="history" id="history-modal" tabindex="-1"
-     class="modal fade modal-xl" data-bs-backdrop="static" data-bs-keyboard="false">
+     class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
@@ -25,18 +25,18 @@
                     <tr th:each="item : ${items}">
                         <td th:text="${#formats.format(item.modifiedAt)}" />
                         <td th:text="${item.version}" />
-                        <td th:text="${#formats.formatBytes(resources.resolve(item.resource)}" />
+                        <td th:text="${#formats.formatBytes(#resources.resolve(item.resource))}" />
                         <td th:text="${item.modifiedBy}" />
                         <td>
-                            <a><i class="fa-solid fa-eye" th:attr="onclick=|Application.action('rest.library.history.view', '${item.id}')|"></i></a>
-                            <a><i class="fa-solid fa-arrow-rotate-left" th:attr="onclick=|Application.action('rest.library.history.revert', '${item.id}')|"></i></a>
+                            <a class="icon-link" href="#" th:attr="onclick=|Application.action('rest.library.history', '${item.id}')|" component:tooltip-text="View the content of this version"><i class="fa-solid fa-eye"></i></a>
+                            <a class="icon-link" href="#" th:attr="onclick=|Application.action('rest.library.history.revert', '${item.id}')|" component:tooltip-text="Restore the content of this version"><i class="fa-solid fa-arrow-rotate-left"></i></a>
                         </td>
                     </tr>
                     </tbody>
                 </table>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary btn-sm dataset-btn-sm" th:attr="onclick=|Application.closeDialog()|">Close</button>
+                <button type="button" class="btn btn-secondary btn-sm dataset-btn-sm" th:attr="onclick=|Application.closeModal()|">Close</button>
             </div>
         </div>
     </div>

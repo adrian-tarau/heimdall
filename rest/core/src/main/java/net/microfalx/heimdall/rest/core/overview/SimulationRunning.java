@@ -51,7 +51,7 @@ public class SimulationRunning extends NamedIdentityAware<String> {
     @Description("A resource containing the log of the simulation")
     @Align(Align.Type.CENTER)
     @Position(120)
-    @Renderable(action = "rest.simulation.view.logs", icon = "fa-regular fa-file-lines")
+    @Renderable(action = "rest.result.view.logs", icon = "fa-regular fa-file-lines")
     private String logsURI;
 
     @Label("Report")
@@ -59,7 +59,7 @@ public class SimulationRunning extends NamedIdentityAware<String> {
     @Description("The resource containing the report of the simulation")
     @Align(Align.Type.CENTER)
     @Position(121)
-    @Renderable(action = "rest.simulation.view.report", icon = "fa-solid fa-chart-line")
+    @Renderable(action = "rest.result.view.report", icon = "fa-solid fa-chart-line")
     private String reportURI;
 
     @Label("Data")
@@ -67,6 +67,6 @@ public class SimulationRunning extends NamedIdentityAware<String> {
     @Description("The resource containing the data produced byt the simulation")
     @Align(Align.Type.CENTER)
     @Position(122)
-    @Renderable(action = "rest.simulation.view.data", icon = "fa-solid fa-file-csv")
+    @Renderable(action = "rest.result.view.data", icon = "fa-solid fa-file-csv")
     private String dataURI;
 }

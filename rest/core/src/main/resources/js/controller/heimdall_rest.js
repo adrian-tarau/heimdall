@@ -4,14 +4,8 @@ Application.bind("rest.project.sync", function () {
     }, {dataType: "json"});
 });
 
-Application.bind("rest.library.history", function (id) {
-    DataSet.get("history/" + id, {}, function (data) {
-        Application.loadModal("history-modal", data);
-    });
-});
-
-Application.bind("rest.simulation.history", function (id) {
-    DataSet.get("history/" + id, {}, function (data) {
+Application.bind("rest.library.history", function () {
+    DataSet.get("history/" +  DataSet.getId(), {}, function (data) {
         Application.loadModal("history-modal", data);
     });
 });
@@ -20,23 +14,19 @@ Application.bind("rest.library.design", function () {
     CodeEditor.loadModal("design/" + DataSet.getId());
 });
 
-Application.bind("rest.simulation.design", function () {
-    CodeEditor.loadModal("design/" + DataSet.getId());
-});
-
-Application.bind("rest.simulation.view.logs", function (id) {
+Application.bind("rest.result.view.logs", function (id) {
     DataSet.get("log/" + id, {}, function (data) {
         Application.loadModal("log-modal", data);
     });
 });
 
-Application.bind("rest.simulation.view.data", function (id) {
+Application.bind("rest.result.view.data", function (id) {
     DataSet.get("data/" + id, {}, function (data) {
         Application.loadModal("data-modal", data);
     });
 });
 
-Application.bind("rest.simulation.view.report", function (id) {
+Application.bind("rest.result.view.report", function (id) {
     DataSet.get("report/" + id, {}, function (data) {
         Application.loadModal("report-modal", data);
     });

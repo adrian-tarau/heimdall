@@ -171,7 +171,7 @@ public abstract class AbstractResult extends IdentityAware<Long> {
     @Description("A resource containing the log of the simulation")
     @Align(Align.Type.CENTER)
     @Position(105)
-    @Renderable(action = "rest.simulation.view.logs", icon = "fa-regular fa-file-lines")
+    @Renderable(action = "rest.result.view.logs", icon = "fa-regular fa-file-lines")
     private String logsURI;
 
     @Label("Report")
@@ -179,7 +179,7 @@ public abstract class AbstractResult extends IdentityAware<Long> {
     @Description("The resource containing the report of the simulation")
     @Align(Align.Type.CENTER)
     @Position(110)
-    @Renderable(action = "rest.simulation.view.report", icon = "fa-solid fa-chart-line")
+    @Renderable(action = "rest.result.view.report", icon = "fa-solid fa-chart-line")
     private String reportURI;
 
     @Label("Data")
@@ -187,7 +187,7 @@ public abstract class AbstractResult extends IdentityAware<Long> {
     @Description("The resource containing the data produced byt the simulation")
     @Align(Align.Type.CENTER)
     @Position(115)
-    @Renderable(action = "rest.simulation.view.data", icon = "fa-solid fa-file-csv")
+    @Renderable(action = "rest.result.view.data", icon = "fa-solid fa-file-csv")
     private String dataURI;
 
     @Column(name = "version", length = 50)
