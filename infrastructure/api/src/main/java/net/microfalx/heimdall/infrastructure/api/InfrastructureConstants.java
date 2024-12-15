@@ -10,6 +10,21 @@ public interface InfrastructureConstants {
     String APP_URI = "app_uri";
     String API_URI = "api_uri";
     String REST_API_URI = "rest_api_uri";
+    // Host Variables
+    String BASE_HOST = "base_host";
+    String APP_HOST = "app_host";
+    String API_HOST = "api_host";
+    String REST_API_HOST = "rest_api_host";
+    // Host Variables
+    String BASE_PORT = "base_port";
+    String APP_PORT = "app_port";
+    String API_PORT = "api_port";
+    String REST_API_PORT = "rest_api_port";
+    // Path Variables
+    String BASE_PATH = "base_path";
+    String APP_PATH = "app_path";
+    String API_PATH = "api_path";
+    String REST_API_PATH = "rest_api_path";
 
     // Credential Variables
     String USERNAME_VARIABLE = "username";

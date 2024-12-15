@@ -15,8 +15,7 @@ import java.util.Set;
 import static java.util.Collections.unmodifiableSet;
 import static net.microfalx.heimdall.infrastructure.api.InfrastructureConstants.*;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
-import static net.microfalx.lang.StringUtils.EMPTY_STRING;
-import static net.microfalx.lang.StringUtils.defaultIfEmpty;
+import static net.microfalx.lang.StringUtils.*;
 import static net.microfalx.lang.UriUtils.SLASH;
 import static net.microfalx.lang.UriUtils.parseUri;
 
@@ -192,6 +191,21 @@ public class Environment extends NamedAndTaggedIdentifyAware<String> implements 
         attributes.addIfAbsent(APP_URI, getAppUri().toASCIIString());
         attributes.addIfAbsent(API_URI, getApiUri().toASCIIString());
         attributes.addIfAbsent(REST_API_URI, getApiUri().toASCIIString());
+
+        updateHost(attributes, BASE_HOST, getBaseUri());
+        updateHost(attributes, APP_HOST, getAppUri());
+        updateHost(attributes, API_HOST, getApiUri());
+        updateHost(attributes, REST_API_HOST, getApiUri());
+
+        updatePort(attributes, BASE_PORT, getBaseUri());
+        updatePort(attributes, APP_PORT, getAppUri());
+        updatePort(attributes, API_PORT, getApiUri());
+        updatePort(attributes, REST_API_PORT, getApiUri());
+
+        updatePath(attributes, BASE_PATH, getBaseUri());
+        updatePath(attributes, APP_PATH, getAppUri());
+        updatePath(attributes, API_PATH, getApiUri());
+        updatePath(attributes, REST_API_PATH, getApiUri());
     }
 
     private static void updateDefaultAttributes(Attributes<?> attributes) {
@@ -199,6 +213,32 @@ public class Environment extends NamedAndTaggedIdentifyAware<String> implements 
         attributes.addIfAbsent(PASSWORD_VARIABLE, EMPTY_STRING);
         attributes.addIfAbsent(BEARER_VARIABLE, EMPTY_STRING);
         attributes.addIfAbsent(API_KEY_VARIABLE, EMPTY_STRING);
+    }
+
+    private void updateHost(Attributes<?> attributes, String name, URI uri) {
+        attributes.addIfAbsent(name, uri.getHost());
+    }
+
+    private void updatePort(Attributes<?> attributes, String name, URI uri) {
+        int port = uri.getPort();
+        if (port <= 0) port = getDefaultPort(uri.getScheme());
+        attributes.addIfAbsent(name, port);
+    }
+
+    private int getDefaultPort(String scheme) {
+        scheme = StringUtils.toLowerCase(scheme);
+        if (scheme == null) return -1;
+        return switch (scheme) {
+            case "http" -> 80;
+            case "https" -> 443;
+            default -> -1;
+        };
+    }
+
+    private void updatePath(Attributes<?> attributes, String name, URI uri) {
+        String path = addStartSlash(removeEndSlash(uri.getPath()));
+        if (UriUtils.isRoot(path)) path = EMPTY_STRING;
+        attributes.addIfAbsent(name, path);
     }
 
     /**
