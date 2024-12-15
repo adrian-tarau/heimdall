@@ -131,6 +131,20 @@ public interface Output extends Identifiable<String>, Nameable {
     Vector getHttpRequestFailed();
 
     /**
+     * Returns the rate of failed requests with errors in 4XX group.
+     *
+     * @return a non-null instance
+     */
+    Vector getHttpRequestFailed4XX();
+
+    /**
+     * Returns the rate of failed requests with errors in 5XX groups.
+     *
+     * @return a non-null instance
+     */
+    Vector getHttpRequestFailed5XX();
+
+    /**
      * Returns the time spent receiving response data from the remote host.
      *
      * @return a non-null instance

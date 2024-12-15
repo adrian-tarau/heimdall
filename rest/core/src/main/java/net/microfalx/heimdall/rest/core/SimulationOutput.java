@@ -44,6 +44,8 @@ public class SimulationOutput implements Output {
     private Matrix httpRequestConnecting;
     private Matrix httpRequestDuration;
     private Vector httpRequestFailed;
+    private Vector httpRequestFailed4XX;
+    private Vector httpRequestFailed5XX;
 
     private Matrix httpRequestReceiving;
     private Matrix httpRequestSending;
@@ -111,6 +113,14 @@ public class SimulationOutput implements Output {
 
     public Vector getHttpRequestFailed() {
         return httpRequestFailed != null ? httpRequestFailed : Vector.empty(Metrics.HTTP_REQ_FAILED);
+    }
+
+    public Vector getHttpRequestFailed4XX() {
+        return httpRequestFailed4XX != null ? httpRequestFailed4XX : Vector.empty(Metrics.HTTP_REQ_FAILED_4XX);
+    }
+
+    public Vector getHttpRequestFailed5XX() {
+        return httpRequestFailed5XX != null ? httpRequestFailed5XX : Vector.empty(Metrics.HTTP_REQ_FAILED_5XX);
     }
 
     public Matrix getHttpRequestReceiving() {
