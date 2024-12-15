@@ -170,7 +170,7 @@ public abstract class AbstractOutputParser {
     protected int getHttpStatusCode(String value) {
         if (StringUtils.isEmpty(value)) value = "200";
         try {
-            int responseCode = Integer.parseInt(value);
+            return Integer.parseInt(value);
         } catch (NumberFormatException e) {
             return 500;
         }

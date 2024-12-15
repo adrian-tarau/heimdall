@@ -43,9 +43,10 @@ class JmeterOutputParser extends AbstractOutputParser {
         TimeSeries requestFailed4XX = getTimeSeries(scenario, Metrics.HTTP_REQ_FAILED_4XX);
         TimeSeries requestFailed5XX = getTimeSeries(scenario, Metrics.HTTP_REQ_FAILED_5XX);
         int responseCode = getHttpStatusCode(record.get("responseCode"));
+        boolean success = Boolean.parseBoolean(record.get("success"));
         boolean failure4XX = responseCode >= 400 && responseCode < 500;
         boolean failure5XX = responseCode >= 500;
-        requestFailed.add(Value.create(timestamp, failure4XX || failure5XX ? 1 : 0));
+        requestFailed.add(Value.create(timestamp, failure4XX || failure5XX || !success ? 1 : 0));
         requestFailed4XX.add(Value.create(timestamp, failure4XX ? 1 : 0));
         requestFailed5XX.add(Value.create(timestamp, failure5XX ? 1 : 0));
 
