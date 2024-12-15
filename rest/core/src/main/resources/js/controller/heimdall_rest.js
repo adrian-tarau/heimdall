@@ -10,16 +10,14 @@ Application.bind("rest.library.history", function () {
     });
 });
 
-Application.bind("rest.library.history.view", function () {
-    DataSet.get("history/view/" +  DataSet.getId(), {}, function (data) {
-        CodeEditor.loadModal("design/" + DataSet.getId());
-    });
+Application.bind("rest.library.history.view", function (id) {
+    CodeEditor.loadModal("history/view/" +  id);
 });
 
-Application.bind("rest.library.history.revert", function () {
-    DataSet.get("history/revert/" +  DataSet.getId(), {}, function (data) {
+Application.bind("rest.library.history.revert", function (id) {
+    DataSet.get("history/revert/" +  id, {}, function (data) {
         Application.showInfoAlert("Restore", data.message);
-    });
+    }, {dataType: "json"});
 });
 
 Application.bind("rest.library.design", function () {

@@ -81,7 +81,7 @@ public abstract class AbstractLibraryController<T extends AbstractLibrary> exten
         T library = getLibrary(id);
         Resource resource = ResourceFactory.resolve(library.getResource()).withName("Design")
                 .withMimeType(library.getType().getMimeType());
-        return new CodeEditor<Integer>(contentService, resource, this).getEditorDialog(id, model);
+        return new CodeEditor<Integer>(contentService, resource, this).getDialog(id, model);
     }
 
     @PostMapping("/design/{id}")
