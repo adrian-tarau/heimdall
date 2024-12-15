@@ -73,22 +73,28 @@ public abstract class AbstractResult extends IdentityAware<Long> {
     @Formattable(minimumFractionDigits = 2, alert = ApdexProvider.class)
     private float apdex;
 
+    @Column(name = "version", length = 50)
+    @Description("The version of the software available in the environment at the time of the simulation")
+    @Position(33)
+    @Filterable
+    private String version;
+
     @Column(name = "data_received")
     @Description("The amount of received data")
-    @Position(35)
+    @Position(40)
     @Visible(false)
     private Float dataReceived;
 
     @Column(name = "data_sent")
     @Description("the amount of data sent")
-    @Position(35)
+    @Position(41)
     @Visible(false)
     private Float dataSent;
 
     @Label(group = "Iterations", value = "Count")
     @Column(name = "iterations")
     @Description("the aggregate number of times the VUs execute the script")
-    @Position(40)
+    @Position(42)
     private Float iterations;
 
     @Label(group = "Iterations", value = "Duration")
@@ -166,35 +172,32 @@ public abstract class AbstractResult extends IdentityAware<Long> {
     @Visible(false)
     private Float httpRequests;
 
-    @Label("Logs")
+    @Label(group = "Actions", value = "Logs")
     @Column(name = "logs_uri", length = 500)
-    @Description("A resource containing the log of the simulation")
+    @Description("The log of the simulation")
     @Align(Align.Type.CENTER)
-    @Position(105)
+    @Position(150)
     @Renderable(action = "rest.result.view.logs", icon = "fa-regular fa-file-lines")
+    @Sortable
     private String logsURI;
 
-    @Label("Report")
+    @Label(group = "Actions", value = "Report")
     @Column(name = "report_uri", length = 500)
-    @Description("The resource containing the report of the simulation")
+    @Description("The (HTML) report of the simulation")
     @Align(Align.Type.CENTER)
-    @Position(110)
+    @Position(151)
     @Renderable(action = "rest.result.view.report", icon = "fa-solid fa-chart-line")
+    @Sortable
     private String reportURI;
 
-    @Label("Data")
+    @Label(group = "Actions", value = "Data")
     @Column(name = "data_uri", length = 500)
-    @Description("The resource containing the data produced byt the simulation")
+    @Description("The data produced by the simulation (CSV)")
     @Align(Align.Type.CENTER)
-    @Position(115)
+    @Position(152)
     @Renderable(action = "rest.result.view.data", icon = "fa-solid fa-file-csv")
+    @Sortable
     private String dataURI;
-
-    @Column(name = "version", length = 50)
-    @Description("The version of the software available in the environment at the time of the simulation")
-    @Position(200)
-    @Filterable
-    private String version;
 
     @Column(name = "description")
     @Position(1000)
