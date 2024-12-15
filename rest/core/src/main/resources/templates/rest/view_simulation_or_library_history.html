@@ -25,7 +25,7 @@
                     <tr th:each="item : ${items}">
                         <td th:text="${#formats.format(item.modifiedAt)}" />
                         <td th:text="${item.version}" />
-                        <td th:text="${#formats.formatBytes(#resources.resolve(item.resource))}" />
+                        <td th:text="${#formats.formatBytes(#resources.resolve(item.resource).length())}" />
                         <td th:text="${item.modifiedBy}" />
                         <td>
                             <a class="icon-link" href="#" th:attr="onclick=|Application.action('rest.library.history.view', '${item.id}')|" component:tooltip-text="View the content of this version"><i class="fa-solid fa-eye"></i></a>

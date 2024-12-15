@@ -90,6 +90,7 @@ public class RestProjectController extends DataSetController<RestProject, Intege
     @Override
     protected void afterPersist(net.microfalx.bootstrap.dataset.DataSet<RestProject, Field<RestProject>, Integer> dataSet, RestProject model, State state) {
         super.afterPersist(dataSet, model, state);
+        restService.reload();
         Project project = restService.getProject(model.getNaturalId());
         executor.execute(() -> restService.reload(project));
     }

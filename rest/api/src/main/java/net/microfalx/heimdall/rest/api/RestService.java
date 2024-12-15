@@ -260,4 +260,11 @@ public interface RestService {
      * @param project the project
      */
     void reload(Project project);
+
+    /**
+     * Reloads a schedule.
+     *
+     * @param schedule the schedule
+     */
+    void reload(Schedule schedule);
 }

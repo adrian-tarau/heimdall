@@ -312,9 +312,6 @@ public class RestServiceImpl implements RestService, InitializingBean {
     @Override
     public void reload() {
         reloadCache();
-        taskExecutor.execute(() -> projectManager.initialize(this));
-        taskExecutor.execute(() -> simulationScheduler.initialize(this));
-        taskExecutor.execute(simulationScheduler::reload);
     }
 
     @Override
@@ -324,8 +321,14 @@ public class RestServiceImpl implements RestService, InitializingBean {
             projectManager.reload(project);
             reloadCache();
         } catch (IOException e) {
-            LOGGER.error("Failed to reload project '" + project.getName() + "'", e);
+            LOGGER.atError().setCause(e).log("Failed to reload project '{}'", project.getName());
         }
+    }
+
+    @Override
+    public void reload(Schedule schedule) {
+        requireNonNull(schedule);
+        simulationScheduler.reload(schedule);
     }
 
     @Override
@@ -336,8 +339,8 @@ public class RestServiceImpl implements RestService, InitializingBean {
         initResources();
         registerProjects();
         discoverGlobalLibraries();
-        this.reload();
-        simulationScheduler.initialize(this);
+        reloadCache();
+        reloadProjectsAndSchedules();
     }
 
     RestProperties getProperties() {
@@ -474,6 +477,11 @@ public class RestServiceImpl implements RestService, InitializingBean {
         } else {
             LOGGER.info("Rest data is stored in: " + dataResource);
         }
+    }
+
+    private void reloadProjectsAndSchedules() {
+        taskExecutor.execute(() -> projectManager.initialize(this));
+        taskExecutor.execute(() -> simulationScheduler.initialize(this));
     }
 
     private void initProjectResources() {

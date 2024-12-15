@@ -1,10 +1,13 @@
 package net.microfalx.heimdall.rest.jmeter;
 
 import lombok.extern.slf4j.Slf4j;
+import net.microfalx.bootstrap.model.Attribute;
 import net.microfalx.heimdall.rest.api.Output;
 import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.heimdall.rest.api.SimulationContext;
 import net.microfalx.heimdall.rest.core.AbstractSimulator;
+import net.microfalx.lang.ObjectUtils;
+import net.microfalx.lang.StringUtils;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.archive.ArchiveUtils;
 
@@ -47,8 +50,17 @@ public class JmeterSimulator extends AbstractSimulator {
         arguments.add("-e");
         arguments.add("-o");
         arguments.add(toFile(htmlReport).getAbsolutePath());
+        updateVariables(arguments, context);
         jmeterLog = getSessionWorkspace().resolve("jmeter.log");
         setLog(jmeterLog);
+    }
+
+    private void updateVariables(List<String> arguments, SimulationContext context) {
+        for (Attribute attribute : context.getAttributes()) {
+            String name = StringUtils.toIdentifier(attribute.getName()).toUpperCase();
+            String value = ObjectUtils.toString(attribute.getValue());
+            arguments.add("-J" + name + "=" + value);
+        }
     }
 
     @Override

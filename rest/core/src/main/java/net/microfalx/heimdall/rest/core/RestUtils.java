@@ -95,8 +95,9 @@ public class RestUtils {
      * @return the score
      */
     public static float getApdexScore(Scenario scenario, Collection<Value> values) {
-        requireNotEmpty(scenario);
-        requireNotEmpty(values);
+        requireNonNull(scenario);
+        requireNonNull(values);
+        if (values.isEmpty()) return 1;
         long toleratingThreshold = scenario.getToleratingThreshold().toMillis();
         long frustratingThreshold = scenario.getFrustratingThreshold().toMillis();
         float numberOfSatisfiedUsers = 0;

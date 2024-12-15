@@ -85,7 +85,9 @@ public abstract class AbstractScheduleController<T extends AbstractSchedule> ext
     @Override
     protected void afterPersist(net.microfalx.bootstrap.dataset.DataSet<T, Field<T>, Integer> dataSet, T model, State state) {
         super.afterPersist(dataSet, model, state);
-        executor.execute(restService::reload);
+        restService.reload();
+        Schedule schedule = restService.getSchedule(Integer.toString(model.getId()));
+        executor.execute(() -> restService.reload(schedule));
     }
 
     private Trigger createTrigger(T model, JsonFormResponse<?> response) {

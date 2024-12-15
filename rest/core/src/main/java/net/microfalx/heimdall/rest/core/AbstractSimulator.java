@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import net.microfalx.bootstrap.core.utils.SecretUtils;
 import net.microfalx.bootstrap.model.Attribute;
 import net.microfalx.heimdall.infrastructure.api.Environment;
 import net.microfalx.heimdall.rest.api.*;
@@ -378,7 +379,11 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
     protected final void log(String format, Object... args) {
         requireNotEmpty(format);
         if (!logger.isEmpty()) logger.append('\n');
-        logger.append(MessageFormat.format(format, args));
+        if (ObjectUtils.isEmpty(args)) {
+            logger.append(format);
+        } else {
+            logger.append(MessageFormat.format(format, args));
+        }
     }
 
     /**
@@ -513,7 +518,7 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
         exportEnvironmentVariables(processBuilder, context);
         running = true;
         try {
-            log("Execute simulator, command like:\n  " + String.join(SPACE, arguments));
+            log("Execute simulator, command like:\n  " + String.join(SPACE, hideSecrets(arguments)));
             try {
                 process = processBuilder.start();
             } catch (IOException e) {
@@ -548,9 +553,15 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
     }
 
     private void exportEnvironmentVariables(ProcessBuilder processBuilder, SimulationContext context) {
-        for (Attribute attribute : context.getAttributes()) {
+        log("Variables");
+        List<? extends Attribute> attributes = new ArrayList<>(context.getAttributes().toCollection());
+        attributes.sort(Comparator.comparing(Nameable::getName));
+        for (Attribute attribute : attributes) {
             String name = StringUtils.toIdentifier(attribute.getName()).toUpperCase();
-            processBuilder.environment().put(name, ObjectUtils.toString(attribute.getValue()));
+            String value = ObjectUtils.toString(attribute.getValue());
+            String displayValue = SecretUtils.isSecret(name) ? SecretUtils.maskSecret(value) : value;
+            log(" - " + name + " = '" + displayValue + "'");
+            processBuilder.environment().put(name, value);
         }
     }
 
@@ -613,6 +624,14 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
         }
         INSTALLED.add(getSimulatorId());
         return true;
+    }
+
+    private List<String> hideSecrets(List<String> args) {
+        List<String> newArgs = new ArrayList<>();
+        for (String arg : newArgs) {
+            newArgs.add(arg);
+        }
+        return newArgs;
     }
 
     private void cleanupWorkspace() {
