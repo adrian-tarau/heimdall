@@ -33,7 +33,7 @@ public class K6OutputParser extends AbstractOutputParser {
     protected void process(CSVRecord record) {
         String scenario = defaultIfEmpty(record.get("scenario"), "default");
         Metric metric = getMetric(record.get("metric_name"));
-        int responseCode = getHttpStatusCode(record.get("code"));
+        int responseCode = getHttpStatusCode(record.get("status"));
         long timestamp = parseLong(record.get("timestamp"));
         Value value = Value.create(timestamp, parseDouble(record.get("metric_value")));
         if (Metrics.VUS.equals(metric)) {

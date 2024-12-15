@@ -161,11 +161,11 @@ public abstract class AbstractOutputParser {
     /**
      * Returns the HTTP error code base in a value received in the data.
      * <p>
-     * If the value is empty it is considered a success.
-     * If the value  cannot be parsed to an integer, it is considered a failure
+     * If the value is empty, it is considered a success.
+     * If the value cannot be parsed to an integer, it is considered a failure
      *
      * @param value the HTTP code as a string
-     * @return
+     * @return the HTTP code
      */
     protected int getHttpStatusCode(String value) {
         if (StringUtils.isEmpty(value)) value = "200";

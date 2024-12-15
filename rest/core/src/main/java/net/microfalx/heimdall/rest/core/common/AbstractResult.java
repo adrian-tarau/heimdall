@@ -140,19 +140,19 @@ public abstract class AbstractResult extends IdentityAware<Long> {
     @Column(name = "http_request_failed", nullable = false)
     @Description("The rate of failed requests")
     @Position(75)
-    private float httpRequestFailed;
+    private Float httpRequestFailed;
 
     @Label(group = "Failures", value = "4xx")
     @Column(name = "http_request_failed_4xx", nullable = false)
     @Description("The rate of failed requests with errors in 4XX range")
     @Position(76)
-    private float httpRequestFailed4XX;
+    private Float httpRequestFailed4XX;
 
     @Label(group = "Failures", value = "5xx")
     @Column(name = "http_request_failed_5xx", nullable = false)
     @Description("The rate of failed requests with errors in 5XX range")
     @Position(77)
-    private float httpRequestFailed5XX;
+    private Float httpRequestFailed5XX;
 
     @Column(name = "http_request_receiving")
     @Description("The time spent receiving response data from the remote host")
@@ -184,7 +184,7 @@ public abstract class AbstractResult extends IdentityAware<Long> {
     @Visible(false)
     private Float httpRequests;
 
-    @Label(group = "Actions", value = "Logs")
+    @Label(value = "Logs")
     @Column(name = "logs_uri", length = 500)
     @Description("The log of the simulation")
     @Align(Align.Type.CENTER)
@@ -193,7 +193,7 @@ public abstract class AbstractResult extends IdentityAware<Long> {
     @Sortable
     private String logsURI;
 
-    @Label(group = "Actions", value = "Report")
+    @Label(value = "Report")
     @Column(name = "report_uri", length = 500)
     @Description("The (HTML) report of the simulation")
     @Align(Align.Type.CENTER)
@@ -202,7 +202,7 @@ public abstract class AbstractResult extends IdentityAware<Long> {
     @Sortable
     private String reportURI;
 
-    @Label(group = "Actions", value = "Data")
+    @Label(value = "Data")
     @Column(name = "data_uri", length = 500)
     @Description("The data produced by the simulation (CSV)")
     @Align(Align.Type.CENTER)
