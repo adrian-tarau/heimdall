@@ -84,20 +84,20 @@ public abstract class AbstractLibraryController<T extends AbstractLibrary> exten
         return new CodeEditor<Integer>(contentService, resource, this).getEditorDialog(id, model);
     }
 
-    @GetMapping("/history/{id}")
-    public String history(@PathVariable("id") int id, Model model) throws IOException {
-        T library = getLibrary(id);
-        model.addAttribute("library", library);
-        model.addAttribute("items", extractHistory(library));
-        return "rest/view_simulation_or_library_history::#history-modal";
-    }
-
     @PostMapping("/design/{id}")
     @ResponseBody()
     public JsonResponse<?> design(@PathVariable("id") int id, @RequestBody String content, Model model) throws IOException {
         Resource resource = register(Resource.text(content));
         save(id, resource);
         return JsonResponse.success();
+    }
+
+    @GetMapping("/view/history/{id}")
+    public String history(@PathVariable("id") int id, Model model) throws IOException {
+        T library = getLibrary(id);
+        model.addAttribute("library", library);
+        model.addAttribute("items", extractHistory(library));
+        return "rest/view_simulation_or_library_history::#history-modal";
     }
 
     @Override

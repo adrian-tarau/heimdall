@@ -28,7 +28,7 @@
                         <td th:text="${#formats.formatBytes(#resources.resolve(item.resource))}" />
                         <td th:text="${item.modifiedBy}" />
                         <td>
-                            <a class="icon-link" href="#" th:attr="onclick=|Application.action('rest.library.history', '${item.id}')|" component:tooltip-text="View the content of this version"><i class="fa-solid fa-eye"></i></a>
+                            <a class="icon-link" href="#" th:attr="onclick=|Application.action('rest.library.history.view', '${item.id}')|" component:tooltip-text="View the content of this version"><i class="fa-solid fa-eye"></i></a>
                             <a class="icon-link" href="#" th:attr="onclick=|Application.action('rest.library.history.revert', '${item.id}')|" component:tooltip-text="Restore the content of this version"><i class="fa-solid fa-arrow-rotate-left"></i></a>
                         </td>
                     </tr>

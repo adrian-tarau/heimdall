@@ -5,8 +5,20 @@ Application.bind("rest.project.sync", function () {
 });
 
 Application.bind("rest.library.history", function () {
-    DataSet.get("history/" +  DataSet.getId(), {}, function (data) {
+    DataSet.get("view/history/" +  DataSet.getId(), {}, function (data) {
         Application.loadModal("history-modal", data);
+    });
+});
+
+Application.bind("rest.library.history.view", function () {
+    DataSet.get("history/view/" +  DataSet.getId(), {}, function (data) {
+        CodeEditor.loadModal("design/" + DataSet.getId());
+    });
+});
+
+Application.bind("rest.library.history.revert", function () {
+    DataSet.get("history/revert/" +  DataSet.getId(), {}, function (data) {
+        Application.showInfoAlert("Restore", data.message);
     });
 });
 
