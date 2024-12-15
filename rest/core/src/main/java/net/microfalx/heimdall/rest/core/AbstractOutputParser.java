@@ -7,6 +7,7 @@ import net.microfalx.bootstrap.metrics.Vector;
 import net.microfalx.heimdall.rest.api.*;
 import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.Nameable;
+import net.microfalx.lang.StringUtils;
 import net.microfalx.resource.Resource;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
@@ -157,6 +158,24 @@ public abstract class AbstractOutputParser {
         // empty by default
     }
 
+    /**
+     * Returns the HTTP error code base in a value received in the data.
+     * <p>
+     * If the value is empty it is considered a success.
+     * If the value  cannot be parsed to an integer, it is considered a failure
+     *
+     * @param value the HTTP code as a string
+     * @return
+     */
+    protected int getHttpStatusCode(String value) {
+        if (StringUtils.isEmpty(value)) value = "200";
+        try {
+            int responseCode = Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return 500;
+        }
+    }
+
     protected final void convertTimeSeriesToOutputs() {
         for (String scenario : getScenarios()) {
             SimulationOutput output = getOutput(scenario);
@@ -175,6 +194,8 @@ public abstract class AbstractOutputParser {
             output.setHttpRequestConnecting(getTimeSeries(scenario, Metrics.HTTP_REQ_CONNECTING).getMatrix());
             output.setHttpRequestDuration(getTimeSeries(scenario, Metrics.HTTP_REQ_DURATION).getMatrix());
             output.setHttpRequestFailed(getTimeSeries(scenario, Metrics.HTTP_REQ_FAILED).getVector(false));
+            output.setHttpRequestFailed4XX(getTimeSeries(scenario, Metrics.HTTP_REQ_FAILED_4XX).getVector(false));
+            output.setHttpRequestFailed5XX(getTimeSeries(scenario, Metrics.HTTP_REQ_FAILED_5XX).getVector(false));
             output.setHttpRequestSending(getTimeSeries(scenario, Metrics.HTTP_REQ_SENDING).getMatrix());
             output.setHttpRequestTlsHandshaking(getTimeSeries(scenario, Metrics.HTTP_REQ_TLS_HANDSHAKING).getMatrix());
             output.setHttpRequestWaiting(getTimeSeries(scenario, Metrics.HTTP_REQ_WAITING).getMatrix());

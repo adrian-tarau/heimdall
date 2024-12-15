@@ -149,6 +149,8 @@ class RestSimulationScheduler extends ApplicationContextSupport {
         restOutput.setHttpRequestTlsHandshaking((float) output.getHttpRequestTlsHandshaking().getAverage().orElse(0));
         restOutput.setHttpRequestSending((float) output.getHttpRequestSending().getAverage().orElse(0));
         restOutput.setHttpRequestFailed(output.getHttpRequestFailed().getValue().asFloat());
+        restOutput.setHttpRequestFailed4XX(output.getHttpRequestFailed4XX().getValue().asFloat());
+        restOutput.setHttpRequestFailed5XX(output.getHttpRequestFailed5XX().getValue().asFloat());
         restOutput.setHttpRequestReceiving((float) output.getHttpRequestReceiving().getAverage().orElse(0));
         restOutput.setHttpRequestConnecting((float) output.getHttpRequestConnecting().getAverage().orElse(0));
         restOutput.setHttpRequestDuration((float) output.getHttpRequestDuration().getAverage().orElse(0));
@@ -190,7 +192,9 @@ class RestSimulationScheduler extends ApplicationContextSupport {
             restResult.setDataReceived(extractMetricFromVector(result, output -> output.getDataReceived().getValue(), Aggregation.Type.SUM));
 
             restResult.setHttpRequestSending(extractMetricFromMatrix(result, output -> output.getHttpRequestSending().getAverage()));
-            restResult.setHttpRequestFailed(extractMetricFromVector(result, output -> output.getHttpRequestFailed().getValue()));
+            restResult.setHttpRequestFailed(extractMetricFromVector(result, output -> output.getHttpRequestFailed().getValue(), Aggregation.Type.SUM));
+            restResult.setHttpRequestFailed4XX(extractMetricFromVector(result,output -> output.getHttpRequestFailed4XX().getValue(), Aggregation.Type.SUM));
+            restResult.setHttpRequestFailed5XX(extractMetricFromVector(result,output -> output.getHttpRequestFailed5XX().getValue(), Aggregation.Type.SUM));
             restResult.setHttpRequestDuration(extractMetricFromMatrix(result, output -> output.getHttpRequestDuration().getAverage()));
             restResult.setHttpRequestTlsHandshaking(extractMetricFromMatrix(result, output -> output.getHttpRequestTlsHandshaking().getAverage()));
             restResult.setHttpRequestReceiving(extractMetricFromMatrix(result, output -> output.getHttpRequestReceiving().getAverage()));

@@ -130,11 +130,23 @@ public class RestOutput extends IdentityAware<Integer> {
     @Visible(false)
     private float httpRequestDuration;
 
+    @Label(group = "Failures", value = "Total")
     @Column(name = "http_request_failed", nullable = false)
     @Description("The rate of failed requests")
     @Position(75)
-    @Visible(false)
     private float httpRequestFailed;
+
+    @Label(group = "Failures", value = "4xx")
+    @Column(name = "http_request_failed_4xx", nullable = false)
+    @Description("The rate of failed requests with errors in 4XX range")
+    @Position(76)
+    private float httpRequestFailed4XX;
+
+    @Label(group = "Failures", value = "5xx")
+    @Column(name = "http_request_failed_5xx", nullable = false)
+    @Description("The rate of failed requests with errors in 5XX range")
+    @Position(77)
+    private float httpRequestFailed5XX;
 
     @Column(name = "http_request_receiving", nullable = false)
     @Description("The time spent receiving response data from the remote host")
