@@ -512,13 +512,12 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
         arguments.add(executable.getAbsolutePath());
         update(arguments, toFile(input), toFile(output), context);
         ProcessBuilder processBuilder = new ProcessBuilder(arguments).directory(toFile(getSessionWorkspace()))
-                .redirectError(toFile(systemError))
-                .redirectOutput(toFile(systemOutput));
+                .redirectError(toFile(systemError)).redirectOutput(toFile(systemOutput));
         update(processBuilder, context);
         exportEnvironmentVariables(processBuilder, context);
         running = true;
         try {
-            log("Execute simulator, command like:\n  " + String.join(SPACE, hideSecrets(arguments)));
+            log("Execute simulator, command line: " + String.join(SPACE, hideSecrets(arguments)));
             try {
                 process = processBuilder.start();
             } catch (IOException e) {
@@ -628,7 +627,23 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
 
     private List<String> hideSecrets(List<String> args) {
         List<String> newArgs = new ArrayList<>();
-        for (String arg : newArgs) {
+        String previousOption = EMPTY_STRING;
+        for (String arg : args) {
+            boolean argument = arg.startsWith("-") || arg.startsWith("--");
+            boolean argumentWithValue = arg.indexOf('=') != -1;
+            if (argumentWithValue) {
+                String[] parts = StringUtils.split(arg, "=");
+                if (parts.length > 1) {
+                    String possibleSecret = parts[1];
+                    if (SecretUtils.isSecret(possibleSecret)) {
+                        parts[1] = SecretUtils.maskSecret(possibleSecret);
+                    }
+                    arg = String.join("=", parts);
+                }
+            } else if (SecretUtils.isSecret(previousOption)) {
+                arg = SecretUtils.maskSecret(arg);
+            }
+            if (argument) previousOption = arg;
             newArgs.add(arg);
         }
         return newArgs;
