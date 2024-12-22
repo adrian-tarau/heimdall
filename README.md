@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Heimdall is a tool created for developers to monitor and test services, allowing them to validate and troubleshoot performance issues. It provides simulated services that applications can use to replicate real interactions with remote services. Furthermore, it monitors the infrastructure while conducting load tests on these services
+Heimdall is a tool created for developers to monitor and test services, allowing them to validate and troubleshoot performance issues. It provides simulated services that applications can use to replicate real interactions with remote services. Furthermore, it monitors the infrastructure while conducting load tests on these services.
 
 The following services are faked and available to be used:
 * SMTP (Simple Mail Transfer Protocol)

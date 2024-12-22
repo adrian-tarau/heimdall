@@ -1,10 +1,16 @@
-version: "3.5"
-
 services:
   heimdell:
     image: heimdall:latest
     ports:
-      - 8080:8080
+      - 9800:8080
+      - 9805:2525
+      - 9806:2526
+      - 9807:2161/udp
+      - 9808:2162
+      - 9809:2514/udp
+      - 9810:2601
+      - 9811:12201/udp
+      - 9812:12200
     volumes:
       - heimdall-data:/data
     depends_on:
