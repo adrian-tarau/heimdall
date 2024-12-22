@@ -1,6 +1,6 @@
 services:
-  heimdell:
-    image: heimdall:latest
+  heimdall:
+    image: adriantarau/heimdall:latest
     ports:
       - 9800:8080
       - 9805:2525
@@ -14,7 +14,8 @@ services:
     volumes:
       - heimdall-data:/data
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     environment:
       HEIMDALL_DATABASE_HOST: mysql
       HEIMDALL_DATABASE_NAME: heimdall
@@ -34,6 +35,10 @@ services:
       MYSQL_DATABASE: heimdall
       MYSQL_USER: heimdall
       MYSQL_PASSWORD: 7Ry4j2Y5j1Of
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost","-u","${MYSQL_USER}","-p","${MYSQL_PASSWORD}" ]
+      timeout: 20s
+      retries: 10
 
 volumes:
   mysql-data:
