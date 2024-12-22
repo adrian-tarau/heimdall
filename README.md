@@ -2,22 +2,28 @@
 
 ## Introduction
 
-A monitoring/testing tool for developers, used to validate or troubleshoot services. The tool provides fake services which are used by applications to mimic a real interaction with a remote service.
-
-However, all services provided by _Heimdall_ will be partially or completely faked. For example, the _SMPT_ server will act like a real SMTP server, but it will not forward the email to real accounts - it will accept an email, store it, make it available for introspection but it will not be forwarded to users.
+Heimdall is a tool created for developers to monitor and test services, allowing them to validate and troubleshoot performance issues. It provides simulated services that applications can use to replicate real interactions with remote services. Furthermore, it monitors the infrastructure while conducting load tests on these services
 
 The following services are faked and available to be used:
-
 * SMTP (Simple Mail Transfer Protocol)
 * SNMP (Simple Network Management Protocol)
 * Syslog (Standard for Message Logging)
 * GELF (Graylog Extended Logging Format)
 
+For testing the performance of services, Heimdall integrates the following load testing tools:
+* [Apache JMeter](https://jmeter.apache.org/)
+* [Grafana K6](https://k6.io/)
+* [Gatling](https://github.com/gatling/gatling)
+
+Heimdall utilizes these tools' reporting capabilities for individual simulations, but it also integrates the results from these simulations to provide trends and reporting capabilities that surpass their individual functionalities.
+
+This project uses Apache Lucene as a search engine. All communication over supported protocols is indexed and can be searched using a full-text search engine, making it easy to find any events or messages passed to Heimdall.
+
 ## Getting Started
 
 ## Build & Run
 
-The project requires Java 17 to develop and run and uses Spring Boot 3.X. The latest version can be downloaded from https://adoptium.net/
+The project requires Java 21 to develop and run and uses Spring Boot 3.X. The latest version can be downloaded from https://adoptium.net/
 
 Once it is installed, check the version from the shell:
 
@@ -28,14 +34,14 @@ java --version
 The output must show a text similar to the one bellow (maybe a newer version is acceptable):
 
 ```
-openjdk 17.0.6 2023-01-17
-OpenJDK Runtime Environment Temurin-17.0.6+10 (build 17.0.6+10)
-OpenJDK 64-Bit Server VM Temurin-17.0.6+10 (build 17.0.6+10, mixed mode, sharing)
+openjdk version "21.0.5" 2024-10-15 LTS
+OpenJDK Runtime Environment Temurin-21.0.5+11 (build 21.0.5+11-LTS)
+OpenJDK 64-Bit Server VM Temurin-21.0.5+11 (build 21.0.5+11-LTS, mixed mode, sharing)
 ```
 
 ### IDE
 
-Load the project in any IDE which support Apache Maven (Eclipse, IntelliJ, VS Code). There is a main class called
+Load the project in any IDE that supports Apache Maven (Eclipse, IntelliJ, VS Code). The main class is called
 `HeimdallApplication`, just run it, and it will start the Spring Boot. Access the application at http://localhost:8080
 
 ### Shell
@@ -50,9 +56,9 @@ Apache Maven is used to build the project.
 
 `mvn clean test` can be used to compile and run tests only.
 
-## Users
+## Running
 
-There is a default administrator (called `admin`, with password `9uYI4IE583Eb`) which can be used to access the application over the web.
+Heimdall uses automatic database migration. During the initial startup, it will provision all required database tables. All default passwords (database user, application administrator, etc) should be changed for production environments.
 
 ## Database
 
@@ -66,18 +72,16 @@ GRANT ALL ON heimdall.* TO 'heimdall'@'%';
 GRANT SELECT ON mysql.* TO heimdall;
 FLUSH PRIVILEGES; 
 ```
+## Users
 
-## Search Engine
-
-This project uses Apache Lucene as a search engine. 
+There is a default administrator (called `admin`, password `WhfAeDkf8857`) which can be used to access the application over the web.
 
 ## Configuration
 
-Under `application.properties` the database name or the database user/password can be changed.
+Most important settings can be changed using environment variables. See [application.properties](web/src/main/resources/application.properties) for available environment variables.
 
 ## Container
 
-The project is available in [Docker Hub](https://hub.docker.com/repository/docker/adriantarau/heimdall). Heimdall relies on MySQL as a required dependency and an optional 
-S3 object store to store data collected from services.
+The project is available in [Docker Hub](https://hub.docker.com/repository/docker/adriantarau/heimdall). Heimdall relies on MySQL as a required dependency and an optional S3 object store to store data collected from services.
 
-Read [docker](docs/docker.md) document to learn how to deploy Heimdall in Docker.
+Read [docker](docs/docker.md) document to learn how to deploy Heimdall with Docker.

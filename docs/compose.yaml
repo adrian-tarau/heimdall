@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   heimdell:
-    image: heimdall:1.0.0-SNAPSHOT
+    image: heimdall:latest
     ports:
       - 8080:8080
     volumes:
