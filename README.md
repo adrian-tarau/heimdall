@@ -4,11 +4,20 @@
 
 Heimdall is a tool created for developers to monitor and test services, allowing them to validate and troubleshoot performance issues. It provides simulated services that applications can use to replicate real interactions with remote services. Furthermore, it monitors the infrastructure while conducting load tests on these services.
 
-The following services are faked and available to be used:
+### Protocols
+
+The following protocols/services are faked and available to be used:
 * SMTP (Simple Mail Transfer Protocol)
 * SNMP (Simple Network Management Protocol)
 * Syslog (Standard for Message Logging)
 * GELF (Graylog Extended Logging Format)
+
+### Events
+
+Heimdall integrates with Apache Kafka and Pulsar brokers. Events can be pulled from topics, viewed and searched.
+
+
+### Load Testing
 
 For testing the performance of services, Heimdall integrates the following load testing tools:
 * [Apache JMeter](https://jmeter.apache.org/)
@@ -16,6 +25,8 @@ For testing the performance of services, Heimdall integrates the following load 
 * [Gatling](https://github.com/gatling/gatling)
 
 Heimdall utilizes these tools' reporting capabilities for individual simulations, but it also integrates the results from these simulations to provide trends and reporting capabilities that surpass their individual functionalities.
+
+### Searching
 
 This project uses Apache Lucene as a search engine. All communication over supported protocols is indexed and can be searched using a full-text search engine, making it easy to find any events or messages passed to Heimdall.
 
