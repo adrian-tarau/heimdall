@@ -16,6 +16,8 @@ The protocols are mapped to the following ports:
 * `9811`: GELF over UDP
 * `9812`: GELF over TCP 
 
+The environment variable `HEIMDALL_PROTOCOL_SIMULATOR_ENABLED` can be set to `true` to enable simulators for protocols.
+
 Run the following command to start up Heimdall:
 
 ```bash
