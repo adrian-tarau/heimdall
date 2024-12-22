@@ -20,7 +20,7 @@ services:
       HEIMDALL_DATABASE_HOST: mysql
       HEIMDALL_DATABASE_NAME: heimdall
       HEIMDALL_DATABASE_USERNAME: heimdall
-      HEIMDALL_DATABASE_PASSWORD: 7Ry4j2Y5j1Of
+      HEIMDALL_DATABASE_PASSWORD: hD0IzwPtPD3353wj1ADq
       HEIMDALL_PROTOCOL_SIMULATOR_ENABLED: false
       HEIMDALL_RESOURCE_DIRECTORY: /data
 
@@ -34,10 +34,11 @@ services:
       MYSQL_RANDOM_ROOT_PASSWORD: yes
       MYSQL_DATABASE: heimdall
       MYSQL_USER: heimdall
-      MYSQL_PASSWORD: 7Ry4j2Y5j1Of
+      MYSQL_PASSWORD: hD0IzwPtPD3353wj1ADq
     healthcheck:
-      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost","-u","${MYSQL_USER}","-p","${MYSQL_PASSWORD}" ]
-      timeout: 20s
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost", "-u", "$${MYSQL_USER}", "-p$${MYSQL_PASSWORD}" ]
+      interval: 5s
+      timeout: 5s
       retries: 10
 
 volumes:
