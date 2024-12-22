@@ -39,7 +39,7 @@ services:
       test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost", "-u", "$${MYSQL_USER}", "-p$${MYSQL_PASSWORD}" ]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 30
 
 volumes:
   mysql-data:
