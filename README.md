@@ -22,7 +22,7 @@ Heimdall integrates with Apache Kafka and Pulsar brokers. Events can be pulled f
 For testing the performance of services, Heimdall integrates the following load testing tools:
 * [Apache JMeter](https://jmeter.apache.org/)
 * [Grafana K6](https://k6.io/)
-* [Gatling](https://github.com/gatling/gatling)
+* [Gatling](https://gatling.io/) (Pending)
 
 Heimdall utilizes these tools' reporting capabilities for individual simulations, but it also integrates the results from these simulations to provide trends and reporting capabilities that surpass their individual functionalities.
 
