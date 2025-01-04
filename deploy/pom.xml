@@ -54,25 +54,26 @@
 
     <build>
         <plugins>
+
             <plugin>
-                <groupId>com.google.cloud.tools</groupId>
-                <artifactId>jib-maven-plugin</artifactId>
+                <groupId>net.microfalx.maven</groupId>
+                <artifactId>maven-plugin</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
                 <configuration>
-                    <container>
-                        <ports>
-                            <port>8080</port>
-                        </ports>
-                        <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
-                        <mainClass>net.microfalx.heimdall.web.HeimdallApplication</mainClass>
-                    </container>
-                    <from>
-                        <image>eclipse-temurin:21-jre-jammy</image>
-                    </from>
-                    <to>
-                        <image>heimdall:${project.version}</image>
-                    </to>
+                    <boot>true</boot>
+                    <image>heimdall</image>
+                    <mainClass>net.microfalx.heimdall.web.HeimdallApplication</mainClass>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>container</id>
+                        <goals>
+                            <goal>package</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
+            
         </plugins>
     </build>
 
