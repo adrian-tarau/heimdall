@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import net.microfalx.bootstrap.core.utils.SecretUtils;
 import net.microfalx.bootstrap.model.Attribute;
 import net.microfalx.heimdall.infrastructure.api.Environment;
 import net.microfalx.heimdall.rest.api.*;
