@@ -25,12 +25,12 @@
 
     <groupId>net.microfalx.heimdall</groupId>
     <artifactId>heimdall-broker-core</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>0.9.0-SNAPSHOT</version>
 
     <parent>
         <groupId>net.microfalx.heimdall</groupId>
         <artifactId>heimdall-broker</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>0.9.0-SNAPSHOT</version>
     </parent>
 
     <name>Heimdall - Broker - Core</name>

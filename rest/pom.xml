@@ -26,12 +26,12 @@
     <groupId>net.microfalx.heimdall</groupId>
     <artifactId>heimdall-rest</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>0.9.0-SNAPSHOT</version>
 
     <parent>
         <groupId>net.microfalx.heimdall</groupId>
 		<artifactId>heimdall</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>0.9.0-SNAPSHOT</version>
     </parent>
 
     <name>Heimdall - Rest</name>
