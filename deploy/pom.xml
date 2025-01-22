@@ -58,7 +58,7 @@
             <plugin>
                 <groupId>net.microfalx.maven</groupId>
                 <artifactId>maven-plugin</artifactId>
-                <version>0.8.0-SNAPSHOT</version>
+                <version>0.8.2-SNAPSHOT</version>
                 <configuration>
                     <boot>true</boot>
                     <image>heimdall</image>
