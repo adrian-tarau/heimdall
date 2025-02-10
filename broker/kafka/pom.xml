@@ -33,7 +33,7 @@
         <version>0.9.0-SNAPSHOT</version>
     </parent>
 
-    <name>Heimdall - Broker - Kafka</name>
+    <name>Heimdall :: Broker :: Kafka</name>
 
     <dependencies>
 

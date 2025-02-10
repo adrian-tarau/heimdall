@@ -33,7 +33,7 @@
         <version>0.9.0-SNAPSHOT</version>
     </parent>
 
-    <name>Heimdall - Infrastructure - Core</name>
+    <name>Heimdall :: Infrastructure :: Core</name>
 
     <dependencies>
 

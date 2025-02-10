@@ -33,7 +33,7 @@
         <version>0.9.0-SNAPSHOT</version>
     </parent>
 
-    <name>Heimdall - Database - Postgres</name>
+    <name>Heimdall :: Database :: Postgres</name>
 
     <dependencies>
 

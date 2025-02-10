@@ -33,7 +33,7 @@
         <version>0.9.0-SNAPSHOT</version>
     </parent>
 
-    <name>Heimdall - Rest - K6</name>
+    <name>Heimdall :: Rest :: K6</name>
 
     <dependencies>
 

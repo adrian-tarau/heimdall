@@ -33,7 +33,7 @@
         <version>0.9.0-SNAPSHOT</version>
     </parent>
 
-    <name>Heimdall - Broker - Pulsar</name>
+    <name>Heimdall :: Broker :: Pulsar</name>
 
     <dependencies>
 

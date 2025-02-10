@@ -33,7 +33,7 @@
         <version>0.9.0-SNAPSHOT</version>
     </parent>
 
-    <name>Heimdall - Rest - Gatling</name>
+    <name>Heimdall :: Rest :: Gatling</name>
 
     <dependencies>
 

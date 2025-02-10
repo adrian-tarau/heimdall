@@ -33,7 +33,7 @@
         <version>0.9.0-SNAPSHOT</version>
     </parent>
 
-    <name>Heimdall - Broker - RabbitMQ</name>
+    <name>Heimdall :: Broker :: RabbitMQ</name>
 
     <dependencies>
 

@@ -33,7 +33,7 @@
         <version>0.9.0-SNAPSHOT</version>
     </parent>
 
-    <name>Heimdall - Protocols - SMTP</name>
+    <name>Heimdall :: Protocols :: SMTP</name>
 
     <dependencies>
 

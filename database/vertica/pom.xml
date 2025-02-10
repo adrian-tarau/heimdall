@@ -33,7 +33,7 @@
         <version>0.9.0-SNAPSHOT</version>
     </parent>
 
-    <name>Heimdall - Database - Vertica</name>
+    <name>Heimdall :: Database :: Vertica</name>
 
     <dependencies>
 

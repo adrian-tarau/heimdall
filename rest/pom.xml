@@ -34,7 +34,7 @@
 		<version>0.9.0-SNAPSHOT</version>
     </parent>
 
-    <name>Heimdall - Rest</name>
+    <name>Heimdall :: Rest</name>
 
     <modules>
         <module>api</module>

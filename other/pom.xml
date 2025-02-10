@@ -34,7 +34,7 @@
 		<version>0.9.0-SNAPSHOT</version>
     </parent>
 
-    <name>Heimdall - Other</name>
+    <name>Heimdall :: Other</name>
 
     <modules>
         <module>core</module>
