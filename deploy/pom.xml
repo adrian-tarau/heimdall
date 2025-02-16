@@ -56,9 +56,9 @@
         <plugins>
 
             <plugin>
-                <groupId>net.microfalx.maven</groupId>
-                <artifactId>maven-plugin</artifactId>
-                <version>0.8.2-SNAPSHOT</version>
+                <groupId>net.microfalx.talos</groupId>
+                <artifactId>talos-maven-plugin</artifactId>
+                <version>0.8.3-SNAPSHOT</version>
                 <configuration>
                     <boot>true</boot>
                     <image>heimdall</image>
