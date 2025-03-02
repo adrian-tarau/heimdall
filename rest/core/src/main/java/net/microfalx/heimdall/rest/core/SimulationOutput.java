@@ -3,13 +3,13 @@ package net.microfalx.heimdall.rest.core;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import net.microfalx.bootstrap.metrics.Matrix;
-import net.microfalx.bootstrap.metrics.Vector;
 import net.microfalx.heimdall.infrastructure.api.Environment;
 import net.microfalx.heimdall.rest.api.Metrics;
 import net.microfalx.heimdall.rest.api.Output;
 import net.microfalx.heimdall.rest.api.Scenario;
 import net.microfalx.heimdall.rest.api.Simulation;
+import net.microfalx.metrics.Matrix;
+import net.microfalx.metrics.Vector;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

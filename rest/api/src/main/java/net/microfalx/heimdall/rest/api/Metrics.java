@@ -1,6 +1,6 @@
 package net.microfalx.heimdall.rest.api;
 
-import net.microfalx.bootstrap.metrics.Metric;
+import net.microfalx.metrics.Metric;
 
 /**
  * A collection of metrics returned by simulations.

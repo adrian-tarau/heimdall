@@ -3,13 +3,13 @@ package net.microfalx.heimdall.rest.core;
 import net.microfalx.bootstrap.content.Content;
 import net.microfalx.bootstrap.content.ContentLocator;
 import net.microfalx.bootstrap.content.ContentService;
-import net.microfalx.bootstrap.metrics.Value;
 import net.microfalx.heimdall.rest.api.Scenario;
 import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.lang.Hashing;
 import net.microfalx.lang.Nameable;
 import net.microfalx.lang.UriUtils;
 import net.microfalx.metrics.Metrics;
+import net.microfalx.metrics.Value;
 import net.microfalx.resource.MimeType;
 import net.microfalx.resource.Resource;
 

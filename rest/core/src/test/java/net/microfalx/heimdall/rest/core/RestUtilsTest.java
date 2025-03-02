@@ -1,8 +1,8 @@
 package net.microfalx.heimdall.rest.core;
 
-import net.microfalx.bootstrap.metrics.Value;
 import net.microfalx.heimdall.rest.api.Scenario;
 import net.microfalx.heimdall.rest.api.Simulation;
+import net.microfalx.metrics.Value;
 import net.microfalx.resource.MemoryResource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

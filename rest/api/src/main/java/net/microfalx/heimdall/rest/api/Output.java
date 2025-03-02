@@ -1,10 +1,10 @@
 package net.microfalx.heimdall.rest.api;
 
-import net.microfalx.bootstrap.metrics.Matrix;
-import net.microfalx.bootstrap.metrics.Vector;
 import net.microfalx.heimdall.infrastructure.api.Environment;
 import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.Nameable;
+import net.microfalx.metrics.Matrix;
+import net.microfalx.metrics.Vector;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

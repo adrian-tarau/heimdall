@@ -1,8 +1,8 @@
 package net.microfalx.heimdall.rest.core;
 
-import net.microfalx.bootstrap.metrics.Value;
-import net.microfalx.bootstrap.metrics.Vector;
 import net.microfalx.heimdall.rest.api.*;
+import net.microfalx.metrics.Value;
+import net.microfalx.metrics.Vector;
 import net.microfalx.resource.Resource;
 
 import java.io.File;

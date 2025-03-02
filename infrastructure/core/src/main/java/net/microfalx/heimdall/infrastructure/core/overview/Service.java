@@ -5,8 +5,6 @@ import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.dataset.annotation.OrderBy;
-import net.microfalx.bootstrap.metrics.Series;
-import net.microfalx.bootstrap.metrics.Value;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.web.chart.Chart;
 import net.microfalx.bootstrap.web.chart.Type;
@@ -14,6 +12,8 @@ import net.microfalx.bootstrap.web.chart.annotation.Chartable;
 import net.microfalx.bootstrap.web.dataset.DataSetChartProvider;
 import net.microfalx.heimdall.infrastructure.api.Health;
 import net.microfalx.lang.annotation.*;
+import net.microfalx.metrics.Series;
+import net.microfalx.metrics.Value;
 
 import java.util.ArrayList;
 import java.util.List;

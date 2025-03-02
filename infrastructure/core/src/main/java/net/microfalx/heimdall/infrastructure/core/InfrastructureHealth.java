@@ -2,12 +2,12 @@ package net.microfalx.heimdall.infrastructure.core;
 
 import lombok.Getter;
 import lombok.ToString;
-import net.microfalx.bootstrap.metrics.Series;
-import net.microfalx.bootstrap.metrics.Value;
 import net.microfalx.heimdall.infrastructure.api.*;
 import net.microfalx.heimdall.infrastructure.core.util.HealthSummary;
 import net.microfalx.lang.TimeUtils;
 import net.microfalx.lang.Timestampable;
+import net.microfalx.metrics.Series;
+import net.microfalx.metrics.Value;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

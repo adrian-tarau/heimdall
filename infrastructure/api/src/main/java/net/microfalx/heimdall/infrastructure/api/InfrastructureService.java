@@ -1,6 +1,6 @@
 package net.microfalx.heimdall.infrastructure.api;
 
-import net.microfalx.bootstrap.metrics.Series;
+import net.microfalx.metrics.Series;
 
 import java.util.Collection;
 

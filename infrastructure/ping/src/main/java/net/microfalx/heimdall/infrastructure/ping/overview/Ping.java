@@ -7,7 +7,6 @@ import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.dataset.annotation.OrderBy;
 import net.microfalx.bootstrap.dataset.annotation.Renderable;
 import net.microfalx.bootstrap.dataset.model.NamedIdentityAware;
-import net.microfalx.bootstrap.metrics.Series;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.web.chart.Chart;
 import net.microfalx.bootstrap.web.chart.Function;
@@ -25,6 +24,7 @@ import net.microfalx.heimdall.infrastructure.ping.PingService;
 import net.microfalx.heimdall.infrastructure.ping.dataset.StatusAlertProvider;
 import net.microfalx.lang.EnumUtils;
 import net.microfalx.lang.annotation.*;
+import net.microfalx.metrics.Series;
 
 import java.time.Duration;
 import java.util.ArrayList;

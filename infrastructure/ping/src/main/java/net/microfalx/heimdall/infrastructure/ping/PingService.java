@@ -2,8 +2,8 @@ package net.microfalx.heimdall.infrastructure.ping;
 
 import net.microfalx.bootstrap.core.async.AsynchronousProperties;
 import net.microfalx.bootstrap.core.async.TaskExecutorFactory;
-import net.microfalx.bootstrap.metrics.Series;
 import net.microfalx.heimdall.infrastructure.api.*;
+import net.microfalx.metrics.Series;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;

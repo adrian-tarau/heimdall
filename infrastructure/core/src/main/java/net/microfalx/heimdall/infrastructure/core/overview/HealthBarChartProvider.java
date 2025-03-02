@@ -1,6 +1,5 @@
 package net.microfalx.heimdall.infrastructure.core.overview;
 
-import net.microfalx.bootstrap.metrics.Series;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.web.chart.Chart;
 import net.microfalx.bootstrap.web.chart.annotations.Annotations;
@@ -9,6 +8,7 @@ import net.microfalx.bootstrap.web.dataset.DataSetChartProvider;
 import net.microfalx.heimdall.infrastructure.api.Health;
 import net.microfalx.heimdall.infrastructure.api.InfrastructureService;
 import net.microfalx.lang.annotation.Asynchronous;
+import net.microfalx.metrics.Series;
 
 import static net.microfalx.heimdall.infrastructure.api.InfrastructureConstants.TREND_ZERO_FILL_COLOR;
 
