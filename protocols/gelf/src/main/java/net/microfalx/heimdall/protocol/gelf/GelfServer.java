@@ -68,7 +68,7 @@ public class GelfServer implements InitializingBean, ProtocolServerHandler {
     private void initializeTcpServer() {
         tcpServer = new TcpProtocolServer();
         tcpServer.setPort(configuration.getTcpPort());
-        tcpServer.setExecutor(gelfService.getTaskExecutor());
+        tcpServer.setThreadPool(gelfService.getThreadPool());
         tcpServer.setHandler(this);
         tcpServer.listen();
         LOGGER.info("Listen on " + tcpServer.getPort() + " over TCP");
@@ -77,7 +77,7 @@ public class GelfServer implements InitializingBean, ProtocolServerHandler {
     private void initializeUdpServer() {
         udpServer = new UdpProtocolServer();
         udpServer.setPort(configuration.getUdpPort());
-        udpServer.setExecutor(gelfService.getTaskExecutor());
+        udpServer.setThreadPool(gelfService.getThreadPool());
         udpServer.setHandler(this);
         udpServer.listen();
         LOGGER.info("Listen on " + tcpServer.getPort() + " over UDP");

@@ -6,9 +6,9 @@ import net.microfalx.heimdall.infrastructure.api.Server;
 import net.microfalx.heimdall.infrastructure.api.Service;
 import net.microfalx.heimdall.infrastructure.ping.system.Ping;
 import net.microfalx.lang.ExceptionUtils;
+import net.microfalx.threadpool.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.task.AsyncTaskExecutor;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,20 +29,20 @@ class PingScheduler implements Runnable {
     private final InfrastructureService infrastructureService;
     private final PingHealth health;
     private final PingPersistence pingPersistence;
-    private final AsyncTaskExecutor taskExecutor;
+    private final ThreadPool threadPool;
 
     private final Map<Integer, Long> lastScheduledTime = new ConcurrentHashMap<>();
     private final Map<Integer, AtomicBoolean> pingRunning = new ConcurrentHashMap<>();
 
     PingScheduler(PingCache cache, InfrastructureService infrastructureService,
-                  PingPersistence pingPersistence, PingHealth health, AsyncTaskExecutor taskExecutor) {
+                  PingPersistence pingPersistence, PingHealth health, ThreadPool threadPool) {
         requireNonNull(cache);
         requireNonNull(infrastructureService);
         requireNonNull(pingPersistence);
         requireNonNull(health);
-        requireNonNull(taskExecutor);
+        requireNonNull(threadPool);
         this.cache = cache;
-        this.taskExecutor = taskExecutor;
+        this.threadPool = threadPool;
         this.health = health;
         this.infrastructureService = infrastructureService;
         this.pingPersistence = pingPersistence;
@@ -75,7 +75,7 @@ class PingScheduler implements Runnable {
             Server server = infrastructureService.getServer(ping.getServer().getNaturalId());
             PingExecutor pingExecutor = new PingExecutor(ping, service, server, pingPersistence, infrastructureService, health);
             lastScheduledTime.put(ping.getId(), System.currentTimeMillis());
-            taskExecutor.execute(new PingRunnable(pingExecutor));
+            threadPool.execute(new PingRunnable(pingExecutor));
         }
     }
 

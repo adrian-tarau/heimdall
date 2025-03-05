@@ -1,14 +1,14 @@
 package net.microfalx.heimdall.infrastructure.ping;
 
 import net.microfalx.bootstrap.core.async.AsynchronousProperties;
-import net.microfalx.bootstrap.core.async.TaskExecutorFactory;
+import net.microfalx.bootstrap.core.async.ThreadPoolFactory;
 import net.microfalx.heimdall.infrastructure.api.*;
 import net.microfalx.metrics.Series;
+import net.microfalx.threadpool.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
@@ -46,7 +46,7 @@ public class PingService implements InitializingBean, InfrastructureListener {
     private PingHealth health;
 
     private PingScheduler scheduler;
-    private AsyncTaskExecutor taskExecutor;
+    private ThreadPool pingExecutor;
 
     public Collection<net.microfalx.heimdall.infrastructure.ping.system.Ping> getRegisterPings() {
         return unmodifiableCollection(cache.getPings());
@@ -147,24 +147,24 @@ public class PingService implements InitializingBean, InfrastructureListener {
         startScheduler();
     }
 
-    AsyncTaskExecutor getTaskExecutor() {
-        return taskExecutor;
+    ThreadPool getPingExecutor() {
+        return pingExecutor;
     }
 
     private void provisionPings() {
-        this.taskExecutor.submit(new PingProvisioning(this, infrastructureService));
+        this.pingExecutor.submit(new PingProvisioning(this, infrastructureService));
     }
 
     private void initializeExecutor() {
         AsynchronousProperties asynchronousProperties = new AsynchronousProperties();
-        asynchronousProperties.setSuffix("ping");
+        asynchronousProperties.setSuffix("Ping");
         asynchronousProperties.setCoreThreads(properties.getThreads());
-        this.taskExecutor = TaskExecutorFactory.create(asynchronousProperties).createExecutor();
-        LOGGER.info("Ping services with " + properties.getThreads() + " threads");
+        this.pingExecutor = ThreadPoolFactory.create(asynchronousProperties).create();
+        LOGGER.info("Ping services with {} threads", properties.getThreads());
     }
 
     private void initializeScheduler() {
-        scheduler = new PingScheduler(cache, infrastructureService, persistence, health, taskExecutor);
+        scheduler = new PingScheduler(cache, infrastructureService, persistence, health, pingExecutor);
     }
 
     private void startScheduler() {

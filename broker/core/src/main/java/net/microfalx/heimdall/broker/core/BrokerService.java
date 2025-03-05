@@ -4,7 +4,7 @@ import net.microfalx.bootstrap.broker.BrokerConsumer;
 import net.microfalx.bootstrap.broker.BrokerUtils;
 import net.microfalx.bootstrap.broker.Topic;
 import net.microfalx.bootstrap.content.ContentService;
-import net.microfalx.bootstrap.core.async.TaskExecutorFactory;
+import net.microfalx.bootstrap.core.async.ThreadPoolFactory;
 import net.microfalx.bootstrap.resource.ResourceService;
 import net.microfalx.bootstrap.search.IndexService;
 import net.microfalx.bootstrap.template.Template;
@@ -15,13 +15,11 @@ import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.TimeUtils;
 import net.microfalx.resource.FileResource;
 import net.microfalx.resource.Resource;
+import net.microfalx.threadpool.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.support.PeriodicTrigger;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -29,6 +27,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -89,9 +88,9 @@ public class BrokerService implements InitializingBean {
     private PlatformTransactionManager transactionManager;
 
     @Autowired
-    private TaskScheduler taskScheduler;
+    private ThreadPool threadPool;
 
-    private AsyncTaskExecutor executor;
+    private ThreadPool clientsThreadPool;
     private final Map<Integer, Lock> brokerLocks = new ConcurrentHashMap<>();
     private final Map<Integer, Lock> topicLocks = new ConcurrentHashMap<>();
 
@@ -204,7 +203,7 @@ public class BrokerService implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
         reload();
         initResources();
-        initializeExecutor();
+        initializeClientsThreadPool();
         scheduleTasks();
     }
 
@@ -224,7 +223,7 @@ public class BrokerService implements InitializingBean {
             LOGGER.error("Failed to register broker " + broker.getName(), e);
         }
         lastTopicCacheRefresh = TimeUtils.oneHourAgo();
-        if (executor != null) executor.submit(new SessionSchedulerTask());
+        if (clientsThreadPool != null) clientsThreadPool.submit(new SessionSchedulerTask());
     }
 
     public void reload() {
@@ -260,11 +259,11 @@ public class BrokerService implements InitializingBean {
     }
 
     private void scheduleTasks() {
-        taskScheduler.schedule(new SessionSchedulerTask(), new PeriodicTrigger(ofMinutes(1)));
+        threadPool.scheduleAtFixedRate(new SessionSchedulerTask(), Duration.ZERO, ofMinutes(1));
     }
 
-    private void initializeExecutor() {
-        executor = TaskExecutorFactory.create("broker").setRatio(2).createExecutor();
+    private void initializeClientsThreadPool() {
+        clientsThreadPool = ThreadPoolFactory.create("broker").setRatio(2).create();
     }
 
     private Resource getSharedResource() {
@@ -331,7 +330,7 @@ public class BrokerService implements InitializingBean {
                         contentService, indexService);
                 updateTemplates(topic, task);
                 updateAttributeFilters(topic, task);
-                executor.submit(task);
+                clientsThreadPool.submit(task);
             }
         }
     }

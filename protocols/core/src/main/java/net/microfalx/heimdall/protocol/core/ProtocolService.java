@@ -1,7 +1,7 @@
 package net.microfalx.heimdall.protocol.core;
 
 import inet.ipaddr.IPAddressString;
-import net.microfalx.bootstrap.core.async.TaskExecutorFactory;
+import net.microfalx.bootstrap.core.async.ThreadPoolFactory;
 import net.microfalx.bootstrap.model.Attributes;
 import net.microfalx.bootstrap.resource.ResourceService;
 import net.microfalx.bootstrap.search.Attribute;
@@ -17,20 +17,19 @@ import net.microfalx.resource.MimeType;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceFactory;
 import net.microfalx.resource.rocksdb.RocksDbResource;
+import net.microfalx.threadpool.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.retry.support.RetryTemplate;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.support.PeriodicTrigger;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -49,8 +48,7 @@ import java.util.function.Supplier;
 import static net.microfalx.bootstrap.search.Document.*;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
-import static net.microfalx.lang.StringUtils.NA_STRING;
-import static net.microfalx.lang.StringUtils.capitalizeWords;
+import static net.microfalx.lang.StringUtils.*;
 
 /**
  * Base class for all protocol services.
@@ -98,10 +96,7 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
     @Autowired
     private PlatformTransactionManager transactionManager;
 
-    @Autowired
-    private TaskScheduler taskScheduler;
-
-    private AsyncTaskExecutor taskExecutor;
+    private ThreadPool threadPool;
 
     private Resource partsResource;
     private final Map<LocalDate, AtomicInteger> resourceSequences = new ConcurrentHashMap<>();
@@ -158,23 +153,13 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
     }
 
     /**
-     * Returns the shared scheduler.
-     *
-     * @return a non-null instance
-     */
-    public final TaskScheduler getTaskScheduler() {
-        if (taskExecutor == null) initializeScheduler();
-        return taskScheduler;
-    }
-
-    /**
      * Returns the shared executor.
      *
      * @return a non-null instance
      */
-    public final AsyncTaskExecutor getTaskExecutor() {
-        if (taskExecutor == null) initializeExecutor();
-        return taskExecutor;
+    public final ThreadPool getThreadPool() {
+        if (threadPool == null) initializeThreadPool();
+        return threadPool;
     }
 
     /**
@@ -448,7 +433,7 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        initializeExecutor();
+        initializeThreadPool();
         initializeSimulator();
         initializeQueue();
         initResources();
@@ -456,14 +441,14 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
 
     private void initializeSimulator() {
         if (!simulatorProperties.isEnabled()) return;
-        LOGGER.info("Simulator is enabled, interval " + simulatorProperties.getInterval());
-        getTaskScheduler().schedule(new SimulatorWorker(), new PeriodicTrigger(simulatorProperties.getInterval()));
+        LOGGER.info("Simulator is enabled, interval {}", simulatorProperties.getInterval());
+        getThreadPool().scheduleAtFixedRate(new SimulatorWorker(), Duration.ZERO, simulatorProperties.getInterval());
     }
 
     private void initResources() {
         partsResource = resourceService.getShared("parts");
         if (partsResource.isLocal()) {
-            LOGGER.info("Protocol parts are stored in a RocksDB database: " + partsResource);
+            LOGGER.info("Protocol parts are stored in a RocksDB database: {}", partsResource);
             Resource dbPartsResource = RocksDbResource.create(partsResource);
             try {
                 dbPartsResource.create();
@@ -473,21 +458,20 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
             }
             ResourceFactory.registerSymlink("parts", dbPartsResource);
         } else {
-            LOGGER.info("Protocol parts are stored in a remote storage: " + partsResource);
+            LOGGER.info("Protocol parts are stored in a remote storage: {}", partsResource);
         }
     }
 
     private void initializeQueue() {
         queue = new ArrayBlockingQueue<>(properties.getBatchSize());
-        getTaskScheduler().schedule(new FlushWorker(), new PeriodicTrigger(properties.getBatchInterval()));
+        getThreadPool().scheduleAtFixedRate(new FlushWorker(), Duration.ZERO, properties.getBatchInterval());
     }
 
-    private void initializeExecutor() {
-        taskExecutor = TaskExecutorFactory.create(getEventType().name().toLowerCase()).setQueueCapacity(5000).createExecutor();
-    }
-
-    private void initializeScheduler() {
-        taskScheduler = TaskExecutorFactory.create(getEventType().name().toLowerCase()).createScheduler();
+    private void initializeThreadPool() {
+        if (threadPool == null) {
+            threadPool = ThreadPoolFactory.create(capitalizeFirst(getEventType().name()))
+                    .setQueueCapacity(5000).create();
+        }
     }
 
     private int getNextSequence() {

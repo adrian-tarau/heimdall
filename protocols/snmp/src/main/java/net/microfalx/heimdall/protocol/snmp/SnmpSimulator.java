@@ -44,7 +44,7 @@ public class SnmpSimulator extends ProtocolSimulator<SnmpEvent, SnmpClient> {
     @Override
     protected void initializeData() {
         if (getProperties().isUseSamples()) {
-            mibService.getTaskExecutor().execute(new LoadMibsWorker());
+            mibService.getThreadPool().execute(new LoadMibsWorker());
         } else {
             latch.countDown();
         }

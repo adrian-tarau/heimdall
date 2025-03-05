@@ -9,6 +9,7 @@ import net.microfalx.heimdall.protocol.snmp.mib.MibModule;
 import net.microfalx.heimdall.protocol.snmp.mib.MibService;
 import net.microfalx.heimdall.protocol.snmp.mib.MibVariable;
 import net.microfalx.lang.IOUtils;
+import net.microfalx.threadpool.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.*;
@@ -24,7 +25,6 @@ import org.snmp4j.util.MultiThreadedMessageDispatcher;
 import org.snmp4j.util.WorkerPool;
 import org.snmp4j.util.WorkerTask;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -128,7 +128,7 @@ public class SnmpServer implements CommandResponder {
         dispatcher.addMessageProcessingModel(new MPv2c());
         dispatcher.addMessageProcessingModel(new MPv3());
         SecurityProtocols.getInstance().addDefaultProtocols();
-        messageDispatcher = new MultiThreadedMessageDispatcher(new WorkerPoolImpl(snmpService.getTaskExecutor()), dispatcher);
+        messageDispatcher = new MultiThreadedMessageDispatcher(new WorkerPoolImpl(snmpService.getThreadPool()), dispatcher);
     }
 
     private void updateCommonAttributes(SnmpEvent event, PDU pdu) {
@@ -244,22 +244,22 @@ public class SnmpServer implements CommandResponder {
 
     static class WorkerPoolImpl implements WorkerPool {
 
-        private final TaskExecutor executor;
+        private final ThreadPool threadPool;
 
-        WorkerPoolImpl(TaskExecutor executor) {
+        WorkerPoolImpl(ThreadPool executor) {
             requireNonNull(executor);
-            this.executor = executor;
+            this.threadPool = executor;
         }
 
         @Override
         public void execute(WorkerTask task) {
-            executor.execute(task);
+            threadPool.execute(task);
         }
 
         @Override
         public boolean tryToExecute(WorkerTask task) {
             try {
-                executor.execute(task);
+                threadPool.execute(task);
                 return true;
             } catch (Exception e) {
                 return false;

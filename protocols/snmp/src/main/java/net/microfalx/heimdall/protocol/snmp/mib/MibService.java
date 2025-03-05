@@ -1,6 +1,6 @@
 package net.microfalx.heimdall.protocol.snmp.mib;
 
-import net.microfalx.bootstrap.core.async.TaskExecutorFactory;
+import net.microfalx.bootstrap.core.async.ThreadPoolFactory;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.model.Metadata;
 import net.microfalx.bootstrap.model.MetadataService;
@@ -12,12 +12,12 @@ import net.microfalx.heimdall.protocol.snmp.jpa.SnmpMibRepository;
 import net.microfalx.resource.ClassPathResource;
 import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.Resource;
+import net.microfalx.threadpool.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.smi.OID;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -62,7 +62,7 @@ public class MibService implements InitializingBean {
     private IndexService indexService;
 
     @Autowired(required = false)
-    private AsyncTaskExecutor taskExecutor;
+    private ThreadPool threadPool;
 
     private final CountDownLatch latch = new CountDownLatch(1);
     private static final Duration DEFAULT_WAIT = ofSeconds(60);
@@ -74,9 +74,9 @@ public class MibService implements InitializingBean {
      *
      * @return a non-null instance
      */
-    public AsyncTaskExecutor getTaskExecutor() {
-        if (taskExecutor == null) taskExecutor = TaskExecutorFactory.create("mib").createExecutor();
-        return taskExecutor;
+    public ThreadPool getThreadPool() {
+        if (threadPool == null) threadPool = ThreadPoolFactory.create("Mib").setRatio(0.5f).create();
+        return threadPool;
     }
 
     /**
@@ -121,7 +121,7 @@ public class MibService implements InitializingBean {
     public void updateModule(MibModule mibModule) {
         requireNotEmpty(mibModule);
         persistMib(mibModule);
-        taskExecutor.submit(this::loadModulesFromDatabaseAndResolve);
+        threadPool.submit(this::loadModulesFromDatabaseAndResolve);
     }
 
     /**
@@ -254,7 +254,7 @@ public class MibService implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         initWorkspace();
-        getTaskExecutor().execute(this::initializeMibs);
+        getThreadPool().execute(this::initializeMibs);
     }
 
     private void registerSystemMibs() {
@@ -462,7 +462,7 @@ public class MibService implements InitializingBean {
             }
         }
         this.holder = new MibHolder(newModules, newSymbols, newVariables, newModulesById, newSymbolsById, newVariablesById);
-        getTaskExecutor().submit(this::index);
+        getThreadPool().submit(this::index);
     }
 
     private void index() {

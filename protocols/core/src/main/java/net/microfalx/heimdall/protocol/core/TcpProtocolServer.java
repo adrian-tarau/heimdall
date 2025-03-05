@@ -30,7 +30,7 @@ public class TcpProtocolServer extends ProtocolServer {
         } else {
             serverSocket = new ServerSocket(getPort(), 50, InetAddress.getByName(getHostname()));
         }
-        getExecutor().execute(this::handleClient);
+        getThreadPool().execute(this::handleClient);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class TcpProtocolServer extends ProtocolServer {
         while (!serverSocket.isClosed()) {
             try {
                 Socket clientSocket = serverSocket.accept();
-                getExecutor().submit(new ClientWorker(clientSocket));
+                getThreadPool().submit(new ClientWorker(clientSocket));
             } catch (SocketException e) {
                 if (!serverSocket.isClosed()) {
                     LOGGER.error("Failed to process client connection", e);

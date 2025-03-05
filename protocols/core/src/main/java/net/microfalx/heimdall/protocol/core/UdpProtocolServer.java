@@ -34,7 +34,7 @@ public class UdpProtocolServer extends ProtocolServer {
         } else {
             serverSocket = new DatagramSocket(getPort(), InetAddress.getByName(getHostname()));
         }
-        getExecutor().execute(this::handleClient);
+        getThreadPool().execute(this::handleClient);
     }
 
     @Override
@@ -48,7 +48,7 @@ public class UdpProtocolServer extends ProtocolServer {
                 byte[] buffer = new byte[MAX_PACKET_SIZE];
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 serverSocket.receive(packet);
-                getExecutor().submit(new ClientWorker(packet));
+                getThreadPool().submit(new ClientWorker(packet));
             } catch (SocketException e) {
                 if (!serverSocket.isClosed()) {
                     LOGGER.error("Failed to process client connection", e);

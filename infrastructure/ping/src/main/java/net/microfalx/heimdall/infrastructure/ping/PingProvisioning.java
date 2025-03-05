@@ -37,7 +37,7 @@ class PingProvisioning implements Runnable {
     private void registerServers() {
         infrastructureService.getServers().forEach(server -> {
             registerServer(server);
-            pingService.getTaskExecutor().submit(() -> registerServices(server));
+            pingService.getPingExecutor().submit(() -> registerServices(server));
         });
     }
 

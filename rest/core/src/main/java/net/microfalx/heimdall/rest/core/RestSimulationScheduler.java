@@ -3,6 +3,7 @@ package net.microfalx.heimdall.rest.core;
 import lombok.extern.slf4j.Slf4j;
 import net.microfalx.bootstrap.core.async.AsynchronousProperties;
 import net.microfalx.bootstrap.core.async.TaskExecutorFactory;
+import net.microfalx.bootstrap.core.async.ThreadPoolFactory;
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
 import net.microfalx.heimdall.infrastructure.core.system.EnvironmentRepository;
 import net.microfalx.heimdall.rest.api.*;
@@ -13,7 +14,7 @@ import net.microfalx.metrics.Aggregation;
 import net.microfalx.metrics.Value;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceUtils;
-import org.springframework.core.task.AsyncTaskExecutor;
+import net.microfalx.threadpool.ThreadPool;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.scheduling.support.PeriodicTrigger;
@@ -40,7 +41,7 @@ class RestSimulationScheduler extends ApplicationContextSupport {
 
     private RestServiceImpl restService;
     private TaskScheduler scheduler;
-    private AsyncTaskExecutor executor;
+    private ThreadPool threadPool;
     private final Map<Schedule, ScheduledFuture<?>> schedules = new ConcurrentHashMap<>();
     private final Map<Schedule, Lock> locks = new ConcurrentHashMap<>();
 
@@ -97,13 +98,13 @@ class RestSimulationScheduler extends ApplicationContextSupport {
      */
     Future<Result> schedule(SimulationContext context) {
         requireNonNull(context);
-        return executor.submit(new SimulationTask(context, null, false));
+        return threadPool.submit(new SimulationTask(context, null, false));
     }
 
     private void createScheduler() {
         RestProperties properties = restService.getProperties();
         AsynchronousProperties schedulerProperties = properties.getScheduler();
-        if (executor == null) executor = TaskExecutorFactory.create(schedulerProperties).createExecutor();
+        if (threadPool == null) threadPool = ThreadPoolFactory.create(schedulerProperties).create();
         schedulerProperties.setCoreThreads(schedulerProperties.getCoreThreads() / 4);
         schedulerProperties.setSuffix(schedulerProperties.getSuffix() + "_scheduler");
         if (scheduler == null) scheduler = TaskExecutorFactory.create(schedulerProperties).createScheduler();
@@ -257,7 +258,7 @@ class RestSimulationScheduler extends ApplicationContextSupport {
         public void run() {
             SimulationContext context = restService.createContext(schedule.getEnvironment(), schedule.getSimulation());
             context.getAttributes().copyFrom(schedule.getAttributes(true));
-            executor.submit(new SimulationTask(context, schedule, true));
+            threadPool.submit(new SimulationTask(context, schedule, true));
         }
     }
 

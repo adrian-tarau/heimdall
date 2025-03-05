@@ -1,9 +1,9 @@
 package net.microfalx.heimdall.protocol.core;
 
-import net.microfalx.bootstrap.core.async.TaskExecutorFactory;
+import net.microfalx.bootstrap.core.async.ThreadPoolFactory;
+import net.microfalx.threadpool.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.task.AsyncTaskExecutor;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -25,7 +25,7 @@ public abstract class ProtocolServer {
     private String hostname;
     private int port;
     private ProtocolServerHandler handler;
-    private AsyncTaskExecutor executor;
+    private ThreadPool threadPool;
 
     /**
      * Returns the transport protocol used by this server.
@@ -112,19 +112,19 @@ public abstract class ProtocolServer {
      *
      * @return the executor, null if not set
      */
-    public AsyncTaskExecutor getExecutor() {
-        return executor;
+    public ThreadPool getThreadPool() {
+        return threadPool;
     }
 
     /**
      * Changes the executor used by this server.
      *
-     * @param executor the executor
+     * @param threadPool the executor
      * @return self
      */
-    public ProtocolServer setExecutor(AsyncTaskExecutor executor) {
-        requireNonNull(executor);
-        this.executor = executor;
+    public ProtocolServer setThreadPool(ThreadPool threadPool) {
+        requireNonNull(threadPool);
+        this.threadPool = threadPool;
         return this;
     }
 
@@ -185,9 +185,9 @@ public abstract class ProtocolServer {
     }
 
     private void initExecutor() {
-        if (this.executor != null) return;
+        if (this.threadPool != null) return;
         getLogger().info("Start internal thread pool");
-        this.executor = TaskExecutorFactory.create("protocol").createExecutor();
+        this.threadPool = ThreadPoolFactory.create("Protocol").create();
     }
 
     private String describeHostname() {

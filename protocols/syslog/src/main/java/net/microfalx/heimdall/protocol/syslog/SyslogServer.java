@@ -75,7 +75,7 @@ public class SyslogServer implements InitializingBean {
         config.setUseStructuredData(true);
         tcpServer = new TCPNetSyslogServer();
         tcpServer.initialize("TCP", config);
-        syslogService.getTaskExecutor().execute(tcpServer);
+        syslogService.getThreadPool().execute(tcpServer);
         LOGGER.info("Listen on " + config.getPort() + " for TCP");
     }
 
@@ -86,7 +86,7 @@ public class SyslogServer implements InitializingBean {
         config.setUseStructuredData(true);
         udpServer = new UDPNetSyslogServer();
         udpServer.initialize("UDP", config);
-        syslogService.getTaskExecutor().execute(udpServer);
+        syslogService.getThreadPool().execute(udpServer);
         LOGGER.info("Listen on " + config.getPort() + " for UDP");
     }
 
