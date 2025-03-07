@@ -263,7 +263,7 @@ public class BrokerService implements InitializingBean {
     }
 
     private void initializeClientsThreadPool() {
-        clientsThreadPool = ThreadPoolFactory.create("broker").setRatio(2).create();
+        clientsThreadPool = ThreadPoolFactory.create("Broker").setRatio(2).create();
     }
 
     private Resource getSharedResource() {

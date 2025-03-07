@@ -469,7 +469,7 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
 
     private void initializeThreadPool() {
         if (threadPool == null) {
-            threadPool = ThreadPoolFactory.create(capitalizeFirst(getEventType().name()))
+            threadPool = ThreadPoolFactory.create("Proto-"+capitalizeFirst(getEventType().name()))
                     .setQueueCapacity(5000).create();
         }
     }

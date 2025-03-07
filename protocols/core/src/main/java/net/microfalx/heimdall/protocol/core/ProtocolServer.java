@@ -187,7 +187,7 @@ public abstract class ProtocolServer {
     private void initExecutor() {
         if (this.threadPool != null) return;
         getLogger().info("Start internal thread pool");
-        this.threadPool = ThreadPoolFactory.create("Protocol").create();
+        this.threadPool = ThreadPoolFactory.create("Proto").create();
     }
 
     private String describeHostname() {
