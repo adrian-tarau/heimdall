@@ -2,7 +2,6 @@ package net.microfalx.heimdall.rest.core;
 
 import lombok.extern.slf4j.Slf4j;
 import net.microfalx.bootstrap.core.async.AsynchronousProperties;
-import net.microfalx.bootstrap.core.async.TaskExecutorFactory;
 import net.microfalx.bootstrap.core.async.ThreadPoolFactory;
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
 import net.microfalx.heimdall.infrastructure.core.system.EnvironmentRepository;
@@ -14,10 +13,9 @@ import net.microfalx.metrics.Aggregation;
 import net.microfalx.metrics.Value;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceUtils;
+import net.microfalx.threadpool.AbstractRunnable;
 import net.microfalx.threadpool.ThreadPool;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.support.CronTrigger;
-import org.springframework.scheduling.support.PeriodicTrigger;
+import net.microfalx.threadpool.Trigger;
 
 import java.io.IOException;
 import java.util.*;
@@ -31,6 +29,7 @@ import java.util.function.Function;
 import java.util.stream.DoubleStream;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.StringUtils.joinNames;
 import static net.microfalx.lang.TextUtils.abbreviateMiddle;
 
 /**
@@ -40,7 +39,6 @@ import static net.microfalx.lang.TextUtils.abbreviateMiddle;
 class RestSimulationScheduler extends ApplicationContextSupport {
 
     private RestServiceImpl restService;
-    private TaskScheduler scheduler;
     private ThreadPool threadPool;
     private final Map<Schedule, ScheduledFuture<?>> schedules = new ConcurrentHashMap<>();
     private final Map<Schedule, Lock> locks = new ConcurrentHashMap<>();
@@ -82,9 +80,9 @@ class RestSimulationScheduler extends ApplicationContextSupport {
         if (schedule.isActive()) {
             ScheduleTask task = new ScheduleTask(schedule);
             if (schedule.getType() == Schedule.Type.EXPRESSION) {
-                future = scheduler.schedule(task, new CronTrigger(schedule.getExpression()));
+                future = threadPool.schedule(task, Trigger.cron(schedule.getExpression()));
             } else {
-                future = scheduler.schedule(task, new PeriodicTrigger(schedule.getInterval()));
+                future = threadPool.schedule(task, Trigger.fixedRate(schedule.getInterval()));
             }
             schedules.put(schedule, future);
         }
@@ -105,9 +103,6 @@ class RestSimulationScheduler extends ApplicationContextSupport {
         RestProperties properties = restService.getProperties();
         AsynchronousProperties schedulerProperties = properties.getScheduler();
         if (threadPool == null) threadPool = ThreadPoolFactory.create(schedulerProperties).create();
-        schedulerProperties.setCoreThreads(schedulerProperties.getCoreThreads() / 4);
-        schedulerProperties.setSuffix(schedulerProperties.getSuffix() + "_scheduler");
-        if (scheduler == null) scheduler = TaskExecutorFactory.create(schedulerProperties).createScheduler();
     }
 
     private Lock getLock(Schedule schedule) {
@@ -246,12 +241,13 @@ class RestSimulationScheduler extends ApplicationContextSupport {
         };
     }
 
-    class ScheduleTask implements Runnable {
+    class ScheduleTask extends AbstractRunnable {
 
         private final Schedule schedule;
 
         public ScheduleTask(Schedule schedule) {
             this.schedule = schedule;
+            setName(joinNames("Rest", "Simulation", schedule.getName()));
         }
 
         @Override

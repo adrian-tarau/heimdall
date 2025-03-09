@@ -6,6 +6,7 @@ import net.microfalx.heimdall.infrastructure.api.Server;
 import net.microfalx.heimdall.infrastructure.api.Service;
 import net.microfalx.heimdall.infrastructure.ping.system.Ping;
 import net.microfalx.lang.ExceptionUtils;
+import net.microfalx.threadpool.AbstractRunnable;
 import net.microfalx.threadpool.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,12 +17,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.FormatterUtils.formatDuration;
+import static net.microfalx.lang.StringUtils.joinNames;
 import static net.microfalx.lang.TimeUtils.millisSince;
 
 /**
  * A class which handles scheduling pings.
  */
-class PingScheduler implements Runnable {
+class PingScheduler extends AbstractRunnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PingScheduler.class);
 
@@ -46,6 +48,7 @@ class PingScheduler implements Runnable {
         this.health = health;
         this.infrastructureService = infrastructureService;
         this.pingPersistence = pingPersistence;
+        setName(joinNames("Ping", "Scheduler"));
 
     }
 
@@ -108,12 +111,13 @@ class PingScheduler implements Runnable {
     /**
      * Wraps the ping to be submitted to the TaskExecutor
      */
-    class PingRunnable implements Runnable {
+    class PingRunnable extends AbstractRunnable {
 
         private final PingExecutor pingExecutor;
 
         public PingRunnable(PingExecutor pingExecutor) {
             this.pingExecutor = pingExecutor;
+            setName(joinNames("Ping", pingExecutor.getName()));
         }
 
         @Override

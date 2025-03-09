@@ -5,8 +5,11 @@ import net.microfalx.heimdall.infrastructure.api.Environment;
 import net.microfalx.heimdall.infrastructure.api.Server;
 import net.microfalx.heimdall.infrastructure.api.Service;
 import net.microfalx.heimdall.infrastructure.core.util.HealthSummary;
+import net.microfalx.threadpool.AbstractRunnable;
 
-class InfrastructureScheduler implements Runnable {
+import static net.microfalx.lang.StringUtils.joinNames;
+
+class InfrastructureScheduler extends AbstractRunnable {
 
     private final InfrastructureServiceImpl infrastructureService;
     private final InfrastructureHealth infrastructureHealth;
@@ -14,6 +17,7 @@ class InfrastructureScheduler implements Runnable {
     InfrastructureScheduler(InfrastructureServiceImpl infrastructureService, InfrastructureHealth infrastructureHealth) {
         this.infrastructureService = infrastructureService;
         this.infrastructureHealth = infrastructureHealth;
+        setName(joinNames("Infrastructure", "Scheduler"));
     }
 
     @Override

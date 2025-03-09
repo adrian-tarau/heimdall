@@ -10,9 +10,9 @@ import net.microfalx.heimdall.infrastructure.core.system.DnsRepository;
 import net.microfalx.lang.CollectionUtils;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.TimeUtils;
+import net.microfalx.threadpool.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.task.AsyncTaskExecutor;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -39,12 +39,12 @@ public class InfrastructureDns extends ApplicationContextSupport {
     private final Map<String, InetAddress> addresses = new ConcurrentHashMap<>();
     private final Map<String, Long> addressesLastUpdates = new ConcurrentHashMap<>();
 
-    private AsyncTaskExecutor executor;
+    private ThreadPool threadPool = ThreadPool.get();
 
     private final static InetAddress NA;
 
-    void setExecutor(AsyncTaskExecutor executor) {
-        this.executor = executor;
+    void setExecutor(ThreadPool threadPool) {
+        this.threadPool = threadPool;
     }
 
     Dns getDns(Server server) {
@@ -98,8 +98,8 @@ public class InfrastructureDns extends ApplicationContextSupport {
             AddressResolver addressResolver = new AddressResolver(server);
             addressResolver.run();
             address = addressResolver.address;
-        } else if (executor != null && shouldUpdateAddress(server)) {
-            executor.submit(new AddressResolver(server));
+        } else if (shouldUpdateAddress(server)) {
+            threadPool.submit(new AddressResolver(server));
         }
         return address;
     }

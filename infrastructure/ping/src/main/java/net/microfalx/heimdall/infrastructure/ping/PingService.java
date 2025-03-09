@@ -9,8 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -37,7 +35,7 @@ public class PingService implements InitializingBean, InfrastructureListener {
     private PingProperties properties;
 
     @Autowired
-    private TaskScheduler taskScheduler;
+    private ThreadPool threadPool;
 
     @Autowired
     private InfrastructureService infrastructureService;
@@ -46,7 +44,7 @@ public class PingService implements InitializingBean, InfrastructureListener {
     private PingHealth health;
 
     private PingScheduler scheduler;
-    private ThreadPool pingExecutor;
+    private ThreadPool pingThreadPool;
 
     public Collection<net.microfalx.heimdall.infrastructure.ping.system.Ping> getRegisterPings() {
         return unmodifiableCollection(cache.getPings());
@@ -147,28 +145,27 @@ public class PingService implements InitializingBean, InfrastructureListener {
         startScheduler();
     }
 
-    ThreadPool getPingExecutor() {
-        return pingExecutor;
+    ThreadPool getPingThreadPool() {
+        return pingThreadPool;
     }
 
     private void provisionPings() {
-        this.pingExecutor.submit(new PingProvisioning(this, infrastructureService));
+        this.pingThreadPool.submit(new PingProvisioning(this, infrastructureService));
     }
 
     private void initializeExecutor() {
         AsynchronousProperties asynchronousProperties = new AsynchronousProperties();
         asynchronousProperties.setSuffix("Ping");
         asynchronousProperties.setCoreThreads(properties.getThreads());
-        this.pingExecutor = ThreadPoolFactory.create(asynchronousProperties).create();
+        this.pingThreadPool = ThreadPoolFactory.create(asynchronousProperties).create();
         LOGGER.info("Ping services with {} threads", properties.getThreads());
     }
 
     private void initializeScheduler() {
-        scheduler = new PingScheduler(cache, infrastructureService, persistence, health, pingExecutor);
+        scheduler = new PingScheduler(cache, infrastructureService, persistence, health, pingThreadPool);
     }
 
     private void startScheduler() {
-        CronTrigger trigger = new CronTrigger("*/5 * * * * *");
-        taskScheduler.schedule(scheduler, trigger);
+        threadPool.scheduleAtFixedRate(scheduler, properties.getInterval());
     }
 }

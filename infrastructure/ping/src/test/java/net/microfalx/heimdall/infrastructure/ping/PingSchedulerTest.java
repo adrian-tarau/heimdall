@@ -6,6 +6,7 @@ import net.microfalx.heimdall.infrastructure.core.system.Service;
 import net.microfalx.heimdall.infrastructure.ping.system.Ping;
 import net.microfalx.heimdall.infrastructure.ping.system.PingRepository;
 import net.microfalx.heimdall.infrastructure.ping.system.PingResultRepository;
+import net.microfalx.threadpool.ThreadPool;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,7 +15,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.core.task.AsyncTaskExecutor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +42,7 @@ class PingSchedulerTest {
     private InfrastructureService infrastructureService;
 
     @Mock
-    private AsyncTaskExecutor taskExecutor;
+    private ThreadPool threadPool;
 
     @InjectMocks
     private PingScheduler pingScheduler;
@@ -64,14 +64,14 @@ class PingSchedulerTest {
     void allPingsScheduled() {
         pingScheduler.run();
         verify(cache).getPings();
-        verify(taskExecutor, times(3)).execute(any(Runnable.class));
+        verify(threadPool, times(3)).execute(any(Runnable.class));
     }
 
     @Test
     void nothingScheduledAfterFirstRun() {
         pingScheduler.run();
         pingScheduler.run();
-        verify(taskExecutor, times(3)).execute(any(Runnable.class));
+        verify(threadPool, times(3)).execute(any(Runnable.class));
     }
 
     @Test
@@ -79,7 +79,7 @@ class PingSchedulerTest {
         pingScheduler.run();
         sleepSeconds(3);
         pingScheduler.run();
-        verify(taskExecutor, times(4)).execute(any(Runnable.class));
+        verify(threadPool, times(4)).execute(any(Runnable.class));
     }
 
     @Test

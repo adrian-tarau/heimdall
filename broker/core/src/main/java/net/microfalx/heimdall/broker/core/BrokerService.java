@@ -15,6 +15,7 @@ import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.TimeUtils;
 import net.microfalx.resource.FileResource;
 import net.microfalx.resource.Resource;
+import net.microfalx.threadpool.AbstractRunnable;
 import net.microfalx.threadpool.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -259,7 +259,7 @@ public class BrokerService implements InitializingBean {
     }
 
     private void scheduleTasks() {
-        threadPool.scheduleAtFixedRate(new SessionSchedulerTask(), Duration.ZERO, ofMinutes(1));
+        threadPool.scheduleAtFixedRate(new SessionSchedulerTask(), ofMinutes(1));
     }
 
     private void initializeClientsThreadPool() {
@@ -321,7 +321,11 @@ public class BrokerService implements InitializingBean {
         }
     }
 
-    class SessionSchedulerTask implements Runnable {
+    class SessionSchedulerTask extends AbstractRunnable {
+
+        public SessionSchedulerTask() {
+            setName(joinNames("Session", "Scheduler"));
+        }
 
         @Override
         public void run() {

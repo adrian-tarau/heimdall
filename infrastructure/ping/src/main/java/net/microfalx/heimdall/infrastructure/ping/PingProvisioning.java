@@ -4,6 +4,7 @@ import net.microfalx.heimdall.infrastructure.api.InfrastructureService;
 import net.microfalx.heimdall.infrastructure.api.Ping;
 import net.microfalx.heimdall.infrastructure.api.Server;
 import net.microfalx.heimdall.infrastructure.api.Service;
+import net.microfalx.threadpool.AbstractRunnable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,8 +12,9 @@ import java.util.Collection;
 
 import static java.time.Duration.ofSeconds;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.StringUtils.joinNames;
 
-class PingProvisioning implements Runnable {
+class PingProvisioning extends AbstractRunnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PingProvisioning.class);
 
@@ -26,6 +28,7 @@ class PingProvisioning implements Runnable {
         requireNonNull(infrastructureService);
         this.pingService = pingService;
         this.infrastructureService = infrastructureService;
+        setName(joinNames("Ping", "Provisioning"));
     }
 
     @Override
@@ -37,7 +40,7 @@ class PingProvisioning implements Runnable {
     private void registerServers() {
         infrastructureService.getServers().forEach(server -> {
             registerServer(server);
-            pingService.getPingExecutor().submit(() -> registerServices(server));
+            pingService.getPingThreadPool().submit(new ProvisionServicesTask(server));
         });
     }
 
@@ -72,6 +75,21 @@ class PingProvisioning implements Runnable {
                 LOGGER.debug("Service '" + service.getName() + "' is not available on '" + server.getName() + "', status: " + ping.getStatus()
                         + ", error code: " + ping.getErrorCode() + ", error message: " + ping.getErrorMessage());
             }
+        }
+    }
+
+    class ProvisionServicesTask extends AbstractRunnable {
+
+        private final Server server;
+
+        public ProvisionServicesTask(Server server) {
+            this.server = server;
+            setName(joinNames("Ping", "Provisioning", server.getName()));
+        }
+
+        @Override
+        public void run() {
+            registerServices(server);
         }
     }
 }

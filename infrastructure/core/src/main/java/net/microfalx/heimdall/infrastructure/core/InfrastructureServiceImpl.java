@@ -3,9 +3,11 @@ package net.microfalx.heimdall.infrastructure.core;
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
 import net.microfalx.bootstrap.web.application.ApplicationProperties;
 import net.microfalx.heimdall.infrastructure.api.*;
+import net.microfalx.heimdall.infrastructure.core.system.DnsRepository;
 import net.microfalx.heimdall.infrastructure.core.util.HealthSummary;
 import net.microfalx.lang.ClassUtils;
 import net.microfalx.metrics.Series;
+import net.microfalx.threadpool.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -14,9 +16,6 @@ import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
-import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -35,12 +34,6 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
     private static final Logger LOGGER = LoggerFactory.getLogger(InfrastructureService.class);
 
     @Autowired
-    private AsyncTaskExecutor taskExecutor;
-
-    @Autowired
-    private TaskScheduler taskScheduler;
-
-    @Autowired
     private ApplicationContext applicationContext;
 
     @Autowired
@@ -51,6 +44,12 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
 
     @Autowired
     private ApplicationProperties applicationProperties;
+
+    @Autowired
+    private DnsRepository dnsRepository;
+
+    @Autowired
+    private ThreadPool threadPool;
 
     private volatile InfrastructureCache cache = new InfrastructureCache(this);
     private final InfrastructureDns dns = new InfrastructureDns();
@@ -201,8 +200,8 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
     @Override
     public void onApplicationEvent(ApplicationStartedEvent event) {
         initializeListeners();
-        taskExecutor.submit(this::fireInitializedEvent);
-        taskScheduler.schedule(new InfrastructureScheduler(this, health), new CronTrigger(properties.getSchedule()));
+        threadPool.submit(this::fireInitializedEvent);
+        threadPool.scheduleAtFixedRate(new InfrastructureScheduler(this, health), properties.getInterval());
     }
 
     @Override
@@ -247,14 +246,14 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
     }
 
     private void provisionInfrastructure() {
-        taskExecutor.submit(new InfrastructureProvisioning(this));
+        threadPool.submit(new InfrastructureProvisioning(this));
     }
 
     private void initializeApplicationContext() {
         infrastructurePersistence.setApplicationContext(getApplicationContext());
         cache.setApplicationContext(getApplicationContext());
         dns.setApplicationContext(getApplicationContext());
-        dns.setExecutor(taskExecutor);
+        dns.setExecutor(threadPool);
     }
 
     private void initializeListeners() {

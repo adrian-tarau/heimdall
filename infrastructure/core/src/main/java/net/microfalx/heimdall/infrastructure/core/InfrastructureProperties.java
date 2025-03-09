@@ -6,6 +6,8 @@ import net.microfalx.heimdall.infrastructure.api.InfrastructureConstants;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.Duration;
+
 @Configuration
 @ConfigurationProperties("heimdall.infrastructure")
 @Getter
@@ -21,9 +23,14 @@ public class InfrastructureProperties {
     private int windowSize = InfrastructureConstants.WINDOW_SIZE;
 
     /**
-     * The health stats refresh schedule
+     * The health stats refresh schedule as CRON expression.
      */
     private String schedule = "*/30 * * * * *";
+
+    /**
+     * The health stats refresh schedule as interval;
+     */
+    private Duration interval = Duration.ofSeconds(30);
 
     /**
      * A threshold (percentage) which determines after how many degraded infrastructure elements

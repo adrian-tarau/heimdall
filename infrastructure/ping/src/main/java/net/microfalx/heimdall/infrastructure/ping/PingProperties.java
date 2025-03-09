@@ -6,11 +6,18 @@ import net.microfalx.heimdall.infrastructure.api.InfrastructureConstants;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.Duration;
+
 @Configuration
 @ConfigurationProperties("heimdall.infrustructure.ping")
 @Getter
 @Setter
 public class PingProperties {
+
+    /**
+     * The interval between pings
+     */
+    private Duration interval = Duration.ofSeconds(5);
 
     /**
      * The number of threads used to ping services.

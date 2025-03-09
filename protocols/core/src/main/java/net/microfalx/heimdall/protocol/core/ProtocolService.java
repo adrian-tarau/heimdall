@@ -10,6 +10,7 @@ import net.microfalx.bootstrap.search.IndexService;
 import net.microfalx.bootstrap.search.SearchService;
 import net.microfalx.heimdall.protocol.core.jpa.AddressRepository;
 import net.microfalx.heimdall.protocol.core.jpa.PartRepository;
+import net.microfalx.lang.EnumUtils;
 import net.microfalx.lang.ObjectUtils;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.metrics.Metrics;
@@ -17,6 +18,7 @@ import net.microfalx.resource.MimeType;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceFactory;
 import net.microfalx.resource.rocksdb.RocksDbResource;
+import net.microfalx.threadpool.AbstractRunnable;
 import net.microfalx.threadpool.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +31,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -442,7 +443,7 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
     private void initializeSimulator() {
         if (!simulatorProperties.isEnabled()) return;
         LOGGER.info("Simulator is enabled, interval {}", simulatorProperties.getInterval());
-        getThreadPool().scheduleAtFixedRate(new SimulatorWorker(), Duration.ZERO, simulatorProperties.getInterval());
+        getThreadPool().scheduleAtFixedRate(new SimulatorWorker(), simulatorProperties.getInterval());
     }
 
     private void initResources() {
@@ -464,7 +465,7 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
 
     private void initializeQueue() {
         queue = new ArrayBlockingQueue<>(properties.getBatchSize());
-        getThreadPool().scheduleAtFixedRate(new FlushWorker(), Duration.ZERO, properties.getBatchInterval());
+        getThreadPool().scheduleAtFixedRate(new FlushWorker(), properties.getBatchInterval());
     }
 
     private void initializeThreadPool() {
@@ -580,7 +581,11 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
         }
     }
 
-    class SimulatorWorker implements Runnable {
+    class SimulatorWorker extends AbstractRunnable {
+
+        public SimulatorWorker() {
+            setName(joinNames("Protocol", "Simulation", EnumUtils.toLabel(getEventType())));
+        }
 
         @Override
         public void run() {
@@ -591,7 +596,11 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
         }
     }
 
-    class FlushWorker implements Runnable {
+    class FlushWorker extends AbstractRunnable {
+
+        public FlushWorker() {
+            setName(joinNames("Protocol", "Flush", EnumUtils.toLabel(getEventType())));
+        }
 
         @Override
         public void run() {

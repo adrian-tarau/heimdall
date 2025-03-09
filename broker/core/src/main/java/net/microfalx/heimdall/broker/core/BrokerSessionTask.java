@@ -18,6 +18,7 @@ import net.microfalx.resource.FileResource;
 import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.MimeType;
 import net.microfalx.resource.Resource;
+import net.microfalx.threadpool.AbstractRunnable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -42,7 +43,7 @@ import static net.microfalx.bootstrap.search.Document.SOURCE_FIELD;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.StringUtils.*;
 
-class BrokerSessionTask implements Runnable {
+class BrokerSessionTask extends AbstractRunnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BrokerSessionTask.class);
 
@@ -83,6 +84,7 @@ class BrokerSessionTask implements Runnable {
         this.contentService = contentService;
         this.indexService = indexService;
         this.topic = topic;
+        setName(getTaskName());
     }
 
     BrokerSessionTask setNameTemplate(Template nameTemplate) {
@@ -129,6 +131,7 @@ class BrokerSessionTask implements Runnable {
 
     private void collectEvents() {
         this.realTopic = brokerService.getTopic(topic);
+        setName(getTaskName());
         LOGGER.debug("Collect events from " + BrokerUtils.describe(realTopic));
         int iteration = 0;
         while (iteration++ < MAX_ITERATIONS) {
@@ -147,6 +150,14 @@ class BrokerSessionTask implements Runnable {
                 }
             }
             BrokerUtils.METRICS.withGroup("Sessions").count(topic.getName());
+        }
+    }
+
+    private String getTaskName() {
+        if (this.realTopic != null) {
+            return joinNames(realTopic.getBroker().getName(), realTopic.getName());
+        } else {
+            return joinNames(topic.getBroker().getName(), topic.getName());
         }
     }
 
@@ -186,6 +197,7 @@ class BrokerSessionTask implements Runnable {
                 if (sampleCount == 0) sampleCount = getSampleCounter(topic);
                 sampleCount--;
             }
+            setDescription("Collected " + snapshot.getCount() + " events");
             if (snapshot.getCount() >= MAX_EVENT_COUNT || totalSize >= MAX_EVENT_SIZE) break;
         }
         BrokerUtils.METRICS.withGroup("Events").count(topic.getName(), snapshot.getTotalCount());

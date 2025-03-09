@@ -12,8 +12,8 @@ import net.microfalx.bootstrap.web.util.JsonResponse;
 import net.microfalx.heimdall.rest.api.Project;
 import net.microfalx.heimdall.rest.api.RestService;
 import net.microfalx.lang.StringUtils;
+import net.microfalx.threadpool.ThreadPool;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,7 +34,7 @@ public class RestProjectController extends DataSetController<RestProject, Intege
     private RestService restService;
 
     @Autowired
-    private AsyncTaskExecutor executor;
+    private ThreadPool threadPool;
 
     @PostMapping("sync")
     @ResponseBody
@@ -92,7 +92,7 @@ public class RestProjectController extends DataSetController<RestProject, Intege
         super.afterPersist(dataSet, model, state);
         restService.reload();
         Project project = restService.getProject(model.getNaturalId());
-        executor.execute(() -> restService.reload(project));
+        threadPool.execute(() -> restService.reload(project));
     }
 
     private boolean restrictPrivateProjects(Model controllerModel, RestProject dataSetModel, String action) {

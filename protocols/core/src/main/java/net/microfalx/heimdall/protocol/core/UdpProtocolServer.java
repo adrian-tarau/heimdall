@@ -1,6 +1,7 @@
 package net.microfalx.heimdall.protocol.core;
 
 import net.microfalx.lang.StringUtils;
+import net.microfalx.threadpool.AbstractRunnable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +12,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+
+import static net.microfalx.lang.StringUtils.joinNames;
 
 /**
  * A generic UDP server.
@@ -59,12 +62,13 @@ public class UdpProtocolServer extends ProtocolServer {
         }
     }
 
-    private class ClientWorker implements Runnable {
+    private class ClientWorker extends AbstractRunnable {
 
         private final DatagramPacket packet;
 
         ClientWorker(DatagramPacket packet) {
             this.packet = packet;
+            setName(joinNames("Protocol", "UDP", Integer.toString(getPort())));
         }
 
         @Override
