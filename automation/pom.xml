@@ -24,58 +24,29 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>net.microfalx.heimdall</groupId>
-    <artifactId>heimdall-deploy</artifactId>
+    <artifactId>heimdall-automation</artifactId>
     <version>0.9.0-SNAPSHOT</version>
 
     <parent>
         <groupId>net.microfalx.heimdall</groupId>
-        <artifactId>heimdall</artifactId>
-        <version>0.9.0-SNAPSHOT</version>
+		<artifactId>heimdall</artifactId>
+		<version>0.9.0-SNAPSHOT</version>
     </parent>
 
-    <name>Heimdall :: Deploy</name>
+    <name>Heimdall :: Automation</name>
 
     <dependencies>
 
-        <!-- Runtime -->
-
         <dependency>
-            <groupId>net.microfalx.bootstrap</groupId>
-            <artifactId>bootstrap-deploy</artifactId>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>net.microfalx.heimdall</groupId>
-            <artifactId>heimdall-web</artifactId>
-            <version>${project.version}</version>
+            <groupId>io.github.bonigarcia</groupId>
+            <artifactId>webdrivermanager</artifactId>
         </dependency>
 
     </dependencies>
-
-    <build>
-        <plugins>
-
-            <plugin>
-                <groupId>net.microfalx.talos</groupId>
-                <artifactId>talos-maven-plugin</artifactId>
-                <version>1.0.1</version>
-                <configuration>
-                    <boot>true</boot>
-                    <image>heimdall</image>
-                    <repository>adriantarau</repository>
-                    <mainClass>net.microfalx.heimdall.web.HeimdallApplication</mainClass>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>container</id>
-                        <goals>
-                            <goal>package</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            
-        </plugins>
-    </build>
 
 </project>

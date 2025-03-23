@@ -59,6 +59,7 @@
         <module>other</module>
         <module>web</module>
         <module>deploy</module>
+        <module>automation</module>
     </modules>
 
     <issueManagement>
