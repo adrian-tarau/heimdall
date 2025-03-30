@@ -1,6 +1,6 @@
 package net.microfalx.heimdall;
 
-import net.microfalx.bootstrap.serenity.Login;
+import net.microfalx.bootstrap.serenity.task.Login;
 import org.junit.jupiter.api.Test;
 
 public class LoginTest extends AbstractSystemTestCase {

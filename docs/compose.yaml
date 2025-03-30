@@ -11,8 +11,6 @@ services:
       - 9810:2601
       - 9811:12201/udp
       - 9812:12200
-    volumes:
-      - heimdall-data:/data
     depends_on:
       mysql:
         condition: service_healthy
@@ -22,7 +20,7 @@ services:
       HEIMDALL_DATABASE_USERNAME: heimdall
       HEIMDALL_DATABASE_PASSWORD: hD0IzwPtPD3353wj1ADq
       HEIMDALL_PROTOCOL_SIMULATOR_ENABLED: false
-      HEIMDALL_RESOURCE_DIRECTORY: /data
+      HEIMDALL_RESOURCE_DIRECTORY: /var/opt/microfalx
 
   mysql:
     image: mysql:8.2
@@ -43,4 +41,3 @@ services:
 
 volumes:
   mysql-data:
-  heimdall-data:
