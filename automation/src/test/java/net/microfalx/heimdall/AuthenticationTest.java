@@ -14,6 +14,6 @@ public class AuthenticationTest extends AbstractSystemTestCase {
     @Test
     void logout() {
         loginAsAdmin();
-        toby.attemptsTo(Logout.logout());
+        toby.attemptsTo(Logout.withLink());
     }
 }
