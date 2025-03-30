@@ -17,6 +17,6 @@ public abstract class AbstractSystemTestCase {
     }
 
     protected final String getAdminPassword() {
-        return System.getProperty("test.admin.password", "dummy");
+        return System.getProperty("test.admin.password", "WhfAeDkf8857");
     }
 }
