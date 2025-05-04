@@ -1,19 +1,36 @@
 package net.microfalx.heimdall;
 
-import net.microfalx.bootstrap.serenity.Logout;
-import net.microfalx.bootstrap.serenity.task.Login;
+import net.microfalx.bootstrap.serenity.junit.AbstractSystemTestCase;
+import net.microfalx.bootstrap.serenity.task.Logout;
+import net.microfalx.bootstrap.serenity.task.User;
 import org.junit.jupiter.api.Test;
 
 public class AuthenticationTest extends AbstractSystemTestCase {
 
     @Test
     void loginAsAdmin() {
-        toby.attemptsTo(Login.as(getAdminUserName(), getAdminPassword()));
+        actor.attemptsTo(User.asAdmin().login());
     }
 
     @Test
-    void logout() {
+    void loginAsAdminAndLogoutWithLink() {
         loginAsAdmin();
-        toby.attemptsTo(Logout.withLink());
+        actor.attemptsTo(Logout.withLink());
+    }
+
+    @Test
+    void loginAsAdminAndLogoutWithButton() {
+        loginAsAdmin();
+        actor.attemptsTo(Logout.withButton());
+    }
+
+    @Test
+    void loginAsRegular() {
+        actor.attemptsTo(User.asRegular());
+    }
+
+    @Test
+    void loginAsGuest() {
+        actor.attemptsTo(User.asGuest());
     }
 }
