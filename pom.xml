@@ -53,6 +53,7 @@
         <module>core</module>
         <module>infrastructure</module>
         <module>protocols</module>
+        <module>llm</module>
         <module>database</module>
         <module>broker</module>
         <module>rest</module>
