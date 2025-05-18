@@ -8,7 +8,15 @@ import java.util.Collection;
  * A service which manages the AI models and providers.
  */
 @Service
-public interface AiService extends ChatFactory {
+public interface AiService extends Chat.Factory {
+
+    /**
+     * Creates a chat session with a given identifier.
+     *
+     * @param modelId the model identifier to use
+     * @return a non-null instance
+     */
+    Chat createChat(String modelId);
 
     /**
      * Returns registered chat models.

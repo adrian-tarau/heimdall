@@ -2,6 +2,7 @@ package net.microfalx.heimdall.llm.api;
 
 import net.microfalx.lang.IdentityAware;
 import net.microfalx.lang.NamedAndTaggedIdentifyAware;
+import net.microfalx.lang.StringUtils;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -20,7 +21,11 @@ public class Provider extends NamedAndTaggedIdentifyAware<String> {
     private String apyKey;
 
     private List<Model> models;
-    private ChatFactory chatFactory;
+    private Chat.Factory chatFactory;
+
+    private String version = StringUtils.NA_STRING;
+    private String author = StringUtils.NA_STRING;
+    private String license = "Proprietary";
 
     /**
      * Returns the URI of the provider.
@@ -44,6 +49,33 @@ public class Provider extends NamedAndTaggedIdentifyAware<String> {
     }
 
     /**
+     * Returns the version of the provider.
+     *
+     * @return the version string, never null
+     */
+    public String getVersion() {
+        return version;
+    }
+
+    /**
+     * Returns the author of the provider.
+     *
+     * @return the author string, never null
+     */
+    public String getAuthor() {
+        return author;
+    }
+
+    /**
+     * Returns the license of the provider.
+     *
+     * @return the license string, never null
+     */
+    public String getLicense() {
+        return license;
+    }
+
+    /**
      * Returns all models provided by this provider.
      *
      * @return a non-null instance
@@ -57,16 +89,8 @@ public class Provider extends NamedAndTaggedIdentifyAware<String> {
      *
      * @return a non-null instance
      */
-    public ChatFactory getChatFactory() {
+    public Chat.Factory getChatFactory() {
         return chatFactory;
-    }
-
-    protected void updateModels(Collection<Model> models) {
-        requireNonNull(models);
-        this.models = new ArrayList<>(models);
-        for (Model model : models) {
-            model.provider = this;
-        }
     }
 
     public static class Builder extends NamedAndTaggedIdentifyAware.Builder<String> {
@@ -74,8 +98,12 @@ public class Provider extends NamedAndTaggedIdentifyAware<String> {
         private URI uri;
         private String apyKey;
 
-        private final List<Model> models = new ArrayList<>();
-        private ChatFactory chatFactory;
+        private String version = StringUtils.NA_STRING;
+        private String author = StringUtils.NA_STRING;
+        private String license = "Proprietary";
+
+        private final List<Model.Builder> models = new ArrayList<>();
+        private Chat.Factory chatFactory;
 
         public Builder(String id) {
             super(id);
@@ -95,18 +123,35 @@ public class Provider extends NamedAndTaggedIdentifyAware<String> {
             requireNonNull(uri);
             requireNonNull(apyKey);
             this.uri = uri;
+            this.apyKey = apyKey;
             return this;
         }
 
-        public Builder model(Model model) {
+        public Builder version(String version) {
+            this.version = version;
+            return this;
+        }
+
+        public Builder author(String author) {
+            this.author = author;
+            return this;
+        }
+
+        public Builder license(String license) {
+            this.license = license;
+            return this;
+        }
+
+        public Builder model(Model.Builder model) {
             requireNonNull(model);
             models.add(model);
             return this;
         }
 
-        public void chatFactory(ChatFactory chatFactory) {
+        public Builder chatFactory(Chat.Factory chatFactory) {
             requireNonNull(chatFactory);
             this.chatFactory = chatFactory;
+            return this;
         }
 
         @Override
@@ -115,8 +160,11 @@ public class Provider extends NamedAndTaggedIdentifyAware<String> {
             Provider provider = (Provider) super.build();
             provider.uri = uri;
             provider.apyKey = apyKey;
+            provider.version = version;
+            provider.author = author;
+            provider.license = license;
             provider.chatFactory = chatFactory;
-            provider.updateModels(models);
+            provider.models = models.stream().map(builder -> builder.provider(provider).build()).toList();
             return provider;
         }
     }

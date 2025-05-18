@@ -37,6 +37,7 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
 
     private URI uri;
     private String apyKey;
+    private String modelName;
     private Double temperature;
     private Double topP;
     private Integer topK;
@@ -47,6 +48,14 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
     private ResponseFormat responseFormat = ResponseFormat.TEXT;
 
     Provider provider;
+
+    public static Builder create(String id, String name) {
+        return (Builder) new Builder(id).name(name);
+    }
+
+    public static Builder create(String id, String name, String modelName) {
+        return (Builder) new Builder(id).modelName(modelName).name(name);
+    }
 
     /**
      * Returns the provider.
@@ -83,6 +92,17 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
         } else {
             return getProvider().getApyKey();
         }
+    }
+
+    /**
+     * Returns a reference to the model name.
+     * <p>
+     * Some models have a reference to the model name, and they know how to get the model from the internet.
+     *
+     * @return the model name, null if not set
+     */
+    public String getModelName() {
+        return modelName;
     }
 
     /**
@@ -176,6 +196,7 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
 
         private URI uri;
         private String apyKey;
+        private String modelName;
         private Double temperature;
         private Double topP;
         private Integer topK;
@@ -184,6 +205,8 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
         private Integer maximumOutputTokens;
         private final Set<String> stopSequences = new HashSet<>();
         private ResponseFormat responseFormat = ResponseFormat.TEXT;
+
+        private Provider provider;
 
         public Builder(String id) {
             super(id);
@@ -198,6 +221,12 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
             requireNonNull(uri);
             requireNonNull(apyKey);
             this.uri = uri;
+            this.apyKey = apyKey;
+            return this;
+        }
+
+        public Builder modelName(String modelName) {
+            this.modelName = modelName;
             return this;
         }
 
@@ -249,6 +278,12 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
             return this;
         }
 
+        protected Builder provider(Provider provider) {
+            this.provider = provider;
+            id(provider.getId() + "." + id());
+            return this;
+        }
+
         @Override
         protected IdentityAware<String> create() {
             return new Model();
@@ -259,6 +294,7 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
             Model model = (Model) super.build();
             model.uri = uri;
             model.apyKey = apyKey;
+            model.modelName = modelName;
             model.temperature = temperature;
             model.topK = topK;
             model.topP = topP;
@@ -267,6 +303,7 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
             model.maximumOutputTokens = maximumOutputTokens;
             model.stopSequences = stopSequences;
             model.responseFormat = responseFormat;
+            model.provider = provider;
             return model;
         }
     }
