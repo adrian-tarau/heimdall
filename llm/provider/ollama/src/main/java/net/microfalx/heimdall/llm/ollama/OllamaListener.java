@@ -19,8 +19,8 @@ public class OllamaListener implements AiListener {
     }
 
     private void registerModels(net.microfalx.heimdall.llm.api.Provider.Builder builder) {
-        builder.model(Model.create("gemma3:4b","Gemma3 (4b)","/gemma3:4b"));
-        builder.model(Model.create("qwen3:0.6b","Qwen3 (0.6b)"));
-        builder.model(Model.create("deepseek-r1:7b","DeepSeek-R1 (7b)"));
+        builder.model(Model.create("gemma3:4b","Gemma3 (4b)")).tag("meta").tag("gemma3").tag("4b");
+        builder.model(Model.create("qwen3:0.6b","Qwen3 (0.6b)")).tag("alibaba").tag("qwen3").tag("0.6b");
+        builder.model(Model.create("deepseek-r1:7b","DeepSeek-R1 (7b)")).tag("deepseek").tag("deepseek-r1").tag("7b");
     }
 }
