@@ -36,7 +36,6 @@ public class AiServiceImpl extends ApplicationContextSupport implements AiServic
 
     private volatile AICache cache = new AICache(this);
     private final AiPersistence aiPersistence = new AiPersistence();
-    private final Collection<net.microfalx.heimdall.llm.api.Provider> providers = new CopyOnWriteArrayList<>();
     private final Collection<AiListener> listeners = new CopyOnWriteArrayList<>();
     private final Collection<Chat> activeChats = new CopyOnWriteArrayList<>();
     private final Collection<Chat> closedChats = new CopyOnWriteArrayList<>();
@@ -92,9 +91,8 @@ public class AiServiceImpl extends ApplicationContextSupport implements AiServic
     @Override
     public void registerProvider(Provider provider) {
         requireNonNull(provider);
-        providers.add(provider);
         cache.registerProvider(provider);
-        for (Model model:provider.getModels()){
+        for (Model model : provider.getModels()) {
             aiPersistence.execute(model);
         }
     }
@@ -141,7 +139,7 @@ public class AiServiceImpl extends ApplicationContextSupport implements AiServic
     private void updateModels() {
         if (millisSince(lastModelUpdates) < ONE_MINUTE) return;
         Map<String, Model> newModels = new HashMap<>();
-        for (Provider provider : providers) {
+        for (Provider provider : cache.getProviders().values()) {
             for (Model model : provider.getModels()) {
                 newModels.put(model.getId().toLowerCase(), model);
             }
