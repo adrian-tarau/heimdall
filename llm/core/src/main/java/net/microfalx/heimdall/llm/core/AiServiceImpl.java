@@ -1,6 +1,9 @@
 package net.microfalx.heimdall.llm.core;
 
+import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
 import net.microfalx.heimdall.llm.api.*;
+import net.microfalx.heimdall.llm.api.Model;
+import net.microfalx.heimdall.llm.api.Provider;
 import net.microfalx.lang.ClassUtils;
 import net.microfalx.lang.TimeUtils;
 import net.microfalx.threadpool.ThreadPool;
@@ -8,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -23,15 +27,20 @@ import static net.microfalx.lang.TimeUtils.ONE_MINUTE;
 import static net.microfalx.lang.TimeUtils.millisSince;
 
 @Service
-public class AiServiceImpl implements AiService, InitializingBean {
+public class AiServiceImpl extends ApplicationContextSupport implements AiService, InitializingBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AiService.class);
 
-    private final Collection<Provider> providers = new CopyOnWriteArrayList<>();
+    @Autowired
+    private ApplicationContext applicationContext;
+
+    private volatile AICache cache = new AICache(this);
+    private final AiPersistence aiPersistence = new AiPersistence();
+    private final Collection<net.microfalx.heimdall.llm.api.Provider> providers = new CopyOnWriteArrayList<>();
     private final Collection<AiListener> listeners = new CopyOnWriteArrayList<>();
     private final Collection<Chat> activeChats = new CopyOnWriteArrayList<>();
     private final Collection<Chat> closedChats = new CopyOnWriteArrayList<>();
-    private volatile Map<String, Model> models;
+    private volatile Map<String, net.microfalx.heimdall.llm.api.Model> models;
     private volatile long lastModelUpdates = TimeUtils.oneDayAgo();
 
     @Autowired(required = false)
@@ -55,15 +64,13 @@ public class AiServiceImpl implements AiService, InitializingBean {
     @Override
     public Collection<Model> getModels() {
         updateModels();
-        return unmodifiableCollection(models.values());
+        return unmodifiableCollection(cache.getModels().values());
     }
 
     @Override
     public Model getModel(String id) {
         updateModels();
-        Model model = models.get(id.toLowerCase());
-        if (model == null) throw new AiNotFoundException("A model with identifier '" + id + "' cannot be found");
-        return model;
+        return cache.getModel(id);
     }
 
     @Override
@@ -79,18 +86,31 @@ public class AiServiceImpl implements AiService, InitializingBean {
     @Override
     public Collection<Provider> getProviders() {
         updateModels();
-        return unmodifiableCollection(providers);
+        return unmodifiableCollection(cache.getProviders().values());
     }
 
     @Override
     public void registerProvider(Provider provider) {
         requireNonNull(provider);
         providers.add(provider);
+        cache.registerProvider(provider);
+        for (Model model:provider.getModels()){
+            aiPersistence.execute(model);
+        }
+    }
+
+    @Override
+    public void reload() {
+        AICache cache = new AICache(this);
+        cache.setApplicationContext(getApplicationContext());
+        cache.load();
+        this.cache = cache;
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
         initListeners();
+        initializeApplicationContext();
         registerProviders();
     }
 
@@ -111,6 +131,11 @@ public class AiServiceImpl implements AiService, InitializingBean {
             LOGGER.debug(" - {}", ClassUtils.getName(listeners));
             this.listeners.add(listener);
         }
+    }
+
+    private void initializeApplicationContext() {
+        aiPersistence.setApplicationContext(getApplicationContext());
+        cache.setApplicationContext(getApplicationContext());
     }
 
     private void updateModels() {

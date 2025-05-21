@@ -61,4 +61,9 @@ public interface AiService extends Chat.Factory {
      * @param provider the provider
      */
     void registerProvider(Provider provider);
+
+    /**
+     * Reloads the models.
+     */
+    void reload();
 }
