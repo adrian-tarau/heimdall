@@ -11,8 +11,8 @@ import net.microfalx.lang.annotation.Name;
 import net.microfalx.lang.annotation.NaturalId;
 import net.microfalx.lang.annotation.Width;
 
-@Entity
-@Table(name = "model")
+@Entity(name = "CoreModel")
+@Table(name = "llm_model")
 @Name("Models")
 @Getter
 @Setter

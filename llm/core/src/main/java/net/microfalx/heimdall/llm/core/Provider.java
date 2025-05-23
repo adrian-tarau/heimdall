@@ -12,8 +12,8 @@ import net.microfalx.lang.annotation.Name;
 import net.microfalx.lang.annotation.NaturalId;
 import net.microfalx.lang.annotation.Width;
 
-@Entity
-@Table(name = "provider")
+@Entity(name = "CoreProvider")
+@Table(name = "llm_provider")
 @Name("Providers")
 @Getter
 @Setter

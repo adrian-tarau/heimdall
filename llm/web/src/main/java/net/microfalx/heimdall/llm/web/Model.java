@@ -1,14 +1,15 @@
+package net.microfalx.heimdall.llm.web;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import net.microfalx.bootstrap.dataset.annotation.Filterable;
 import net.microfalx.bootstrap.jdbc.entity.NamedIdentityAware;
 import net.microfalx.heimdall.llm.api.ResponseFormat;
-import net.microfalx.heimdall.llm.core.Provider;
 import net.microfalx.lang.annotation.*;
 
-@Entity
-@Table(name = "model")
+@Entity(name = "WebModel")
+@Table(name = "llm_model")
 @Name("Models")
 @Getter
 @Setter

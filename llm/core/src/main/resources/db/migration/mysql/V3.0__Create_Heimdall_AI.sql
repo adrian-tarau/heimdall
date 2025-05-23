@@ -1,4 +1,4 @@
-create table provider
+create table llm_provider
 (
     id                              int                 not null primary key auto_increment,
     natural_id                      varchar(100)        not null,
@@ -12,7 +12,7 @@ create table provider
     description                     varchar(1000)
 ) ENGINE = InnoDB;
 
-create table model
+create table llm_model
 (
     id                              int                not null primary key auto_increment,
     natural_id                      varchar(100)       not null,
@@ -31,6 +31,22 @@ create table model
     response_format                 enum('TEXT','JSON') default 'TEXT',
     tags                            varchar(500),
     description                     varchar(1000),
-    constraint nk$model$natural_id unique key (natural_id),
-    constraint fk$model$provider_id foreign key (provider_id) references provider (id)
+    constraint nk$llm_model$natural_id unique key (natural_id),
+    constraint fk$llm_model$provider_id foreign key (provider_id) references llm_provider (id)
+) ENGINE = InnoDB;
+
+create table llm_chat
+(
+    id                              int                 not null primary key auto_increment,
+    user_id                         varchar(50)         not null,
+    model_id                        int                 not null,
+    name                            varchar(100)        not null,
+    start_at                        datetime            not null,
+    finish_at                       datetime,
+    content                         longtext            not null,
+    tags                            varchar(500),
+    token_count                     int                 not null,
+    duration                        int                 not null,
+    constraint fk$llm_chat$user_id foreign key (user_id) references security_users (username),
+    constraint fk$llm_chat$model_id foreign key (model_id) references llm_model (id)
 ) ENGINE = InnoDB;

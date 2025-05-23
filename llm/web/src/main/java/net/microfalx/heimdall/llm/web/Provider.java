@@ -1,3 +1,5 @@
+package net.microfalx.heimdall.llm.web;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -7,8 +9,8 @@ import net.microfalx.bootstrap.dataset.annotation.Filterable;
 import net.microfalx.bootstrap.jdbc.entity.NamedIdentityAware;
 import net.microfalx.lang.annotation.*;
 
-@Entity
-@Table(name = "provider")
+@Entity(name = "WebProvider")
+@Table(name = "llm_provider")
 @Name("Providers")
 @Getter
 @Setter

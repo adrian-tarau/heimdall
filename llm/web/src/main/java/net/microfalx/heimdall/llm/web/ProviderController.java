@@ -1,3 +1,5 @@
+package net.microfalx.heimdall.llm.web;
+
 import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.model.Field;

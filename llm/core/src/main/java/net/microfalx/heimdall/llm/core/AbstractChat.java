@@ -14,6 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.UUID;
@@ -31,6 +33,11 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractChat.class);
 
     private final Model model;
+    private int user;
+    private final LocalDateTime startAt = LocalDateTime.now();
+    private LocalDateTime finishAt;
+    private String content;
+    private int tokenCount;
     private ChatModel chatModel;
     private StreamingChatModel streamingChatModel;
 
@@ -49,16 +56,49 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
     }
 
     @Override
+    public int getUser() {
+        return user;
+    }
+
+    @Override
+    public String getContent() {
+        return content;
+    }
+
+    @Override
+    public LocalDateTime getStartAt() {
+        return startAt;
+    }
+
+    @Override
+    public LocalDateTime getFinishAt() {
+        return finishAt;
+    }
+
+    @Override
+    public int getTokenCount() {
+        return tokenCount;
+    }
+
+    @Override
+    public Duration getDuration() {
+        return Duration.between(startAt, finishAt != null ? finishAt : LocalDateTime.now());
+    }
+
+    @Override
     public String ask(String message) {
         validate();
         if (chatModel != null) {
-            return chatModel.chat(message);
+            String answer = chatModel.chat(message);
+            tokenCount = StringUtils.split(answer, " ").length;
+            return answer;
         } else {
             StringBuilder builder = new StringBuilder();
             Iterator<String> stream = chat(message);
             while (stream.hasNext()) {
                 String token = stream.next();
                 builder.append(token);
+                tokenCount++;
             }
             return builder.toString();
         }
@@ -109,6 +149,7 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
 
     @Override
     public final void close() {
+        finishAt = LocalDateTime.now();
         try {
             doClose();
         } catch (IOException e) {

@@ -3,6 +3,8 @@ package net.microfalx.heimdall.llm.api;
 import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.Nameable;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Iterator;
 
 /**
@@ -16,6 +18,48 @@ public interface Chat extends Identifiable<String>, Nameable {
      * @return a non-null instance
      */
     Model getModel();
+
+    /**
+     * Returns the user that created the chat.
+     *
+     * @return a non-null instance
+     */
+    int getUser();
+
+    /**
+     * Returns the start time of chat.
+     *
+     * @return a non-null instance
+     */
+    LocalDateTime getStartAt();
+
+    /**
+     * Returns the finish time of chat.
+     *
+     * @return a non-null instance
+     */
+    LocalDateTime getFinishAt();
+
+    /**
+     * Returns duration of the chat.
+     *
+     * @return a non-null instance
+     */
+    Duration getDuration();
+
+    /**
+     * Returns the content of the chat.
+     *
+     * @return a non-null instance
+     */
+    String getContent();
+
+    /**
+     * Returns the token count of the chat.
+     *
+     * @return a non-null instance
+     */
+    int getTokenCount();
 
     /**
      * Asks a question to the AI model and returns the answer.
