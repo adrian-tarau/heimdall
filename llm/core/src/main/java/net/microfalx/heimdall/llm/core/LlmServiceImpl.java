@@ -116,17 +116,17 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     }
 
     private void initListeners() {
-        Collection<LlmListener> listeners = ClassUtils.resolveProviderInstances(LlmListener.class);
-        LOGGER.info("Register {} listeners", listeners.size());
-        for (LlmListener listener : listeners) {
-            LOGGER.debug(" - {}", ClassUtils.getName(listeners));
+        Collection<LlmListener> loadedListeners = ClassUtils.resolveProviderInstances(LlmListener.class);
+        LOGGER.info("Register {} listeners", loadedListeners.size());
+        for (LlmListener listener : loadedListeners) {
+            LOGGER.debug(" - {}", ClassUtils.getName(loadedListeners));
             this.listeners.add(listener);
         }
     }
 
     private void initProviderFactories() {
         Collection<Provider.Factory> loadedProviderFactories = ClassUtils.resolveProviderInstances(Provider.Factory.class);
-        LOGGER.info("Register {} provider factories", listeners.size());
+        LOGGER.info("Register {} provider factories", loadedProviderFactories.size());
         for (Provider.Factory providerFactory : loadedProviderFactories) {
             LOGGER.debug(" - {}", ClassUtils.getName(providerFactory));
             this.providerFactories.add(providerFactory);
@@ -142,7 +142,11 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         for (Provider.Factory providerFactory : providerFactories) {
             try {
                 Provider provider = providerFactory.createProvider();
-                registerProvider(provider);
+                if (provider == null) {
+                    LOGGER.warn("Provider factory {} returned NULL", ClassUtils.getName(providerFactory));
+                } else {
+                    registerProvider(provider);
+                }
             } catch (Exception e) {
                 LOGGER.atError().setCause(e).log("Failed to create provider with factory {}", ClassUtils.getName(providerFactory));
             }

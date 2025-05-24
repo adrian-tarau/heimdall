@@ -3,6 +3,7 @@ package net.microfalx.heimdall.llm.ollama;
 import net.microfalx.heimdall.llm.api.Model;
 import net.microfalx.heimdall.llm.api.Provider;
 
+@net.microfalx.lang.annotation.Provider
 public class OllamaProviderFactory implements Provider.Factory{
 
     @Override
@@ -12,7 +13,7 @@ public class OllamaProviderFactory implements Provider.Factory{
         builder.version("0.7.0").author("Ollama Team").license("MIT")
                 .chatFactory(new OllamaChatFactory());
         registerModels(builder);
-        return null;
+        return builder.build();
     }
 
     private void registerModels(net.microfalx.heimdall.llm.api.Provider.Builder builder) {

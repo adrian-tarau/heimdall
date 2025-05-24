@@ -25,27 +25,37 @@ public class LlmProperties {
     private int maximumConcurrentRequests = 4;
 
     /**
+     * Indicates whether the LLM service has access to the internet.
+     */
+    private boolean internetAccess = true;
+
+    /**
      * The duration that models stay loaded in memory (default "5m")
      */
     private Duration interval = Duration.ofMinutes(5);
 
     /**
-     * The OpenAI API key to use when accessing models that require it.
+     * OpenAI API key to use when accessing models that require it.
      */
     private String openAiApiKey;
 
     /**
-     * The Ollama API key to use when accessing models that require it.
+     * Ollama API key to use when accessing models that require it.
      */
     private String ollamaApiKey;
 
     /**
-     * The Hugging Face API key to use when accessing models that require it.
+     * Ollama URI to use when accessing models that require it.
+     */
+    private String ollamaUri;
+
+    /**
+     * Hugging Face API key to use when accessing models that require it.
      */
     private String huggingFaceApiKey;
 
     /**
-     * The GitHub API key to use when accessing models that require it.
+     * GitHub API key to use when accessing models that require it.
      */
     private String gitHubApiKey;
 }
