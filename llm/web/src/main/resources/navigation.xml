@@ -4,6 +4,7 @@
         <menu id="ai_system" text="AI" parent="system" position="5" icon="fa-solid fa-robot">
             <item id="provider" text="Providers" action="/system/ai/provider" icon="fa-solid fa-building"/>
             <item id="model" text="Models" action="/system/ai/model" icon="fa-solid fa-square-binary"/>
+            <item id="chat" text="Chats" action="/system/ai/chat" icon="fa-brands fa-rocketchat"/>
         </menu>
     </menu>
 </navigations>

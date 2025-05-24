@@ -3,6 +3,7 @@ package net.microfalx.heimdall.llm.api;
 import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.Nameable;
 
+import java.security.Principal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Iterator;
@@ -24,7 +25,7 @@ public interface Chat extends Identifiable<String>, Nameable {
      *
      * @return a non-null instance
      */
-    int getUser();
+    Principal getUser();
 
     /**
      * Returns the start time of chat.

@@ -9,7 +9,8 @@ create table llm_provider
     tags                            varchar(500),
     license                         varchar(1000)       default 'Proprietary',
     version                         varchar(50)         default '',
-    description                     varchar(1000)
+    description                     varchar(1000),
+    constraint nk$llm_provider$natural_id unique key (natural_id)
 ) ENGINE = InnoDB;
 
 create table llm_model
@@ -38,6 +39,7 @@ create table llm_model
 create table llm_chat
 (
     id                              int                 not null primary key auto_increment,
+    natural_id                      varchar(100)        not null,
     user_id                         varchar(50)         not null,
     model_id                        int                 not null,
     name                            varchar(100)        not null,
@@ -47,6 +49,7 @@ create table llm_chat
     tags                            varchar(500),
     token_count                     int                 not null,
     duration                        int                 not null,
+    constraint nk$llm_chat$natural_id unique key (natural_id),
     constraint fk$llm_chat$user_id foreign key (user_id) references security_users (username),
     constraint fk$llm_chat$model_id foreign key (model_id) references llm_model (id)
 ) ENGINE = InnoDB;

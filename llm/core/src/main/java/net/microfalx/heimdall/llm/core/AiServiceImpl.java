@@ -110,6 +110,7 @@ public class AiServiceImpl extends ApplicationContextSupport implements AiServic
         requireNonNull(chat);
         activeChats.remove(chat);
         closedChats.add(chat);
+        aiPersistence.execute(chat);
     }
 
     private void initListeners() {

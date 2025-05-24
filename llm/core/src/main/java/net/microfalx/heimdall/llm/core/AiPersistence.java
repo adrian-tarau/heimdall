@@ -30,7 +30,7 @@ public class AiPersistence extends ApplicationContextSupport {
         return updater.findByNaturalIdAndUpdate(jpaProvider);
     }
 
-    void execute(Model model) {
+    net.microfalx.heimdall.llm.core.Model execute(Model model) {
         NaturalIdEntityUpdater<net.microfalx.heimdall.llm.core.Model, Integer> updater = getUpdater(ModelRepository.class);
         net.microfalx.heimdall.llm.core.Model jpaModel = new net.microfalx.heimdall.llm.core.Model();
         jpaModel.setNaturalId(model.getId());
@@ -54,7 +54,22 @@ public class AiPersistence extends ApplicationContextSupport {
         jpaModel.setDescription(model.getDescription());
         jpaModel.setName(model.getName());
         jpaModel.setProvider(execute(model.getProvider()));
-        updater.findByNaturalIdAndUpdate(jpaModel);
+        return updater.findByNaturalIdAndUpdate(jpaModel);
+    }
+
+    void execute(net.microfalx.heimdall.llm.api.Chat chat){
+        NaturalIdEntityUpdater<Chat, Integer> updater = getUpdater(ChatRepository.class);
+        Chat jpaChat=new Chat();
+        jpaChat.setModel(execute(chat.getModel()));
+        jpaChat.setNaturalId(chat.getId());
+        jpaChat.setName(chat.getName());
+        jpaChat.setContent("");
+        jpaChat.setDuration(chat.getDuration());
+        jpaChat.setUser(chat.getUser().getName());
+        jpaChat.setFinishAt(chat.getFinishAt());
+        jpaChat.setStartAt(chat.getStartAt());
+        jpaChat.setTokenCount(chat.getTokenCount());
+        updater.findByNaturalIdAndUpdate(jpaChat);
     }
 
 

@@ -12,8 +12,11 @@ import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.ThreadUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -33,7 +36,6 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractChat.class);
 
     private final Model model;
-    private int user;
     private final LocalDateTime startAt = LocalDateTime.now();
     private LocalDateTime finishAt;
     private String content;
@@ -56,8 +58,12 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
     }
 
     @Override
-    public int getUser() {
-        return user;
+    public Principal getUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            return (Principal) authentication.getPrincipal();
+        }
+        return new PrincipalImpl("anonymous");
     }
 
     @Override
@@ -194,6 +200,21 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
         @Override
         public String next() {
             return queue.poll();
+        }
+    }
+
+    private static class PrincipalImpl implements java.security.Principal {
+
+        private final String name;
+
+        public PrincipalImpl(String name) {
+            requireNonNull(name);
+            this.name = name;
+        }
+
+        @Override
+        public String getName() {
+            return name;
         }
     }
 }
