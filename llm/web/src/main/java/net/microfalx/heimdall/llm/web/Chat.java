@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 @Name("Chats")
 @Getter
 @Setter
+@ReadOnly
 public class Chat extends IdentityAware<Integer> {
 
     @NaturalId

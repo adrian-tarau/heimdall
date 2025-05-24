@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller("SystemProviderController")
 @RequestMapping("/system/ai/provider")
-@DataSet(model = Provider.class, timeFilter = false)
+@DataSet(model = Provider.class, timeFilter = false, canAdd = false, canDelete = false)
 public class ProviderController extends SystemDataSetController<Provider, Integer> {
 
     @Autowired

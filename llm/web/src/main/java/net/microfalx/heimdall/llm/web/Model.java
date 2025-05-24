@@ -31,16 +31,19 @@ public class Model extends NamedIdentityAware<Integer> {
     @Position(15)
     @Column(name = "uri", length = 1000)
     @Description("The URI of the model")
+    @Visible(value = false)
     private String uri;
 
     @Position(20)
     @Column(name = "api_key", nullable = false, length = 500)
     @Description("The API key to use when accessing the model")
+    @Visible(value = false)
     private String apiKey;
 
     @Position(25)
     @Column(name = "model_name", length = 100)
     @Description("A reference to the model name")
+    @Visible(value = false)
     private String modelName;
 
     @Position(30)

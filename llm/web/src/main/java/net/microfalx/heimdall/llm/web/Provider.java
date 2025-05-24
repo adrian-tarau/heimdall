@@ -26,11 +26,13 @@ public class Provider extends NamedIdentityAware<Integer> {
     @Position(10)
     @Column(name = "uri", length = 1000)
     @Description("The URI of the provider")
+    @Visible(value = false)
     private String uri;
 
     @Position(15)
     @Column(name = "api_key", nullable = false, length = 500)
     @Description("the API key to use when accessing the model")
+    @Visible(value = false)
     private String apiKey;
 
     @Position(20)
