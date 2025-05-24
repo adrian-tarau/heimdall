@@ -1,7 +1,9 @@
 package net.microfalx.heimdall.llm.jlama;
 
 import net.microfalx.heimdall.llm.api.Chat;
-import net.microfalx.heimdall.llm.core.AiServiceImpl;
+import net.microfalx.heimdall.llm.api.Model;
+import net.microfalx.heimdall.llm.api.Provider;
+import net.microfalx.heimdall.llm.core.LlmServiceImpl;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,16 +17,19 @@ import java.util.Iterator;
 class JLamaChatTest {
 
     @InjectMocks
-    private AiServiceImpl aiService;
+    private LlmServiceImpl aiService;
+
+    private Provider provider;
 
     @BeforeEach
     void setup() throws Exception {
-        aiService.afterPropertiesSet();
+        provider = new JLamaProviderFactory().createProvider();
+        //aiService.afterPropertiesSet();
     }
 
     @Test
     void ask() {
-        Chat chat = aiService.createChat("jlama_llama3_2_1b");
+        Chat chat = aiService.createChat(loadChat("jlama_llama3_2_1b"));
         String response = chat.ask("Tell me a joke about Java");
         System.out.println(response);
         Assertions.assertThat(response.length()).isGreaterThan(0);
@@ -32,7 +37,7 @@ class JLamaChatTest {
 
     @Test
     void chat() {
-        Chat chat = aiService.createChat("jlama_llama3_2_1b");
+        Chat chat = aiService.createChat(loadChat("jlama_llama3_2_1b"));
         int tokenCount = 0;
         Iterator<String> stream = chat.chat("Tell me a joke about Java");
         while (stream.hasNext()) {
@@ -42,6 +47,10 @@ class JLamaChatTest {
             tokenCount++;
         }
         Assertions.assertThat(tokenCount).isGreaterThan(0);
+    }
+
+    private Model loadChat(String modelId) {
+        return provider.getModel(modelId);
     }
 
 }

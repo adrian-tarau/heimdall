@@ -8,7 +8,7 @@ import java.util.Collection;
  * A service which manages the AI models and providers.
  */
 @Service
-public interface AiService extends Chat.Factory {
+public interface LlmService extends Chat.Factory {
 
     /**
      * Creates a chat session with a given identifier.
@@ -30,7 +30,7 @@ public interface AiService extends Chat.Factory {
      *
      * @param id the model identifier
      * @return the model
-     * @throws AiNotFoundException if the model cannot be found
+     * @throws LlmNotFoundException if the model cannot be found
      */
     Model getModel(String id);
 

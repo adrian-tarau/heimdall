@@ -1,7 +1,7 @@
 package net.microfalx.heimdall.llm.core;
 
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
-import net.microfalx.heimdall.llm.api.AiNotFoundException;
+import net.microfalx.heimdall.llm.api.LlmNotFoundException;
 import net.microfalx.heimdall.llm.api.Model;
 import net.microfalx.heimdall.llm.api.Provider;
 import org.slf4j.Logger;
@@ -16,16 +16,16 @@ import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.CollectionUtils.setFromString;
 import static net.microfalx.lang.StringUtils.toIdentifier;
 
-public class AICache extends ApplicationContextSupport {
+public class LlmCache extends ApplicationContextSupport {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AICache.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LlmCache.class);
 
-    private final AiServiceImpl aiService;
+    private final LlmServiceImpl aiService;
 
     private final Map<String, net.microfalx.heimdall.llm.api.Model> models = new HashMap<>();
     private final Map<String, Provider> providers = new HashMap<>();
 
-    AICache(AiServiceImpl aiService) {
+    LlmCache(LlmServiceImpl aiService) {
         this.aiService = aiService;
     }
 
@@ -42,7 +42,7 @@ public class AICache extends ApplicationContextSupport {
         requireNonNull(id);
         Model model = models.get(toIdentifier(id));
         if (model == null) {
-            throw new AiNotFoundException("A model with identifier '" + id + "' is not registered");
+            throw new LlmNotFoundException("A model with identifier '" + id + "' is not registered");
         }
         return model;
     }
@@ -62,7 +62,7 @@ public class AICache extends ApplicationContextSupport {
         requireNonNull(id);
         Provider cluster = providers.get(toIdentifier(id));
         if (cluster == null) {
-            throw new AiNotFoundException("A provider with identifier '" + id + "' is not registered");
+            throw new LlmNotFoundException("A provider with identifier '" + id + "' is not registered");
         }
         return cluster;
     }

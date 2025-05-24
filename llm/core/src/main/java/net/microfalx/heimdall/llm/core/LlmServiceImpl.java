@@ -1,10 +1,10 @@
 package net.microfalx.heimdall.llm.core;
 
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
-import net.microfalx.heimdall.llm.api.*;
 import net.microfalx.heimdall.llm.api.Chat;
 import net.microfalx.heimdall.llm.api.Model;
 import net.microfalx.heimdall.llm.api.Provider;
+import net.microfalx.heimdall.llm.api.*;
 import net.microfalx.lang.ClassUtils;
 import net.microfalx.threadpool.ThreadPool;
 import org.slf4j.Logger;
@@ -22,16 +22,17 @@ import static java.util.Collections.unmodifiableCollection;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
 @Service
-public class AiServiceImpl extends ApplicationContextSupport implements AiService, InitializingBean {
+public class LlmServiceImpl extends ApplicationContextSupport implements LlmService, InitializingBean {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AiService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LlmService.class);
 
     @Autowired
     private ApplicationContext applicationContext;
 
-    private volatile AICache cache = new AICache(this);
-    private final AiPersistence aiPersistence = new AiPersistence();
-    private final Collection<AiListener> listeners = new CopyOnWriteArrayList<>();
+    private volatile LlmCache cache = new LlmCache(this);
+    private final LlmPersistence llmPersistence = new LlmPersistence();
+    private final Collection<LlmListener> listeners = new CopyOnWriteArrayList<>();
+    private final Collection<Provider.Factory> providerFactories = new CopyOnWriteArrayList<>();
     private final Collection<net.microfalx.heimdall.llm.api.Chat> activeChats = new CopyOnWriteArrayList<>();
     private final Collection<net.microfalx.heimdall.llm.api.Chat> closedChats = new CopyOnWriteArrayList<>();
 
@@ -83,13 +84,13 @@ public class AiServiceImpl extends ApplicationContextSupport implements AiServic
         requireNonNull(provider);
         cache.registerProvider(provider);
         for (Model model : provider.getModels()) {
-            aiPersistence.execute(model);
+            llmPersistence.execute(model);
         }
     }
 
     @Override
     public void reload() {
-        AICache cache = new AICache(this);
+        LlmCache cache = new LlmCache(this);
         cache.setApplicationContext(getApplicationContext());
         cache.load();
         this.cache = cache;
@@ -98,6 +99,7 @@ public class AiServiceImpl extends ApplicationContextSupport implements AiServic
     @Override
     public void afterPropertiesSet() throws Exception {
         initListeners();
+        initProviderFactories();
         initializeApplicationContext();
         registerProviders();
     }
@@ -110,29 +112,39 @@ public class AiServiceImpl extends ApplicationContextSupport implements AiServic
         requireNonNull(chat);
         activeChats.remove(chat);
         closedChats.add(chat);
-        aiPersistence.execute(chat);
+        llmPersistence.execute(chat);
     }
 
     private void initListeners() {
-        Collection<AiListener> listeners = ClassUtils.resolveProviderInstances(AiListener.class);
+        Collection<LlmListener> listeners = ClassUtils.resolveProviderInstances(LlmListener.class);
         LOGGER.info("Register {} listeners", listeners.size());
-        for (AiListener listener : listeners) {
+        for (LlmListener listener : listeners) {
             LOGGER.debug(" - {}", ClassUtils.getName(listeners));
             this.listeners.add(listener);
         }
     }
 
+    private void initProviderFactories() {
+        Collection<Provider.Factory> loadedProviderFactories = ClassUtils.resolveProviderInstances(Provider.Factory.class);
+        LOGGER.info("Register {} provider factories", listeners.size());
+        for (Provider.Factory providerFactory : loadedProviderFactories) {
+            LOGGER.debug(" - {}", ClassUtils.getName(providerFactory));
+            this.providerFactories.add(providerFactory);
+        }
+    }
+
     private void initializeApplicationContext() {
-        aiPersistence.setApplicationContext(getApplicationContext());
+        llmPersistence.setApplicationContext(getApplicationContext());
         cache.setApplicationContext(getApplicationContext());
     }
 
     private void registerProviders() {
-        for (AiListener listener : listeners) {
+        for (Provider.Factory providerFactory : providerFactories) {
             try {
-                listener.registerProviders(this);
+                Provider provider = providerFactory.createProvider();
+                registerProvider(provider);
             } catch (Exception e) {
-                LOGGER.atError().setCause(e).log("Failed to register provider with listener {}", ClassUtils.getName(listener));
+                LOGGER.atError().setCause(e).log("Failed to create provider with factory {}", ClassUtils.getName(providerFactory));
             }
         }
     }

@@ -9,7 +9,7 @@ import net.microfalx.heimdall.llm.api.Provider;
 
 import static net.microfalx.lang.CollectionUtils.setToString;
 
-public class AiPersistence extends ApplicationContextSupport {
+public class LlmPersistence extends ApplicationContextSupport {
 
     net.microfalx.heimdall.llm.core.Provider execute(Provider provider) {
         NaturalIdEntityUpdater<net.microfalx.heimdall.llm.core.Provider, Integer> updater = getUpdater(ProviderRepository.class);

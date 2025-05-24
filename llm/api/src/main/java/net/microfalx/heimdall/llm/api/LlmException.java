@@ -3,13 +3,13 @@ package net.microfalx.heimdall.llm.api;
 /**
  * Base class for all exceptions thrown by the AI framework.
  */
-public class AiException extends RuntimeException {
+public class LlmException extends RuntimeException {
 
-    public AiException(String message) {
+    public LlmException(String message) {
         super(message);
     }
 
-    public AiException(String message, Throwable cause) {
+    public LlmException(String message, Throwable cause) {
         super(message, cause);
     }
 }

@@ -43,7 +43,7 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
     private ChatModel chatModel;
     private StreamingChatModel streamingChatModel;
 
-    AiServiceImpl service;
+    LlmServiceImpl service;
 
     public AbstractChat(Model model) {
         requireNonNull(model);

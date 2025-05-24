@@ -3,13 +3,14 @@ package net.microfalx.heimdall.llm.api;
 import net.microfalx.lang.IdentityAware;
 import net.microfalx.lang.NamedAndTaggedIdentifyAware;
 import net.microfalx.lang.StringUtils;
+import org.atteo.classindex.IndexSubclasses;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
+import static java.util.Collections.unmodifiableList;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
 /**
@@ -81,7 +82,21 @@ public class Provider extends NamedAndTaggedIdentifyAware<String> {
      * @return a non-null instance
      */
     public Collection<Model> getModels() {
-        return Collections.unmodifiableList(models);
+        return unmodifiableList(models);
+    }
+
+    /**
+     * Returns a model.
+     *
+     * @param id the identifier of the model
+     * @return the model
+     * @throws LlmNotFoundException if the model was not found
+     */
+    public Model getModel(String id) {
+        for (Model model : models) {
+            if (model.getId().equals(id)) return model;
+        }
+        throw new LlmNotFoundException("A model with identifier " + id + " was not found");
     }
 
     /**
@@ -91,6 +106,20 @@ public class Provider extends NamedAndTaggedIdentifyAware<String> {
      */
     public Chat.Factory getChatFactory() {
         return chatFactory;
+    }
+
+    /**
+     * A factory for creating providers.
+     */
+    @IndexSubclasses
+    public interface Factory {
+
+        /**
+         * Creates a provider.
+         *
+         * @return a non-null instance
+         */
+        Provider createProvider();
     }
 
     public static class Builder extends NamedAndTaggedIdentifyAware.Builder<String> {
