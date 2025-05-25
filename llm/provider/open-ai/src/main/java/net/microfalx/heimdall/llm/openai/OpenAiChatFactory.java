@@ -1,12 +1,36 @@
 package net.microfalx.heimdall.llm.openai;
 
+import dev.langchain4j.model.chat.StreamingChatModel;
+import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import net.microfalx.heimdall.llm.api.Chat;
+import net.microfalx.heimdall.llm.api.LlmNotFoundException;
 import net.microfalx.heimdall.llm.api.Model;
+import net.microfalx.heimdall.llm.core.AbstractChatFactory;
+import net.microfalx.lang.NumberUtils;
+import net.microfalx.lang.StringUtils;
 
-public class OpenAiChatFactory implements Chat.Factory {
+import java.util.ArrayList;
+
+public class OpenAiChatFactory extends AbstractChatFactory {
 
     @Override
     public Chat createChat(Model model) {
-        return null;
+        if (StringUtils.isEmpty(model.getModelName())) {
+            throw new LlmNotFoundException("The model name is required for OpenAI");
+        }
+        StreamingChatModel chatModel = OpenAiStreamingChatModel.builder()
+                .modelName(model.getModelName())
+                .temperature(NumberUtils.toFloat(model.getTemperature()).doubleValue())
+                .maxTokens(model.getMaximumOutputTokens())
+                .frequencyPenalty(model.getFrequencyPenalty())
+                .presencePenalty(model.getPresencePenalty())
+                .baseUrl(model.getUri().toASCIIString())
+                .apiKey(model.getApyKey()).projectId("heimdall")
+                .maxCompletionTokens(model.getMaximumOutputTokens())
+                .responseFormat(model.getResponseFormat().name())
+                .stop(new ArrayList<>(model.getStopSequences())).strictTools(true)
+                .topP(model.getTopP())
+                .build();
+        return new OpenAiChat(model).setStreamingChatModel(chatModel);
     }
 }

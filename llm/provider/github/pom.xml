@@ -24,24 +24,30 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>net.microfalx.heimdall</groupId>
-    <artifactId>heimdall-llm-provider</artifactId>
-    <packaging>pom</packaging>
+    <artifactId>heimdall-llm-provider-github</artifactId>
     <version>0.9.0-SNAPSHOT</version>
 
     <parent>
         <groupId>net.microfalx.heimdall</groupId>
-        <artifactId>heimdall-llm</artifactId>
+        <artifactId>heimdall-llm-provider</artifactId>
         <version>0.9.0-SNAPSHOT</version>
     </parent>
 
-    <name>Heimdall :: Large Language Model :: Providers</name>
+    <name>Heimdall :: Large Language Model :: Providers :: GitHub</name>
 
-    <modules>
-        <module>hugging-face</module>
-        <module>jlama</module>
-        <module>ollama</module>
-        <module>open-ai</module>
-        <module>github</module>
-    </modules>
+    <dependencies>
+
+        <dependency>
+            <groupId>net.microfalx.heimdall</groupId>
+            <artifactId>heimdall-llm-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-github-models</artifactId>
+        </dependency>
+
+    </dependencies>
 
 </project>

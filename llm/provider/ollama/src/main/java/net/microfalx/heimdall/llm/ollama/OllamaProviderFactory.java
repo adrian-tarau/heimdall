@@ -12,7 +12,7 @@ public class OllamaProviderFactory implements Provider.Factory{
         builder.version("0.7.0").author("Ollama Team").license("MIT")
                 .chatFactory(new OllamaChatFactory());
         registerModels(builder);
-        return null;
+        return builder.build();
     }
 
     private void registerModels(net.microfalx.heimdall.llm.api.Provider.Builder builder) {
