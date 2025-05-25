@@ -43,6 +43,7 @@ public class Model extends NamedIdentityAware<Integer> {
     @Position(22)
     @Column(name = "_default", columnDefinition = "boolean default false",nullable = false)
     @Description("The default model use for inference")
+    @Label(value = "default")
     private boolean _default;
 
     @Position(25)
@@ -76,7 +77,7 @@ public class Model extends NamedIdentityAware<Integer> {
 
     @Position(50)
     @Column(name = "frequency_penalty")
-    @Label(value = "Frequency Penalty",group = "Penality")
+    @Label(value = "Frequency",group = "Penality")
     @Description("""
             The frequency penalty to use, between -2 and 2. Positive values penalize new tokens based on
             their existing frequency in the text so far, decreasing the model's likelihood to repeat the same line
@@ -85,7 +86,7 @@ public class Model extends NamedIdentityAware<Integer> {
 
     @Position(55)
     @Column(name = "presence_penalty")
-    @Label(value = "Presence Penalty",group = "Penality")
+    @Label(value = "Presence",group = "Penality")
     @Description("The presence penalty to use, between -2 and 2. Positive values penalize new tokens based on\n" +
             "whether they appear in the text so far, increasing the model's likelihood to talk about new topics.")
     private Double presencePenalty;
@@ -109,6 +110,7 @@ public class Model extends NamedIdentityAware<Integer> {
     @Column(name = "response_format", nullable = false)
     @Enumerated(value = EnumType.STRING)
     @Description("The format of the response from the model")
+    @Visible(value = false)
     private ResponseFormat responseFormat;
 
     @Position(400)

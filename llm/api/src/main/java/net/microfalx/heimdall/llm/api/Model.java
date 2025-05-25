@@ -198,7 +198,7 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
      *
      * @return a non-null instance
      */
-    public boolean is_default() {
+    public boolean isDefault() {
         return _default;
     }
 
