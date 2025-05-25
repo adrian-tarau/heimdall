@@ -1,9 +1,9 @@
 package net.microfalx.heimdall.llm.api;
 
+import lombok.ToString;
 import net.microfalx.lang.IdentityAware;
 import net.microfalx.lang.NamedAndTaggedIdentifyAware;
 import net.microfalx.lang.StringUtils;
-import org.atteo.classindex.IndexSubclasses;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -16,11 +16,13 @@ import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 /**
  * An interface for representing an AI model provider.
  */
+@ToString(callSuper = true)
 public class Provider extends NamedAndTaggedIdentifyAware<String> {
 
     private URI uri;
     private String apyKey;
 
+    @ToString.Exclude
     private List<Model> models;
     private Chat.Factory chatFactory;
 
@@ -111,7 +113,6 @@ public class Provider extends NamedAndTaggedIdentifyAware<String> {
     /**
      * A factory for creating providers.
      */
-    @IndexSubclasses
     public interface Factory {
 
         /**

@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.llm.api;
 
+import lombok.ToString;
 import net.microfalx.lang.IdentityAware;
 import net.microfalx.lang.NamedAndTaggedIdentifyAware;
 
@@ -33,10 +34,13 @@ import static net.microfalx.lang.ArgumentUtils.requireNonNull;
  * So temperature increases variety, while top-p and top-k reduce variety and focus samples on the model’s top predictions.
  * You have to balance diversity and relevance when tuning these parameters for different applications.
  */
+@ToString(callSuper = true)
 public class Model extends NamedAndTaggedIdentifyAware<String> {
 
     private URI uri;
     private String apyKey;
+    private boolean _default;
+
     private String modelName;
     private Double temperature;
     private Double topP;
@@ -196,6 +200,8 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
 
         private URI uri;
         private String apyKey;
+        private boolean _default;
+
         private String modelName;
         private Double temperature;
         private Double topP;
@@ -222,6 +228,11 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
             requireNonNull(apyKey);
             this.uri = uri;
             this.apyKey = apyKey;
+            return this;
+        }
+
+        public Builder setDefault(boolean _default) {
+            this._default = _default;
             return this;
         }
 
@@ -304,6 +315,7 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
             model.stopSequences = stopSequences;
             model.responseFormat = responseFormat;
             model.provider = provider;
+            model._default = _default;
             return model;
         }
     }

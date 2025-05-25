@@ -3,6 +3,7 @@ package net.microfalx.heimdall.llm.ollama;
 import net.microfalx.heimdall.llm.api.Model;
 import net.microfalx.heimdall.llm.api.Provider;
 
+@net.microfalx.lang.annotation.Provider
 public class OllamaProviderFactory implements Provider.Factory{
 
     @Override
