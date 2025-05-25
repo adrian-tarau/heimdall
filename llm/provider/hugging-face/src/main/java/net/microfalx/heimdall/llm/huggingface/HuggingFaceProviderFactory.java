@@ -3,7 +3,7 @@ package net.microfalx.heimdall.llm.huggingface;
 import net.microfalx.heimdall.llm.api.Provider;
 
 import java.net.URI;
-
+@net.microfalx.lang.annotation.Provider
 public class HuggingFaceProviderFactory implements Provider.Factory {
 
     @Override
