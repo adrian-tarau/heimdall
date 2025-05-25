@@ -40,6 +40,11 @@ public class Model extends NamedIdentityAware<Integer> {
     @Visible(value = false)
     private String apiKey;
 
+    @Position(22)
+    @Column(name = "_default", columnDefinition = "boolean default false",nullable = false)
+    @Description("The default model use for inference")
+    private boolean _default;
+
     @Position(25)
     @Column(name = "model_name", length = 100)
     @Description("A reference to the model name")
@@ -89,6 +94,7 @@ public class Model extends NamedIdentityAware<Integer> {
     @Column(name = "maximum_output_tokens")
     @Label(value = "Maximum Output Tokens",group = "Other")
     @Description("The maximum number of tokens that can be generated in the chat completion")
+    @Visible(value = false)
     private Integer maximumOutputTokens;
 
     @Position(65)
@@ -96,6 +102,7 @@ public class Model extends NamedIdentityAware<Integer> {
     @Label(value = "Stop Sequences",group = "Other")
     @Description("The tokens to be used as a stop sequence. The API will stop generating further tokens after\n" +
             "it encounters the stop sequence")
+    @Visible(value = false)
     private String stopSequences;
 
     @Position(70)

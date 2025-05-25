@@ -194,6 +194,15 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
     }
 
     /**
+     * Return true if the model is the defualt model for inference, otherwise false
+     *
+     * @return a non-null instance
+     */
+    public boolean is_default() {
+        return _default;
+    }
+
+    /**
      * A builder class.
      */
     public static class Builder extends NamedAndTaggedIdentifyAware.Builder<String> {

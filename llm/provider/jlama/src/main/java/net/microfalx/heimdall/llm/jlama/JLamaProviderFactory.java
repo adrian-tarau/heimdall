@@ -20,7 +20,7 @@ public class JLamaProviderFactory implements Provider.Factory {
         // this model gets into a loop
         //builder.model(Model.create("tinyllama", "TinyLlama", "tjake/TinyLlama-1.1B-Chat-v1.0-Jlama-Q4"));
         builder.model((Model.Builder) Model.create("llama3.2-1b", "Llama 3.2 (1B)", "tjake/Llama-3.2-1B-Instruct-JQ4")
-                .tag("meta").tag("llama").tag("1b").tag("llama3"));
+                .setDefault(true).tag("meta").tag("llama").tag("1b").tag("llama3"));
         builder.model((Model.Builder) Model.create("llama3.2-3b", "Llama 3.2 (3B)", "tjake/Llama-3.2-3B-Instruct-JQ4")
                 .tag("meta").tag("llama").tag("3b").tag("llama3"));
         builder.model((Model.Builder) Model.create("gemma2-2b", "Gemma 3 (2B)", "tjake/gemma-2-2b-it-JQ4")
