@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
+import net.microfalx.bootstrap.dataset.annotation.Tabs;
 import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
 import net.microfalx.heimdall.infrastructure.core.system.Server;
 import net.microfalx.heimdall.infrastructure.core.system.Service;
@@ -17,6 +18,7 @@ import net.microfalx.lang.annotation.*;
 @Setter
 @ToString(callSuper = true)
 @Name("Health Check")
+@Tabs(attributes = {"tags", "description"})
 public class Ping extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
 
     @ManyToOne

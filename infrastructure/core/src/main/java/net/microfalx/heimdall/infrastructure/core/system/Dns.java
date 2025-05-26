@@ -6,6 +6,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.microfalx.bootstrap.dataset.annotation.Tabs;
 import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
 import net.microfalx.lang.annotation.*;
 import org.hibernate.annotations.NaturalId;
@@ -16,6 +17,7 @@ import org.hibernate.annotations.NaturalId;
 @Getter
 @Setter
 @ToString(callSuper = true)
+@Tabs(attributes = {"tags", "description"})
 public class Dns extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
 
     @NaturalId

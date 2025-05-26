@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Lookup;
+import net.microfalx.bootstrap.dataset.annotation.Tabs;
 import net.microfalx.bootstrap.dataset.lookup.TimeZoneLookup;
 import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
 import net.microfalx.heimdall.infrastructure.api.Server;
@@ -22,6 +23,7 @@ import java.util.Collection;
 @Getter
 @Setter
 @ToString(callSuper = true)
+@Tabs(attributes = {"tags", "description"})
 public class Cluster extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
 
     @NaturalId

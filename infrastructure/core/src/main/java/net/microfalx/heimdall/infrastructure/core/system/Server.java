@@ -6,6 +6,8 @@ import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Component;
 import net.microfalx.bootstrap.dataset.annotation.Lookup;
+import net.microfalx.bootstrap.dataset.annotation.Tab;
+import net.microfalx.bootstrap.dataset.annotation.Tabs;
 import net.microfalx.bootstrap.dataset.lookup.TimeZoneLookup;
 import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
 import net.microfalx.lang.StringUtils;
@@ -20,6 +22,7 @@ import java.util.Collection;
 @Getter
 @Setter
 @ToString(callSuper = true)
+@Tabs(attributes = {"tags", "description"})
 public class Server extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
 
     @NaturalId
@@ -48,12 +51,14 @@ public class Server extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
     @Position(35)
     @Description("The timezone where the server is deployed")
     @Lookup(model = TimeZoneLookup.class)
+    @Tab(label = "Options")
     private String timeZone;
 
     @Column(name = "icmp", nullable = false)
     @Position(40)
     @Description("Indicates whether the server could be pinged using ICMP protocol")
     @Label("ICMP")
+    @Tab(label = "Options")
     private boolean icmp;
 
     @Column(name = "attributes", nullable = false)
@@ -61,6 +66,7 @@ public class Server extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
     @Description("A collection of attributes, one per line, separated by '=' associated with a server")
     @Component(Component.Type.TEXT_AREA)
     @Visible(modes = {Visible.Mode.EDIT, Visible.Mode.ADD, Visible.Mode.VIEW})
+    @Tab(label = "Options")
     private String attributes;
 
     @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})

@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Filterable;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
+import net.microfalx.bootstrap.dataset.annotation.Tabs;
 import net.microfalx.bootstrap.jdbc.entity.NamedAndOwnedAndTaggedAndTimestampedIdentityAware;
 import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.heimdall.rest.core.system.RestProject;
@@ -15,6 +16,7 @@ import net.microfalx.lang.annotation.*;
 @ToString
 @Getter
 @Setter
+@Tabs(attributes = {"tags", "description"})
 public abstract class AbstractLibrary extends NamedAndOwnedAndTaggedAndTimestampedIdentityAware<Integer> {
 
     @Column(name = "natural_id", nullable = false, length = 100, unique = true)

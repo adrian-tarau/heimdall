@@ -7,9 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.broker.Topic;
 import net.microfalx.bootstrap.dataset.Alert;
-import net.microfalx.bootstrap.dataset.annotation.Component;
-import net.microfalx.bootstrap.dataset.annotation.Filterable;
-import net.microfalx.bootstrap.dataset.annotation.Formattable;
+import net.microfalx.bootstrap.dataset.annotation.*;
 import net.microfalx.bootstrap.jdbc.entity.NamedAndTimestampedIdentityAware;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.lang.annotation.*;
@@ -21,6 +19,7 @@ import net.microfalx.resource.MimeType;
 @Getter
 @Setter
 @ToString(callSuper = true)
+@Tabs
 public class BrokerTopic extends NamedAndTimestampedIdentityAware<Integer> {
 
     @ManyToOne
@@ -66,36 +65,41 @@ public class BrokerTopic extends NamedAndTimestampedIdentityAware<Integer> {
     @Column(name = "name_expression")
     @Position(20)
     @Description("An MVEL expression used to extract the event name from event attributes")
-    @Visible(modes = {Visible.Mode.EDIT})
+    @Visible(modes = {Visible.Mode.EDIT, Visible.Mode.VIEW})
     @Component(Component.Type.TEXT_AREA)
+    @Tab(label = "Expressions")
     private String nameExpression;
 
     @Column(name = "description_expression")
     @Position(21)
     @Description("An MVEL expression used to extract the event description from event attributes")
-    @Visible(modes = {Visible.Mode.EDIT})
+    @Visible(modes = {Visible.Mode.EDIT, Visible.Mode.VIEW})
     @Component(Component.Type.TEXT_AREA)
+    @Tab(label = "Expressions")
     private String descriptionExpression;
 
     @Column(name = "attribute_inclusions")
     @Position(30)
     @Description("An comma separate list of regular expressions used to select which event attributes to be indexed (if empty all will be included)")
-    @Visible(modes = {Visible.Mode.EDIT})
+    @Visible(modes = {Visible.Mode.EDIT, Visible.Mode.VIEW})
     @Component(Component.Type.TEXT_AREA)
+    @Tab(label = "Attributes")
     private String attributeInclusions;
 
     @Column(name = "attribute_exclusions")
     @Position(31)
     @Description("An comma separate list of regular expressions used to select which event attributes to be excluded (not indexed)")
-    @Visible(modes = {Visible.Mode.EDIT})
+    @Visible(modes = {Visible.Mode.EDIT, Visible.Mode.VIEW})
     @Component(Component.Type.TEXT_AREA)
+    @Tab(label = "Attributes")
     private String attributeExclusions;
 
     @Column(name = "attribute_prefixes")
     @Position(32)
     @Description("An comma separate list of attribute prefixes to be removed")
-    @Visible(modes = {Visible.Mode.EDIT})
+    @Visible(modes = {Visible.Mode.EDIT, Visible.Mode.VIEW})
     @Component(Component.Type.TEXT_AREA)
+    @Tab(label = "Attributes")
     private String attributePrefixes;
 
     @Column(name = "parameters")

@@ -4,9 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import net.microfalx.bootstrap.dataset.annotation.Component;
-import net.microfalx.bootstrap.dataset.annotation.Filterable;
-import net.microfalx.bootstrap.dataset.annotation.Formattable;
+import net.microfalx.bootstrap.dataset.annotation.*;
 import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
 import net.microfalx.lang.annotation.*;
 import org.hibernate.annotations.NaturalId;
@@ -19,6 +17,7 @@ import java.util.Collection;
 @Getter
 @Setter
 @ToString(callSuper = true)
+@Tabs(attributes = {"tags", "description"})
 public class Environment extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
 
     @NaturalId
@@ -52,6 +51,7 @@ public class Environment extends NamedAndTaggedAndTimestampedIdentityAware<Integ
     @Description("A collection of attributes, one per line, separated by '=' associated with an environment")
     @Component(Component.Type.TEXT_AREA)
     @Visible(modes = {Visible.Mode.EDIT, Visible.Mode.ADD, Visible.Mode.VIEW})
+    @Tab(label = "Options")
     private String attributes;
 
     @Transient
@@ -74,6 +74,7 @@ public class Environment extends NamedAndTaggedAndTimestampedIdentityAware<Integ
     @Description("The version of the environment")
     @Position(100)
     @Filterable
+    @Tab(label = "Options")
     private String version;
 
     @Visible(value = false)

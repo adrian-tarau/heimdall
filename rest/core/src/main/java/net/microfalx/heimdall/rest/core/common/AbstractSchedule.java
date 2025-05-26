@@ -7,6 +7,8 @@ import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Component;
 import net.microfalx.bootstrap.dataset.annotation.Filterable;
+import net.microfalx.bootstrap.dataset.annotation.Tab;
+import net.microfalx.bootstrap.dataset.annotation.Tabs;
 import net.microfalx.bootstrap.jdbc.entity.TimestampAware;
 import net.microfalx.heimdall.infrastructure.core.system.Environment;
 import net.microfalx.heimdall.rest.core.system.RestSimulation;
@@ -18,6 +20,7 @@ import java.time.LocalDateTime;
 @ToString
 @Getter
 @Setter
+@Tabs
 public abstract class AbstractSchedule extends TimestampAware {
 
     @Id
@@ -68,18 +71,21 @@ public abstract class AbstractSchedule extends TimestampAware {
     @Description("The number of virtual users")
     @Position(40)
     @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})
+    @Tab(label = "Options")
     private Integer vus;
 
     @Column(name = "duration",length = 50)
     @Description("The duration")
     @Position(45)
     @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})
+    @Tab(label = "Options")
     private String duration;
 
     @Column(name = "iterations")
     @Description("The iterations")
     @Position(50)
     @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})
+    @Tab(label = "Options")
     private Integer iterations;
 
     @Column(name = "attributes",length = 4000)
@@ -87,6 +93,7 @@ public abstract class AbstractSchedule extends TimestampAware {
     @Position(55)
     @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})
     @Component(Component.Type.TEXT_AREA)
+    @Tab(label = "Options")
     private String attributes;
 
     @Transient

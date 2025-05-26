@@ -4,9 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import net.microfalx.bootstrap.dataset.annotation.Component;
-import net.microfalx.bootstrap.dataset.annotation.Filterable;
-import net.microfalx.bootstrap.dataset.annotation.Formattable;
+import net.microfalx.bootstrap.dataset.annotation.*;
 import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
 import net.microfalx.heimdall.rest.api.Project;
 import net.microfalx.lang.annotation.*;
@@ -17,6 +15,7 @@ import net.microfalx.lang.annotation.*;
 @ToString
 @Getter
 @Setter
+@Tabs(attributes = {"tags", "description"})
 public class RestProject extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
 
     @Column(name = "natural_id", nullable = false, length = 100, unique = true)
@@ -35,6 +34,7 @@ public class RestProject extends NamedAndTaggedAndTimestampedIdentityAware<Integ
     @Position(15)
     @Filterable
     @Formattable(maximumLength = 40)
+    @Tab(label = "Repository")
     private String uri;
 
     @Column(name = "user_name", length = 100)
@@ -43,6 +43,7 @@ public class RestProject extends NamedAndTaggedAndTimestampedIdentityAware<Integ
     @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})
     @Formattable()
     @Filterable
+    @Tab(label = "Repository")
     private String userName;
 
     @Column(name = "password", length = 100)
@@ -52,6 +53,7 @@ public class RestProject extends NamedAndTaggedAndTimestampedIdentityAware<Integ
     @Component(Component.Type.PASSWORD)
     @Formattable()
     @Filterable
+    @Tab(label = "Repository")
     private String password;
 
     @Column(name = "token", length = 2000)
@@ -61,6 +63,7 @@ public class RestProject extends NamedAndTaggedAndTimestampedIdentityAware<Integ
     @Component(Component.Type.PASSWORD)
     @Formattable()
     @Filterable
+    @Tab(label = "Repository")
     private String token;
 
     @Column(name = "simulation_path", length = 2000)

@@ -7,9 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.Alert;
-import net.microfalx.bootstrap.dataset.annotation.Component;
-import net.microfalx.bootstrap.dataset.annotation.Formattable;
-import net.microfalx.bootstrap.dataset.annotation.Lookup;
+import net.microfalx.bootstrap.dataset.annotation.*;
 import net.microfalx.bootstrap.dataset.lookup.TimeZoneLookup;
 import net.microfalx.bootstrap.jdbc.entity.NamedAndTimestampedIdentityAware;
 import net.microfalx.bootstrap.jdbc.jpa.EncryptAttributeConverter;
@@ -25,6 +23,7 @@ import java.time.ZoneId;
 @Getter
 @Setter
 @ToString(callSuper = true)
+@Tabs
 public class Schema extends NamedAndTimestampedIdentityAware<Integer> {
 
     @Column(name = "type")
@@ -40,6 +39,7 @@ public class Schema extends NamedAndTimestampedIdentityAware<Integer> {
     @Width(min = "300")
     @Description("The JDBC URL of the database")
     @NotEmpty
+    @Tab(label = "Connection")
     private String url;
 
     @Column(name = "username", length = 100)
@@ -47,6 +47,7 @@ public class Schema extends NamedAndTimestampedIdentityAware<Integer> {
     @Description("The user name used to connect to the database")
     @Label("User Name")
     @NotEmpty
+    @Tab(label = "Connection")
     private String username;
 
     @Column(name = "password", length = 100)
@@ -55,6 +56,7 @@ public class Schema extends NamedAndTimestampedIdentityAware<Integer> {
     @Visible(modes = {Visible.Mode.ADD, Visible.Mode.EDIT})
     @Component(Component.Type.PASSWORD)
     @Convert(converter = EncryptAttributeConverter.class)
+    @Tab(label = "Connection")
     private String password;
 
     @Column(name = "time_zone", length = 100)
@@ -76,6 +78,7 @@ public class Schema extends NamedAndTimestampedIdentityAware<Integer> {
     @Description("The mappings used to translate IPs or any additional database specific features")
     @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.ADD, Visible.Mode.EDIT})
     @Component(Component.Type.TEXT_AREA)
+    @Tab(label = "Options")
     private String mappings;
 
     @Position(2000)
