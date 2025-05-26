@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import net.microfalx.bootstrap.dataset.annotation.Filterable;
+import net.microfalx.bootstrap.dataset.annotation.Tabs;
 import net.microfalx.bootstrap.jdbc.entity.NamedIdentityAware;
 import net.microfalx.heimdall.llm.api.ResponseFormat;
 import net.microfalx.lang.annotation.*;
@@ -13,6 +14,7 @@ import net.microfalx.lang.annotation.*;
 @Name("Models")
 @Getter
 @Setter
+@Tabs
 public class Model extends NamedIdentityAware<Integer> {
 
     @NaturalId

@@ -143,7 +143,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
             try {
                 Provider provider = providerFactory.createProvider();
                 if (provider == null) {
-                    LOGGER.warn("Provider factory {} returned NULL", ClassUtils.getName(providerFactory));
+                    LOGGER.error("Provider factory {} returned NULL", ClassUtils.getName(providerFactory));
                 } else {
                     registerProvider(provider);
                 }

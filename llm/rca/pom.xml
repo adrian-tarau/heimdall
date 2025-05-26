@@ -61,6 +61,12 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>net.microfalx.heimdall</groupId>
+            <artifactId>heimdall-llm-provider-github</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
     </dependencies>
 
 </project>
