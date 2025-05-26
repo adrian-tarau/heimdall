@@ -219,7 +219,7 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
 
         private URI uri;
         private String apyKey;
-        private boolean enabled;
+        private boolean enabled=true;
         private boolean _default;
 
         private String modelName;

@@ -32,6 +32,9 @@ public class Model extends NamedIdentityAware<Integer> {
     @Column(name = "api_key", nullable = false, length = 500)
     private String apiKey;
 
+    @Column(name = "enabled", columnDefinition = "boolean default false", nullable = false)
+    private boolean enabled;
+
     @Column(name = "default", columnDefinition = "boolean default false", nullable = false)
     private boolean _default;
 

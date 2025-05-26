@@ -54,6 +54,7 @@ public class LlmPersistence extends ApplicationContextSupport {
         jpaModel.setDescription(model.getDescription());
         jpaModel.setName(model.getName());
         jpaModel.set_default(model.isDefault());
+        jpaModel.setEnabled(model.isEnabled());
         jpaModel.setProvider(execute(model.getProvider()));
         return updater.findByNaturalIdAndUpdate(jpaModel);
     }

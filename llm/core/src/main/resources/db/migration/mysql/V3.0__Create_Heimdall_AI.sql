@@ -21,6 +21,7 @@ create table llm_model
     name                            varchar(100)       not null,
     uri                             varchar(1000),
     api_key                         varchar(500),
+    enabled boolean default true not null,
     `default` boolean default false not null,
     model_name                      varchar(100),
     temperature                     decimal,
