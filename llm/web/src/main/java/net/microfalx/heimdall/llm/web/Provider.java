@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import net.microfalx.bootstrap.dataset.annotation.Component;
 import net.microfalx.bootstrap.dataset.annotation.Filterable;
 import net.microfalx.bootstrap.jdbc.entity.NamedIdentityAware;
 import net.microfalx.lang.annotation.*;
@@ -33,6 +34,7 @@ public class Provider extends NamedIdentityAware<Integer> {
     @Column(name = "api_key", nullable = false, length = 500)
     @Description("the API key to use when accessing the model")
     @Visible(value = false)
+    @Component(Component.Type.PASSWORD)
     private String apiKey;
 
     @Position(20)

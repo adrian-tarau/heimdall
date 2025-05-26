@@ -39,6 +39,7 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
 
     private URI uri;
     private String apyKey;
+    private boolean enabled;
     private boolean _default;
 
     private String modelName;
@@ -59,6 +60,24 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
 
     public static Builder create(String id, String name, String modelName) {
         return (Builder) new Builder(id).modelName(modelName).name(name);
+    }
+
+    /**
+     * Returns whether the model is enabled or not.
+     *
+     * @return {@code true} if the model is enabled, {@code false} otherwise
+     */
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    /**
+     * Return true if the model is the defualt model for inference, otherwise false
+     *
+     * @return a non-null instance
+     */
+    public boolean isDefault() {
+        return _default;
     }
 
     /**
@@ -194,21 +213,13 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
     }
 
     /**
-     * Return true if the model is the defualt model for inference, otherwise false
-     *
-     * @return a non-null instance
-     */
-    public boolean isDefault() {
-        return _default;
-    }
-
-    /**
      * A builder class.
      */
     public static class Builder extends NamedAndTaggedIdentifyAware.Builder<String> {
 
         private URI uri;
         private String apyKey;
+        private boolean enabled;
         private boolean _default;
 
         private String modelName;
@@ -237,6 +248,11 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
             requireNonNull(apyKey);
             this.uri = uri;
             this.apyKey = apyKey;
+            return this;
+        }
+
+        public Builder setEnabled(boolean enabled) {
+            this.enabled = enabled;
             return this;
         }
 
@@ -314,6 +330,8 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
             Model model = (Model) super.build();
             model.uri = uri;
             model.apyKey = apyKey;
+            model.enabled = enabled;
+            model._default = _default;
             model.modelName = modelName;
             model.temperature = temperature;
             model.topK = topK;
@@ -324,7 +342,7 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
             model.stopSequences = stopSequences;
             model.responseFormat = responseFormat;
             model.provider = provider;
-            model._default = _default;
+
             return model;
         }
     }

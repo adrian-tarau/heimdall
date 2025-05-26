@@ -19,6 +19,7 @@ import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 @ToString(callSuper = true)
 public class Provider extends NamedAndTaggedIdentifyAware<String> {
 
+    private Type type;
     private URI uri;
     private String apyKey;
 
@@ -111,6 +112,29 @@ public class Provider extends NamedAndTaggedIdentifyAware<String> {
     }
 
     /**
+     * The type of provider.
+     */
+    public enum Type {
+
+        /**
+         * The provider is embedded in the application, no network access is required.
+         */
+        EMBEDDED,
+
+        /**
+         * The provider is accessed over a network, typically using an API.
+         * <p>
+         * However, the provider is local the network and does not require an internet connection.
+         */
+        LOCAL,
+
+        /**
+         * The provider is accessed over the internet, typically using an API.
+         */
+        EXTERNAL
+    }
+
+    /**
      * A factory for creating providers.
      */
     public interface Factory {
@@ -125,6 +149,7 @@ public class Provider extends NamedAndTaggedIdentifyAware<String> {
 
     public static class Builder extends NamedAndTaggedIdentifyAware.Builder<String> {
 
+        private Type type = Type.EXTERNAL;
         private URI uri;
         private String apyKey;
 
@@ -142,6 +167,11 @@ public class Provider extends NamedAndTaggedIdentifyAware<String> {
         @Override
         protected IdentityAware<String> create() {
             return new Provider();
+        }
+
+        public Builder type(Type type) {
+            this.type = type;
+            return this;
         }
 
         public Builder uri(URI uri) {
@@ -188,6 +218,7 @@ public class Provider extends NamedAndTaggedIdentifyAware<String> {
         public Provider build() {
             if (chatFactory == null) throw new IllegalArgumentException("Chat factory cannot be null");
             Provider provider = (Provider) super.build();
+            provider.type = type;
             provider.uri = uri;
             provider.apyKey = apyKey;
             provider.version = version;

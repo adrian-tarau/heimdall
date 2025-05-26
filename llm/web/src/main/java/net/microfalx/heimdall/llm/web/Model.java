@@ -3,6 +3,7 @@ package net.microfalx.heimdall.llm.web;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import net.microfalx.bootstrap.dataset.annotation.Component;
 import net.microfalx.bootstrap.dataset.annotation.Filterable;
 import net.microfalx.bootstrap.dataset.annotation.Tabs;
 import net.microfalx.bootstrap.jdbc.entity.NamedIdentityAware;
@@ -28,30 +29,34 @@ public class Model extends NamedIdentityAware<Integer> {
     @ManyToOne
     @JoinColumn(name = "provider_id", nullable = false)
     @Description("The provider")
+    @ReadOnly
     private Provider provider;
 
     @Position(15)
     @Column(name = "uri", length = 1000)
     @Description("The URI of the model")
     @Visible(value = false)
+
     private String uri;
 
     @Position(20)
     @Column(name = "api_key", nullable = false, length = 500)
     @Description("The API key to use when accessing the model")
     @Visible(value = false)
+    @Component(Component.Type.PASSWORD)
     private String apiKey;
 
     @Position(22)
-    @Column(name = "_default", columnDefinition = "boolean default false",nullable = false)
+    @Column(name = "default", nullable = false)
     @Description("The default model use for inference")
-    @Label(value = "default")
+    @Label(value = "Default")
     private boolean _default;
 
     @Position(25)
     @Column(name = "model_name", length = 100)
     @Description("A reference to the model name")
     @Visible(value = false)
+    @ReadOnly
     private String modelName;
 
     @Position(30)

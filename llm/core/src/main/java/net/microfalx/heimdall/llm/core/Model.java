@@ -6,7 +6,10 @@ import lombok.Setter;
 import net.microfalx.bootstrap.dataset.annotation.Filterable;
 import net.microfalx.bootstrap.jdbc.entity.NamedIdentityAware;
 import net.microfalx.heimdall.llm.api.ResponseFormat;
-import net.microfalx.lang.annotation.*;
+import net.microfalx.lang.annotation.Description;
+import net.microfalx.lang.annotation.Name;
+import net.microfalx.lang.annotation.NaturalId;
+import net.microfalx.lang.annotation.Width;
 
 @Entity(name = "CoreModel")
 @Table(name = "llm_model")
@@ -29,8 +32,7 @@ public class Model extends NamedIdentityAware<Integer> {
     @Column(name = "api_key", nullable = false, length = 500)
     private String apiKey;
 
-    @Column(name = "_default", columnDefinition = "boolean default false",nullable = false)
-    @Label(value = "default")
+    @Column(name = "default", columnDefinition = "boolean default false", nullable = false)
     private boolean _default;
 
     @Column(name = "model_name", length = 100)
