@@ -294,7 +294,7 @@ class BrokerSessionTask extends AbstractRunnable {
         document.add(Attribute.create("broker", realTopic.getBroker().getName()).enableAll());
         document.add(Attribute.create("partition", event.getPartition()));
         document.add(Attribute.create(SOURCE_FIELD, realTopic.getName()).enableAll());
-        indexService.index(document, false);
+        indexService.index(document);
     }
 
     private String renameAttribute(String name) {

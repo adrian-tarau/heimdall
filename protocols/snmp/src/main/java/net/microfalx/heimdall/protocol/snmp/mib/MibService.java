@@ -361,7 +361,7 @@ public class MibService implements InitializingBean {
             document.add("enterprise_oid", module.getEnterpriseOid());
             document.add("imports", module.getImportedModules().stream().map(MibImport::getName)
                     .collect(Collectors.joining(" ")));
-            indexService.index(document, false);
+            indexService.index(document);
         } catch (Exception e) {
             LOGGER.error("Failed to index module '{}'", module.getName(), e);
         }
@@ -383,7 +383,7 @@ public class MibService implements InitializingBean {
             if (symbol.getPrimitiveType() != null) {
                 document.add("primitive_type", symbol.getPrimitiveType().name());
             }
-            indexService.index(document, false);
+            indexService.index(document);
         } catch (Exception e) {
             LOGGER.error("Failed to index symbol '{}'", symbol.getName(), e);
         }
@@ -407,7 +407,7 @@ public class MibService implements InitializingBean {
             if (variable.isEnum()) document.add("enum_values", variable.getEnumValues().stream()
                     .map(MibNamedNumber::getName).collect(Collectors.joining(" ")));
             document.add("is_number", variable.isNumber());
-            indexService.index(document, false);
+            indexService.index(document);
         } catch (Exception e) {
             LOGGER.error("Failed to index variable '{}'", variable.getName(), e);
         }
