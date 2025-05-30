@@ -1,6 +1,7 @@
 package net.microfalx.heimdall.llm.core;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import net.microfalx.bootstrap.dataset.annotation.Filterable;
@@ -36,6 +37,8 @@ public class Model extends NamedIdentityAware<Integer> {
     private boolean enabled;
 
     @Column(name = "default", columnDefinition = "boolean default false", nullable = false)
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     private boolean _default;
 
     @Column(name = "model_name", length = 100)
@@ -72,4 +75,13 @@ public class Model extends NamedIdentityAware<Integer> {
     @Width("150px")
     @Filterable()
     private String tags;
+
+    public boolean isDefault() {
+        return _default;
+    }
+
+    public Model setDefault(boolean _default) {
+        this._default = _default;
+        return this;
+    }
 }

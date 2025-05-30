@@ -1,19 +1,29 @@
 package net.microfalx.heimdall.llm.core;
 
+import jakarta.annotation.PreDestroy;
+import net.microfalx.bootstrap.core.async.ThreadPoolFactory;
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
+import net.microfalx.bootstrap.search.IndexService;
+import net.microfalx.bootstrap.search.SearchService;
 import net.microfalx.heimdall.llm.api.Chat;
 import net.microfalx.heimdall.llm.api.Model;
 import net.microfalx.heimdall.llm.api.Provider;
 import net.microfalx.heimdall.llm.api.*;
+import net.microfalx.heimdall.llm.lucene.LuceneEmbeddingStore;
 import net.microfalx.lang.ClassUtils;
+import net.microfalx.lang.ExceptionUtils;
+import net.microfalx.lang.JvmUtils;
+import net.microfalx.lang.ObjectUtils;
 import net.microfalx.threadpool.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ReflectionUtils;
 
+import java.io.File;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -27,8 +37,16 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     private static final Logger LOGGER = LoggerFactory.getLogger(LlmService.class);
 
     @Autowired
-    private ApplicationContext applicationContext;
+    private IndexService indexService;
 
+    @Autowired
+    private SearchService searchService;
+
+    @Autowired(required = false)
+    private LlmProperties llmProperties = new LlmProperties();
+
+    private File variableDirectory;
+    private LuceneEmbeddingStore embeddingStore;
     private volatile LlmCache cache = new LlmCache(this);
     private final LlmPersistence llmPersistence = new LlmPersistence();
     private final Collection<LlmListener> listeners = new CopyOnWriteArrayList<>();
@@ -36,8 +54,13 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     private final Collection<net.microfalx.heimdall.llm.api.Chat> activeChats = new CopyOnWriteArrayList<>();
     private final Collection<net.microfalx.heimdall.llm.api.Chat> closedChats = new CopyOnWriteArrayList<>();
 
-    @Autowired(required = false)
     private ThreadPool chatPool;
+    private ThreadPool embeddingPool;
+
+    public LlmServiceImpl() {
+        // Workaround for classes not being loaded by Spring
+        warmClassesWorkaround();
+    }
 
     @Override
     public net.microfalx.heimdall.llm.api.Chat createChat(String modelId) {
@@ -98,14 +121,26 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        initThreadPools();
+        initDirectories();
         initListeners();
         initProviderFactories();
         initializeApplicationContext();
         registerProviders();
+        initializeEmbeddingStore();
     }
 
-    ThreadPool getChatPool() {
-        return chatPool != null ? chatPool : ThreadPool.get();
+    @PreDestroy
+    protected void destroy() {
+        if (embeddingStore != null) embeddingStore.close();
+    }
+
+    public ThreadPool getChatPool() {
+        return ObjectUtils.defaultIfNull(chatPool, ThreadPool.get());
+    }
+
+    public ThreadPool getEmbeddingPool() {
+        return ObjectUtils.defaultIfNull(embeddingPool, ThreadPool.get());
     }
 
     void closeChat(Chat chat) {
@@ -113,6 +148,10 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         activeChats.remove(chat);
         closedChats.add(chat);
         llmPersistence.execute(chat);
+    }
+
+    private void initDirectories() {
+        variableDirectory = JvmUtils.getVariableDirectory("llm");
     }
 
     private void initListeners() {
@@ -133,14 +172,27 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         }
     }
 
+    private void initializeEmbeddingStore() {
+        this.embeddingStore = new LuceneEmbeddingStore(indexService, searchService, new File(variableDirectory, "embedding"))
+                .setThreadPool(getEmbeddingPool());
+        this.indexService.registerListener(this.embeddingStore);
+    }
+
     private void initializeApplicationContext() {
         llmPersistence.setApplicationContext(getApplicationContext());
         cache.setApplicationContext(getApplicationContext());
     }
 
+    private void initThreadPools() {
+        chatPool = ThreadPoolFactory.create("LLM").create();
+        embeddingPool = ThreadPoolFactory.create("Embedding").create();
+    }
+
     private void registerProviders() {
         for (Provider.Factory providerFactory : providerFactories) {
             try {
+                Method method = ReflectionUtils.findMethod(providerFactory.getClass(), "setLlmProperties");
+                if (method != null) ReflectionUtils.invokeMethod(method, providerFactory, llmProperties);
                 Provider provider = providerFactory.createProvider();
                 if (provider == null) {
                     LOGGER.error("Provider factory {} returned NULL", ClassUtils.getName(providerFactory));
@@ -150,6 +202,15 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
             } catch (Exception e) {
                 LOGGER.atError().setCause(e).log("Failed to create provider with factory {}", ClassUtils.getName(providerFactory));
             }
+        }
+    }
+
+    private void warmClassesWorkaround() {
+        try {
+            Class.forName("net.microfalx.heimdall.llm.lucene.LuceneContentRetriever");
+            Class.forName("net.microfalx.heimdall.llm.lucene.LuceneEmbeddingStore");
+        } catch (ClassNotFoundException e) {
+            ExceptionUtils.throwException(e);
         }
     }
 }

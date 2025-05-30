@@ -185,21 +185,27 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
         @Override
         public void onError(Throwable error) {
             this.throwable = error;
+            this.completed.set(true);
         }
 
         @Override
         public boolean hasNext() {
-            if (throwable != null) ExceptionUtils.throwException(throwable);
+            raiseIfError();
             if (!queue.isEmpty()) return true;
             while (queue.isEmpty() && !completed.get()) {
                 ThreadUtils.sleepMillis(5);
             }
+            raiseIfError();
             return !(queue.isEmpty() || completed.get());
         }
 
         @Override
         public String next() {
             return queue.poll();
+        }
+
+        private void raiseIfError() {
+            if (throwable != null) ExceptionUtils.throwException(throwable);
         }
     }
 

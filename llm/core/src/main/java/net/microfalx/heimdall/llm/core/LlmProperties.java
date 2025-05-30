@@ -47,7 +47,7 @@ public class LlmProperties {
     /**
      * Ollama URI to use when accessing models that require it.
      */
-    private String ollamaUri;
+    private String ollamaUri = "http://localhost:11434";
 
     /**
      * Hugging Face API key to use when accessing models that require it.
