@@ -1,14 +1,25 @@
 package net.microfalx.heimdall.llm.ollama;
 
+import lombok.Getter;
+import lombok.Setter;
 import net.microfalx.heimdall.llm.api.Model;
 import net.microfalx.heimdall.llm.api.Provider;
+import net.microfalx.heimdall.llm.core.LlmProperties;
+import net.microfalx.lang.UriUtils;
 
 @net.microfalx.lang.annotation.Provider
+@Setter
+@Getter
 public class OllamaProviderFactory implements Provider.Factory {
+
+    private LlmProperties llmProperties;
 
     @Override
     public Provider createProvider() {
         net.microfalx.heimdall.llm.api.Provider.Builder builder = new net.microfalx.heimdall.llm.api.Provider.Builder("ollama");
+        if (llmProperties != null) {
+            builder.uri(UriUtils.parseUri(llmProperties.getOllamaUri()), llmProperties.getOllamaApiKey());
+        }
         builder.name("Ollama").description("Get up and running with large language models.");
         builder.version("0.7.0").author("Ollama Team").license("MIT")
                 .chatFactory(new OllamaChatFactory());

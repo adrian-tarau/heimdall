@@ -6,9 +6,9 @@ import dev.langchain4j.model.ollama.OllamaStreamingChatModel;
 import net.microfalx.heimdall.llm.api.Chat;
 import net.microfalx.heimdall.llm.api.LlmNotFoundException;
 import net.microfalx.heimdall.llm.api.Model;
-import net.microfalx.lang.NumberUtils;
 import net.microfalx.lang.StringUtils;
 
+import java.time.Duration;
 import java.util.ArrayList;
 
 public class OllamaChatFactory implements Chat.Factory {
@@ -19,13 +19,13 @@ public class OllamaChatFactory implements Chat.Factory {
             throw new LlmNotFoundException("The model name is required for Ollama");
         }
         StreamingChatModel chatModel = OllamaStreamingChatModel.builder()
-                .modelName(model.getModelName())
-                .temperature(NumberUtils.toFloat(model.getTemperature()).doubleValue())
                 .baseUrl(model.getUri().toASCIIString())
-                .responseFormat(ResponseFormat.TEXT)
+                .modelName(model.getModelName())
+                .temperature(model.getTemperature())
                 .stop(new ArrayList<>(model.getStopSequences()))
-                .topP(model.getTopP())
-                .topK(model.getTopK())
+                .topP(model.getTopP()).topK(model.getTopK())
+                .responseFormat(ResponseFormat.TEXT)
+                .timeout(Duration.ofSeconds(10))
                 .build();
         return new OllamaChat(model).setStreamingChatModel(chatModel);
     }
