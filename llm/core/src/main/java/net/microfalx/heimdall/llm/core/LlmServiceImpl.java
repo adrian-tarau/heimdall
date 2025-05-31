@@ -54,12 +54,20 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     private final Collection<net.microfalx.heimdall.llm.api.Chat> activeChats = new CopyOnWriteArrayList<>();
     private final Collection<net.microfalx.heimdall.llm.api.Chat> closedChats = new CopyOnWriteArrayList<>();
 
+    private volatile Model defaultModel;
+    private volatile Model defaultEmbeddingModel;
+
     private ThreadPool chatPool;
     private ThreadPool embeddingPool;
 
     public LlmServiceImpl() {
         // Workaround for classes not being loaded by Spring
         warmClassesWorkaround();
+    }
+
+    @Override
+    public Chat createChat() {
+        return createChat(getDefaultModel());
     }
 
     @Override
@@ -71,10 +79,43 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     @Override
     public net.microfalx.heimdall.llm.api.Chat createChat(Model model) {
         requireNonNull(model);
+        if (model.isEmbedding()) throw new LlmException("Model '" + model.getId() + "' does not support chating");
         net.microfalx.heimdall.llm.api.Chat chat = model.getProvider().getChatFactory().createChat(model);
         activeChats.add(chat);
         if (chat instanceof AbstractChat abstractChat) abstractChat.service = this;
         return chat;
+    }
+
+    @Override
+    public Embedding embed(String text) {
+        return createEmbedding(getDefaultEmbeddingModel(), text);
+    }
+
+    @Override
+    public Embedding embed(String modelId, String text) {
+        return createEmbedding(getModel(modelId), text);
+    }
+
+    public Embedding createEmbedding(Model model, String text) {
+        requireNonNull(model);
+        if (!model.isEmbedding()) throw new LlmException("Model '" + model.getId() + "' does not support embedding");
+        return model.getProvider().getEmbeddingFactory().createEmbedding(model, text);
+    }
+
+    @Override
+    public Model getDefaultModel() {
+        if (defaultModel != null) return defaultModel;
+        defaultModel = getModels().stream().filter(model -> model.isDefault() && !model.isEmbedding()).findFirst().orElseThrow(
+                () -> new LlmNotFoundException("No default model found"));
+        return defaultModel;
+    }
+
+    @Override
+    public Model getDefaultEmbeddingModel() {
+        if (defaultEmbeddingModel != null) return defaultEmbeddingModel;
+        defaultEmbeddingModel = getModels().stream().filter(model -> model.isDefault() && model.isEmbedding()).findFirst().orElseThrow(
+                () -> new LlmNotFoundException("No default embedding model found"));
+        return defaultEmbeddingModel;
     }
 
     @Override
@@ -116,6 +157,8 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         LlmCache cache = new LlmCache(this);
         cache.setApplicationContext(getApplicationContext());
         cache.load();
+        this.defaultModel = null;
+        this.defaultEmbeddingModel = null;
         this.cache = cache;
     }
 
@@ -173,7 +216,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     }
 
     private void initializeEmbeddingStore() {
-        this.embeddingStore = new LuceneEmbeddingStore(indexService, searchService, new File(variableDirectory, "embedding"))
+        this.embeddingStore = new LuceneEmbeddingStore(this, indexService, searchService, new File(variableDirectory, "embedding"))
                 .setThreadPool(getEmbeddingPool());
         this.indexService.registerListener(this.embeddingStore);
     }
