@@ -11,12 +11,50 @@ import java.util.Collection;
 public interface LlmService extends Chat.Factory {
 
     /**
-     * Creates a chat session with a given identifier.
+     * Creates a chat session with the default model.
+     *
+     * @return a non-null instance
+     */
+    Chat createChat();
+
+    /**
+     * Creates a chat session using a given model.
      *
      * @param modelId the model identifier to use
      * @return a non-null instance
      */
     Chat createChat(String modelId);
+
+    /**
+     * Embed the text content with the default model.
+     *
+     * @param text the text to embed.
+     * @return the embedding.
+     */
+    Embedding embed(String text);
+
+    /**
+     * Embed the text content using a given model.
+     *
+     * @param modelId the model to use
+     * @param text    the text to embed.
+     * @return the embedding.
+     */
+    Embedding embed(String modelId, String text);
+
+    /**
+     * Returns the default model.
+     *
+     * @return a non-null instance
+     */
+    Model getDefaultModel();
+
+    /**
+     * Returns the default model used for embedding.
+     *
+     * @return a non-null instance
+     */
+    Model getDefaultEmbeddingModel();
 
     /**
      * Returns registered chat models.

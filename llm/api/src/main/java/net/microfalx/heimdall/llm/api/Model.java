@@ -41,6 +41,7 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
     private String apyKey;
     private boolean enabled;
     private boolean _default;
+    private boolean embedding;
 
     private String modelName;
     private Double temperature;
@@ -52,6 +53,7 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
     private Set<String> stopSequences;
     private ResponseFormat responseFormat = ResponseFormat.TEXT;
 
+    @ToString.Exclude
     Provider provider;
 
     public static Builder create(String id, String name) {
@@ -72,12 +74,21 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
     }
 
     /**
-     * Return true if the model is the defualt model for inference, otherwise false
+     * Return true if the model is the default model for inference, otherwise false
      *
      * @return a non-null instance
      */
     public boolean isDefault() {
         return _default;
+    }
+
+    /**
+     * Returns whether the model is an embedding model.
+     *
+     * @return {@code true} if the model is an embedding model, {@code false} otherwise
+     */
+    public boolean isEmbedding() {
+        return embedding;
     }
 
     /**
@@ -232,6 +243,8 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
         private final Set<String> stopSequences = new HashSet<>();
         private ResponseFormat responseFormat = ResponseFormat.TEXT;
 
+        private boolean embedding;
+
         private Provider provider;
 
         public Builder(String id) {
@@ -314,6 +327,11 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
             return this;
         }
 
+        public Builder embedding(boolean embedding) {
+            this.embedding = embedding;
+            return this;
+        }
+
         protected Builder provider(Provider provider) {
             this.provider = provider;
             id(provider.getId() + "." + id());
@@ -332,6 +350,7 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
             model.apyKey = apyKey;
             model.enabled = enabled;
             model._default = _default;
+            model.embedding = embedding;
             model.modelName = modelName;
             model.temperature = temperature;
             model.topK = topK;

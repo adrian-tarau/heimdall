@@ -12,6 +12,7 @@ import java.util.List;
 
 import static java.util.Collections.unmodifiableList;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.StringUtils.toIdentifier;
 
 /**
  * An interface for representing an AI model provider.
@@ -26,6 +27,7 @@ public class Provider extends NamedAndTaggedIdentifyAware<String> {
     @ToString.Exclude
     private List<Model> models;
     private Chat.Factory chatFactory;
+    private Embedding.Factory embeddingFactory;
 
     private String version = StringUtils.NA_STRING;
     private String author = StringUtils.NA_STRING;
@@ -96,6 +98,8 @@ public class Provider extends NamedAndTaggedIdentifyAware<String> {
      * @throws LlmNotFoundException if the model was not found
      */
     public Model getModel(String id) {
+        requireNonNull(id);
+        id = toIdentifier(id);
         for (Model model : models) {
             if (model.getId().equals(id)) return model;
         }
@@ -109,6 +113,18 @@ public class Provider extends NamedAndTaggedIdentifyAware<String> {
      */
     public Chat.Factory getChatFactory() {
         return chatFactory;
+    }
+
+    /**
+     * Returns the factory used to create embeddings.
+     *
+     * @return a non-null instance
+     */
+    public Embedding.Factory getEmbeddingFactory() {
+        if (embeddingFactory == null) {
+            throw new IllegalStateException("Embedding factory is not set for provider " + getId());
+        }
+        return embeddingFactory;
     }
 
     /**
@@ -159,6 +175,7 @@ public class Provider extends NamedAndTaggedIdentifyAware<String> {
 
         private final List<Model.Builder> models = new ArrayList<>();
         private Chat.Factory chatFactory;
+        private Embedding.Factory embeddingFactory;
 
         public Builder(String id) {
             super(id);
@@ -214,6 +231,12 @@ public class Provider extends NamedAndTaggedIdentifyAware<String> {
             return this;
         }
 
+        public Builder embeddingFactory(Embedding.Factory embeddingFactory) {
+            requireNonNull(embeddingFactory);
+            this.embeddingFactory = embeddingFactory;
+            return this;
+        }
+
         @Override
         public Provider build() {
             if (chatFactory == null) throw new IllegalArgumentException("Chat factory cannot be null");
@@ -225,6 +248,7 @@ public class Provider extends NamedAndTaggedIdentifyAware<String> {
             provider.author = author;
             provider.license = license;
             provider.chatFactory = chatFactory;
+            provider.embeddingFactory = embeddingFactory;
             provider.models = models.stream().map(builder -> builder.provider(provider).build()).toList();
             return provider;
         }
