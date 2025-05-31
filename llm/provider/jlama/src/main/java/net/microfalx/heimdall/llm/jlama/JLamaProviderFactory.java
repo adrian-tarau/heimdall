@@ -25,7 +25,13 @@ public class JLamaProviderFactory implements Provider.Factory {
                 .tag("google").tag("gemma").tag("2b").tag("gemma2"));
         builder.model(Model.create("mistral-7B", "Mistral 7B", "tjake/Mistral-7B-Instruct-v0.3-Jlama-Q4"))
                 .tag("mistral ai").tag("mistral").tag("7b");
-        builder.model(Model.create("qwen2.5-0.5B", "Qwen 2.5 (0.5B)", "tjake/Qwen2.5-0.5B-Instruct-JQ4")).tag("alibaba")
-                .tag("qwen").tag("0.5b");
+        builder.model((Model.Builder) Model.create("qwen2.5-0.5B", "Qwen 2.5 (0.5B)", "tjake/Qwen2.5-0.5B-Instruct-JQ4").tag("alibaba")
+                .tag("qwen").tag("0.5b"));
+
+        builder.model((Model.Builder) Model.create("e5-base-v2", "E5 Base v2", "intfloat/e5-base-v2")
+                .embedding(true).tag("embedding"));
+        builder.model((Model.Builder) Model.create("e5-small-v2", "E5 Small v2", "intfloat/e5-small-v2")
+                .embedding(true).tag("embedding"));
+
     }
 }

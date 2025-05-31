@@ -28,7 +28,7 @@ class JLamaChatTest {
 
     @Test
     void ask() {
-        Chat chat = aiService.createChat(loadChat("jlama_llama3_2_1b"));
+        Chat chat = aiService.createChat(loadModel("jlama_llama3_2_1b"));
         String response = chat.ask("Tell me a joke about Java");
         System.out.println(response);
         Assertions.assertThat(response.length()).isGreaterThan(0);
@@ -36,7 +36,7 @@ class JLamaChatTest {
 
     @Test
     void chat() {
-        Chat chat = aiService.createChat(loadChat("jlama_llama3_2_1b"));
+        Chat chat = aiService.createChat(loadModel("jlama_llama3_2_1b"));
         int tokenCount = 0;
         Iterator<String> stream = chat.chat("Tell me a joke about Java");
         while (stream.hasNext()) {
@@ -48,7 +48,7 @@ class JLamaChatTest {
         Assertions.assertThat(tokenCount).isGreaterThan(0);
     }
 
-    private Model loadChat(String modelId) {
+    private Model loadModel(String modelId) {
         return provider.getModel(modelId);
     }
 
