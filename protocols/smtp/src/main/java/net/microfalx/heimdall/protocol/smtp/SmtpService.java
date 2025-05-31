@@ -1,21 +1,33 @@
 package net.microfalx.heimdall.protocol.smtp;
 
+import jakarta.mail.internet.MimeMessage;
+import net.microfalx.heimdall.protocol.core.Body;
 import net.microfalx.heimdall.protocol.core.Event;
 import net.microfalx.heimdall.protocol.core.Part;
 import net.microfalx.heimdall.protocol.core.ProtocolService;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpAttachment;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpAttachmentRepository;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpEventRepository;
+import net.microfalx.lang.ExceptionUtils;
+import net.microfalx.resource.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Properties;
+
+import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
 @Service
 public final class SmtpService extends ProtocolService<SmtpEvent, net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent> {
 
     @Autowired
     private SmtpProperties configuration;
+
+    @Autowired
+    private SmtpGatewayProperties gatewayConfiguration;
 
     @Autowired
     private SmtpEventRepository repository;
@@ -26,6 +38,8 @@ public final class SmtpService extends ProtocolService<SmtpEvent, net.microfalx.
     @Autowired
     private SmtpAttachmentRepository attachmentRepository;
 
+    private JavaMailSender mailSender;
+
     @Override
     protected Event.Type getEventType() {
         return Event.Type.SMTP;
@@ -34,6 +48,22 @@ public final class SmtpService extends ProtocolService<SmtpEvent, net.microfalx.
     @Override
     protected String getControllerPath() {
         return "/protocol/smtp";
+    }
+
+    /**
+     * Forwards an email to real accounts.
+     *
+     * @param resource the resource containing the email MIME message
+     */
+    public void forward(Resource resource) {
+        requireNonNull(resource);
+        try {
+            JavaMailSenderImpl mailSender = createMailSender();
+            MimeMessage mimeMessage = mailSender.createMimeMessage(resource.getInputStream());
+            mailSender.send(mimeMessage);
+        } catch (Exception e) {
+            ExceptionUtils.throwException(e);
+        }
     }
 
     @Override
@@ -47,6 +77,8 @@ public final class SmtpService extends ProtocolService<SmtpEvent, net.microfalx.
         jpaSmtpEvent.setCreatedAt(smtpEvent.getCreatedAt().toLocalDateTime());
         jpaSmtpEvent.setSentAt(smtpEvent.getSentAt().toLocalDateTime());
         jpaSmtpEvent.setReceivedAt(smtpEvent.getReceivedAt().toLocalDateTime());
+        Body messageBody = Body.create(smtpEvent.getResource().orElseThrow(), smtpEvent);
+        jpaSmtpEvent.setMessage(persistPart(messageBody));
         jpaSmtpEvent.setSubject(org.apache.commons.lang3.StringUtils.abbreviate(smtpEvent.getName(), 490));
         updateAddresses(smtpEvent, jpaSmtpEvent);
         List<SmtpAttachment> attachments = smtpEvent.getParts().stream().map(part -> {
@@ -75,5 +107,18 @@ public final class SmtpService extends ProtocolService<SmtpEvent, net.microfalx.
     @Override
     protected SmtpSimulator getSimulator() {
         return smtpSimulator;
+    }
+
+    public JavaMailSenderImpl createMailSender() {
+        JavaMailSenderImpl sender = new JavaMailSenderImpl();
+        sender.setHost(gatewayConfiguration.getHost());
+        sender.setPort(gatewayConfiguration.getPort());
+        Properties props = sender.getJavaMailProperties();
+        props.put("mail.transport.protocol", "smtp");
+        props.put("mail.smtp.auth", "false");
+        props.put("mail.smtp.starttls.enable", "false");
+        props.put("mail.debug", "false");
+        mailSender = sender;
+        return sender;
     }
 }

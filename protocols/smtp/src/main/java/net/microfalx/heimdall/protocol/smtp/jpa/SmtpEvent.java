@@ -7,6 +7,7 @@ import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Filterable;
 import net.microfalx.heimdall.protocol.core.jpa.Address;
 import net.microfalx.heimdall.protocol.core.jpa.Event;
+import net.microfalx.heimdall.protocol.core.jpa.Part;
 import net.microfalx.lang.annotation.*;
 
 import java.util.ArrayList;
@@ -40,6 +41,11 @@ public class SmtpEvent extends Event {
     @Position(3)
     @Description("the host that is receiving the email")
     private Address to;
+
+    @OneToOne
+    @JoinColumn(name = "message_id", nullable = false)
+    @Visible(value = false)
+    private Part message;
 
     @Column(name = "attachment_count", nullable = false)
     @Label(value = "-", icon = "fa-solid fa-paperclip")

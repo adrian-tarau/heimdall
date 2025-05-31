@@ -3,12 +3,14 @@ package net.microfalx.heimdall.protocol.core;
 import io.azam.ulidj.ULID;
 import net.microfalx.bootstrap.model.AbstractAttributes;
 import net.microfalx.bootstrap.model.Attribute;
+import net.microfalx.resource.Resource;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
@@ -24,6 +26,7 @@ public abstract class AbstractEvent extends AbstractAttributes<Attribute> implem
     private ZonedDateTime createdAt = ZonedDateTime.now();
     private ZonedDateTime sentAt;
 
+    private Resource resource;
     private Collection<Part> parts = new ArrayList<>();
 
     public AbstractEvent(Type type) {
@@ -105,6 +108,21 @@ public abstract class AbstractEvent extends AbstractAttributes<Attribute> implem
     public void addTarget(Address address) {
         requireNonNull(address);
         targets.add(address);
+    }
+
+    @Override
+    public Optional<Resource> getResource() {
+        return Optional.ofNullable(resource);
+    }
+
+    /**
+     * Attaches the content of the event, when available
+     *
+     * @param resource the resource holding the event content
+     */
+    public void setResource(Resource resource) {
+        requireNonNull(resource);
+        this.resource = resource;
     }
 
     @Override

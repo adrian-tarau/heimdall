@@ -68,6 +68,7 @@ public class SmtpServer implements InitializingBean, BasicMessageListener {
             smtpEvent.setSentAt(message.getSentDate().toInstant().atZone(ZoneId.systemDefault()));
             smtpEvent.setCreatedAt(smtpEvent.getSentAt());
             smtpEvent.setReceivedAt(ZonedDateTime.now());
+            smtpEvent.setResource(MemoryResource.create(data));
             Body body = extractBody(message);
             if (body != null) smtpEvent.setBody(body);
             extractParts(message).forEach(smtpEvent::addPart);

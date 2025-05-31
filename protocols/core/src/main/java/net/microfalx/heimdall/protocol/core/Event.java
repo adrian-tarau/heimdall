@@ -2,9 +2,11 @@ package net.microfalx.heimdall.protocol.core;
 
 import net.microfalx.bootstrap.model.Attribute;
 import net.microfalx.bootstrap.model.Attributes;
+import net.microfalx.resource.Resource;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
+import java.util.Optional;
 
 /**
  * Holds an event received over the wire.
@@ -73,6 +75,13 @@ public interface Event extends Attributes<Attribute> {
      * @return a non-null instance, null if not available
      */
     ZonedDateTime getSentAt();
+
+    /**
+     * Returns the content of the event.
+     *
+     * @return a non-null instance
+     */
+    Optional<Resource> getResource();
 
     /**
      * Returns the body of the event (the message).

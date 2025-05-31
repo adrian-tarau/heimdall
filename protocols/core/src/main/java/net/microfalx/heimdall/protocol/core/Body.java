@@ -6,6 +6,7 @@ import net.microfalx.resource.MimeType;
 import net.microfalx.resource.Resource;
 
 import static net.microfalx.heimdall.protocol.core.ProtocolConstants.MAX_NAME_LENGTH;
+import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
 /**
  * Holds the body of the event.
@@ -57,7 +58,22 @@ public class Body extends AbstractPart {
         return body;
     }
 
+    /**
+     * Creates a body from a resource.
+     *
+     * @param resource the resource
+     * @return a non-null instance
+     */
+    public static Body create(Resource resource, Event event) {
+        requireNonNull(event);
+        Body body = new Body();
+        body.setResource(resource);
+        body.setEvent((AbstractEvent) event);
+        return body;
+    }
+
     public Body() {
         super(Type.BODY);
     }
+
 }
