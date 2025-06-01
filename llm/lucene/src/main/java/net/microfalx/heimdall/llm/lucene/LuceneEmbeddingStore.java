@@ -221,8 +221,11 @@ public class LuceneEmbeddingStore implements IndexListener, EmbeddingStore<TextS
 
 
     private void initIndex() {
-        IndexerOptions options = IndexerOptions.create().setAnalyzer(new StandardAnalyzer()).setMetrics(INDEX_METRICS);
-        indexer = indexService.createIndexer(directory, options);
+        IndexerOptions options = IndexerOptions.builder().id("embedding").name("Embedding")
+                .description("An index for storing embeddings and their associated text segments")
+                .directory(directory).analyzer(new StandardAnalyzer()).metrics(INDEX_METRICS)
+                .build();
+        indexer = indexService.createIndexer(options);
     }
 
     private void initEncodings() {
