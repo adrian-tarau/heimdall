@@ -55,13 +55,14 @@ public class LlmPersistence extends ApplicationContextSupport {
         jpaModel.setName(model.getName());
         jpaModel.setDefault(model.isDefault());
         jpaModel.setEnabled(model.isEnabled());
+        jpaModel.setEmbedding(model.isEmbedding());
         jpaModel.setProvider(execute(model.getProvider()));
         return updater.findByNaturalIdAndUpdate(jpaModel);
     }
 
-    void execute(net.microfalx.heimdall.llm.api.Chat chat){
+    void execute(net.microfalx.heimdall.llm.api.Chat chat) {
         NaturalIdEntityUpdater<Chat, Integer> updater = getUpdater(ChatRepository.class);
-        Chat jpaChat=new Chat();
+        Chat jpaChat = new Chat();
         jpaChat.setModel(execute(chat.getModel()));
         jpaChat.setNaturalId(chat.getId());
         jpaChat.setName(chat.getName());

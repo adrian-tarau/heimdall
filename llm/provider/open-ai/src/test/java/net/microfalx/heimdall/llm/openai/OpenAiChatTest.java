@@ -28,7 +28,7 @@ class OpenAiChatTest {
 
     @Test
     void ask() {
-        Chat chat = llmService.createChat(loadChat("openai_o4_mini"));
+        Chat chat = llmService.createChat(loadChat("o4-mini-2025-04-16"));
         String response = chat.ask("Tell me a joke about Java");
         System.out.println(response);
         Assertions.assertThat(response.length()).isGreaterThan(0);

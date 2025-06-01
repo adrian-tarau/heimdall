@@ -23,6 +23,7 @@ create table llm_model
     api_key                         varchar(500),
     enabled boolean default true not null,
     `default` boolean default false not null,
+    embedding boolean not null,
     model_name                      varchar(100),
     temperature                     decimal,
     top_p                           decimal,

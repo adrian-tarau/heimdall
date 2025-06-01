@@ -57,6 +57,12 @@ public class Model extends NamedIdentityAware<Integer> {
     @Label(value = "Default")
     private boolean _default;
 
+    @Position(22)
+    @Column(name = "embedding", nullable = false)
+    @Description("The embedded model use for inference")
+    @Label(value = "Embedding")
+    private boolean embedding;
+
     @Position(25)
     @Column(name = "model_name", length = 100)
     @Description("A reference to the model name")

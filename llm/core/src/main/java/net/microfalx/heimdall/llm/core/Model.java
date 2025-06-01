@@ -41,6 +41,9 @@ public class Model extends NamedIdentityAware<Integer> {
     @Setter(AccessLevel.NONE)
     private boolean _default;
 
+    @Column(name = "embedding", nullable = false)
+    private boolean embedding;
+
     @Column(name = "model_name", length = 100)
     private String modelName;
 
