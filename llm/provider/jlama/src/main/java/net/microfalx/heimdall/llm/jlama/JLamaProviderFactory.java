@@ -22,16 +22,16 @@ public class JLamaProviderFactory implements Provider.Factory {
         builder.model((Model.Builder) Model.create("llama3.2-3b", "Llama 3.2 (3B)", "tjake/Llama-3.2-3B-Instruct-JQ4")
                 .tag("meta").tag("llama").tag("3b").tag("llama3"));
         builder.model((Model.Builder) Model.create("gemma2-2b", "Gemma 3 (2B)", "tjake/gemma-2-2b-it-JQ4")
-                .tag("google").tag("gemma").tag("2b").tag("gemma2"));
-        builder.model(Model.create("mistral-7B", "Mistral 7B", "tjake/Mistral-7B-Instruct-v0.3-Jlama-Q4"))
-                .tag("mistral ai").tag("mistral").tag("7b");
+                .tag("google").tag("gemma").tag("2b"));
+        builder.model(Model.create("mistral-7B", "Mistral (7B)", "tjake/Mistral-7B-Instruct-v0.3-Jlama-Q4"))
+                .tag("mistral").tag("7b");
         builder.model((Model.Builder) Model.create("qwen2.5-0.5B", "Qwen 2.5 (0.5B)", "tjake/Qwen2.5-0.5B-Instruct-JQ4").tag("alibaba")
                 .tag("qwen").tag("0.5b"));
 
-        builder.model((Model.Builder) Model.create("e5-base-v2", "E5 Base v2", "intfloat/e5-base-v2")
-                .embedding(true).tag("embedding"));
-        builder.model((Model.Builder) Model.create("e5-small-v2", "E5 Small v2", "intfloat/e5-small-v2")
-                .embedding(true).tag("embedding"));
+        builder.model((Model.Builder) Model.create("e5-base-v2", "E5 Base", "intfloat/e5-base-v2")
+                .forEmbedding().tag("embedding").tag("microsoft"));
+        builder.model((Model.Builder) Model.create("e5-small-v2", "E5 Small", "intfloat/e5-small-v2")
+                .embedding(true).tag("embedding").tag("microsoft"));
 
     }
 }

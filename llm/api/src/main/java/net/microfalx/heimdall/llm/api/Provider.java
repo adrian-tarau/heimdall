@@ -249,7 +249,10 @@ public class Provider extends NamedAndTaggedIdentifyAware<String> {
             provider.license = license;
             provider.chatFactory = chatFactory;
             provider.embeddingFactory = embeddingFactory;
-            provider.models = models.stream().map(builder -> builder.provider(provider).build()).toList();
+            provider.models = models.stream().map(builder -> {
+                builder.tags(provider.getTags());
+                return builder.provider(provider).build();
+            }).toList();
             return provider;
         }
     }
