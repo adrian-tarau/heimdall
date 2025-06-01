@@ -27,7 +27,7 @@ public class LlmProperties {
     /**
      * Indicates whether the LLM service has access to the internet.
      */
-    private boolean internetAccess = true;
+    private boolean offline;
 
     /**
      * The duration that models stay loaded in memory (default "5m")

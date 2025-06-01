@@ -16,6 +16,7 @@ import org.springframework.test.context.bean.override.convention.TestBean;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ContextConfiguration(classes = {LlmServiceImpl.class, MetadataService.class})
 class LlmServiceImplTest extends AbstractBootstrapServiceTestCase {
@@ -31,6 +32,11 @@ class LlmServiceImplTest extends AbstractBootstrapServiceTestCase {
     @Test
     void initialize() {
         assertThat(llmService.getModels().size()).isGreaterThan(1);
+    }
+
+    @Test
+    void embed() {
+        assertEquals(384, llmService.embed("This is a test embedding").getDimension());
     }
 
     private static ModelRepository modelRepository() {

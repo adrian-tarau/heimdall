@@ -264,13 +264,23 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
             return this;
         }
 
-        public Builder setEnabled(boolean enabled) {
+        public Builder enabled(boolean enabled) {
             this.enabled = enabled;
+            return this;
+        }
+
+        public Builder asEnabled() {
+            this.enabled = true;
             return this;
         }
 
         public Builder setDefault(boolean _default) {
             this._default = _default;
+            return this;
+        }
+
+        public Builder asDefault() {
+            this._default = true;
             return this;
         }
 
@@ -329,6 +339,11 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
 
         public Builder embedding(boolean embedding) {
             this.embedding = embedding;
+            return this;
+        }
+
+        public Builder forEmbedding() {
+            this.embedding = true;
             return this;
         }
 

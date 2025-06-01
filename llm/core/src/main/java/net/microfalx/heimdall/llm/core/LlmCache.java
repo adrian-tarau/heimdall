@@ -90,7 +90,7 @@ public class LlmCache extends ApplicationContextSupport {
                     .modelName(modelJpa.getModelName()).maximumOutputTokens(modelJpa.getMaximumOutputTokens())
                     .presencePenalty(modelJpa.getPresencePenalty()).temperature(modelJpa.getTemperature()).
                     uri(URI.create(modelJpa.getUri()),modelJpa.getApiKey()).topK(modelJpa.getTopK()).topP(modelJpa.getTopP())
-                    .responseFormat(modelJpa.getResponseFormat()).setDefault(modelJpa.isDefault()).setEnabled(modelJpa.isEnabled());
+                    .responseFormat(modelJpa.getResponseFormat()).setDefault(modelJpa.isDefault()).enabled(modelJpa.isEnabled());
             builder.tags(setFromString(modelJpa.getTags())).name(modelJpa.getName()).description(modelJpa.getDescription());
             registerModel(builder.build());
         }

@@ -30,6 +30,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import static java.util.Collections.unmodifiableCollection;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.FileUtils.validateDirectoryExists;
 
 @Service
 public class LlmServiceImpl extends ApplicationContextSupport implements LlmService, InitializingBean {
@@ -164,6 +165,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        registerLibraryPaths();
         initThreadPools();
         initDirectories();
         initListeners();
@@ -255,5 +257,12 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         } catch (ClassNotFoundException e) {
             ExceptionUtils.throwException(e);
         }
+    }
+
+    private void registerLibraryPaths() {
+        File djlCache = JvmUtils.getCacheDirectory("djl");
+        System.setProperty("ENGINE_CACHE_DIR", validateDirectoryExists(new File(djlCache, "engine")).getAbsolutePath());
+        System.setProperty("DJL_CACHE_DIR", validateDirectoryExists(new File(djlCache, "cache")).getAbsolutePath());
+        System.setProperty("DJL_OFFLINE", Boolean.toString(llmProperties.isOffline()));
     }
 }
