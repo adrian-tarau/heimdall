@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Properties;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.StringUtils.isNotEmpty;
 
 @Service
 public final class SmtpService extends ProtocolService<SmtpEvent, net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent> {
@@ -114,10 +115,15 @@ public final class SmtpService extends ProtocolService<SmtpEvent, net.microfalx.
         sender.setHost(gatewayConfiguration.getHost());
         sender.setPort(gatewayConfiguration.getPort());
         Properties props = sender.getJavaMailProperties();
+        if (isNotEmpty(gatewayConfiguration.getUserName())) {
+            props.put("mail.smtp.auth", "true");
+            sender.setUsername(gatewayConfiguration.getUserName());
+            sender.setPassword(gatewayConfiguration.getPassword());
+        } else {
+            props.put("mail.smtp.auth", "false");
+        }
         props.put("mail.transport.protocol", "smtp");
-        props.put("mail.smtp.auth", "false");
-        props.put("mail.smtp.starttls.enable", "false");
-        props.put("mail.debug", "false");
+        props.put("mail.smtp.starttls.enable", gatewayConfiguration.isTls());
         mailSender = sender;
         return sender;
     }
