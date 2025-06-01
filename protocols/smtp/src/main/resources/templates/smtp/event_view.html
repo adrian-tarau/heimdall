@@ -12,7 +12,9 @@
                 <div class="col-md-4"><span class="fw-bold">Received at: </span><span class="fst-italic" th:text="${#formats.format(model.receivedAt)}"></span></div>
             </div>
             <div class="row">
-                <div class="col-md-8"><span class="fw-bold">To: </span><span class="fst-italic" th:text="${model.to.name}"></span></div>
+                <div class="col-md-8"><span class="fw-bold">To: </span><span class="fst-italic" th:text="${model.to.name}"></span>
+                    <a class="icon-link" href="#" th:attr="onclick=|Application.fire('smtp.forward', '${modelId}')|" component:tooltip-text="Forward the email to initial recipients"><i class="fa-solid fa-share"></i></a>
+                </div>
                 <div class="col-md-4"><span class="fw-bold">Sent at: </span><span class="fst-italic" th:text="${#formats.format(model.sentAt)}"></span></div>
             </div>
             <div class="flex-row" th:unless="${attachments.isEmpty()}">
