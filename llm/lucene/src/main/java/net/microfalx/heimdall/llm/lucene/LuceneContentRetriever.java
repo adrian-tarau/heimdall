@@ -203,8 +203,8 @@ class LuceneContentRetriever implements ContentRetriever {
             if (searcher == null || reopen) {
                 if (searcher != null) releaseSearcher();
                 LOGGER.debug("Open searcher");
-                SearcherOptions options = SearcherOptions.builder()
-                        .directory(embeddingStore.getDirectory()).threadPool(embeddingStore.getThreadPool())
+                SearcherOptions options = (SearcherOptions) SearcherOptions.create(LuceneFields.INDEX_NAME)
+                        .threadPool(embeddingStore.getThreadPool())
                         .analyzer(new StandardAnalyzer()).metrics(LuceneEmbeddingStore.SEARCH_METRICS)
                         .build();
                 searcher = embeddingStore.getSearchService().createSearcher(options);
