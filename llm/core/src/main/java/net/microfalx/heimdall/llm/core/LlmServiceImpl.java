@@ -218,7 +218,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     }
 
     private void initializeEmbeddingStore() {
-        this.embeddingStore = new LuceneEmbeddingStore(this, indexService, searchService, new File(variableDirectory, "embedding"))
+        this.embeddingStore = new LuceneEmbeddingStore(this, indexService, searchService)
                 .setThreadPool(getEmbeddingPool());
         this.indexService.registerListener(this.embeddingStore);
     }

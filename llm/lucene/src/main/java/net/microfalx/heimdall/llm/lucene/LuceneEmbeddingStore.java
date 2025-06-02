@@ -25,7 +25,6 @@ import org.apache.lucene.document.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.net.URI;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -48,7 +47,6 @@ public class LuceneEmbeddingStore implements IndexListener, EmbeddingStore<TextS
     private final IndexService indexService;
     @Getter(AccessLevel.PROTECTED)
     private final SearchService searchService;
-    private final File directory;
     private Encoding encoding;
 
     private Indexer indexer;
@@ -56,15 +54,13 @@ public class LuceneEmbeddingStore implements IndexListener, EmbeddingStore<TextS
 
     private volatile LuceneContentRetriever contentRetriever;
 
-    public LuceneEmbeddingStore(LlmService llmService, IndexService indexService, SearchService searchService, File directory) {
+    public LuceneEmbeddingStore(LlmService llmService, IndexService indexService, SearchService searchService) {
         requireNonNull(indexService);
         requireNonNull(indexService);
         requireNonNull(searchService);
-        requireNonNull(directory);
         this.llmService = llmService;
         this.indexService = indexService;
         this.searchService = searchService;
-        this.directory = directory;
         initIndex();
         initEncodings();
     }
@@ -80,10 +76,6 @@ public class LuceneEmbeddingStore implements IndexListener, EmbeddingStore<TextS
     public LuceneEmbeddingStore setThreadPool(ThreadPool threadPool) {
         this.threadPool = threadPool;
         return this;
-    }
-
-    public File getDirectory() {
-        return directory;
     }
 
     @Override

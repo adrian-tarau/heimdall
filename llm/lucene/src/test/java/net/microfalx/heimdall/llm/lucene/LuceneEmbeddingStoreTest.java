@@ -56,7 +56,7 @@ class LuceneEmbeddingStoreTest extends AbstractBootstrapServiceTestCase {
     @BeforeEach
     void setup() {
         directory = JvmUtils.getTemporaryDirectory("lucene-embedding", "index");
-        embeddingStore = new LuceneEmbeddingStore(llmService, indexService, searchService, directory);
+        embeddingStore = new LuceneEmbeddingStore(llmService, indexService, searchService);
         net.microfalx.heimdall.llm.api.Embedding embeddings = createEmbeddings();
         when(llmService.embed(anyString())).thenReturn(embeddings);
     }
