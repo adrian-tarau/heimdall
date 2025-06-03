@@ -3,6 +3,7 @@ package net.microfalx.heimdall.llm.openai;
 import net.microfalx.heimdall.llm.api.Chat;
 import net.microfalx.heimdall.llm.api.Model;
 import net.microfalx.heimdall.llm.api.Provider;
+import net.microfalx.heimdall.llm.core.LlmProperties;
 import net.microfalx.heimdall.llm.core.LlmServiceImpl;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,16 +20,20 @@ class OpenAiChatTest {
     @InjectMocks
     private LlmServiceImpl llmService;
 
+    private LlmProperties properties = new LlmProperties();
+
     private Provider provider;
 
     @BeforeEach
     void setUp() {
-        provider = new OpenAiProviderFactory().createProvider();
+        properties.setOpenAiApiKey(System.getProperty("openai.api_key", "demo"));
+        properties.setProjectId("heimdall");
+        provider = new OpenAiProviderFactory().setLlmProperties(properties).createProvider();
     }
 
     @Test
     void ask() {
-        Chat chat = llmService.createChat(loadChat("o4-mini-2025-04-16"));
+        Chat chat = llmService.createChat(loadChat("openai_gpt_4_1_nano"));
         String response = chat.ask("Tell me a joke about Java");
         System.out.println(response);
         Assertions.assertThat(response.length()).isGreaterThan(0);
@@ -36,7 +41,7 @@ class OpenAiChatTest {
 
     @Test
     void chat() {
-        Chat chat = llmService.createChat(loadChat("openai_o4_mini"));
+        Chat chat = llmService.createChat(loadChat("openai_gpt_4_1_nano"));
         int tokenCount = 0;
         Iterator<String> stream = chat.chat("Tell me a joke about Java");
         while (stream.hasNext()) {

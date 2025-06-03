@@ -34,10 +34,26 @@ public class LlmProperties {
      */
     private Duration interval = Duration.ofMinutes(5);
 
+
+    /**
+     * OpenAI API key to use when accessing models that require it.
+     */
+    private String openAiUri = "https://api.openai.com/v1";
+
     /**
      * OpenAI API key to use when accessing models that require it.
      */
     private String openAiApiKey;
+
+    /**
+     * The id of the OpenAI project
+     */
+    private String openAiProjectId;
+
+    /**
+     * The id of the OpenAI organization
+     */
+    private String openAiOrganizationId;
 
     /**
      * Ollama API key to use when accessing models that require it.

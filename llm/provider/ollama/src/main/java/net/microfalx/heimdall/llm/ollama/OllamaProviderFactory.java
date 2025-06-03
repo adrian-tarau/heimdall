@@ -7,6 +7,8 @@ import net.microfalx.heimdall.llm.api.Provider;
 import net.microfalx.heimdall.llm.core.LlmProperties;
 import net.microfalx.lang.UriUtils;
 
+import static net.microfalx.lang.StringUtils.isNotEmpty;
+
 @net.microfalx.lang.annotation.Provider
 @Setter
 @Getter
@@ -17,7 +19,7 @@ public class OllamaProviderFactory implements Provider.Factory {
     @Override
     public Provider createProvider() {
         net.microfalx.heimdall.llm.api.Provider.Builder builder = new net.microfalx.heimdall.llm.api.Provider.Builder("ollama");
-        if (llmProperties != null) {
+        if (llmProperties != null && isNotEmpty(llmProperties.getOllamaUri())) {
             builder.uri(UriUtils.parseUri(llmProperties.getOllamaUri()), llmProperties.getOllamaApiKey());
         }
         builder.name("Ollama").description("Get up and running with large language models.");

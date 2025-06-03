@@ -6,12 +6,14 @@ import net.microfalx.heimdall.llm.api.Chat;
 import net.microfalx.heimdall.llm.api.LlmNotFoundException;
 import net.microfalx.heimdall.llm.api.Model;
 import net.microfalx.heimdall.llm.core.AbstractChatFactory;
-import net.microfalx.lang.NumberUtils;
+import net.microfalx.heimdall.llm.core.LlmProperties;
 import net.microfalx.lang.StringUtils;
 
 import java.util.ArrayList;
 
 public class OpenAiChatFactory extends AbstractChatFactory {
+
+    private LlmProperties properties = new LlmProperties();
 
     @Override
     public Chat createChat(Model model) {
@@ -19,13 +21,14 @@ public class OpenAiChatFactory extends AbstractChatFactory {
             throw new LlmNotFoundException("The model name is required for OpenAI");
         }
         StreamingChatModel chatModel = OpenAiStreamingChatModel.builder()
+                .baseUrl(model.getUri().toASCIIString()).apiKey(model.getApyKey())
+                .projectId(properties.getOpenAiProjectId())
+                .organizationId(properties.getOpenAiOrganizationId())
                 .modelName(model.getModelName())
-                .temperature(NumberUtils.toFloat(model.getTemperature()).doubleValue())
+                .temperature(model.getTemperature())
                 .maxTokens(model.getMaximumOutputTokens())
                 .frequencyPenalty(model.getFrequencyPenalty())
                 .presencePenalty(model.getPresencePenalty())
-                .baseUrl(model.getUri().toASCIIString())
-                .apiKey(model.getApyKey()).projectId("heimdall")
                 .maxCompletionTokens(model.getMaximumOutputTokens())
                 .responseFormat(model.getResponseFormat().name())
                 .stop(new ArrayList<>(model.getStopSequences())).strictTools(true)
