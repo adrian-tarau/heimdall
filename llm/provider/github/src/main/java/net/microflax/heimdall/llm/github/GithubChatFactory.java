@@ -7,7 +7,6 @@ import net.microfalx.heimdall.llm.api.Chat;
 import net.microfalx.heimdall.llm.api.LlmNotFoundException;
 import net.microfalx.heimdall.llm.api.Model;
 import net.microfalx.heimdall.llm.core.AbstractChatFactory;
-import net.microfalx.lang.NumberUtils;
 import net.microfalx.lang.StringUtils;
 
 import java.util.ArrayList;
@@ -20,7 +19,7 @@ public class GithubChatFactory extends AbstractChatFactory {
             throw new LlmNotFoundException("The model name is required for Github");
         }
         StreamingChatModel chatModel = GitHubModelsStreamingChatModel.builder()
-                .modelName(model.getModelName()).temperature(NumberUtils.toFloat(model.getTemperature()).doubleValue())
+                .modelName(model.getModelName()).temperature(model.getTemperature())
                 .frequencyPenalty(model.getFrequencyPenalty())
                 .presencePenalty(model.getPresencePenalty()).topP(model.getTopP())
                 .stop(new ArrayList<>(model.getStopSequences())).gitHubToken(model.getApyKey())
