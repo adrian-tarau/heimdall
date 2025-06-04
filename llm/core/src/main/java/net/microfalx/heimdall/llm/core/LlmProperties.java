@@ -46,12 +46,12 @@ public class LlmProperties {
     private String openAiApiKey;
 
     /**
-     * The id of the OpenAI project
+     * The id of the project
      */
     private String openAiProjectId;
 
     /**
-     * The id of the OpenAI organization
+     * The id of the organization
      */
     private String openAiOrganizationId;
 

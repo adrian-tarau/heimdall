@@ -27,7 +27,7 @@ class OpenAiChatTest {
     @BeforeEach
     void setUp() {
         properties.setOpenAiApiKey(System.getProperty("openai.api_key", "demo"));
-        properties.setProjectId("heimdall");
+        properties.setOpenAiProjectId("proj_3CLMtXB2QZ5t4nl9CqOx9N8B");
         provider = new OpenAiProviderFactory().setLlmProperties(properties).createProvider();
     }
 
