@@ -1,14 +1,16 @@
 package net.microfalx.heimdall.llm.core;
 
 import jakarta.annotation.PreDestroy;
+import lombok.AccessLevel;
+import lombok.Getter;
 import net.microfalx.bootstrap.core.async.ThreadPoolFactory;
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
 import net.microfalx.bootstrap.search.IndexService;
 import net.microfalx.bootstrap.search.SearchService;
+import net.microfalx.heimdall.llm.api.*;
 import net.microfalx.heimdall.llm.api.Chat;
 import net.microfalx.heimdall.llm.api.Model;
 import net.microfalx.heimdall.llm.api.Provider;
-import net.microfalx.heimdall.llm.api.*;
 import net.microfalx.heimdall.llm.lucene.LuceneEmbeddingStore;
 import net.microfalx.lang.ClassUtils;
 import net.microfalx.lang.ExceptionUtils;
@@ -44,6 +46,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     private SearchService searchService;
 
     @Autowired(required = false)
+    @Getter(AccessLevel.PROTECTED)
     private LlmProperties llmProperties = new LlmProperties();
 
     private File variableDirectory;
@@ -173,6 +176,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         initializeApplicationContext();
         registerProviders();
         initializeEmbeddingStore();
+        ThreadPool.get().execute(this::reload);
     }
 
     @PreDestroy

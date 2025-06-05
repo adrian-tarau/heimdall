@@ -74,4 +74,19 @@ public class LlmProperties {
      * GitHub API key to use when accessing models that require it.
      */
     private String gitHubApiKey;
+
+    /**
+     * The default temperature to use when generating text.
+     */
+    private Double defaultTemperature = 0.1;
+
+    /**
+     * The default top P to use when generating text.
+     */
+    private Double defaultTopP = 0.9;
+
+    /**
+     * The default top K to use when generating text.
+     */
+    private Integer defaultTopK = 20;
 }

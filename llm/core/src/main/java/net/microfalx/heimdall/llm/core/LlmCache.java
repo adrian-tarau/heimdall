@@ -4,33 +4,36 @@ import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
 import net.microfalx.heimdall.llm.api.LlmNotFoundException;
 import net.microfalx.heimdall.llm.api.Model;
 import net.microfalx.heimdall.llm.api.Provider;
+import net.microfalx.lang.CollectionUtils;
+import net.microfalx.lang.UriUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.CollectionUtils.setFromString;
+import static net.microfalx.lang.ObjectUtils.defaultIfNull;
 import static net.microfalx.lang.StringUtils.toIdentifier;
 
 public class LlmCache extends ApplicationContextSupport {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LlmCache.class);
 
-    private final LlmServiceImpl aiService;
+    private final LlmServiceImpl llmService;
 
     private final Map<String, net.microfalx.heimdall.llm.api.Model> models = new HashMap<>();
     private final Map<String, Provider> providers = new HashMap<>();
 
-    LlmCache(LlmServiceImpl aiService) {
-        this.aiService = aiService;
+    LlmCache(LlmServiceImpl llmService) {
+        this.llmService = llmService;
     }
 
 
-    Map<String, Model> getModels(){
+    Map<String, Model> getModels() {
         return models;
     }
 
@@ -70,52 +73,53 @@ public class LlmCache extends ApplicationContextSupport {
     void load() {
         LOGGER.info("Load AI");
         try {
-           loadModels();
+            loadModels();
         } catch (Exception e) {
             LOGGER.error("Failed to load models", e);
-        }
-        try {
-            loadProviders();
-        } catch (Exception e) {
-            LOGGER.error("Failed to load providers", e);
         }
         LOGGER.info("AI loaded, providers: {}, models: {}", providers.size(), models.size());
     }
 
     private void loadModels() {
-        List<net.microfalx.heimdall.llm.core.Model> serviceJpas = getBean(ModelRepository.class).findAll();
-        for (net.microfalx.heimdall.llm.core.Model modelJpa : serviceJpas) {
-            Model.Builder builder = new Model.Builder(modelJpa.getNaturalId())
-                    .addStopSequences(modelJpa.getStopSequences()).frequencyPenalty(modelJpa.getFrequencyPenalty())
-                    .modelName(modelJpa.getModelName()).maximumOutputTokens(modelJpa.getMaximumOutputTokens())
-                    .presencePenalty(modelJpa.getPresencePenalty()).temperature(modelJpa.getTemperature()).
-                    uri(URI.create(modelJpa.getUri()),modelJpa.getApiKey()).topK(modelJpa.getTopK()).topP(modelJpa.getTopP())
-                    .responseFormat(modelJpa.getResponseFormat()).setDefault(modelJpa.isDefault()).enabled(modelJpa.isEnabled())
-                    .embedding(modelJpa.isEmbedding());
-            builder.tags(setFromString(modelJpa.getTags())).name(modelJpa.getName()).description(modelJpa.getDescription());
-            registerModel(builder.build());
-        }
-    }
-
-    private void loadProviders() {
-        List<net.microfalx.heimdall.llm.core.Provider> providersJpas = getBean(ProviderRepository.class).findAll();
-        for (net.microfalx.heimdall.llm.core.Provider providerJpa : providersJpas) {
-            Provider.Builder builder = new Provider.Builder(providerJpa.getNaturalId()).
-                    uri(URI.create(providerJpa.getUri()),providerJpa.getApiKey()).
-                    author(providerJpa.getAuthor()).version(providerJpa.getVersion()).license(providerJpa.getLicense());
-            builder.tags(setFromString(providerJpa.getTags())).name(providerJpa.getName()).description(providerJpa.getDescription());
-            for (net.microfalx.heimdall.llm.api.Model model:models.values()){
-                Model.Builder modelBuilder = new Model.Builder(model.getId())
-                        .addStopSequences(model.getStopSequences().stream().toList()).frequencyPenalty(model.getFrequencyPenalty())
-                        .modelName(model.getModelName()).maximumOutputTokens(model.getMaximumOutputTokens())
-                        .presencePenalty(model.getPresencePenalty()).temperature(model.getTemperature()).
-                        uri(model.getUri(),model.getApyKey()).topK(model.getTopK()).topP(model.getTopP())
-                        .responseFormat(model.getResponseFormat());
-                builder.tags(model.getTags()).name(model.getName()).description(model.getDescription());
-                builder.model(modelBuilder);
+        LlmProperties properties = llmService.getLlmProperties();
+        Map<Integer, Provider.Builder> providerBuilders = new HashMap<>();
+        List<net.microfalx.heimdall.llm.core.Model> modelJpas = getBean(ModelRepository.class).findAll();
+        for (net.microfalx.heimdall.llm.core.Model modelJpa : modelJpas) {
+            Model.Builder modelBuild = loadModel(modelJpa, properties);
+            Provider.Builder providerBuild = providerBuilders.get(modelJpa.getProvider().getId());
+            if (providerBuild == null) {
+                providerBuild = loadProvider(modelJpa.getProvider());
+                providerBuilders.put(modelJpa.getProvider().getId(), providerBuild);
             }
-            registerProvider(builder.build());
+            providerBuild.model(modelBuild);
         }
+        providerBuilders.values().forEach(builder -> registerProvider(builder.build()));
     }
 
+    private Model.Builder loadModel(net.microfalx.heimdall.llm.core.Model modelJpa, LlmProperties properties) {
+        Model.Builder builder = new Model.Builder(modelJpa.getNaturalId())
+                .addStopSequences(new ArrayList<>(CollectionUtils.setFromString(modelJpa.getStopSequences()))).frequencyPenalty(modelJpa.getFrequencyPenalty())
+                .modelName(modelJpa.getModelName()).maximumOutputTokens(modelJpa.getMaximumOutputTokens())
+                .presencePenalty(modelJpa.getPresencePenalty())
+                .temperature(defaultIfNull(modelJpa.getTemperature(), properties.getDefaultTemperature()));
+        builder.uri(UriUtils.parseUri(modelJpa.getUri()))
+                .apyKey(modelJpa.getApiKey());
+        builder.topK(defaultIfNull(modelJpa.getTopK(), properties.getDefaultTopK()))
+                .topP(defaultIfNull(modelJpa.getTopP(), properties.getDefaultTopP()))
+                .responseFormat(modelJpa.getResponseFormat()).setDefault(modelJpa.isDefault())
+                .enabled(modelJpa.isEnabled()).embedding(modelJpa.isEmbedding());
+        builder.tags(setFromString(modelJpa.getTags())).name(modelJpa.getName()).description(modelJpa.getDescription());
+        return builder;
+    }
+
+    private Provider.Builder loadProvider(net.microfalx.heimdall.llm.core.Provider providerJpa) {
+        Provider.Builder builder = new Provider.Builder(providerJpa.getNaturalId())
+                .author(providerJpa.getAuthor());
+        builder.uri(UriUtils.parseUri(providerJpa.getUri()))
+                .apyKey(providerJpa.getApiKey())
+                .license(providerJpa.getLicense()).version(providerJpa.getVersion());
+        builder.tags(CollectionUtils.setFromString(providerJpa.getTags()))
+                .name(providerJpa.getName()).description(providerJpa.getDescription());
+        return builder;
+    }
 }

@@ -230,7 +230,7 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
 
         private URI uri;
         private String apyKey;
-        private boolean enabled=true;
+        private boolean enabled = true;
         private boolean _default;
 
         private String modelName;
@@ -253,6 +253,11 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
 
         public Builder uri(URI uri) {
             this.uri = uri;
+            return this;
+        }
+
+        public Builder apyKey(String apyKey) {
+            this.apyKey = apyKey;
             return this;
         }
 
