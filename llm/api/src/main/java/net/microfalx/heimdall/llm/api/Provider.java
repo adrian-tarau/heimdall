@@ -237,7 +237,6 @@ public class Provider extends NamedAndTaggedIdentifyAware<String> {
         }
 
         public Builder embeddingFactory(Embedding.Factory embeddingFactory) {
-            requireNonNull(embeddingFactory);
             this.embeddingFactory = embeddingFactory;
             return this;
         }

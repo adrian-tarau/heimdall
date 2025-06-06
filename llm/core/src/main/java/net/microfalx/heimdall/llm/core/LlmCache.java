@@ -5,7 +5,6 @@ import net.microfalx.heimdall.llm.api.LlmNotFoundException;
 import net.microfalx.heimdall.llm.api.Model;
 import net.microfalx.heimdall.llm.api.Provider;
 import net.microfalx.lang.CollectionUtils;
-import net.microfalx.lang.UriUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,20 +17,22 @@ import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.CollectionUtils.setFromString;
 import static net.microfalx.lang.ObjectUtils.defaultIfNull;
 import static net.microfalx.lang.StringUtils.toIdentifier;
+import static net.microfalx.lang.UriUtils.parseUri;
 
 public class LlmCache extends ApplicationContextSupport {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LlmCache.class);
 
     private final LlmServiceImpl llmService;
+    private volatile LlmCache oldCache;
 
     private final Map<String, net.microfalx.heimdall.llm.api.Model> models = new HashMap<>();
     private final Map<String, Provider> providers = new HashMap<>();
 
-    LlmCache(LlmServiceImpl llmService) {
+    LlmCache(LlmCache oldCache, LlmServiceImpl llmService) {
+        this.oldCache = oldCache;
         this.llmService = llmService;
     }
-
 
     Map<String, Model> getModels() {
         return models;
@@ -71,13 +72,15 @@ public class LlmCache extends ApplicationContextSupport {
     }
 
     void load() {
-        LOGGER.info("Load AI");
+        LOGGER.info("Load models and providers");
         try {
             loadModels();
         } catch (Exception e) {
             LOGGER.error("Failed to load models", e);
+        } finally {
+            oldCache = null;
         }
-        LOGGER.info("AI loaded, providers: {}, models: {}", providers.size(), models.size());
+        LOGGER.info("Loaded completed, providers: {}, models: {}", providers.size(), models.size());
     }
 
     private void loadModels() {
@@ -89,9 +92,13 @@ public class LlmCache extends ApplicationContextSupport {
             Provider.Builder providerBuild = providerBuilders.get(modelJpa.getProvider().getId());
             if (providerBuild == null) {
                 providerBuild = loadProvider(modelJpa.getProvider());
-                providerBuilders.put(modelJpa.getProvider().getId(), providerBuild);
+                if (providerBuild != null) {
+                    providerBuilders.put(modelJpa.getProvider().getId(), providerBuild);
+                }
             }
-            providerBuild.model(modelBuild);
+            if (providerBuild != null) {
+                providerBuild.model(modelBuild);
+            }
         }
         providerBuilders.values().forEach(builder -> registerProvider(builder.build()));
     }
@@ -102,24 +109,41 @@ public class LlmCache extends ApplicationContextSupport {
                 .modelName(modelJpa.getModelName()).maximumOutputTokens(modelJpa.getMaximumOutputTokens())
                 .presencePenalty(modelJpa.getPresencePenalty())
                 .temperature(defaultIfNull(modelJpa.getTemperature(), properties.getDefaultTemperature()));
-        builder.uri(UriUtils.parseUri(modelJpa.getUri()))
+        builder.uri(parseUri(modelJpa.getUri()))
                 .apyKey(modelJpa.getApiKey());
         builder.topK(defaultIfNull(modelJpa.getTopK(), properties.getDefaultTopK()))
                 .topP(defaultIfNull(modelJpa.getTopP(), properties.getDefaultTopP()))
                 .responseFormat(modelJpa.getResponseFormat()).setDefault(modelJpa.isDefault())
                 .enabled(modelJpa.isEnabled()).embedding(modelJpa.isEmbedding());
-        builder.tags(setFromString(modelJpa.getTags())).name(modelJpa.getName()).description(modelJpa.getDescription());
+        builder.tags(setFromString(modelJpa.getTags())).name(modelJpa.getName())
+                .description(modelJpa.getDescription());
         return builder;
     }
 
     private Provider.Builder loadProvider(net.microfalx.heimdall.llm.core.Provider providerJpa) {
+        Provider oldProvider = null;
+        try {
+            if (oldCache != null) oldProvider = oldCache.getProvider(providerJpa.getNaturalId());
+        } catch (LlmNotFoundException e) {
+            return null;
+        }
+        if (oldProvider == null) {
+            LOGGER.warn("No previous provider found for '{}', skipping", providerJpa.getNaturalId());
+            return null;
+        }
         Provider.Builder builder = new Provider.Builder(providerJpa.getNaturalId())
                 .author(providerJpa.getAuthor());
-        builder.uri(UriUtils.parseUri(providerJpa.getUri()))
+        builder.uri(parseUri(providerJpa.getUri()))
                 .apyKey(providerJpa.getApiKey())
                 .license(providerJpa.getLicense()).version(providerJpa.getVersion());
         builder.tags(CollectionUtils.setFromString(providerJpa.getTags()))
                 .name(providerJpa.getName()).description(providerJpa.getDescription());
+        builder.chatFactory(oldProvider.getChatFactory());
+        try {
+            builder.embeddingFactory(oldProvider.getEmbeddingFactory());
+        } catch (IllegalStateException e) {
+            // ignore if the embedding factory is not available
+        }
         return builder;
     }
 }

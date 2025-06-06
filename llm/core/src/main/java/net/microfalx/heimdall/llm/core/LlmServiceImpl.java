@@ -7,10 +7,10 @@ import net.microfalx.bootstrap.core.async.ThreadPoolFactory;
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
 import net.microfalx.bootstrap.search.IndexService;
 import net.microfalx.bootstrap.search.SearchService;
-import net.microfalx.heimdall.llm.api.*;
 import net.microfalx.heimdall.llm.api.Chat;
 import net.microfalx.heimdall.llm.api.Model;
 import net.microfalx.heimdall.llm.api.Provider;
+import net.microfalx.heimdall.llm.api.*;
 import net.microfalx.heimdall.llm.lucene.LuceneEmbeddingStore;
 import net.microfalx.lang.ClassUtils;
 import net.microfalx.lang.ExceptionUtils;
@@ -51,7 +51,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
 
     private File variableDirectory;
     private LuceneEmbeddingStore embeddingStore;
-    private volatile LlmCache cache = new LlmCache(this);
+    private volatile LlmCache cache = new LlmCache(null, this);
     private final LlmPersistence llmPersistence = new LlmPersistence();
     private final Collection<LlmListener> listeners = new CopyOnWriteArrayList<>();
     private final Collection<Provider.Factory> providerFactories = new CopyOnWriteArrayList<>();
@@ -158,7 +158,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
 
     @Override
     public void reload() {
-        LlmCache cache = new LlmCache(this);
+        LlmCache cache = new LlmCache(this.cache, this);
         cache.setApplicationContext(getApplicationContext());
         cache.load();
         this.defaultModel = null;
