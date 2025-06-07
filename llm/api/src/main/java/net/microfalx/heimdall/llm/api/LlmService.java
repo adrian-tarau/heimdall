@@ -11,6 +11,13 @@ import java.util.Collection;
 public interface LlmService {
 
     /**
+     * Creates a chat session with the default model and an empty prompt.
+     *
+     * @return a non-null instance
+     */
+    Chat createChat();
+
+    /**
      * Creates a chat session with the default model.
      *
      * @param prompt the prompt to use
@@ -19,13 +26,21 @@ public interface LlmService {
     Chat createChat(Prompt prompt);
 
     /**
+     * Creates a chat session with a model and an empty prompt.
+     *
+     * @param model the prompt to use
+     * @return a non-null instance
+     */
+    Chat createChat(Model model);
+
+    /**
      * Creates a chat session using a given model.
      *
      * @param prompt the prompt to use
-     * @param modelId the model identifier to use
+     * @param model the model to use
      * @return a non-null instance
      */
-    Chat createChat(Prompt prompt, String modelId);
+    Chat createChat(Prompt prompt, Model model);
 
     /**
      * Embed the text content with the default model.

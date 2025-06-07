@@ -38,7 +38,6 @@
 
     <modules>
         <module>hugging-face</module>
-        <module>jlama</module>
         <module>ollama</module>
         <module>open-ai</module>
         <module>github</module>

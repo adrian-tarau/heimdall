@@ -1,4 +1,4 @@
-package net.microfalx.heimdall.llm.core.provider;
+package net.microfalx.heimdall.llm.core.provider.onnx;
 
 import net.microfalx.heimdall.llm.api.Model;
 import net.microfalx.heimdall.llm.api.Provider;

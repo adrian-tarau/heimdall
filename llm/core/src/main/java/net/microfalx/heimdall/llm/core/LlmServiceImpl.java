@@ -86,23 +86,28 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     }
 
     @Override
+    public Chat createChat() {
+        return createChat(Prompt.empty());
+    }
+
+    @Override
     public Chat createChat(Prompt prompt) {
         return createChat(prompt, getDefaultModel());
     }
 
     @Override
-    public net.microfalx.heimdall.llm.api.Chat createChat(Prompt prompt, String modelId) {
-        Model model = getModel(modelId);
-        return createChat(prompt, model);
+    public Chat createChat(Model model) {
+        return createChat(Prompt.empty(), getDefaultModel());
     }
 
     public net.microfalx.heimdall.llm.api.Chat createChat(Prompt prompt, Model model) {
         requireNonNull(prompt);
         requireNonNull(model);
         if (model.isEmbedding()) throw new LlmException("Model '" + model.getId() + "' does not support chating");
-        net.microfalx.heimdall.llm.api.Chat chat = model.getProvider().getChatFactory().createChat(model);
+        Chat.Factory chatFactory = model.getProvider().getChatFactory();
+        net.microfalx.heimdall.llm.api.Chat chat = chatFactory.createChat(prompt, model);
         activeChats.add(chat);
-        if (chat instanceof AbstractChat abstractChat) abstractChat.initialize(this, prompt);
+        if (chat instanceof AbstractChat abstractChat) abstractChat.initialize(this);
         return chat;
     }
 
@@ -167,9 +172,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     public void registerProvider(Provider provider) {
         requireNonNull(provider);
         cache.registerProvider(provider);
-        for (Model model : provider.getModels()) {
-            llmPersistence.execute(model);
-        }
+        persistProvider(provider);
     }
 
     @Override
@@ -194,6 +197,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
 
     @Override
     public void reload() {
+        if (!llmProperties.isPersistenceEnabled()) return;
         LlmCache cache = new LlmCache(this.cache, this);
         cache.setApplicationContext(getApplicationContext());
         cache.load();
@@ -277,6 +281,13 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     private void initThreadPools() {
         chatPool = ThreadPoolFactory.create("LLM").create();
         embeddingPool = ThreadPoolFactory.create("Embedding").create();
+    }
+
+    private void persistProvider(Provider provider) {
+        if (!llmProperties.isPersistenceEnabled()) return;
+        for (Model model : provider.getModels()) {
+            llmPersistence.execute(model);
+        }
     }
 
     private void registerProviders() {

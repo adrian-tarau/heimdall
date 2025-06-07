@@ -1,4 +1,4 @@
-package net.microfalx.heimdall.llm.core.provider;
+package net.microfalx.heimdall.llm.core.provider.jlama;
 
 import net.microfalx.heimdall.llm.api.Embedding;
 import net.microfalx.heimdall.llm.api.Model;
@@ -8,29 +8,29 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class OnnxEmbeddingFactoryTest {
+class JLamaEmbeddingFactoryTest {
 
     private Provider provider;
 
     @BeforeEach
     void setup() throws Exception {
-        provider = new OnnxProviderFactory().createProvider();
+        provider = new JLamaProviderFactory().createProvider();
     }
 
     @Test
-    void embedMinLmv2q() {
-        Embedding embedding = createEmbedding("onnx-all-minilm-l6-v2-q", "This is a test embedding");
-        assertEquals(384, embedding.getDimension());
+    void embedE5Base() {
+        Embedding embedding = createEmbedding("jlama-e5-base-v2", "This is a test embedding");
+        assertEquals(768, embedding.getDimension());
     }
 
     @Test
-    void embedE5Smallq() {
-        Embedding embedding = createEmbedding("onnx-e5-small-v2-q", "This is a test embedding");
+    void embedE5Small() {
+        Embedding embedding = createEmbedding("jlama-e5-small-v2", "This is a test embedding");
         assertEquals(384, embedding.getDimension());
     }
 
     private Embedding createEmbedding(String modelId, String text) {
-        OnnxEmbeddingFactory factory = new OnnxEmbeddingFactory();
+        JLamaEmbeddingFactory factory = new JLamaEmbeddingFactory();
         Model model = loadModel(modelId);
         return factory.createEmbedding(model, text);
     }

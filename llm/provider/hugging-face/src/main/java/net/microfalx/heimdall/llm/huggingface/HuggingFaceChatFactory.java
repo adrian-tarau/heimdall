@@ -5,14 +5,16 @@ import dev.langchain4j.model.huggingface.HuggingFaceChatModel;
 import net.microfalx.heimdall.llm.api.Chat;
 import net.microfalx.heimdall.llm.api.LlmNotFoundException;
 import net.microfalx.heimdall.llm.api.Model;
+import net.microfalx.heimdall.llm.api.Prompt;
 import net.microfalx.heimdall.llm.core.AbstractChatFactory;
-import net.microfalx.lang.StringUtils;
+
+import static net.microfalx.lang.StringUtils.isEmpty;
 
 public class HuggingFaceChatFactory extends AbstractChatFactory {
 
     @Override
-    public Chat createChat(Model model) {
-        if (StringUtils.isEmpty(model.getModelName())) {
+    public Chat createChat(Prompt prompt, Model model) {
+        if (isEmpty(model.getModelName())) {
             throw new LlmNotFoundException("The model name is required for HuggingFace");
         }
         ChatModel chatModel = HuggingFaceChatModel.builder()
@@ -23,6 +25,6 @@ public class HuggingFaceChatFactory extends AbstractChatFactory {
                 .temperature(model.getTemperature())
                 .maxNewTokens(model.getMaximumOutputTokens())
                 .build();
-        return new HuggingFaceChat(model).setChatModel(chatModel);
+        return new HuggingFaceChat(prompt, model).setChatModel(chatModel);
     }
 }

@@ -106,9 +106,10 @@ public interface Chat extends Identifiable<String>, Nameable {
         /**
          * Creates a chat session with a given identifier.
          *
-         * @param model the model to use
+         * @param prompt the prompt to use for the chat
+         * @param model the model to use for the chat
          * @return a non-null instance
          */
-        Chat createChat(Model model);
+        Chat createChat(Prompt prompt, Model model);
     }
 }

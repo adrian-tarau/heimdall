@@ -60,10 +60,12 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
 
     private volatile Principal principal;
 
-    public AbstractChat(Model model) {
+    public AbstractChat(Prompt prompt, Model model) {
+        requireNonNull(prompt);
         requireNonNull(model);
         setId(UUID.randomUUID().toString());
         setName("Unnamed");
+        this.prompt = prompt;
         this.model = model;
     }
 
@@ -184,9 +186,8 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
         if (service != null) service.closeChat(this);
     }
 
-    void initialize(LlmServiceImpl service, Prompt prompt) {
+    void initialize(LlmServiceImpl service) {
         requireNonNull(service);
-        requireNonNull(prompt);
         validate();
         this.service = service;
         this.prompt = prompt;

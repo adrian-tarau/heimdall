@@ -26,7 +26,12 @@ public class LlmProperties {
     /**
      * Show additional debug information related to the LLM operations.
      */
-    private boolean debug;
+    private boolean debugEnabled;
+
+    /**
+     * Indicates whether the LLM service should persist data to the database.
+     */
+    private boolean persistenceEnabled = true;
 
     /**
      * The maximum number of parallel requests each model can process simultaneously. By default, this

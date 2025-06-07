@@ -1,16 +1,19 @@
-package net.microfalx.heimdall.llm.core.provider;
+package net.microfalx.heimdall.llm.core.provider.jlama;
 
 import dev.langchain4j.model.embedding.EmbeddingModel;
-import dev.langchain4j.model.embedding.onnx.allminilml6v2q.AllMiniLmL6V2QuantizedEmbeddingModel;
+import dev.langchain4j.model.jlama.JlamaEmbeddingModel;
 import net.microfalx.heimdall.llm.api.Embedding;
 import net.microfalx.heimdall.llm.api.Model;
 import net.microfalx.heimdall.llm.core.AbstractEmbeddingFactory;
 
-public class OnnxEmbeddingFactory extends AbstractEmbeddingFactory {
+public class JLamaEmbeddingFactory extends AbstractEmbeddingFactory {
 
     @Override
     public Embedding createEmbedding(Model model, String text) {
-        EmbeddingModel embeddingModel = new AllMiniLmL6V2QuantizedEmbeddingModel();
+        EmbeddingModel embeddingModel = JlamaEmbeddingModel.builder()
+                .modelName(model.getModelName())
+                .build();
         return create(model, embeddingModel.embed(text).content());
     }
+
 }

@@ -6,6 +6,7 @@ import dev.langchain4j.model.ollama.OllamaStreamingChatModel;
 import net.microfalx.heimdall.llm.api.Chat;
 import net.microfalx.heimdall.llm.api.LlmNotFoundException;
 import net.microfalx.heimdall.llm.api.Model;
+import net.microfalx.heimdall.llm.api.Prompt;
 import net.microfalx.lang.StringUtils;
 
 import java.time.Duration;
@@ -14,7 +15,7 @@ import java.util.ArrayList;
 public class OllamaChatFactory implements Chat.Factory {
 
     @Override
-    public Chat createChat(Model model) {
+    public Chat createChat(Prompt prompt, Model model) {
         if (StringUtils.isEmpty(model.getModelName())) {
             throw new LlmNotFoundException("The model name is required for Ollama");
         }
@@ -27,6 +28,6 @@ public class OllamaChatFactory implements Chat.Factory {
                 .responseFormat(ResponseFormat.TEXT)
                 .timeout(Duration.ofSeconds(10))
                 .build();
-        return new OllamaChat(model).setStreamingChatModel(chatModel);
+        return new OllamaChat(prompt, model).setStreamingChatModel(chatModel);
     }
 }

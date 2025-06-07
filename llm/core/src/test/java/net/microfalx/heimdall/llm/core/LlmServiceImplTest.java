@@ -5,15 +5,14 @@ import net.microfalx.bootstrap.search.IndexService;
 import net.microfalx.bootstrap.search.SearchService;
 import net.microfalx.bootstrap.test.AbstractBootstrapServiceTestCase;
 import net.microfalx.bootstrap.test.answer.RepositoryAnswer;
+import net.microfalx.heimdall.llm.api.*;
 import net.microfalx.heimdall.llm.api.Chat;
-import net.microfalx.heimdall.llm.api.LlmService;
-import net.microfalx.heimdall.llm.api.Model;
-import net.microfalx.heimdall.llm.api.Provider;
 import net.microfalx.heimdall.llm.core.jpa.ModelRepository;
 import net.microfalx.heimdall.llm.core.jpa.ProviderRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.convention.TestBean;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
@@ -21,7 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@ContextConfiguration(classes = {LlmServiceImpl.class, MetadataService.class})
+@TestPropertySource(properties = "heimdall.llm.persistenceEnabled=false")
+@ContextConfiguration(classes = {LlmServiceImpl.class, MetadataService.class, LlmProperties.class})
 class LlmServiceImplTest extends AbstractBootstrapServiceTestCase {
 
     @TestBean private ModelRepository modelRepository;
@@ -30,6 +30,7 @@ class LlmServiceImplTest extends AbstractBootstrapServiceTestCase {
     @MockitoBean private IndexService indexService;
     @MockitoBean private SearchService searchService;
 
+    @Autowired private LlmProperties properties;
     @Autowired private LlmService llmService;
 
     @Test
@@ -55,16 +56,16 @@ class LlmServiceImplTest extends AbstractBootstrapServiceTestCase {
 
     public static class TestChat extends AbstractChat {
 
-        public TestChat(Model model) {
-            super(model);
+        public TestChat(Prompt prompt, Model model) {
+            super(prompt, model);
         }
     }
 
     public static class TestChatFactory implements net.microfalx.heimdall.llm.api.Chat.Factory {
 
         @Override
-        public Chat createChat(Model model) {
-            return new TestChat(model);
+        public Chat createChat(Prompt prompt, Model model) {
+            return new TestChat(prompt, model);
         }
     }
 

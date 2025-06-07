@@ -6,6 +6,7 @@ import dev.langchain4j.model.github.GitHubModelsStreamingChatModel;
 import net.microfalx.heimdall.llm.api.Chat;
 import net.microfalx.heimdall.llm.api.LlmNotFoundException;
 import net.microfalx.heimdall.llm.api.Model;
+import net.microfalx.heimdall.llm.api.Prompt;
 import net.microfalx.heimdall.llm.core.AbstractChatFactory;
 import net.microfalx.lang.StringUtils;
 
@@ -14,7 +15,7 @@ import java.util.ArrayList;
 
 public class GithubChatFactory extends AbstractChatFactory {
     @Override
-    public Chat createChat(Model model) {
+    public Chat createChat(Prompt prompt, Model model) {
         if (StringUtils.isEmpty(model.getModelName())) {
             throw new LlmNotFoundException("The model name is required for Github");
         }
@@ -26,6 +27,6 @@ public class GithubChatFactory extends AbstractChatFactory {
                 .responseFormat(new ChatCompletionsResponseFormatText())
                 .maxTokens(model.getMaximumOutputTokens())
                 .build();
-        return new GithubChat(model).setStreamingChatModel(chatModel);
+        return new GithubChat(prompt, model).setStreamingChatModel(chatModel);
     }
 }

@@ -5,6 +5,7 @@ import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import net.microfalx.heimdall.llm.api.Chat;
 import net.microfalx.heimdall.llm.api.LlmNotFoundException;
 import net.microfalx.heimdall.llm.api.Model;
+import net.microfalx.heimdall.llm.api.Prompt;
 import net.microfalx.heimdall.llm.core.AbstractChatFactory;
 import net.microfalx.heimdall.llm.core.LlmProperties;
 import net.microfalx.lang.StringUtils;
@@ -16,7 +17,7 @@ public class OpenAiChatFactory extends AbstractChatFactory {
     private LlmProperties properties = new LlmProperties();
 
     @Override
-    public Chat createChat(Model model) {
+    public Chat createChat(Prompt prompt, Model model) {
         if (StringUtils.isEmpty(model.getModelName())) {
             throw new LlmNotFoundException("The model name is required for OpenAI");
         }
@@ -34,6 +35,6 @@ public class OpenAiChatFactory extends AbstractChatFactory {
                 .stop(new ArrayList<>(model.getStopSequences())).strictTools(true)
                 .topP(model.getTopP())
                 .build();
-        return new OpenAiChat(model).setStreamingChatModel(chatModel);
+        return new OpenAiChat(prompt, model).setStreamingChatModel(chatModel);
     }
 }

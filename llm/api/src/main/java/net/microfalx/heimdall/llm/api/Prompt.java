@@ -50,9 +50,15 @@ public class Prompt extends NamedAndTaggedIdentifyAware<String> {
         return examples;
     }
 
-
     /**
      * Returns the context associated with the prompt.
+     *
+     * The text withing the context supports variable substitution, which allows users to
+     * include dynamic content:
+     * <ul>
+     *     <li>{{SCHEMA}} - will be replaced with data extracted from the current context (dashboard)</li>
+     *     <li>{{DATASET}} - will be replaced with data extracted from the current context (dashboard)</li>
+     * </ul>
      *
      * @return a string containing context, or null if not set
      */
