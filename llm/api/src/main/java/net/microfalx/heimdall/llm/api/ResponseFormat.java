@@ -8,7 +8,13 @@ package net.microfalx.heimdall.llm.api;
  */
 public enum ResponseFormat {
 
+    /**
+     * The response is in plain text format.
+     */
     TEXT,
 
+    /**
+     * The response is in JSON format.
+     */
     JSON
 }

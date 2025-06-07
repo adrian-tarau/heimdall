@@ -1,11 +1,21 @@
 package net.microfalx.heimdall.llm.core;
 
+import dev.langchain4j.memory.ChatMemory;
+import dev.langchain4j.memory.chat.TokenWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
+import dev.langchain4j.model.embedding.onnx.HuggingFaceTokenCountEstimator;
+import dev.langchain4j.service.AiServices;
+import dev.langchain4j.service.TokenStream;
+import dev.langchain4j.service.tool.ToolProvider;
+import dev.langchain4j.service.tool.ToolProviderRequest;
+import dev.langchain4j.service.tool.ToolProviderResult;
 import net.microfalx.heimdall.llm.api.Chat;
+import net.microfalx.heimdall.llm.api.Message;
 import net.microfalx.heimdall.llm.api.Model;
+import net.microfalx.heimdall.llm.api.Prompt;
 import net.microfalx.lang.ExceptionUtils;
 import net.microfalx.lang.NamedAndTaggedIdentifyAware;
 import net.microfalx.lang.StringUtils;
@@ -19,12 +29,11 @@ import java.io.IOException;
 import java.security.Principal;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
@@ -38,12 +47,18 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
     private final Model model;
     private final LocalDateTime startAt = LocalDateTime.now();
     private LocalDateTime finishAt;
-    private String content;
     private int tokenCount;
     private ChatModel chatModel;
     private StreamingChatModel streamingChatModel;
 
-    LlmServiceImpl service;
+    private Prompt prompt = Prompt.empty();
+
+    private ChatMemory chatMemory;
+    private SimpleChat chat;
+    private StreamChat streamChat;
+    private LlmServiceImpl service;
+
+    private volatile Principal principal;
 
     public AbstractChat(Model model) {
         requireNonNull(model);
@@ -52,23 +67,31 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
         this.model = model;
     }
 
-
+    @Override
     public final Model getModel() {
         return model;
     }
 
     @Override
-    public Principal getUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null) {
-            return (Principal) authentication.getPrincipal();
+    public final Prompt getPrompt() {
+        return prompt;
+    }
+
+    @Override
+    public final Principal getUser() {
+        if (principal == null) {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication != null) {
+                principal = (Principal) authentication.getPrincipal();
+            }
+            principal = new PrincipalImpl("anonymous");
         }
-        return new PrincipalImpl("anonymous");
+        return principal;
     }
 
     @Override
     public String getContent() {
-        return content;
+        return null;
     }
 
     @Override
@@ -89,6 +112,11 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
     @Override
     public Duration getDuration() {
         return Duration.between(startAt, finishAt != null ? finishAt : LocalDateTime.now());
+    }
+
+    @Override
+    public Collection<Message> getMessages() {
+        return List.of();
     }
 
     @Override
@@ -124,17 +152,9 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
         }
     }
 
-    public final ChatModel getChatModel() {
-        return chatModel;
-    }
-
     public final AbstractChat setChatModel(ChatModel chatModel) {
         this.chatModel = chatModel;
         return this;
-    }
-
-    public final StreamingChatModel getStreamingChatModel() {
-        return streamingChatModel;
     }
 
     public final AbstractChat setStreamingChatModel(StreamingChatModel streamingChatModel) {
@@ -162,6 +182,65 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
             LOGGER.atWarn().setCause(e).log("Failed to close chat session {}", getNameAndId());
         }
         if (service != null) service.closeChat(this);
+    }
+
+    void initialize(LlmServiceImpl service, Prompt prompt) {
+        requireNonNull(service);
+        requireNonNull(prompt);
+        validate();
+        this.service = service;
+        this.prompt = prompt;
+        HuggingFaceTokenCountEstimator tokenCountEstimator = new HuggingFaceTokenCountEstimator();
+        this.chatMemory = TokenWindowChatMemory.builder()
+                .maxTokens(model.getMaximumContextLength(), tokenCountEstimator)
+                .chatMemoryStore(service.getChatStore())
+                .build();
+        if (chatModel != null) {
+            chat = updateAiService(AiServices.builder(SimpleChat.class)).build();
+        } else {
+            streamChat = updateAiService(AiServices.builder(StreamChat.class)).build();
+        }
+    }
+
+    private <T> AiServices<T> updateAiService(AiServices<T> aiService) {
+        aiService.chatMemory(chatMemory)
+                .systemMessageProvider(new SystemMessageProvider())
+                .contentRetriever(service.getContentRetriever())
+                .toolProvider(new ToolProviderImpl());
+        if (streamingChatModel != null) {
+            aiService.streamingChatModel(streamingChatModel);
+        } else if (chatModel != null) {
+            aiService.chatModel(chatModel);
+        } else {
+            throw new IllegalStateException("No chat model has been set");
+        }
+        return aiService;
+    }
+
+    public interface SimpleChat {
+
+        String chat(String message);
+    }
+
+    public interface StreamChat {
+
+        TokenStream chat(String message);
+    }
+
+    private class SystemMessageProvider implements Function<Object, String> {
+
+        @Override
+        public String apply(Object o) {
+            return "";
+        }
+    }
+
+    private class ToolProviderImpl implements ToolProvider {
+
+        @Override
+        public ToolProviderResult provideTools(ToolProviderRequest request) {
+            return null;
+        }
     }
 
     private static class ResponseHandler implements StreamingChatResponseHandler, Iterator<String> {

@@ -14,6 +14,16 @@ import java.time.Duration;
 public class LlmProperties {
 
     /**
+     * Indicates whether the LLM service is enabled. If set to false, no LLM operations will be performed.
+     */
+    private boolean enabled = true;
+
+    /**
+     * Indicates whether the LLM service should use an embedding store to cache embeddings.
+     */
+    private boolean embeddingEnabled = false;
+
+    /**
      * Show additional debug information related to the LLM operations.
      */
     private boolean debug;

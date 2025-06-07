@@ -8,22 +8,24 @@ import java.util.Collection;
  * A service which manages the AI models and providers.
  */
 @Service
-public interface LlmService extends Chat.Factory {
+public interface LlmService {
 
     /**
      * Creates a chat session with the default model.
      *
+     * @param prompt the prompt to use
      * @return a non-null instance
      */
-    Chat createChat();
+    Chat createChat(Prompt prompt);
 
     /**
      * Creates a chat session using a given model.
      *
+     * @param prompt the prompt to use
      * @param modelId the model identifier to use
      * @return a non-null instance
      */
-    Chat createChat(String modelId);
+    Chat createChat(Prompt prompt, String modelId);
 
     /**
      * Embed the text content with the default model.
@@ -99,6 +101,28 @@ public interface LlmService extends Chat.Factory {
      * @param provider the provider
      */
     void registerProvider(Provider provider);
+
+    /**
+     * Returns registered tools.
+     *
+     * @return a non-null instance
+     */
+    Collection<Tool> getTools();
+
+    /**
+     * Returns a tool with a given identifier.
+     *
+     * @param id the tool identifier
+     * @return a non-null instance
+     */
+    Tool getTool(String id);
+
+    /**
+     * Registers a tool.
+     *
+     * @param tool the tool to register
+     */
+    void registerTool(Tool tool);
 
     /**
      * Reloads the models.

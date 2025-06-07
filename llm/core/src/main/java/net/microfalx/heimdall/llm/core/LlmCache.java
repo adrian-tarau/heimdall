@@ -4,6 +4,7 @@ import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
 import net.microfalx.heimdall.llm.api.LlmNotFoundException;
 import net.microfalx.heimdall.llm.api.Model;
 import net.microfalx.heimdall.llm.api.Provider;
+import net.microfalx.heimdall.llm.core.jpa.ModelRepository;
 import net.microfalx.lang.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,8 +87,8 @@ public class LlmCache extends ApplicationContextSupport {
     private void loadModels() {
         LlmProperties properties = llmService.getLlmProperties();
         Map<Integer, Provider.Builder> providerBuilders = new HashMap<>();
-        List<net.microfalx.heimdall.llm.core.Model> modelJpas = getBean(ModelRepository.class).findAll();
-        for (net.microfalx.heimdall.llm.core.Model modelJpa : modelJpas) {
+        List<net.microfalx.heimdall.llm.core.jpa.Model> modelJpas = getBean(ModelRepository.class).findAll();
+        for (net.microfalx.heimdall.llm.core.jpa.Model modelJpa : modelJpas) {
             Model.Builder modelBuild = loadModel(modelJpa, properties);
             Provider.Builder providerBuild = providerBuilders.get(modelJpa.getProvider().getId());
             if (providerBuild == null) {
@@ -103,7 +104,7 @@ public class LlmCache extends ApplicationContextSupport {
         providerBuilders.values().forEach(builder -> registerProvider(builder.build()));
     }
 
-    private Model.Builder loadModel(net.microfalx.heimdall.llm.core.Model modelJpa, LlmProperties properties) {
+    private Model.Builder loadModel(net.microfalx.heimdall.llm.core.jpa.Model modelJpa, LlmProperties properties) {
         Model.Builder builder = new Model.Builder(modelJpa.getNaturalId())
                 .addStopSequences(new ArrayList<>(CollectionUtils.setFromString(modelJpa.getStopSequences()))).frequencyPenalty(modelJpa.getFrequencyPenalty())
                 .modelName(modelJpa.getModelName()).maximumOutputTokens(modelJpa.getMaximumOutputTokens())
@@ -120,7 +121,7 @@ public class LlmCache extends ApplicationContextSupport {
         return builder;
     }
 
-    private Provider.Builder loadProvider(net.microfalx.heimdall.llm.core.Provider providerJpa) {
+    private Provider.Builder loadProvider(net.microfalx.heimdall.llm.core.jpa.Provider providerJpa) {
         Provider oldProvider = null;
         try {
             if (oldCache != null) oldProvider = oldCache.getProvider(providerJpa.getNaturalId());

@@ -14,7 +14,7 @@ import static java.util.Collections.unmodifiableSet;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
 /**
- * An interface for representing an AI model.
+ * Represents an LLM model.
  * <p>
  * The key parameters are:
  * <ul>
@@ -49,6 +49,7 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
     private Integer topK;
     private Double frequencyPenalty;
     private Double presencePenalty;
+    private int maximumContextLength;
     private Integer maximumOutputTokens;
     private Set<String> stopSequences;
     private ResponseFormat responseFormat = ResponseFormat.TEXT;
@@ -196,6 +197,17 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
     }
 
     /**
+     * Returns the maximum context length in tokens that the model can handle.
+     * <p>
+     * This is the maximum number of tokens that can be processed in a single request, including both input and output.
+     *
+     * @return a positive integer, default is 64K tokens
+     */
+    public int getMaximumContextLength() {
+        return maximumContextLength;
+    }
+
+    /**
      * Returns the maximum number of tokens that can be generated in the chat completion.
      *
      * @return a positive integer
@@ -239,6 +251,7 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
         private Integer topK;
         private Double frequencyPenalty;
         private Double presencePenalty;
+        private int maximumContextLength = 64 * 1024; // 64K tokens
         private Integer maximumOutputTokens;
         private final Set<String> stopSequences = new HashSet<>();
         private ResponseFormat responseFormat = ResponseFormat.TEXT;
@@ -319,6 +332,11 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
             return this;
         }
 
+        public Builder maximumContextLength(int maximumContextLength) {
+            this.maximumContextLength = maximumContextLength;
+            return this;
+        }
+
         public Builder maximumOutputTokens(Integer maximumOutputTokens) {
             this.maximumOutputTokens = maximumOutputTokens;
             return this;
@@ -377,6 +395,7 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
             model.topP = topP;
             model.frequencyPenalty = frequencyPenalty;
             model.presencePenalty = presencePenalty;
+            model.maximumContextLength = maximumContextLength;
             model.maximumOutputTokens = maximumOutputTokens;
             model.stopSequences = stopSequences;
             model.responseFormat = responseFormat;

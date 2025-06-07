@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.microfalx.bootstrap.dataset.annotation.Filterable;
 import net.microfalx.bootstrap.jdbc.entity.IdentityAware;
-import net.microfalx.heimdall.llm.core.Model;
+import net.microfalx.heimdall.llm.core.jpa.Model;
 import net.microfalx.lang.annotation.*;
 
 import java.time.Duration;

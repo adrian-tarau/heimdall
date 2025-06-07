@@ -1,4 +1,4 @@
-package net.microfalx.heimdall.llm.core;
+package net.microfalx.heimdall.llm.core.jpa;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

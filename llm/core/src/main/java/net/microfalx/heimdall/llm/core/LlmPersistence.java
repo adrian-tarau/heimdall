@@ -6,14 +6,16 @@ import net.microfalx.bootstrap.jdbc.jpa.NaturalJpaRepository;
 import net.microfalx.bootstrap.model.MetadataService;
 import net.microfalx.heimdall.llm.api.Model;
 import net.microfalx.heimdall.llm.api.Provider;
+import net.microfalx.heimdall.llm.core.jpa.ModelRepository;
+import net.microfalx.heimdall.llm.core.jpa.ProviderRepository;
 
 import static net.microfalx.lang.CollectionUtils.setToString;
 
 public class LlmPersistence extends ApplicationContextSupport {
 
-    net.microfalx.heimdall.llm.core.Provider execute(Provider provider) {
-        NaturalIdEntityUpdater<net.microfalx.heimdall.llm.core.Provider, Integer> updater = getUpdater(ProviderRepository.class);
-        net.microfalx.heimdall.llm.core.Provider jpaProvider = new net.microfalx.heimdall.llm.core.Provider();
+    net.microfalx.heimdall.llm.core.jpa.Provider execute(Provider provider) {
+        NaturalIdEntityUpdater<net.microfalx.heimdall.llm.core.jpa.Provider, Integer> updater = getUpdater(ProviderRepository.class);
+        net.microfalx.heimdall.llm.core.jpa.Provider jpaProvider = new net.microfalx.heimdall.llm.core.jpa.Provider();
         jpaProvider.setLicense(provider.getLicense());
         jpaProvider.setAuthor(provider.getAuthor());
         jpaProvider.setNaturalId(provider.getId());
@@ -30,9 +32,9 @@ public class LlmPersistence extends ApplicationContextSupport {
         return updater.findByNaturalIdAndUpdate(jpaProvider);
     }
 
-    net.microfalx.heimdall.llm.core.Model execute(Model model) {
-        NaturalIdEntityUpdater<net.microfalx.heimdall.llm.core.Model, Integer> updater = getUpdater(ModelRepository.class);
-        net.microfalx.heimdall.llm.core.Model jpaModel = new net.microfalx.heimdall.llm.core.Model();
+    net.microfalx.heimdall.llm.core.jpa.Model execute(Model model) {
+        NaturalIdEntityUpdater<net.microfalx.heimdall.llm.core.jpa.Model, Integer> updater = getUpdater(ModelRepository.class);
+        net.microfalx.heimdall.llm.core.jpa.Model jpaModel = new net.microfalx.heimdall.llm.core.jpa.Model();
         jpaModel.setNaturalId(model.getId());
         jpaModel.setModelName(model.getModelName());
         jpaModel.setApiKey(model.getApyKey());

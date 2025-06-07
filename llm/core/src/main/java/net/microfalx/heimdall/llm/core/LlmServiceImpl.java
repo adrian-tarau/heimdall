@@ -1,5 +1,8 @@
 package net.microfalx.heimdall.llm.core;
 
+import dev.langchain4j.rag.content.retriever.ContentRetriever;
+import dev.langchain4j.store.memory.chat.ChatMemoryStore;
+import dev.langchain4j.store.memory.chat.InMemoryChatMemoryStore;
 import jakarta.annotation.PreDestroy;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -7,10 +10,8 @@ import net.microfalx.bootstrap.core.async.ThreadPoolFactory;
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
 import net.microfalx.bootstrap.search.IndexService;
 import net.microfalx.bootstrap.search.SearchService;
-import net.microfalx.heimdall.llm.api.Chat;
-import net.microfalx.heimdall.llm.api.Model;
-import net.microfalx.heimdall.llm.api.Provider;
 import net.microfalx.heimdall.llm.api.*;
+import net.microfalx.heimdall.llm.api.Chat;
 import net.microfalx.heimdall.llm.lucene.LuceneEmbeddingStore;
 import net.microfalx.lang.ClassUtils;
 import net.microfalx.lang.ExceptionUtils;
@@ -27,12 +28,16 @@ import org.springframework.util.ReflectionUtils;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static java.util.Collections.unmodifiableCollection;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.FileUtils.validateDirectoryExists;
+import static net.microfalx.lang.StringUtils.toIdentifier;
 
 @Service
 public class LlmServiceImpl extends ApplicationContextSupport implements LlmService, InitializingBean {
@@ -51,7 +56,10 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
 
     private File variableDirectory;
     private LuceneEmbeddingStore embeddingStore;
+    private ContentRetriever contentRetriever;
+    private ChatMemoryStore chatStore;
     private volatile LlmCache cache = new LlmCache(null, this);
+    private final Map<String, Tool> tools = new ConcurrentHashMap<>();
     private final LlmPersistence llmPersistence = new LlmPersistence();
     private final Collection<LlmListener> listeners = new CopyOnWriteArrayList<>();
     private final Collection<Provider.Factory> providerFactories = new CopyOnWriteArrayList<>();
@@ -69,24 +77,32 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         warmClassesWorkaround();
     }
 
-    @Override
-    public Chat createChat() {
-        return createChat(getDefaultModel());
+    ChatMemoryStore getChatStore() {
+        return chatStore;
+    }
+
+    ContentRetriever getContentRetriever() {
+        return contentRetriever;
     }
 
     @Override
-    public net.microfalx.heimdall.llm.api.Chat createChat(String modelId) {
+    public Chat createChat(Prompt prompt) {
+        return createChat(prompt, getDefaultModel());
+    }
+
+    @Override
+    public net.microfalx.heimdall.llm.api.Chat createChat(Prompt prompt, String modelId) {
         Model model = getModel(modelId);
-        return createChat(model);
+        return createChat(prompt, model);
     }
 
-    @Override
-    public net.microfalx.heimdall.llm.api.Chat createChat(Model model) {
+    public net.microfalx.heimdall.llm.api.Chat createChat(Prompt prompt, Model model) {
+        requireNonNull(prompt);
         requireNonNull(model);
         if (model.isEmbedding()) throw new LlmException("Model '" + model.getId() + "' does not support chating");
         net.microfalx.heimdall.llm.api.Chat chat = model.getProvider().getChatFactory().createChat(model);
         activeChats.add(chat);
-        if (chat instanceof AbstractChat abstractChat) abstractChat.service = this;
+        if (chat instanceof AbstractChat abstractChat) abstractChat.initialize(this, prompt);
         return chat;
     }
 
@@ -157,6 +173,26 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     }
 
     @Override
+    public Collection<Tool> getTools() {
+        return Collections.unmodifiableCollection(tools.values());
+    }
+
+    @Override
+    public Tool getTool(String id) {
+        requireNonNull(id);
+        Tool tool = tools.get(toIdentifier(id));
+        if (tool == null) throw new LlmNotFoundException("Tool '" + id + "' not found");
+        return tool;
+    }
+
+    @Override
+    public void registerTool(Tool tool) {
+        requireNonNull(tool);
+        LOGGER.info("Registering tool {}", tool.getId());
+        tools.put(toIdentifier(tool.getId()), tool);
+    }
+
+    @Override
     public void reload() {
         LlmCache cache = new LlmCache(this.cache, this);
         cache.setApplicationContext(getApplicationContext());
@@ -175,6 +211,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         initProviderFactories();
         initializeApplicationContext();
         registerProviders();
+        initializeChatStore();
         initializeEmbeddingStore();
         ThreadPool.get().execute(this::reload);
     }
@@ -225,6 +262,11 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         this.embeddingStore = new LuceneEmbeddingStore(this, indexService, searchService)
                 .setThreadPool(getEmbeddingPool());
         this.indexService.registerListener(this.embeddingStore);
+        this.contentRetriever = this.embeddingStore.getContentRetriever();
+    }
+
+    private void initializeChatStore() {
+        this.chatStore = new InMemoryChatMemoryStore();
     }
 
     private void initializeApplicationContext() {

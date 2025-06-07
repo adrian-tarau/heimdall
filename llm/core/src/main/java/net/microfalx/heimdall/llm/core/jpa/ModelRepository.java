@@ -1,4 +1,4 @@
-package net.microfalx.heimdall.llm.core;
+package net.microfalx.heimdall.llm.core.jpa;
 
 import net.microfalx.bootstrap.jdbc.jpa.NaturalJpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;

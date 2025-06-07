@@ -15,7 +15,7 @@ import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.StringUtils.toIdentifier;
 
 /**
- * An interface for representing an AI model provider.
+ * Represents an LLM model provider.
  */
 @ToString(callSuper = true)
 public class Provider extends NamedAndTaggedIdentifyAware<String> {

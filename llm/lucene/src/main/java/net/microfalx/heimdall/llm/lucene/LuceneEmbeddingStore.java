@@ -15,8 +15,8 @@ import dev.langchain4j.store.embedding.EmbeddingSearchResult;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import lombok.AccessLevel;
 import lombok.Getter;
-import net.microfalx.bootstrap.search.Document;
 import net.microfalx.bootstrap.search.*;
+import net.microfalx.bootstrap.search.Document;
 import net.microfalx.heimdall.llm.api.LlmService;
 import net.microfalx.metrics.Metrics;
 import net.microfalx.threadpool.ThreadPool;
@@ -225,7 +225,7 @@ public class LuceneEmbeddingStore implements IndexListener, EmbeddingStore<TextS
         encoding = registry.getEncoding(EncodingType.CL100K_BASE);
     }
 
-    private LuceneContentRetriever getContentRetriever() {
+    public LuceneContentRetriever getContentRetriever() {
         if (contentRetriever == null) {
             synchronized (this) {
                 contentRetriever = new LuceneContentRetriever(this);

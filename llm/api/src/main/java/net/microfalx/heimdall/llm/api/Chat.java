@@ -6,12 +6,20 @@ import net.microfalx.lang.Nameable;
 import java.security.Principal;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Iterator;
 
 /**
  * An interface for representing a chat session with an AI model.
  */
 public interface Chat extends Identifiable<String>, Nameable {
+
+    /**
+     * Returns the prompt used to start a chat session.
+     *
+     * @return a non-null instance
+     */
+    Prompt getPrompt();
 
     /**
      * Returns the model used by this chat session.
@@ -49,7 +57,14 @@ public interface Chat extends Identifiable<String>, Nameable {
     Duration getDuration();
 
     /**
-     * Returns the content of the chat.
+     * Returns the messages exchanged in the chat.
+     *
+     * @return a non-null collection of messages
+     */
+    Collection<Message> getMessages();
+
+    /**
+     * Returns the content of the chat in text form.
      *
      * @return a non-null instance
      */
