@@ -23,10 +23,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ReflectionUtils;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -37,7 +35,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import static java.util.Collections.unmodifiableCollection;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.FileUtils.validateDirectoryExists;
-import static net.microfalx.lang.StringUtils.toIdentifier;
+import static net.microfalx.lang.StringUtils.*;
 
 @Service
 public class LlmServiceImpl extends ApplicationContextSupport implements LlmService, InitializingBean {
@@ -52,7 +50,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
 
     @Autowired(required = false)
     @Getter(AccessLevel.PROTECTED)
-    private LlmProperties llmProperties = new LlmProperties();
+    private LlmProperties properties = new LlmProperties();
 
     private File variableDirectory;
     private LuceneEmbeddingStore embeddingStore;
@@ -97,13 +95,13 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
 
     @Override
     public Chat createChat(Model model) {
-        return createChat(Prompt.empty(), getDefaultModel());
+        return createChat(Prompt.empty(), model);
     }
 
     public net.microfalx.heimdall.llm.api.Chat createChat(Prompt prompt, Model model) {
         requireNonNull(prompt);
         requireNonNull(model);
-        if (model.isEmbedding()) throw new LlmException("Model '" + model.getId() + "' does not support chating");
+        if (model.isEmbedding()) throw new LlmException("Model '" + model.getId() + "' does not support chatting");
         Chat.Factory chatFactory = model.getProvider().getChatFactory();
         net.microfalx.heimdall.llm.api.Chat chat = chatFactory.createChat(prompt, model);
         activeChats.add(chat);
@@ -195,9 +193,66 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         tools.put(toIdentifier(tool.getId()), tool);
     }
 
+    /**
+     * Returns the final prompt text for the given model and prompt.
+     *
+     * @param model  the model to use
+     * @param prompt the prompt to use
+     * @return a non-null string
+     */
+    public String getPrompt(Model model, Prompt prompt) {
+        requireNonNull(model);
+        requireNonNull(prompt);
+        StringBuilder builder = new StringBuilder();
+        String role = defaultIfEmpty(prompt.getRole(), properties.getDefaultRole());
+        if (isNotEmpty(role)) {
+            role = getPromptFragment(model, prompt, Prompt.Fragment.ROLE, role);
+            LlmUtils.appendSentence(builder, role);
+            if (isNotEmpty(properties.getDefaultGuidanceMessage())) {
+                LlmUtils.appendSentence(builder, properties.getDefaultGuidanceMessage());
+            }
+            builder.append("\n");
+        }
+        if (isNotEmpty(prompt.getContext())) {
+            String context = getPromptFragment(model, prompt, Prompt.Fragment.CONTEXT, prompt.getContext());
+            if (isNotEmpty(context)) {
+                LlmUtils.appendSentence(builder, context).append("\n");
+            }
+        }
+        if (isNotEmpty(prompt.getExamples())) {
+            String context = getPromptFragment(model, prompt, Prompt.Fragment.EXAMPLES, prompt.getExamples());
+            if (isNotEmpty(context)) {
+                LlmUtils.appendSentence(builder, context).append("\n");
+            }
+        }
+        String promptText = builder.toString().trim();
+        if (isEmpty(promptText)) promptText = properties.getDefaultRole();
+        return promptText;
+    }
+
+    /**
+     * Returns a fragment of the prompt text.
+     *
+     * @param model    the model to use
+     * @param prompt   the prompt to use
+     * @param fragment the fragment to return
+     * @return the text of the fragment, never null
+     */
+    public String getPromptFragment(Model model, Prompt prompt, Prompt.Fragment fragment, String text) {
+        requireNonNull(model);
+        requireNonNull(prompt);
+        requireNonNull(fragment);
+        String originalText = text;
+        for (LlmListener listener : listeners) {
+            text = listener.augment(model, prompt, fragment, text);
+            if (isNotEmpty(text)) break;
+        }
+        return isEmpty(text) ? originalText : text;
+    }
+
     @Override
     public void reload() {
-        if (!llmProperties.isPersistenceEnabled()) return;
+        if (!properties.isPersistenceEnabled()) return;
         LlmCache cache = new LlmCache(this.cache, this);
         cache.setApplicationContext(getApplicationContext());
         cache.load();
@@ -284,7 +339,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     }
 
     private void persistProvider(Provider provider) {
-        if (!llmProperties.isPersistenceEnabled()) return;
+        if (!properties.isPersistenceEnabled()) return;
         for (Model model : provider.getModels()) {
             llmPersistence.execute(model);
         }
@@ -293,8 +348,9 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     private void registerProviders() {
         for (Provider.Factory providerFactory : providerFactories) {
             try {
-                Method method = ReflectionUtils.findMethod(providerFactory.getClass(), "setLlmProperties");
-                if (method != null) ReflectionUtils.invokeMethod(method, providerFactory, llmProperties);
+                if (providerFactory instanceof AbstractProviderFactory abstractProviderFactory) {
+                    abstractProviderFactory.setProperties(properties);
+                }
                 Provider provider = providerFactory.createProvider();
                 if (provider == null) {
                     LOGGER.error("Provider factory {} returned NULL", ClassUtils.getName(providerFactory));
@@ -320,6 +376,6 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         File djlCache = JvmUtils.getCacheDirectory("djl");
         System.setProperty("ENGINE_CACHE_DIR", validateDirectoryExists(new File(djlCache, "engine")).getAbsolutePath());
         System.setProperty("DJL_CACHE_DIR", validateDirectoryExists(new File(djlCache, "cache")).getAbsolutePath());
-        System.setProperty("DJL_OFFLINE", Boolean.toString(llmProperties.isOffline()));
+        System.setProperty("DJL_OFFLINE", Boolean.toString(properties.isOffline()));
     }
 }

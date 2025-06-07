@@ -27,7 +27,7 @@ public class Prompt extends NamedAndTaggedIdentifyAware<String> {
      * @return a new instance of {@link Prompt} with no content
      */
     public static Prompt empty() {
-        return new Builder().build();
+        return (Prompt) new Builder().id("empty").build();
     }
 
     /**

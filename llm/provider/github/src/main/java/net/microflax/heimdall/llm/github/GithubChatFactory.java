@@ -14,6 +14,7 @@ import java.util.ArrayList;
 
 
 public class GithubChatFactory extends AbstractChatFactory {
+
     @Override
     public Chat createChat(Prompt prompt, Model model) {
         if (StringUtils.isEmpty(model.getModelName())) {

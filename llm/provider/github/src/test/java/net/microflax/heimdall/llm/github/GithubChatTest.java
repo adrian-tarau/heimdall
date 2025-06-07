@@ -27,7 +27,7 @@ class GithubChatTest {
     @BeforeEach
     void setUp() {
         properties.setGitHubApiKey(System.getProperty("github.api_key", "demo"));
-        provider = new GithubProviderFactory().setLlmProperties(properties).createProvider();
+        provider = new GithubProviderFactory().setProperties(properties).createProvider();
     }
 
     @Test

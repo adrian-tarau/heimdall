@@ -104,4 +104,14 @@ public class LlmProperties {
      * The default top K to use when generating text.
      */
     private Integer defaultTopK = 20;
+
+    /**
+     * The default role (prompt) to use when creating the prompt.
+     */
+    private String defaultRole = "You are a helpful assistant.";
+
+    /**
+     * The default guidance message to use when creating the prompt.
+     */
+    private String defaultGuidanceMessage = "Answer the question as best you can. If you don't know the answer, just say that you don't know. Don't try to make up an answer.";
 }

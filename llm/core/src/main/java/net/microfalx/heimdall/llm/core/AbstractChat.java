@@ -4,10 +4,9 @@ import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.TokenWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
-import dev.langchain4j.model.chat.response.ChatResponse;
-import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import dev.langchain4j.model.embedding.onnx.HuggingFaceTokenCountEstimator;
 import dev.langchain4j.service.AiServices;
+import dev.langchain4j.service.Result;
 import dev.langchain4j.service.TokenStream;
 import dev.langchain4j.service.tool.ToolProvider;
 import dev.langchain4j.service.tool.ToolProviderRequest;
@@ -16,10 +15,8 @@ import net.microfalx.heimdall.llm.api.Chat;
 import net.microfalx.heimdall.llm.api.Message;
 import net.microfalx.heimdall.llm.api.Model;
 import net.microfalx.heimdall.llm.api.Prompt;
-import net.microfalx.lang.ExceptionUtils;
 import net.microfalx.lang.NamedAndTaggedIdentifyAware;
 import net.microfalx.lang.StringUtils;
-import net.microfalx.lang.ThreadUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -30,9 +27,6 @@ import java.security.Principal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
@@ -144,9 +138,10 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
     public Iterator<String> chat(String message) {
         validate();
         if (streamingChatModel != null) {
-            ResponseHandler responseHandler = new ResponseHandler();
-            service.getChatPool().execute(() -> streamingChatModel.chat(message, responseHandler));
-            return responseHandler;
+            TokenStream stream = streamChat.chat(message);
+            TokenStreamHandler handler = new TokenStreamHandler(service, this, stream);
+            service.getChatPool().execute(stream::start);
+            return handler;
         } else {
             String answer = ask(message);
             String[] parts = StringUtils.split(answer, " ");
@@ -190,7 +185,6 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
         requireNonNull(service);
         validate();
         this.service = service;
-        this.prompt = prompt;
         HuggingFaceTokenCountEstimator tokenCountEstimator = new HuggingFaceTokenCountEstimator();
         this.chatMemory = TokenWindowChatMemory.builder()
                 .maxTokens(model.getMaximumContextLength(), tokenCountEstimator)
@@ -220,7 +214,7 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
 
     public interface SimpleChat {
 
-        String chat(String message);
+        Result<String> chat(String message);
     }
 
     public interface StreamChat {
@@ -232,7 +226,7 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
 
         @Override
         public String apply(Object o) {
-            return "";
+            return service.getPrompt(model, prompt);
         }
     }
 
@@ -240,52 +234,8 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
 
         @Override
         public ToolProviderResult provideTools(ToolProviderRequest request) {
-            return null;
-        }
-    }
-
-    private static class ResponseHandler implements StreamingChatResponseHandler, Iterator<String> {
-
-        private final BlockingQueue<String> queue = new LinkedBlockingQueue<>();
-        private final AtomicBoolean completed = new AtomicBoolean(false);
-        private volatile Throwable throwable;
-
-        @Override
-        public void onPartialResponse(String partialResponse) {
-            if (!queue.offer(partialResponse)) {
-                LOGGER.atError().log("Queue is full : {}", partialResponse);
-            }
-        }
-
-        @Override
-        public void onCompleteResponse(ChatResponse completeResponse) {
-            completed.set(true);
-        }
-
-        @Override
-        public void onError(Throwable error) {
-            this.throwable = error;
-            this.completed.set(true);
-        }
-
-        @Override
-        public boolean hasNext() {
-            raiseIfError();
-            if (!queue.isEmpty()) return true;
-            while (queue.isEmpty() && !completed.get()) {
-                ThreadUtils.sleepMillis(5);
-            }
-            raiseIfError();
-            return !(queue.isEmpty() || completed.get());
-        }
-
-        @Override
-        public String next() {
-            return queue.poll();
-        }
-
-        private void raiseIfError() {
-            if (throwable != null) ExceptionUtils.throwException(throwable);
+            ToolProviderResult result = new ToolProviderResult(Collections.emptyMap());
+            return result;
         }
     }
 

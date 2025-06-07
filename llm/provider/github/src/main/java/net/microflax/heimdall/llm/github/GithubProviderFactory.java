@@ -4,19 +4,17 @@ import lombok.Getter;
 import lombok.Setter;
 import net.microfalx.heimdall.llm.api.Model;
 import net.microfalx.heimdall.llm.api.Provider;
-import net.microfalx.heimdall.llm.core.LlmProperties;
+import net.microfalx.heimdall.llm.core.AbstractProviderFactory;
 
 @net.microfalx.lang.annotation.Provider
 @Getter
 @Setter
-public class GithubProviderFactory implements Provider.Factory {
-
-    private LlmProperties llmProperties;
+public class GithubProviderFactory extends AbstractProviderFactory {
 
     @Override
     public Provider createProvider() {
         net.microfalx.heimdall.llm.api.Provider.Builder builder = new net.microfalx.heimdall.llm.api.Provider.Builder("github");
-        if (llmProperties != null) builder.apyKey(llmProperties.getGitHubApiKey());
+        builder.apyKey(getProperties().getGitHubApiKey());
         builder.name("Github").description("A proprietary developer platform that allows developers to create, store, " +
                 "manage, and share their code");
         builder.version("3.16.2").author("Microsoft").license("Proprietary")

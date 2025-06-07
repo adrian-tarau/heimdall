@@ -85,7 +85,7 @@ public class LlmCache extends ApplicationContextSupport {
     }
 
     private void loadModels() {
-        LlmProperties properties = llmService.getLlmProperties();
+        LlmProperties properties = llmService.getProperties();
         Map<Integer, Provider.Builder> providerBuilders = new HashMap<>();
         List<net.microfalx.heimdall.llm.core.jpa.Model> modelJpas = getBean(ModelRepository.class).findAll();
         for (net.microfalx.heimdall.llm.core.jpa.Model modelJpa : modelJpas) {

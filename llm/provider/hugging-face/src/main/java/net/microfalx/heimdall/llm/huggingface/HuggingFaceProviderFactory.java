@@ -1,10 +1,11 @@
 package net.microfalx.heimdall.llm.huggingface;
 
 import net.microfalx.heimdall.llm.api.Provider;
+import net.microfalx.heimdall.llm.core.AbstractProviderFactory;
 
 import java.net.URI;
 @net.microfalx.lang.annotation.Provider
-public class HuggingFaceProviderFactory implements Provider.Factory {
+public class HuggingFaceProviderFactory extends AbstractProviderFactory {
 
     @Override
     public Provider createProvider() {

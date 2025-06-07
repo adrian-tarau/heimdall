@@ -1,5 +1,7 @@
 package net.microfalx.heimdall.llm.core;
 
+import lombok.Getter;
+import lombok.Setter;
 import net.microfalx.heimdall.llm.api.Chat;
 import net.microfalx.lang.FileUtils;
 import net.microfalx.lang.JvmUtils;
@@ -12,6 +14,13 @@ import static net.microfalx.lang.StringUtils.toIdentifier;
  * Base class for chat factories.
  */
 public abstract class AbstractChatFactory implements Chat.Factory {
+
+    /**
+     * Properties to be used with the chat factory.
+     */
+    @Getter
+    @Setter
+    private LlmProperties properties = new LlmProperties();
 
     /**
      * Returns a directory used to cache models.

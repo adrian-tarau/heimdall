@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.microfalx.heimdall.llm.api.Model;
 import net.microfalx.heimdall.llm.api.Provider;
-import net.microfalx.heimdall.llm.core.LlmProperties;
+import net.microfalx.heimdall.llm.core.AbstractProviderFactory;
 import net.microfalx.lang.UriUtils;
 
 import static net.microfalx.lang.StringUtils.isNotEmpty;
@@ -12,15 +12,13 @@ import static net.microfalx.lang.StringUtils.isNotEmpty;
 @net.microfalx.lang.annotation.Provider
 @Setter
 @Getter
-public class OpenAiProviderFactory implements Provider.Factory {
-
-    private LlmProperties llmProperties;
+public class OpenAiProviderFactory extends AbstractProviderFactory {
 
     @Override
     public Provider createProvider() {
         net.microfalx.heimdall.llm.api.Provider.Builder builder = new net.microfalx.heimdall.llm.api.Provider.Builder("openai");
-        if (llmProperties != null && isNotEmpty(llmProperties.getOpenAiUri())) {
-            builder.uri(UriUtils.parseUri(llmProperties.getOpenAiUri()), llmProperties.getOpenAiApiKey());
+        if (isNotEmpty(getProperties().getOpenAiUri())) {
+            builder.uri(UriUtils.parseUri(getProperties().getOpenAiUri()), getProperties().getOpenAiApiKey());
         }
         builder.name("OpenAI").description("Develops safe and beneficial artificial general " +
                 "intelligence, which it defines as highly autonomous systems that outperform humans at most economically valuable work.");

@@ -28,7 +28,7 @@ class OllamaChatTest {
     void setup() throws Exception {
         properties.setOllamaUri(System.getProperty("ollama.uri", "http://localhost:11434"));
         properties.setOllamaApiKey(System.getProperty("ollama.api_key", "demo"));
-        provider = new OllamaProviderFactory().setLlmProperties(properties).createProvider();
+        provider = new OllamaProviderFactory().setProperties(properties).createProvider();
     }
 
     @Test

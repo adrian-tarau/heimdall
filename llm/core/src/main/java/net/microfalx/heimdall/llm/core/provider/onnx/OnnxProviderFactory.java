@@ -2,9 +2,10 @@ package net.microfalx.heimdall.llm.core.provider.onnx;
 
 import net.microfalx.heimdall.llm.api.Model;
 import net.microfalx.heimdall.llm.api.Provider;
+import net.microfalx.heimdall.llm.core.AbstractProviderFactory;
 
 @net.microfalx.lang.annotation.Provider
-public class OnnxProviderFactory implements Provider.Factory {
+public class OnnxProviderFactory extends AbstractProviderFactory {
 
     @Override
     public Provider createProvider() {

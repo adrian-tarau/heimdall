@@ -7,14 +7,11 @@ import net.microfalx.heimdall.llm.api.LlmNotFoundException;
 import net.microfalx.heimdall.llm.api.Model;
 import net.microfalx.heimdall.llm.api.Prompt;
 import net.microfalx.heimdall.llm.core.AbstractChatFactory;
-import net.microfalx.heimdall.llm.core.LlmProperties;
 import net.microfalx.lang.StringUtils;
 
 import java.util.ArrayList;
 
 public class OpenAiChatFactory extends AbstractChatFactory {
-
-    private LlmProperties properties = new LlmProperties();
 
     @Override
     public Chat createChat(Prompt prompt, Model model) {
@@ -23,8 +20,8 @@ public class OpenAiChatFactory extends AbstractChatFactory {
         }
         StreamingChatModel chatModel = OpenAiStreamingChatModel.builder()
                 .baseUrl(model.getUri().toASCIIString()).apiKey(model.getApyKey())
-                .projectId(properties.getOpenAiProjectId())
-                .organizationId(properties.getOpenAiOrganizationId())
+                .projectId(getProperties().getOpenAiProjectId())
+                .organizationId(getProperties().getOpenAiOrganizationId())
                 .modelName(model.getModelName())
                 .temperature(model.getTemperature())
                 .maxTokens(model.getMaximumOutputTokens())
