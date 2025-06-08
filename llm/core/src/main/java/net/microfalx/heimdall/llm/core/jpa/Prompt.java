@@ -54,7 +54,6 @@ public class Prompt extends IdentityAware<Integer> {
     private String question;
 
     @Column(name = "tags")
-    //@Component(Component.Type.TAG)
     @Description("A collection of tags associated with a {name}")
     @Width("150px")
     @Filterable()

@@ -13,6 +13,7 @@ import net.microfalx.lang.StringUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import static java.util.Collections.unmodifiableList;
 import static net.microfalx.resource.ResourceUtils.loadAsString;
@@ -21,6 +22,7 @@ import static net.microfalx.resource.ResourceUtils.loadAsString;
 @ToString
 public class MessageImpl implements Message {
 
+    private final String id = UUID.randomUUID().toString();
     private final Type type;
     private final List<Content> contents = new ArrayList<>();
 
@@ -36,6 +38,8 @@ public class MessageImpl implements Message {
         this.type = type;
         this.contents.addAll(contents);
     }
+
+    
 
     @Override
     public Type type() {

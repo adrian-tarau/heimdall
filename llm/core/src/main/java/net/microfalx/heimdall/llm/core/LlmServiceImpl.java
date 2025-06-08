@@ -61,7 +61,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     private final LlmPersistence llmPersistence = new LlmPersistence();
     private final Collection<LlmListener> listeners = new CopyOnWriteArrayList<>();
     private final Collection<Provider.Factory> providerFactories = new CopyOnWriteArrayList<>();
-    private final Collection<net.microfalx.heimdall.llm.api.Chat> activeChats = new CopyOnWriteArrayList<>();
+    private final Map<String, net.microfalx.heimdall.llm.api.Chat> activeChats = new ConcurrentHashMap<>();
     private final Collection<net.microfalx.heimdall.llm.api.Chat> closedChats = new CopyOnWriteArrayList<>();
 
     private volatile Model defaultModel;
@@ -104,8 +104,18 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         if (model.isEmbedding()) throw new LlmException("Model '" + model.getId() + "' does not support chatting");
         Chat.Factory chatFactory = model.getProvider().getChatFactory();
         net.microfalx.heimdall.llm.api.Chat chat = chatFactory.createChat(prompt, model);
-        activeChats.add(chat);
+        activeChats.put(toIdentifier(chat.getId()), chat);
         if (chat instanceof AbstractChat abstractChat) abstractChat.initialize(this);
+        return chat;
+    }
+
+    @Override
+    public Chat getChat(String id) {
+        requireNonNull(id);
+        Chat chat = activeChats.get(toIdentifier(id));
+        if (chat == null) {
+            throw new LlmException("Chat '" + id + "' not found");
+        }
         return chat;
     }
 
@@ -245,6 +255,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         initializeChatStore();
         initializeEmbeddingStore();
         ThreadPool.get().execute(this::reload);
+        ThreadPool.get().execute(this::fireStartEvent);
     }
 
     @PreDestroy
@@ -339,6 +350,16 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         if (!properties.isPersistenceEnabled()) return;
         for (Model model : provider.getModels()) {
             llmPersistence.execute(model);
+        }
+    }
+
+    private void fireStartEvent() {
+        for (LlmListener listener : listeners) {
+            try {
+                listener.onStart(this);
+            } catch (Exception e) {
+                LOGGER.atError().setCause(e).log("Failed to notify listener {}", ClassUtils.getName(listener));
+            }
         }
     }
 

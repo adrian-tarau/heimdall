@@ -1,6 +1,7 @@
 package net.microfalx.heimdall.llm.core;
 
 import dev.langchain4j.data.embedding.Embedding;
+import net.microfalx.heimdall.llm.api.LlmService;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.threadpool.ThreadPool;
 
@@ -59,5 +60,19 @@ public class LlmUtils {
             builder.append(DOT);
         }
         return builder;
+    }
+
+    /**
+     * Returns the chat thread pool for the given LLM service.
+     *
+     * @param service the LLM service
+     * @return a non-null thread pool instance
+     */
+
+    public static ThreadPool getChatThreadPool(LlmService service) {
+        if (service instanceof LlmServiceImpl serviceImpl) {
+            return serviceImpl.getChatPool();
+        }
+        return ThreadPool.get();
     }
 }

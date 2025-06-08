@@ -12,8 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller("SystemPromptController")
 @RequestMapping("/system/ai/prompt")
-@DataSet(model = Prompt.class, timeFilter = false, canAdd = false, canDelete = false)
+@DataSet(model = Prompt.class, timeFilter = false)
 public class PromptController extends SystemDataSetController<Prompt, Integer> {
+
     @Autowired
     private LlmService llmService;
 

@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.llm.api;
 
+import lombok.ToString;
 import net.microfalx.lang.IdentityAware;
 import net.microfalx.lang.NamedAndTaggedIdentifyAware;
 import net.microfalx.lang.StringUtils;
@@ -7,6 +8,7 @@ import net.microfalx.lang.StringUtils;
 /**
  * Represents a prompt in the LLM (Large Language Model) API.
  */
+@ToString(callSuper = true)
 public class Prompt extends NamedAndTaggedIdentifyAware<String> {
 
     private String role;
@@ -31,6 +33,19 @@ public class Prompt extends NamedAndTaggedIdentifyAware<String> {
     }
 
     /**
+     * Creates a prompt with the specified identifier and name.
+     * <p>
+     *
+     * @param id   the unique identifier for the prompt
+     * @param name the name of the prompt
+     * @return a new instance of {@link Prompt} with the specified id and name
+     */
+
+    public static Builder create(String id, String name) {
+        return (Builder) new Builder().name(name).id(id);
+    }
+
+    /**
      * Returns the role of the prompt.
      * <p>
      * The role is used to define the context or purpose of the prompt in the chat completion.
@@ -52,7 +67,7 @@ public class Prompt extends NamedAndTaggedIdentifyAware<String> {
 
     /**
      * Returns the context associated with the prompt.
-     *
+     * <p>
      * The text withing the context supports variable substitution, which allows users to
      * include dynamic content:
      * <ul>
@@ -146,7 +161,7 @@ public class Prompt extends NamedAndTaggedIdentifyAware<String> {
         private Integer maximumInputEvents;
         private Integer maximumOutputTokens;
         private boolean chainOfThought;
-        private boolean useOnlyContext;
+        private boolean useOnlyContext = true;
 
         public Builder role(String role) {
             this.role = role;

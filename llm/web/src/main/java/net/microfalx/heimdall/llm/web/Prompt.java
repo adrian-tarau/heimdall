@@ -6,7 +6,9 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
+import net.microfalx.bootstrap.dataset.annotation.Component;
 import net.microfalx.bootstrap.dataset.annotation.Filterable;
+import net.microfalx.bootstrap.dataset.annotation.Tabs;
 import net.microfalx.bootstrap.jdbc.entity.IdentityAware;
 import net.microfalx.lang.annotation.*;
 
@@ -15,6 +17,7 @@ import net.microfalx.lang.annotation.*;
 @Name("Prompts")
 @Getter
 @Setter
+@Tabs
 public class Prompt extends IdentityAware<Integer> {
 
     @NaturalId
@@ -32,16 +35,26 @@ public class Prompt extends IdentityAware<Integer> {
     @Width("200px")
     private String name;
 
+    @Column(name = "question", length = 5000)
+    @Position(6)
+    @Label(value = "Question", group = "Fragments")
+    @Description("The question or prompt text that will be presented to the model as the first message")
+    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT, Visible.Mode.ADD})
+    @Component(Component.Type.TEXT_AREA)
+    private String question;
+
     @Column(name = "role", length = 1000)
     @Position(10)
-    @Description("The role of the prompt, e.g. 'system', 'user', 'assistant'")
-    @Visible(false)
+    @Label(value = "Question", group = "Fragments")
+    @Component(Component.Type.TEXT_AREA)
+    @Description("Returns the role of the prompt.The role is used to define the context or purpose of the prompt in the chat completion.")
+    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT, Visible.Mode.ADD})
     private String role;
 
     @Column(name = "maximum_input_events")
-    @Label(value = "Maximum Input Tokens", group = "Settings")
+    @Label(value = "Maximum Input Events", group = "Settings")
     @Position(15)
-    @Description("The maximum number of input events allowed for this prompt")
+    @Description("The maximum number of input events allowed for the prompt")
     private Integer maximumInputEvents;
 
     @Column(name = "maximum_output_tokens", nullable = false)
@@ -64,21 +77,21 @@ public class Prompt extends IdentityAware<Integer> {
 
     @Column(name = "examples", length = 10000)
     @Position(35)
+    @Label(value = "Examples", group = "Fragments")
     @Description("A collection of examples associated with the prompt")
-    @Visible(false)
+    @Component(Component.Type.TEXT_AREA)
+    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT, Visible.Mode.ADD})
     private String examples;
 
     @Column(name = "context", length = 1000)
     @Position(40)
+    @Label(value = "Context", group = "Fragments")
     @Description("The context in which the prompt is used, e.g. 'chat', 'completion'")
-    @Visible(false)
+    @Component(Component.Type.TEXT_AREA)
+    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT, Visible.Mode.ADD})
     private String context;
 
-    @Column(name = "question", length = 5000)
-    @Position(50)
-    @Description("The question or prompt text that will be presented to the model")
-    @Visible(false)
-    private String question;
+
 
     @Column(name = "tags")
     //@Component(Component.Type.TAG)

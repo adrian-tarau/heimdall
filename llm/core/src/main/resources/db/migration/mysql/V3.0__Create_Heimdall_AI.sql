@@ -63,12 +63,12 @@ create table llm_prompt(
     name                            varchar(100)        not null,
     role                            varchar(1000),
     maximum_input_events            int,
-    maximum_output_tokens           int                 not null,
-    chain_of_thought                boolean,
-    use_only_context                boolean,
+    maximum_output_tokens int,
+    chain_of_thought      boolean default false not null,
+    use_only_context      boolean default true  not null,
     examples                        varchar(10000),
-    context                         varchar(1000),
-    question                        varchar(5000),
+    context                         varchar(2000),
+    question                        varchar(2000),
     tags                            varchar(500),
     constraint nk$llm_prompt$natural_id unique key (natural_id)
 ) ENGINE = InnoDB;

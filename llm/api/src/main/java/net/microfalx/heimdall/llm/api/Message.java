@@ -1,11 +1,13 @@
 package net.microfalx.heimdall.llm.api;
 
+import net.microfalx.lang.Identifiable;
+
 import java.util.List;
 
 /**
  * An interface representing a message in the context of a chat session with an LLM model.
  */
-public interface Message {
+public interface Message extends Identifiable<String> {
 
     /**
      * The type of the message.

@@ -43,6 +43,14 @@ public interface LlmService {
     Chat createChat(Prompt prompt, Model model);
 
     /**
+     * Returns a chat session with a given identifier.
+     *
+     * @param id the chat session identifier
+     * @return a non-null instance
+     */
+    Chat getChat(String id);
+
+    /**
      * Embed the text content with the default model.
      *
      * @param text the text to embed.
