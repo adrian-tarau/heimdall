@@ -113,5 +113,6 @@ public class LlmProperties {
     /**
      * The default guidance message to use when creating the prompt.
      */
-    private String defaultGuidanceMessage = "Answer the question as best you can. If you don't know the answer, just say that you don't know. Don't try to make up an answer.";
+    private String defaultGuidanceMessage = "Answer the question as best you can. If you don't know the answer," +
+            " just say that you don't know. Don't try to make up an answer.";
 }

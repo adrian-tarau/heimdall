@@ -13,22 +13,25 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
+/**
+ * Handles a token stream from a chat session, allowing iteration over the tokens.
+ */
 class TokenStreamHandler implements Iterator<String> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TokenStreamHandler.class);
 
     private final AbstractChat chat;
-    private final LlmServiceImpl llmService;
+    private final LlmServiceImpl service;
     private final TokenStream tokenStream;
     private final BlockingQueue<String> queue = new LinkedBlockingQueue<>();
     private final AtomicBoolean completed = new AtomicBoolean(false);
     private volatile Throwable throwable;
 
-    TokenStreamHandler(LlmServiceImpl llmService, AbstractChat chat, TokenStream tokenStream) {
-        requireNonNull(llmService);
+    TokenStreamHandler(LlmServiceImpl service, AbstractChat chat, TokenStream tokenStream) {
+        requireNonNull(service);
         requireNonNull(chat);
         requireNonNull(tokenStream);
-        this.llmService = llmService;
+        this.service = service;
         this.chat = chat;
         this.tokenStream = tokenStream;
         initTokenStream();
