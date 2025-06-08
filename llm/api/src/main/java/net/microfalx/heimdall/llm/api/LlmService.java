@@ -37,7 +37,7 @@ public interface LlmService {
      * Creates a chat session using a given model.
      *
      * @param prompt the prompt to use
-     * @param model the model to use
+     * @param model  the model to use
      * @return a non-null instance
      */
     Chat createChat(Prompt prompt, Model model);
@@ -143,4 +143,26 @@ public interface LlmService {
      * Reloads the models.
      */
     void reload();
+
+    /**
+     * Returns registered prompts.
+     *
+     * @return a non-null instance
+     */
+    Collection<Prompt> getPrompts();
+
+    /**
+     * Returns a prompt with a given identifier.
+     *
+     * @param id the prompt identifier
+     * @return a non-null instance
+     */
+    Prompt getPrompt(String id);
+
+    /**
+     * Registers a prompt.
+     *
+     * @param prompt the prompt to register
+     */
+    void registerPrompt(Prompt prompt);
 }

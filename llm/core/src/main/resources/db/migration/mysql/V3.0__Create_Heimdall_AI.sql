@@ -56,3 +56,19 @@ create table llm_chat
     constraint fk$llm_chat$user_id foreign key (user_id) references security_users (username),
     constraint fk$llm_chat$model_id foreign key (model_id) references llm_model (id)
 ) ENGINE = InnoDB;
+
+create table llm_prompt(
+    id                              int                 not null primary key auto_increment,
+    natural_id                      varchar(100)        not null,
+    name                            varchar(100)        not null,
+    role                            varchar(1000),
+    maximum_input_events            int,
+    maximum_output_tokens           int                 not null,
+    chain_of_thought                boolean,
+    use_only_context                boolean,
+    examples                        varchar(10000),
+    context                         varchar(1000),
+    question                        varchar(5000),
+    tags                            varchar(500),
+    constraint nk$llm_prompt$natural_id unique key (natural_id)
+) ENGINE = InnoDB;

@@ -262,6 +262,23 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     }
 
     @Override
+    public Collection<Prompt> getPrompts() {
+        return unmodifiableCollection(cache.getPrompts().values());
+    }
+
+    @Override
+    public Prompt getPrompt(String id) {
+        return cache.getPrompt(id);
+    }
+
+    @Override
+    public void registerPrompt(Prompt prompt) {
+        requireNonNull(prompt);
+        cache.registerPrompt(prompt);
+        llmPersistence.execute(prompt);
+    }
+
+    @Override
     public void afterPropertiesSet() throws Exception {
         registerLibraryPaths();
         initThreadPools();

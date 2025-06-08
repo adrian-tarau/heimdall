@@ -3,8 +3,10 @@ package net.microfalx.heimdall.llm.core;
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
 import net.microfalx.heimdall.llm.api.LlmNotFoundException;
 import net.microfalx.heimdall.llm.api.Model;
+import net.microfalx.heimdall.llm.api.Prompt;
 import net.microfalx.heimdall.llm.api.Provider;
 import net.microfalx.heimdall.llm.core.jpa.ModelRepository;
+import net.microfalx.heimdall.llm.core.jpa.PromptRepository;
 import net.microfalx.lang.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +31,7 @@ public class LlmCache extends ApplicationContextSupport {
 
     private final Map<String, net.microfalx.heimdall.llm.api.Model> models = new HashMap<>();
     private final Map<String, Provider> providers = new HashMap<>();
+    private final Map<String, Prompt> prompts = new HashMap<>();
 
     LlmCache(LlmCache oldCache, LlmServiceImpl llmService) {
         this.oldCache = oldCache;
@@ -72,6 +75,23 @@ public class LlmCache extends ApplicationContextSupport {
         return cluster;
     }
 
+    Map<String, Prompt> getPrompts() {
+        return prompts;
+    }
+
+    void registerPrompt(Prompt prompt) {
+        prompts.put(toIdentifier(prompt.getId()), prompt);
+    }
+
+    Prompt getPrompt(String id) {
+        requireNonNull(id);
+        Prompt prompt = prompts.get(toIdentifier(id));
+        if (prompt == null) {
+            throw new LlmNotFoundException("A prompt with identifier '" + id + "' is not registered");
+        }
+        return prompt;
+    }
+
     void load() {
         LOGGER.info("Load models and providers");
         try {
@@ -81,7 +101,14 @@ public class LlmCache extends ApplicationContextSupport {
         } finally {
             oldCache = null;
         }
-        LOGGER.info("Loaded completed, providers: {}, models: {}", providers.size(), models.size());
+        try {
+            loadPrompts();
+        } catch (Exception e) {
+            LOGGER.error("Failed to load prompts", e);
+        }finally {
+            oldCache = null;
+        }
+        LOGGER.info("Loaded completed, providers: {}, models: {}, prompts: {}", providers.size(), models.size(), prompts.size());
     }
 
     private void loadModels() {
@@ -146,5 +173,23 @@ public class LlmCache extends ApplicationContextSupport {
             // ignore if the embedding factory is not available
         }
         return builder;
+    }
+
+    private void loadPrompts() {
+        List<net.microfalx.heimdall.llm.core.jpa.Prompt> modelJpas = getBean(PromptRepository.class).findAll();
+        modelJpas.forEach(promptJpa -> {
+            Prompt.Builder builder = new Prompt.Builder()
+                    .chainOfThought(promptJpa.isChainOfThought())
+                    .context(promptJpa.getContext())
+                    .examples(promptJpa.getExamples())
+                    .maximumInputEvents(promptJpa.getMaximumInputEvents())
+                    .maximumOutputTokens(promptJpa.getMaximumOutputTokens())
+                    .question(promptJpa.getQuestion())
+                    .role(promptJpa.getRole())
+                    .useOnlyContext(promptJpa.isUseOnlyContext());
+            builder.tags(CollectionUtils.setFromString(promptJpa.getTags()))
+                    .name(promptJpa.getName());
+            registerPrompt(builder.build());
+        });
     }
 }

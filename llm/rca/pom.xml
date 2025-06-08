@@ -51,12 +51,6 @@
 
         <dependency>
             <groupId>net.microfalx.heimdall</groupId>
-            <artifactId>heimdall-llm-provider-jlama</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>net.microfalx.heimdall</groupId>
             <artifactId>heimdall-llm-provider-open-ai</artifactId>
             <version>${project.version}</version>
         </dependency>

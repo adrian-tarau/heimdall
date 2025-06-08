@@ -7,6 +7,8 @@ import net.microfalx.bootstrap.model.MetadataService;
 import net.microfalx.heimdall.llm.api.Model;
 import net.microfalx.heimdall.llm.api.Provider;
 import net.microfalx.heimdall.llm.core.jpa.ModelRepository;
+import net.microfalx.heimdall.llm.core.jpa.Prompt;
+import net.microfalx.heimdall.llm.core.jpa.PromptRepository;
 import net.microfalx.heimdall.llm.core.jpa.ProviderRepository;
 
 import static net.microfalx.lang.CollectionUtils.setToString;
@@ -75,6 +77,23 @@ public class LlmPersistence extends ApplicationContextSupport {
         jpaChat.setStartAt(chat.getStartAt());
         jpaChat.setTokenCount(chat.getTokenCount());
         updater.findByNaturalIdAndUpdate(jpaChat);
+    }
+
+    void execute(net.microfalx.heimdall.llm.api.Prompt prompt) {
+        NaturalIdEntityUpdater<Prompt, Integer> updater = getUpdater(PromptRepository.class);
+        Prompt jpaPrompt = new Prompt();
+        jpaPrompt.setNaturalId(prompt.getId());
+        jpaPrompt.setName(prompt.getName());
+        jpaPrompt.setRole(prompt.getRole());
+        jpaPrompt.setMaximumInputEvents(prompt.getMaximumInputEvents());
+        jpaPrompt.setMaximumOutputTokens(prompt.getMaximumOutputTokens());
+        jpaPrompt.setChainOfThought(prompt.isChainOfThought());
+        jpaPrompt.setUseOnlyContext(prompt.isUseOnlyContext());
+        jpaPrompt.setExamples(prompt.getExamples());
+        jpaPrompt.setContext(prompt.getContext());
+        jpaPrompt.setQuestion(prompt.getQuestion());
+        jpaPrompt.setTags(setToString(prompt.getTags()));
+        updater.findByNaturalIdAndUpdate(jpaPrompt);
     }
 
 
