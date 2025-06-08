@@ -226,7 +226,7 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
 
         @Override
         public String apply(Object o) {
-            return service.getPrompt(model, prompt);
+            return service.getSystemMessage(model, prompt);
         }
     }
 

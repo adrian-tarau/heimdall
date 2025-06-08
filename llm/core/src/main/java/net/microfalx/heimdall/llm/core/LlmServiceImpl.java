@@ -200,54 +200,9 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
      * @param prompt the prompt to use
      * @return a non-null string
      */
-    public String getPrompt(Model model, Prompt prompt) {
-        requireNonNull(model);
-        requireNonNull(prompt);
-        StringBuilder builder = new StringBuilder();
-        String role = defaultIfEmpty(prompt.getRole(), properties.getDefaultRole());
-        if (isNotEmpty(role)) {
-            role = getPromptFragment(model, prompt, Prompt.Fragment.ROLE, role);
-            LlmUtils.appendSentence(builder, role);
-            if (isNotEmpty(properties.getDefaultGuidanceMessage())) {
-                LlmUtils.appendSentence(builder, properties.getDefaultGuidanceMessage());
-            }
-            builder.append("\n");
-        }
-        if (isNotEmpty(prompt.getContext())) {
-            String context = getPromptFragment(model, prompt, Prompt.Fragment.CONTEXT, prompt.getContext());
-            if (isNotEmpty(context)) {
-                LlmUtils.appendSentence(builder, context).append("\n");
-            }
-        }
-        if (isNotEmpty(prompt.getExamples())) {
-            String context = getPromptFragment(model, prompt, Prompt.Fragment.EXAMPLES, prompt.getExamples());
-            if (isNotEmpty(context)) {
-                LlmUtils.appendSentence(builder, context).append("\n");
-            }
-        }
-        String promptText = builder.toString().trim();
-        if (isEmpty(promptText)) promptText = properties.getDefaultRole();
-        return promptText;
-    }
-
-    /**
-     * Returns a fragment of the prompt text.
-     *
-     * @param model    the model to use
-     * @param prompt   the prompt to use
-     * @param fragment the fragment to return
-     * @return the text of the fragment, never null
-     */
-    public String getPromptFragment(Model model, Prompt prompt, Prompt.Fragment fragment, String text) {
-        requireNonNull(model);
-        requireNonNull(prompt);
-        requireNonNull(fragment);
-        String originalText = text;
-        for (LlmListener listener : listeners) {
-            text = listener.augment(model, prompt, fragment, text);
-            if (isNotEmpty(text)) break;
-        }
-        return isEmpty(text) ? originalText : text;
+    public String getSystemMessage(Model model, Prompt prompt) {
+        SystemMessageBuilder builder = new SystemMessageBuilder(this, model, prompt);
+        return builder.build();
     }
 
     @Override
@@ -288,11 +243,36 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         return ObjectUtils.defaultIfNull(embeddingPool, ThreadPool.get());
     }
 
+    /**
+     * Closes the given chat and persists it.
+     *
+     * @param chat the chat to close
+     */
     void closeChat(Chat chat) {
         requireNonNull(chat);
         activeChats.remove(chat);
         closedChats.add(chat);
         llmPersistence.execute(chat);
+    }
+
+    /**
+     * Returns a fragment of the prompt text.
+     *
+     * @param model    the model to use
+     * @param prompt   the prompt to use
+     * @param fragment the fragment to return
+     * @return the text of the fragment, never null
+     */
+    String getPromptFragment(Model model, Prompt prompt, Prompt.Fragment fragment, String text) {
+        requireNonNull(model);
+        requireNonNull(prompt);
+        requireNonNull(fragment);
+        String originalText = text;
+        for (LlmListener listener : listeners) {
+            text = listener.augment(model, prompt, fragment, text);
+            if (isNotEmpty(text)) break;
+        }
+        return isEmpty(text) ? originalText : text;
     }
 
     private void initDirectories() {
