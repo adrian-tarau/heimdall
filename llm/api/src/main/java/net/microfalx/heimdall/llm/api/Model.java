@@ -108,7 +108,17 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
      * @return the URI if the model is remote, null if the model is accessed over an API
      */
     public URI getUri() {
-        if (uri != null) {
+        return getUri(false);
+    }
+
+    /**
+     * Returns the URI of the model.
+     *
+     * @param raw {@code true} to return the URI from model, {@code false} to return the URI from model, if available, or provider
+     * @return the URI if the model is remote, null if the model is accessed over an API
+     */
+    public URI getUri(boolean raw) {
+        if (uri != null || raw) {
             return uri;
         } else {
             return getProvider().getUri();
@@ -119,10 +129,21 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
      * Returns the API key to use when accessing the model.
      *
      * @return the apy key, null if the model is accessed over an API
-     * @see Model#getUri()
+     * @see Model#getUri
      */
     public String getApyKey() {
-        if (apyKey != null) {
+        return getApyKey(false);
+    }
+
+    /**
+     * Returns the API key to use when accessing the model.
+     *
+     * @param raw {@code true} to return the key from model, {@code false} to return the URI from model, if available, or provider
+     * @return the apy key, null if the model is accessed over an API
+     * @see Model#getUri
+     */
+    public String getApyKey(boolean raw) {
+        if (apyKey != null || raw) {
             return apyKey;
         } else {
             return getProvider().getApyKey();

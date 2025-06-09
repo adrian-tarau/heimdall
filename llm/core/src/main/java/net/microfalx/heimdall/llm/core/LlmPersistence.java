@@ -41,14 +41,14 @@ public class LlmPersistence extends ApplicationContextSupport {
         net.microfalx.heimdall.llm.core.jpa.Model jpaModel = new net.microfalx.heimdall.llm.core.jpa.Model();
         jpaModel.setNaturalId(model.getId());
         jpaModel.setModelName(model.getModelName());
-        jpaModel.setApiKey(model.getApyKey());
+        jpaModel.setApiKey(model.getApyKey(false));
         jpaModel.setFrequencyPenalty(model.getFrequencyPenalty());
         jpaModel.setPresencePenalty(model.getPresencePenalty());
         jpaModel.setMaximumOutputTokens(model.getMaximumOutputTokens());
         if (jpaModel.getUri() == null) {
             jpaModel.setUri(null);
         } else {
-            jpaModel.setUri(model.getUri().toASCIIString());
+            jpaModel.setUri(model.getUri(false).toASCIIString());
         }
         jpaModel.setTemperature(model.getTemperature());
         jpaModel.setTopK(model.getTopK());
