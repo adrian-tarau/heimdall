@@ -3,13 +3,11 @@ package net.microfalx.heimdall.llm.web;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import net.microfalx.bootstrap.dataset.annotation.Component;
-import net.microfalx.bootstrap.dataset.annotation.Filterable;
 import net.microfalx.bootstrap.dataset.annotation.Tabs;
-import net.microfalx.bootstrap.jdbc.entity.IdentityAware;
+import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
 import net.microfalx.lang.annotation.*;
 
 @Entity(name = "WebPrompt")
@@ -18,7 +16,7 @@ import net.microfalx.lang.annotation.*;
 @Getter
 @Setter
 @Tabs
-public class Prompt extends IdentityAware<Integer> {
+public class Prompt extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
 
     @NaturalId
     @Position(2)
@@ -26,14 +24,6 @@ public class Prompt extends IdentityAware<Integer> {
     @Description("The natural id of the model")
     @Visible(false)
     private String naturalId;
-
-    @Column(name = "name", nullable = false)
-    @NotBlank
-    @Name
-    @Position(5)
-    @Description("A name for a {name}")
-    @Width("200px")
-    private String name;
 
     @Column(name = "question", length = 5000)
     @Position(6)
@@ -90,13 +80,4 @@ public class Prompt extends IdentityAware<Integer> {
     @Component(Component.Type.TEXT_AREA)
     @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT, Visible.Mode.ADD})
     private String context;
-
-
-
-    @Column(name = "tags")
-    //@Component(Component.Type.TAG)
-    @Description("A collection of tags associated with a {name}")
-    @Width("150px")
-    @Filterable()
-    private String tags;
 }

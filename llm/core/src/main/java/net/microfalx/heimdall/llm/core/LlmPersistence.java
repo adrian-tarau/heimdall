@@ -10,6 +10,7 @@ import net.microfalx.heimdall.llm.core.jpa.ModelRepository;
 import net.microfalx.heimdall.llm.core.jpa.Prompt;
 import net.microfalx.heimdall.llm.core.jpa.PromptRepository;
 import net.microfalx.heimdall.llm.core.jpa.ProviderRepository;
+import net.microfalx.lang.CollectionUtils;
 
 import static net.microfalx.lang.CollectionUtils.setToString;
 
@@ -31,6 +32,7 @@ public class LlmPersistence extends ApplicationContextSupport {
         jpaProvider.setName(provider.getName());
         jpaProvider.setDescription(provider.getDescription());
         jpaProvider.setApiKey(provider.getApyKey());
+        jpaProvider.setTags(CollectionUtils.setToString(provider.getTags()));
         return updater.findByNaturalIdAndUpdate(jpaProvider);
     }
 
@@ -61,6 +63,9 @@ public class LlmPersistence extends ApplicationContextSupport {
         jpaModel.setEnabled(model.isEnabled());
         jpaModel.setEmbedding(model.isEmbedding());
         jpaModel.setProvider(execute(model.getProvider()));
+        jpaModel.setDescription(model.getDescription());
+        jpaModel.setTags(CollectionUtils.setToString(model.getTags()));
+        jpaModel.setMaximumContextLength(model.getMaximumContextLength());
         return updater.findByNaturalIdAndUpdate(jpaModel);
     }
 
@@ -93,6 +98,7 @@ public class LlmPersistence extends ApplicationContextSupport {
         jpaPrompt.setContext(prompt.getContext());
         jpaPrompt.setQuestion(prompt.getQuestion());
         jpaPrompt.setTags(setToString(prompt.getTags()));
+        jpaPrompt.setDescription(prompt.getDescription());
         updater.findByNaturalIdAndUpdate(jpaPrompt);
     }
 

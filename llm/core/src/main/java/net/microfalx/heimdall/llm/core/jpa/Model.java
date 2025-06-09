@@ -4,20 +4,17 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import net.microfalx.bootstrap.dataset.annotation.Filterable;
-import net.microfalx.bootstrap.jdbc.entity.NamedIdentityAware;
+import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
 import net.microfalx.heimdall.llm.api.ResponseFormat;
-import net.microfalx.lang.annotation.Description;
 import net.microfalx.lang.annotation.Name;
 import net.microfalx.lang.annotation.NaturalId;
-import net.microfalx.lang.annotation.Width;
 
 @Entity(name = "CoreModel")
 @Table(name = "llm_model")
 @Name("Models")
 @Getter
 @Setter
-public class Model extends NamedIdentityAware<Integer> {
+public class Model extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
 
     @NaturalId
     @Column(name = "natural_id", nullable = false, length = 100, unique = true)
@@ -62,6 +59,9 @@ public class Model extends NamedIdentityAware<Integer> {
     @Column(name = "presence_penalty")
     private Double presencePenalty;
 
+    @Column(name = "maximum_context_length", nullable = false)
+    private int maximumContextLength;
+
     @Column(name = "maximum_output_tokens")
     private Integer maximumOutputTokens;
 
@@ -71,13 +71,6 @@ public class Model extends NamedIdentityAware<Integer> {
     @Column(name = "response_format", nullable = false)
     @Enumerated(value = EnumType.STRING)
     private ResponseFormat responseFormat;
-
-    @Column(name = "tags")
-    //@Component(Component.Type.TAG)
-    @Description("A collection of tags associated with a {name}")
-    @Width("150px")
-    @Filterable()
-    private String tags;
 
     public boolean isDefault() {
         return _default;

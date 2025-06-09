@@ -6,8 +6,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import net.microfalx.bootstrap.dataset.annotation.Component;
-import net.microfalx.bootstrap.dataset.annotation.Filterable;
-import net.microfalx.bootstrap.jdbc.entity.NamedIdentityAware;
+import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
 import net.microfalx.lang.annotation.*;
 
 @Entity(name = "WebProvider")
@@ -15,7 +14,7 @@ import net.microfalx.lang.annotation.*;
 @Name("Providers")
 @Getter
 @Setter
-public class Provider extends NamedIdentityAware<Integer> {
+public class Provider extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
 
     @Position(2)
     @NaturalId
@@ -42,20 +41,12 @@ public class Provider extends NamedIdentityAware<Integer> {
     @Description("The author of the provider")
     private String author;
 
-    @Position(400)
-    @Column(name = "tags")
-    //@Component(Component.Type.TAG)
-    @Description("A collection of tags associated with a {name}")
-    @Width("150px")
-    @Filterable()
-    private String tags;
-
-    @Position(500)
+    @Position(100)
     @Column(name = "license", length = 1000)
     @Description("The license of the provider")
     private String license;
 
-    @Position(600)
+    @Position(200)
     @Column(name = "version", length = 50)
     @Description("The version of the provider")
     private String version;

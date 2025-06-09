@@ -3,31 +3,22 @@ package net.microfalx.heimdall.llm.core.jpa;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
-import net.microfalx.bootstrap.dataset.annotation.Filterable;
-import net.microfalx.bootstrap.jdbc.entity.IdentityAware;
-import net.microfalx.lang.annotation.*;
+import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
+import net.microfalx.lang.annotation.Name;
+import net.microfalx.lang.annotation.NaturalId;
 
 @Entity(name = "CorePrompt")
 @Table(name = "llm_prompt")
 @Name("Prompts")
 @Getter
 @Setter
-public class Prompt extends IdentityAware<Integer> {
+public class Prompt extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
 
     @NaturalId
     @Column(name = "natural_id", nullable = false, length = 100, unique = true)
     private String naturalId;
-
-    @Column(name = "name", nullable = false)
-    @NotBlank
-    @Name
-    @Position(5)
-    @Description("A name for a {name}")
-    @Width("200px")
-    private String name;
 
     @Column(name = "role", length = 1000)
     private String role;
@@ -52,10 +43,4 @@ public class Prompt extends IdentityAware<Integer> {
 
     @Column(name = "question", length = 5000)
     private String question;
-
-    @Column(name = "tags")
-    @Description("A collection of tags associated with a {name}")
-    @Width("150px")
-    @Filterable()
-    private String tags;
 }

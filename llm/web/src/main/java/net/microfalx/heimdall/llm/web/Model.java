@@ -4,9 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import net.microfalx.bootstrap.dataset.annotation.Component;
-import net.microfalx.bootstrap.dataset.annotation.Filterable;
 import net.microfalx.bootstrap.dataset.annotation.Tabs;
-import net.microfalx.bootstrap.jdbc.entity.NamedIdentityAware;
+import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
 import net.microfalx.heimdall.llm.api.ResponseFormat;
 import net.microfalx.lang.annotation.*;
 
@@ -16,7 +15,7 @@ import net.microfalx.lang.annotation.*;
 @Getter
 @Setter
 @Tabs
-public class Model extends NamedIdentityAware<Integer> {
+public class Model extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
 
     @NaturalId
     @Position(2)
@@ -109,6 +108,12 @@ public class Model extends NamedIdentityAware<Integer> {
             "whether they appear in the text so far, increasing the model's likelihood to talk about new topics.")
     private Double presencePenalty;
 
+    @Position(58)
+    @Column(name = "maximum_context_length",nullable = false)
+    @Description("The maximum context length of the model in tokens. This is the maximum number of tokens that can be " +
+            "processed by the model in a single request, including both input and output tokens")
+    private int maximumContextLength;
+
     @Position(60)
     @Column(name = "maximum_output_tokens")
     @Label(value = "Maximum Output Tokens", group = "Other")
@@ -130,12 +135,4 @@ public class Model extends NamedIdentityAware<Integer> {
     @Description("The format of the response from the model")
     @Visible(value = false)
     private ResponseFormat responseFormat;
-
-    @Position(400)
-    @Column(name = "tags")
-    //@Component(Component.Type.TAG)
-    @Description("A collection of tags associated with a {name}")
-    @Width("150px")
-    @Filterable()
-    private String tags;
 }

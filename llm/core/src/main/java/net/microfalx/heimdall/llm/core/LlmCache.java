@@ -105,7 +105,7 @@ public class LlmCache extends ApplicationContextSupport {
             loadPrompts();
         } catch (Exception e) {
             LOGGER.error("Failed to load prompts", e);
-        }finally {
+        } finally {
             oldCache = null;
         }
         LOGGER.info("Loaded completed, providers: {}, models: {}, prompts: {}", providers.size(), models.size(), prompts.size());
@@ -142,6 +142,7 @@ public class LlmCache extends ApplicationContextSupport {
         builder.topK(defaultIfNull(modelJpa.getTopK(), properties.getDefaultTopK()))
                 .topP(defaultIfNull(modelJpa.getTopP(), properties.getDefaultTopP()))
                 .responseFormat(modelJpa.getResponseFormat()).setDefault(modelJpa.isDefault())
+                .maximumContextLength(modelJpa.getMaximumContextLength())
                 .enabled(modelJpa.isEnabled()).embedding(modelJpa.isEmbedding());
         builder.tags(setFromString(modelJpa.getTags())).name(modelJpa.getName())
                 .description(modelJpa.getDescription());
@@ -188,7 +189,7 @@ public class LlmCache extends ApplicationContextSupport {
                     .role(promptJpa.getRole())
                     .useOnlyContext(promptJpa.isUseOnlyContext());
             builder.tags(CollectionUtils.setFromString(promptJpa.getTags()))
-                    .name(promptJpa.getName());
+                    .name(promptJpa.getName()).description(promptJpa.getDescription());
             registerPrompt(builder.build());
         });
     }
