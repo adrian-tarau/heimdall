@@ -7,6 +7,11 @@ import net.microfalx.lang.StringUtils;
 
 /**
  * Represents a prompt in the LLM (Large Language Model) API.
+ * </p>
+ * The prompt will create the system message for a new chat. The system message is created
+ * from the role, examples, context, and question, based on the current model and prompt settings.
+ * </p>
+ * The final system message will be tailored to the model capabilities and the prompt settings.
  */
 @ToString(callSuper = true)
 public class Prompt extends NamedAndTaggedIdentifyAware<String> {

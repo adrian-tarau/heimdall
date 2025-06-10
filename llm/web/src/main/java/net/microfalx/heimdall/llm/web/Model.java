@@ -168,7 +168,7 @@ public class Model extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
                 }
                 return "<i>" + basicFormatting(actualValue) + "</i>";
             } else {
-                return basicFormatting(value);
+                return "<b>" + basicFormatting(value) + "</b>";
             }
         }
 
