@@ -41,6 +41,7 @@ public class StatementTask implements Runnable {
 
     @Override
     public void run() {
+        if (!databaseService.getProperties().isEnabled()) return;
         threshold = databaseService.getStatementCollectionThreshold();
         if (threshold.isAfter(LocalDateTime.now().minusSeconds(NOW_THRESHOLD_SECONDS))) return;
         collectStatements();

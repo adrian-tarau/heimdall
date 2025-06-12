@@ -57,6 +57,9 @@ public class BrokerService implements InitializingBean {
     private static final Map<LocalDate, AtomicInteger> resourceSequences = new ConcurrentHashMap<>();
     private static final AtomicInteger TMP_FILE_REF = new AtomicInteger(1);
 
+    @Autowired(required = false)
+    private BrokerProperties properties = new BrokerProperties();
+
     @Autowired
     private net.microfalx.bootstrap.broker.BrokerService brokerService;
 
@@ -329,6 +332,7 @@ public class BrokerService implements InitializingBean {
 
         @Override
         public void run() {
+            if (!properties.isEnabled()) return;
             for (BrokerTopic topic : getActiveTopics()) {
                 BrokerSessionTask task = new BrokerSessionTask(BrokerService.this, topic,
                         contentService, indexService);

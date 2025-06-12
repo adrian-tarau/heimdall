@@ -2,8 +2,8 @@ package net.microfalx.heimdall.database.core;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import net.microfalx.bootstrap.jdbc.support.Snapshot;
 import net.microfalx.bootstrap.jdbc.support.*;
+import net.microfalx.bootstrap.jdbc.support.Snapshot;
 import net.microfalx.bootstrap.resource.ResourceService;
 import net.microfalx.lang.ObjectUtils;
 import net.microfalx.lang.StringUtils;
@@ -59,7 +59,7 @@ public class DatabaseService implements InitializingBean {
     private net.microfalx.bootstrap.jdbc.support.DatabaseService databaseService;
 
     @Autowired
-    private DatabaseProperties databaseProperties;
+    private DatabaseProperties properties;
 
     @Autowired
     private ResourceService resourceService;
@@ -92,6 +92,10 @@ public class DatabaseService implements InitializingBean {
     private Resource snapshotsResource;
     private Resource statementsResource;
     private volatile LocalDateTime statementCollectionThreshold = LocalDateTime.now().minusMinutes(1);
+
+    DatabaseProperties getProperties() {
+        return properties;
+    }
 
     net.microfalx.bootstrap.jdbc.support.DatabaseService getDatabaseService() {
         return databaseService;
@@ -274,6 +278,7 @@ public class DatabaseService implements InitializingBean {
     }
 
     public void reload(Schema schema) {
+        if (!properties.isEnabled()) return;
         String id = toIdentifier(schema.getName() + "_" + schema.getType());
         schemaIdCache.put(schema.getId(), id);
         try {
@@ -296,7 +301,7 @@ public class DatabaseService implements InitializingBean {
     }
 
     private void scheduleTasks() {
-        taskScheduler.schedule(new SnapshotsTask(this), new PeriodicTrigger(databaseProperties.getInterval()));
+        taskScheduler.schedule(new SnapshotsTask(this), new PeriodicTrigger(properties.getInterval()));
         taskScheduler.schedule(new StatementTask(this), new PeriodicTrigger(ofMinutes(1)));
     }
 

@@ -1,17 +1,15 @@
-package net.microfalx.heimdall.database.core;
+package net.microfalx.heimdall.broker.core;
 
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-import java.time.Duration;
-
 @Configuration
-@ConfigurationProperties("heimdall.database")
+@ConfigurationProperties("heimdall.broker")
 @Getter
 @Setter
-public class DatabaseProperties {
+public class BrokerProperties {
 
     /**
      * Indicates whether the broker service is enabled.
@@ -19,9 +17,4 @@ public class DatabaseProperties {
      * When enabled, all registered consumers and producers will be started.
      */
     private boolean enabled = true;
-
-    /**
-     * The interval used to collect database statistics.
-     */
-    private Duration interval = Duration.ofSeconds(20);
 }

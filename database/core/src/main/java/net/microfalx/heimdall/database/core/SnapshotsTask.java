@@ -26,6 +26,7 @@ class SnapshotsTask implements Runnable {
 
     @Override
     public void run() {
+        if (!databaseService.getProperties().isEnabled()) return;
         takeSnapshots();
         persistSnapshots();
     }
