@@ -272,7 +272,7 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
         private Integer topK;
         private Double frequencyPenalty;
         private Double presencePenalty;
-        private int maximumContextLength = 64 * 1024; // 64K tokens
+        private int maximumContextLength = 64 * 1028; // 64K tokens
         private Integer maximumOutputTokens;
         private final Set<String> stopSequences = new HashSet<>();
         private ResponseFormat responseFormat = ResponseFormat.TEXT;
