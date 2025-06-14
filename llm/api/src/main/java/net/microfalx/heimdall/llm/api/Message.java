@@ -2,6 +2,7 @@ package net.microfalx.heimdall.llm.api;
 
 import net.microfalx.lang.Identifiable;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 
 /**
@@ -14,7 +15,7 @@ public interface Message extends Identifiable<String> {
      *
      * @return the type of the message
      */
-    Type type();
+    Type getType();
 
     /**
      * The {@link Content}s of the message.
@@ -29,6 +30,13 @@ public interface Message extends Identifiable<String> {
      * @return the text
      */
     String getText();
+
+    /**
+     * Returns the timestamp of when the message was created.
+     *
+     * @return a non-null instance
+     */
+    ZonedDateTime getTimestamp();
 
     /**
      * An enumeration representing the type of message in a chat session.

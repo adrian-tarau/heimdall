@@ -7,7 +7,6 @@ import java.security.Principal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Iterator;
 
 /**
  * An interface for representing a chat session with an AI model.
@@ -91,7 +90,7 @@ public interface Chat extends Identifiable<String>, Nameable {
      * @param message the message to send to the model
      * @return a stream of tokens
      */
-    Iterator<String> chat(String message);
+    TokenStream chat(String message);
 
     /**
      * Completes the chat session and records the chat in the history.

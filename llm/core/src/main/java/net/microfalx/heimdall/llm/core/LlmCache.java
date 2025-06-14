@@ -8,6 +8,7 @@ import net.microfalx.heimdall.llm.api.Provider;
 import net.microfalx.heimdall.llm.core.jpa.ModelRepository;
 import net.microfalx.heimdall.llm.core.jpa.PromptRepository;
 import net.microfalx.lang.CollectionUtils;
+import net.microfalx.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +20,7 @@ import java.util.Map;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.CollectionUtils.setFromString;
 import static net.microfalx.lang.ObjectUtils.defaultIfNull;
+import static net.microfalx.lang.StringUtils.EMPTY_STRING;
 import static net.microfalx.lang.StringUtils.toIdentifier;
 import static net.microfalx.lang.UriUtils.parseUri;
 
@@ -46,9 +48,13 @@ public class LlmCache extends ApplicationContextSupport {
         models.put(toIdentifier(model.getId()), model);
     }
 
-    Model getModel(String id) {
+    Model findModel(String id) {
         requireNonNull(id);
-        Model model = models.get(toIdentifier(id));
+        return models.get(toIdentifier(id));
+    }
+
+    Model getModel(String id) {
+        Model model = findModel(id);
         if (model == null) {
             throw new LlmNotFoundException("A model with identifier '" + id + "' is not registered");
         }
@@ -132,7 +138,9 @@ public class LlmCache extends ApplicationContextSupport {
     }
 
     private Model.Builder loadModel(net.microfalx.heimdall.llm.core.jpa.Model modelJpa, LlmProperties properties) {
-        Model.Builder builder = new Model.Builder(modelJpa.getNaturalId())
+        String modelId = modelJpa.getNaturalId();
+        modelId = StringUtils.replaceFirst(modelId, modelJpa.getProvider().getNaturalId() + "_", EMPTY_STRING);
+        Model.Builder builder = new Model.Builder(modelId)
                 .addStopSequences(new ArrayList<>(CollectionUtils.setFromString(modelJpa.getStopSequences()))).frequencyPenalty(modelJpa.getFrequencyPenalty())
                 .modelName(modelJpa.getModelName()).maximumOutputTokens(modelJpa.getMaximumOutputTokens())
                 .presencePenalty(modelJpa.getPresencePenalty())

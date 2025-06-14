@@ -20,7 +20,7 @@ public class OllamaProviderFactory extends AbstractProviderFactory {
         if (isNotEmpty(getProperties().getOllamaUri())) {
             builder.uri(UriUtils.parseUri(getProperties().getOllamaUri()), getProperties().getOllamaApiKey());
         }
-        builder.name("Ollama").description("Get up and running with large language models.");
+        builder.name("Ollama").description("A locally deployed AI model runner");
         builder.version("0.7.0").author("Ollama Team").license("MIT")
                 .chatFactory(new OllamaChatFactory()).tag("ollama");
         registerModels(builder);

@@ -49,6 +49,15 @@ public class LlmProperties {
      */
     private Duration interval = Duration.ofMinutes(5);
 
+    /**
+     * The default provider to use instead of the one selected.
+     */
+    private String defaultProvider;
+
+    /**
+     * The default model, override to be used.
+     */
+    private String defaultModel;
 
     /**
      * OpenAI API key to use when accessing models that require it.

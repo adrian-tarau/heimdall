@@ -28,6 +28,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
@@ -58,7 +59,7 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
         requireNonNull(prompt);
         requireNonNull(model);
         setId(UUID.randomUUID().toString());
-        setName("Unnamed");
+        setName("New Chat");
         this.prompt = prompt;
         this.model = model;
     }
@@ -112,7 +113,9 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
 
     @Override
     public Collection<Message> getMessages() {
-        return List.of();
+        return chatMemory.messages().stream()
+                .map(MessageImpl::create)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -135,7 +138,7 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
     }
 
     @Override
-    public Iterator<String> chat(String message) {
+    public net.microfalx.heimdall.llm.api.TokenStream chat(String message) {
         validate();
         if (streamingChatModel != null) {
             TokenStream stream = streamChat.chat(message);
@@ -145,7 +148,7 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
         } else {
             String answer = ask(message);
             String[] parts = StringUtils.split(answer, " ");
-            return Arrays.asList(parts).iterator();
+            return new TokenStreamImpl(Arrays.asList(parts).iterator());
         }
     }
 

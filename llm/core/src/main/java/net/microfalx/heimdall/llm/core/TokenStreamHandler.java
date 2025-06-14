@@ -1,22 +1,21 @@
 package net.microfalx.heimdall.llm.core;
 
+import dev.langchain4j.model.output.TokenUsage;
 import dev.langchain4j.service.TokenStream;
-import net.microfalx.lang.ExceptionUtils;
+import net.microfalx.heimdall.llm.api.FinishReason;
 import net.microfalx.lang.ThreadUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
 /**
  * Handles a token stream from a chat session, allowing iteration over the tokens.
  */
-class TokenStreamHandler implements Iterator<String> {
+class TokenStreamHandler extends AbstractTokenStream {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TokenStreamHandler.class);
 
@@ -24,8 +23,6 @@ class TokenStreamHandler implements Iterator<String> {
     private final LlmServiceImpl service;
     private final TokenStream tokenStream;
     private final BlockingQueue<String> queue = new LinkedBlockingQueue<>();
-    private final AtomicBoolean completed = new AtomicBoolean(false);
-    private volatile Throwable throwable;
 
     TokenStreamHandler(LlmServiceImpl service, AbstractChat chat, TokenStream tokenStream) {
         requireNonNull(service);
@@ -54,8 +51,9 @@ class TokenStreamHandler implements Iterator<String> {
         return queue.poll();
     }
 
-    private void raiseIfError() {
-        if (throwable != null) ExceptionUtils.throwException(throwable);
+    @Override
+    public boolean isComplete() {
+        return queue.isEmpty() && super.isComplete();
     }
 
     private void initTokenStream() {
@@ -64,12 +62,31 @@ class TokenStreamHandler implements Iterator<String> {
             this.completed.set(true);
         });
         tokenStream.onPartialResponse(r -> {
+            builder.append(r);
             if (!queue.offer(r)) {
                 LOGGER.atError().log("Queue is full for chat {}: {}", chat.getName(), r);
             }
         });
         tokenStream.onCompleteResponse(r -> {
+            message = MessageImpl.create(r.aiMessage());
+            finishReason = toFinishReason(r.finishReason());
+            TokenUsage tokenUsage = r.tokenUsage();
+            if (tokenUsage != null) {
+                this.inputTokenCount = tokenUsage.inputTokenCount();
+                this.outputTokenCount = tokenUsage.outputTokenCount();
+            }
             completed.set(true);
         });
+    }
+
+    private FinishReason toFinishReason(dev.langchain4j.model.output.FinishReason finishReason) {
+        if (finishReason == null) return null;
+        return switch (finishReason) {
+            case STOP -> FinishReason.STOP;
+            case LENGTH -> FinishReason.LENGTH;
+            case CONTENT_FILTER -> FinishReason.CONTENT_FILTER;
+            case TOOL_EXECUTION -> FinishReason.TOOL_EXECUTION;
+            case OTHER -> FinishReason.OTHER;
+        };
     }
 }

@@ -138,8 +138,17 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     @Override
     public Model getDefaultModel() {
         if (defaultModel != null) return defaultModel;
-        defaultModel = getModels().stream().filter(model -> model.isDefault() && !model.isEmbedding()).findFirst().orElseThrow(
-                () -> new LlmNotFoundException("No default model found"));
+        if (isNotEmpty(properties.getDefaultModel()) && isNotEmpty(properties.getDefaultProvider())) {
+            String defaultModelId = properties.getDefaultProvider() + "." + properties.getDefaultModel();
+            defaultModel = cache.findModel(defaultModelId);
+            if (defaultModel == null) {
+                LOGGER.warn("A model with identifier '{}' not found, falling back to configured model", defaultModelId);
+            }
+        }
+        if (defaultModel == null) {
+            defaultModel = getModels().stream().filter(model -> model.isDefault() && !model.isEmbedding())
+                    .findFirst().orElseThrow(() -> new LlmNotFoundException("No default model found"));
+        }
         return defaultModel;
     }
 

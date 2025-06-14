@@ -10,12 +10,15 @@ import net.microfalx.heimdall.llm.api.Content;
 import net.microfalx.heimdall.llm.api.Message;
 import net.microfalx.lang.StringUtils;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
+import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.resource.ResourceUtils.loadAsString;
 
 @Getter
@@ -25,25 +28,25 @@ public class MessageImpl implements Message {
     private final String id = UUID.randomUUID().toString();
     private final Type type;
     private final List<Content> contents = new ArrayList<>();
+    private ZonedDateTime timestamp = ZonedDateTime.now();
 
-    public static MessageImpl create(ChatMessage message) {
+    public static Message create(ChatMessage message) {
         return new MessageImpl(getType(message), getContent(message));
     }
 
+    public static Message create(Message.Type type, String text) {
+        return new MessageImpl(type, List.of(ContentImpl.from(text)));
+    }
+
     public MessageImpl(Type type) {
-        this.type = type;
+        this(type, emptyList());
     }
 
     public MessageImpl(Type type, Collection<Content> contents) {
+        requireNonNull(type);
+        requireNonNull(contents);
         this.type = type;
         this.contents.addAll(contents);
-    }
-
-    
-
-    @Override
-    public Type type() {
-        return type;
     }
 
     @Override
