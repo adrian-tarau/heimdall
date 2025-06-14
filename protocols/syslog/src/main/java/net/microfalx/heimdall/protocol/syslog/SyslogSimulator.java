@@ -2,7 +2,11 @@ package net.microfalx.heimdall.protocol.syslog;
 
 import com.cloudbees.syslog.Facility;
 import com.cloudbees.syslog.Severity;
-import net.microfalx.heimdall.protocol.core.*;
+import net.microfalx.heimdall.protocol.core.Address;
+import net.microfalx.heimdall.protocol.core.Body;
+import net.microfalx.heimdall.protocol.core.ProtocolClient;
+import net.microfalx.heimdall.protocol.core.simulator.ProtocolSimulator;
+import net.microfalx.heimdall.protocol.core.simulator.ProtocolSimulatorProperties;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;

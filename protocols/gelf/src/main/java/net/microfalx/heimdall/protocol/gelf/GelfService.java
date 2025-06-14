@@ -4,6 +4,7 @@ import net.microfalx.heimdall.protocol.core.Attachment;
 import net.microfalx.heimdall.protocol.core.Event;
 import net.microfalx.heimdall.protocol.core.ProtocolService;
 import net.microfalx.heimdall.protocol.gelf.jpa.GelfEventRepository;
+import net.microfalx.heimdall.protocol.gelf.simulator.GelfSimulator;
 import net.microfalx.resource.MimeType;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceFactory;

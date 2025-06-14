@@ -1,7 +1,11 @@
-package net.microfalx.heimdall.protocol.core;
+package net.microfalx.heimdall.protocol.core.simulator;
 
 import net.datafaker.Faker;
 import net.datafaker.providers.base.Shakespeare;
+import net.microfalx.heimdall.protocol.core.Address;
+import net.microfalx.heimdall.protocol.core.Event;
+import net.microfalx.heimdall.protocol.core.ProtocolClient;
+import net.microfalx.heimdall.protocol.core.ProtocolService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -52,6 +56,15 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
      */
     public boolean isEnabled() {
         return properties.isEnabled();
+    }
+
+    /**
+     * Returns whether the simulator should use external data sets.
+     *
+     * @return a non-null instance
+     */
+    public boolean shouldUseExternalDataSets() {
+        return properties.isUseExternalDataSets();
     }
 
     /**
@@ -164,7 +177,6 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
      * @param <ENUM>    the enum type
      * @return the enum value
      */
-    @SuppressWarnings("unchecked")
     protected final <ENUM extends Enum<ENUM>> ENUM getRandomEnum(Class<ENUM> enumClass) {
         return enumClass.getEnumConstants()[random.nextInt(enumClass.getEnumConstants().length)];
     }

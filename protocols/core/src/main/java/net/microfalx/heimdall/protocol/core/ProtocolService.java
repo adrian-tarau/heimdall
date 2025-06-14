@@ -10,6 +10,8 @@ import net.microfalx.bootstrap.search.IndexService;
 import net.microfalx.bootstrap.search.SearchService;
 import net.microfalx.heimdall.protocol.core.jpa.AddressRepository;
 import net.microfalx.heimdall.protocol.core.jpa.PartRepository;
+import net.microfalx.heimdall.protocol.core.simulator.ProtocolSimulator;
+import net.microfalx.heimdall.protocol.core.simulator.ProtocolSimulatorProperties;
 import net.microfalx.lang.EnumUtils;
 import net.microfalx.lang.ObjectUtils;
 import net.microfalx.lang.StringUtils;

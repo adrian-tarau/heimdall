@@ -1,7 +1,12 @@
 package net.microfalx.heimdall.protocol.smtp;
 
 import net.datafaker.Faker;
-import net.microfalx.heimdall.protocol.core.*;
+import net.microfalx.heimdall.protocol.core.Address;
+import net.microfalx.heimdall.protocol.core.Attachment;
+import net.microfalx.heimdall.protocol.core.Body;
+import net.microfalx.heimdall.protocol.core.ProtocolClient;
+import net.microfalx.heimdall.protocol.core.simulator.ProtocolSimulator;
+import net.microfalx.heimdall.protocol.core.simulator.ProtocolSimulatorProperties;
 import net.microfalx.resource.ClassPathResource;
 import net.microfalx.resource.MimeType;
 import net.microfalx.resource.Resource;
