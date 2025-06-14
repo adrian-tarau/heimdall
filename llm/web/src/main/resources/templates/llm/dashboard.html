@@ -1,0 +1,26 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/default}">
+<body>
+<section layout:fragment="content">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header border-0 pb-0" th:if="${chat.name}">
+                <div class="d-flex justify-content-between">
+                    <h3 id="dashboard-title" class="card-title fs-3" th:text="${chat.name}"></h3>
+                    <div>
+                        <span th:replace="~{ fragments/page :: help}"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body llm-chat" th:id="${chat.id}">
+                <div th:replace="~{ fragments/llm/chat :: render-messages(${chat})}"></div>
+            </div>
+            <div class="card-footer">
+                <div th:replace="~{ fragments/llm/chat :: render-input(${chat})}"></div>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

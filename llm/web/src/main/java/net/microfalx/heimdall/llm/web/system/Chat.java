@@ -1,4 +1,4 @@
-package net.microfalx.heimdall.llm.web;
+package net.microfalx.heimdall.llm.web.system;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;

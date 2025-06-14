@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="question" th:remove="tag">
+    <th:block th:each="message : ${messages}">
+        <div th:replace="~{ fragments/llm/chat :: render-message(${message})}"></div>
+    </th:block>
+</div>
+
+</body>
+</html>

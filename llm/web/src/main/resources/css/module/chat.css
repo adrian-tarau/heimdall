@@ -1,0 +1,130 @@
+
+.llm-chat .card-body {
+    position: relative;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+.llm-chat.chat-pane-open .llm-chat-contacts {
+    transform: translate(0, 0);
+}
+
+.llm-chat.timestamp-light .llm-chat-timestamp {
+    color: rgba(var(--bs-body-color-rgb), 0.65);
+}
+
+.llm-chat.timestamp-dark .llm-chat-timestamp {
+    color: rgba(var(--bs-body-color-rgb), 0.9);
+}
+
+.llm-chat-messages {
+    max-width: 900px !important;
+    height: 100%;
+    padding: 10px;
+    overflow: auto;
+    transform: translate(0, 0);
+}
+
+.llm-chat-input {
+    max-width: 600px !important;
+}
+
+.llm-chat-msg, .llm-chat-text {
+    display: block;
+}
+
+.llm-chat-msg {
+    margin-bottom: 10px;
+}
+
+.llm-chat-msg::after {
+    display: block;
+    clear: both;
+    content: "";
+}
+
+.llm-chat-messages, .llm-chat-contacts {
+    transition: transform 0.5s ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .llm-chat-messages,
+    .llm-chat-contacts {
+        transition: none;
+    }
+}
+
+.llm-chat-text {
+    border-radius: 0.5rem;
+    position: relative;
+    padding: 5px 10px;
+    margin: 5px 0 0 50px;
+    color: var(--bs-emphasis-color);
+    background-color: var(--bs-secondary-bg);
+    border: 1px solid var(--bs-border-color);
+}
+
+.llm-chat-text::after, .llm-chat-text::before {
+    position: absolute;
+    top: 15px;
+    right: 100%;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+    content: " ";
+    border: solid transparent;
+    border-right-color: var(--bs-border-color);
+}
+
+.llm-chat-text::after {
+    margin-top: -5px;
+    border-width: 5px;
+}
+
+.llm-chat-text::before {
+    margin-top: -6px;
+    border-width: 6px;
+}
+
+.end .llm-chat-text {
+    margin-right: 50px;
+    margin-left: 0;
+}
+
+.end .llm-chat-text::after, .end .llm-chat-text::before {
+    right: auto;
+    left: 100%;
+    border-right-color: transparent;
+    border-left-color: var(--bs-border-color);
+}
+
+.llm-chat-img {
+    font-size: 28px;
+    border-radius: 50%;
+    float: left;
+    width: 40px;
+    height: 40px;
+}
+
+.end .llm-chat-img {
+    float: right;
+}
+
+.llm-chat-infos {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 0.875rem;
+}
+
+.llm-chat-name {
+    font-weight: 600;
+}
+
+.llm-chat-timestamp {
+    color: rgba(var(--bs-body-color-rgb), 0.75);
+}
+
+.llm-chat-text p {
+    margin-top: 0.2rem;
+    margin-bottom: 0.2rem;
+}

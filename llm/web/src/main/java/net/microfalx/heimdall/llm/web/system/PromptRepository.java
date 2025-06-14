@@ -1,4 +1,4 @@
-package net.microfalx.heimdall.llm.web;
+package net.microfalx.heimdall.llm.web.system;
 
 import net.microfalx.bootstrap.jdbc.jpa.NaturalJpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
