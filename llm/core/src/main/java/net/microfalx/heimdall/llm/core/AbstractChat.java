@@ -11,6 +11,7 @@ import dev.langchain4j.service.TokenStream;
 import dev.langchain4j.service.tool.ToolProvider;
 import dev.langchain4j.service.tool.ToolProviderRequest;
 import dev.langchain4j.service.tool.ToolProviderResult;
+import net.microfalx.bootstrap.security.SecurityContext;
 import net.microfalx.heimdall.llm.api.Chat;
 import net.microfalx.heimdall.llm.api.Message;
 import net.microfalx.heimdall.llm.api.Model;
@@ -19,14 +20,13 @@ import net.microfalx.lang.NamedAndTaggedIdentifyAware;
 import net.microfalx.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.IOException;
 import java.security.Principal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -55,6 +55,9 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
 
     private volatile Principal principal;
 
+    private final AtomicInteger inputTokenCount = new AtomicInteger();
+    private final AtomicInteger outputTokenCount = new AtomicInteger();
+
     public AbstractChat(Prompt prompt, Model model) {
         requireNonNull(prompt);
         requireNonNull(model);
@@ -76,13 +79,6 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
 
     @Override
     public final Principal getUser() {
-        if (principal == null) {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication != null) {
-                principal = (Principal) authentication.getPrincipal();
-            }
-            principal = new PrincipalImpl("anonymous");
-        }
         return principal;
     }
 
@@ -109,6 +105,12 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
     @Override
     public Duration getDuration() {
         return Duration.between(startAt, finishAt != null ? finishAt : LocalDateTime.now());
+    }
+
+    @Override
+    public Message getSystemMessage() {
+        return getMessages().stream().filter(message -> message.getType() == Message.Type.SYSTEM)
+                .findFirst().orElse(MessageImpl.create(Message.Type.SYSTEM, "System message is not available"));
     }
 
     @Override
@@ -173,6 +175,10 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
         }
     }
 
+    private void updateDescription() {
+
+    }
+
     @Override
     public final void close() {
         finishAt = LocalDateTime.now();
@@ -187,6 +193,7 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
     void initialize(LlmServiceImpl service) {
         requireNonNull(service);
         validate();
+        initializePrincipal();
         this.service = service;
         HuggingFaceTokenCountEstimator tokenCountEstimator = new HuggingFaceTokenCountEstimator();
         this.chatMemory = TokenWindowChatMemory.builder()
@@ -198,6 +205,21 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
         } else {
             streamChat = updateAiService(AiServices.builder(StreamChat.class)).build();
         }
+        streamCompleted(new TokenStreamImpl(Collections.emptyIterator()));
+    }
+
+    void streamCompleted(net.microfalx.heimdall.llm.api.TokenStream tokenStream) {
+        inputTokenCount.addAndGet(tokenStream.getInputTokenCount());
+        outputTokenCount.addAndGet(tokenStream.getOutputTokenCount());
+        StringBuilder builder = new StringBuilder();
+        addDefinitionList(builder, "Model", model.getName() + " (" + model.getProvider().getName() + ")");
+        addDefinitionList(builder, "Tokens", "_Input_: " + inputTokenCount.get(),
+                "_Output_: " + outputTokenCount.get());
+        setDescription(builder.toString());
+    }
+
+    private void initializePrincipal() {
+        principal = SecurityContext.get().getPrincipal();
     }
 
     private <T> AiServices<T> updateAiService(AiServices<T> aiService) {
@@ -213,6 +235,14 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
             throw new IllegalStateException("No chat model has been set");
         }
         return aiService;
+    }
+
+    private void addDefinitionList(StringBuilder builder, String term, String... descriptions) {
+        builder.append(term).append("\n");
+        for (String description : descriptions) {
+            builder.append(": ").append(description).append("\n");
+        }
+        builder.append("\n");
     }
 
     public interface SimpleChat {

@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.llm.api;
 
+import net.microfalx.lang.Descriptable;
 import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.Nameable;
 
@@ -11,7 +12,7 @@ import java.util.Collection;
 /**
  * An interface for representing a chat session with an AI model.
  */
-public interface Chat extends Identifiable<String>, Nameable {
+public interface Chat extends Identifiable<String>, Nameable, Descriptable {
 
     /**
      * Returns the prompt used to start a chat session.
@@ -54,6 +55,12 @@ public interface Chat extends Identifiable<String>, Nameable {
      * @return a non-null instance
      */
     Duration getDuration();
+
+    /**
+     * Returns the system message that provides context or instructions for the chat session.
+     * @return a non-null instance
+     */
+    Message getSystemMessage();
 
     /**
      * Returns the messages exchanged in the chat.

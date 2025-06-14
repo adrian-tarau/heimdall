@@ -17,6 +17,17 @@
     color: rgba(var(--bs-body-color-rgb), 0.9);
 }
 
+.llm-chat-intro {
+    max-width: 900px !important;
+    padding: 10px;
+    overflow: auto;
+}
+
+.llm-chat-info {
+
+}
+
+
 .llm-chat-messages {
     max-width: 900px !important;
     height: 100%;

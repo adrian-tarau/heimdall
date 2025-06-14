@@ -4,6 +4,7 @@ import net.microfalx.heimdall.llm.api.FinishReason;
 import net.microfalx.heimdall.llm.api.Message;
 import net.microfalx.heimdall.llm.api.TokenStream;
 import net.microfalx.lang.ExceptionUtils;
+import net.microfalx.lang.NumberUtils;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -40,13 +41,13 @@ public abstract class AbstractTokenStream implements TokenStream {
     }
 
     @Override
-    public final Integer getInputTokenCount() {
-        return inputTokenCount;
+    public final int getInputTokenCount() {
+        return (int) NumberUtils.toNumber(inputTokenCount, 0);
     }
 
     @Override
-    public final Integer getOutputTokenCount() {
-        return outputTokenCount;
+    public final int getOutputTokenCount() {
+        return (int) NumberUtils.toNumber(outputTokenCount, 0);
     }
 
     protected final void raiseIfError() {

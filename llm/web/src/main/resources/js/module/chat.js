@@ -29,7 +29,9 @@ Chat.loadModal = function (path, params, options) {
 /**
  * Returns the current chat ID.
  *
- * @param {String} chatId the chat identifier
+ * If the chatId is not provided, it will try to find the last chat element in the DOM.
+ *
+ * @param {String} [chatId] the chat identifier
  * @return {String} the identifier
  */
 Chat.getCurrent = function (chatId) {
@@ -38,6 +40,24 @@ Chat.getCurrent = function (chatId) {
     }
     if (Utils.isEmpty(chatId)) throw new Error("No chat is currently selected");
     return chatId;
+}
+
+/**
+ * Displays information about the model.
+ */
+Chat.showModel = function () {
+    Application.get("info/model/" + Chat.getCurrent(), {}, function (data) {
+        Application.loadModal(CHAT_MODAL_ID, data);
+    });
+}
+
+/**
+ * Displays information about the prommpt.
+ */
+Chat.showPrompt = function () {
+    Application.get("info/prompt/" + Chat.getCurrent(), {}, function (data) {
+        Application.loadModal(CHAT_MODAL_ID, data);
+    });
 }
 
 /**
@@ -80,3 +100,6 @@ Chat.receive = function (chatId, target) {
         textElement.html(html);
     });
 }
+
+Application.bind("chat.model", Chat.showModel);
+Application.bind("chat.prompt", Chat.showPrompt);

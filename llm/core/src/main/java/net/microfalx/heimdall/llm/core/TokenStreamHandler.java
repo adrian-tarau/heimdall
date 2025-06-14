@@ -75,6 +75,7 @@ class TokenStreamHandler extends AbstractTokenStream {
                 this.inputTokenCount = tokenUsage.inputTokenCount();
                 this.outputTokenCount = tokenUsage.outputTokenCount();
             }
+            chat.streamCompleted(this);
             completed.set(true);
         });
     }

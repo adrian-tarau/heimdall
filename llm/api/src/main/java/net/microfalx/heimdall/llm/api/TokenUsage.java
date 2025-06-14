@@ -10,13 +10,13 @@ public interface TokenUsage {
      *
      * @return the input token count, or null if unknown.
      */
-    Integer getInputTokenCount();
+    int getInputTokenCount();
 
     /**
      * Returns the output token count, or null if unknown.
      *
      * @return the output token count, or null if unknown.
      */
-    Integer getOutputTokenCount();
+    int getOutputTokenCount();
 
 }

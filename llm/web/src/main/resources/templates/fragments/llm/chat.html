@@ -1,9 +1,17 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:component="https://net.microfalx/component">
 <body>
 
+<span th:fragment="info">
+    <a href="#" data-bs-toggle="dropdown"
+       component:tooltip-text="Displays information about the current chat">
+                            <i class="fa-solid fa-circle-info page-header-icon"></i>
+                        </a>
+    <div th:replace="~{ fragments/component :: render-dropdown-menu(${chatInfoMenu},'')}"></div>
+</span>
+
 <div th:fragment="render-message-info(message)" class="llm-chat-infos clearfix">
-    <span class="llm-chat-name float-start" th:text="${#security.getName()}"></span>
+    <span class="llm-chat-name float-start" th:text="${chatTools.getUser(message)}"></span>
     <span class="llm-chat-timestamp float-end" th:text="${#formats.format(message.timestamp)}"></span>
 </div>
 

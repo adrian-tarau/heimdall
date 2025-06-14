@@ -9,11 +9,13 @@
                 <div class="d-flex justify-content-between">
                     <h3 id="dashboard-title" class="card-title fs-3" th:text="${chat.name}"></h3>
                     <div>
+                        <span th:replace="~{ fragments/llm/chat :: info}"></span>
                         <span th:replace="~{ fragments/page :: help}"></span>
                     </div>
                 </div>
             </div>
             <div class="card-body llm-chat" th:id="${chat.id}">
+                <div class="help llm-chat-intro mx-auto" th:utext="${chatIntro}"></div>
                 <div th:replace="~{ fragments/llm/chat :: render-messages(${chat})}"></div>
             </div>
             <div class="card-footer">
