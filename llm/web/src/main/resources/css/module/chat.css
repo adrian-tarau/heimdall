@@ -24,9 +24,14 @@
 }
 
 .llm-chat-info {
-
+    border-radius: 0.5rem;
+    position: relative;
+    padding: 5px 10px;
+    margin: 5px 0 0 5px;
+    color: var(--bs-emphasis-color);
+    background-color: var(--bs-secondary-bg);
+    border: 1px solid var(--bs-border-color);
 }
-
 
 .llm-chat-messages {
     max-width: 900px !important;

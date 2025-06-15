@@ -15,7 +15,7 @@
     <span class="llm-chat-timestamp float-end" th:text="${#formats.format(message.timestamp)}"></span>
 </div>
 
-<div th:fragment="render-message(message)" class="llm-chat-msg" th:classappend="${chatTools.getMessageCssClass(message)}">
+<div th:fragment="render-message(message)" class="llm-chat-msg help" th:classappend="${chatTools.getMessageCssClass(message)}">
     <div th:replace="~{ fragments/llm/chat :: render-message-info(${message})}"></div>
     <span class="llm-chat-img"><i th:class="${chatTools.getMessageImageCssClass(message)}"></i></span>
     <div class="llm-chat-text" th:utext="${chatTools.renderMessageText(message)}"></div>

@@ -13,10 +13,7 @@ import net.microfalx.bootstrap.search.SearchService;
 import net.microfalx.heimdall.llm.api.*;
 import net.microfalx.heimdall.llm.api.Chat;
 import net.microfalx.heimdall.llm.lucene.LuceneEmbeddingStore;
-import net.microfalx.lang.ClassUtils;
-import net.microfalx.lang.ExceptionUtils;
-import net.microfalx.lang.JvmUtils;
-import net.microfalx.lang.ObjectUtils;
+import net.microfalx.lang.*;
 import net.microfalx.threadpool.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -263,8 +261,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         registerProviders();
         initializeChatStore();
         initializeEmbeddingStore();
-        ThreadPool.get().execute(this::reload);
-        ThreadPool.get().execute(this::fireStartEvent);
+        initTask();
     }
 
     @PreDestroy
@@ -287,7 +284,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
      */
     void closeChat(Chat chat) {
         requireNonNull(chat);
-        activeChats.remove(chat);
+        activeChats.remove(chat.getId());
         closedChats.add(chat);
         llmPersistence.execute(chat);
     }
@@ -362,6 +359,13 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         }
     }
 
+    private void initTask() {
+        ThreadPool threadPool = ThreadPool.get();
+        threadPool.execute(this::reload);
+        threadPool.execute(this::fireStartEvent);
+        threadPool.scheduleAtFixedRate(new MaintenanceTask(), Duration.ofSeconds(60));
+    }
+
     private void fireStartEvent() {
         for (LlmListener listener : listeners) {
             try {
@@ -404,5 +408,27 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         System.setProperty("ENGINE_CACHE_DIR", validateDirectoryExists(new File(djlCache, "engine")).getAbsolutePath());
         System.setProperty("DJL_CACHE_DIR", validateDirectoryExists(new File(djlCache, "cache")).getAbsolutePath());
         System.setProperty("DJL_OFFLINE", Boolean.toString(properties.isOffline()));
+    }
+
+    private void processPendingChats() {
+        for (Chat chat : activeChats.values()) {
+            long lastActivity = ((AbstractChat) chat).lastActivity.get();
+            if (TimeUtils.millisSince(lastActivity) > properties.getChatTimeout().toMillis()) {
+                LOGGER.info("Closing chat {} due to inactivity", chat.getId());
+                chat.close();
+            }
+        }
+    }
+
+    class MaintenanceTask implements Runnable {
+
+        @Override
+        public void run() {
+            try {
+                processPendingChats();
+            } catch (Exception e) {
+                LOGGER.atError().setCause(e).log("Failed to process pending chats");
+            }
+        }
     }
 }

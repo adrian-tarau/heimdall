@@ -47,7 +47,12 @@ public class LlmProperties {
     /**
      * The duration that models stay loaded in memory (default "5m")
      */
-    private Duration interval = Duration.ofMinutes(5);
+    private Duration modelCache = Duration.ofMinutes(5);
+
+    /**
+     * The duration that a chat can stay active
+     */
+    private Duration chatTimeout = Duration.ofMinutes(15);
 
     /**
      * The default provider to use instead of the one selected.

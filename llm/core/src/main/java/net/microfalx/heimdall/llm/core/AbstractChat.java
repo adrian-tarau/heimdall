@@ -27,10 +27,12 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.FormatterUtils.formatNumber;
 
 /**
  * Base class for chat sessions.
@@ -45,8 +47,7 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
     private int tokenCount;
     private ChatModel chatModel;
     private StreamingChatModel streamingChatModel;
-
-    private Prompt prompt = Prompt.empty();
+    private Prompt prompt;
 
     private ChatMemory chatMemory;
     private SimpleChat chat;
@@ -55,6 +56,7 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
 
     private volatile Principal principal;
 
+    final AtomicLong lastActivity = new AtomicLong(System.currentTimeMillis());
     private final AtomicInteger inputTokenCount = new AtomicInteger();
     private final AtomicInteger outputTokenCount = new AtomicInteger();
 
@@ -173,10 +175,7 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
         if (chatModel == null && streamingChatModel == null) {
             throw new IllegalStateException("No chat model has been set");
         }
-    }
-
-    private void updateDescription() {
-
+        updateLastActivity();
     }
 
     @Override
@@ -196,7 +195,7 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
         initializePrincipal();
         this.service = service;
         HuggingFaceTokenCountEstimator tokenCountEstimator = new HuggingFaceTokenCountEstimator();
-        this.chatMemory = TokenWindowChatMemory.builder()
+        this.chatMemory = TokenWindowChatMemory.builder().id(getId())
                 .maxTokens(model.getMaximumContextLength(), tokenCountEstimator)
                 .chatMemoryStore(service.getChatStore())
                 .build();
@@ -213,8 +212,10 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
         outputTokenCount.addAndGet(tokenStream.getOutputTokenCount());
         StringBuilder builder = new StringBuilder();
         addDefinitionList(builder, "Model", model.getName() + " (" + model.getProvider().getName() + ")");
-        addDefinitionList(builder, "Tokens", "_Input_: " + inputTokenCount.get(),
-                "_Output_: " + outputTokenCount.get());
+        addDefinitionList(builder, "Tokens", "_Input_: " + inputTokenCount.get()
+                + ", _Output_: " + outputTokenCount.get() + ", _Total_: " + (inputTokenCount.get() + outputTokenCount.get()));
+        addDefinitionList(builder, "Parameters", "_Temperature_: " + formatNumber(model.getTemperature())
+                + ", _TopP_: " + model.getTopP() + ", _TopK_: " + model.getTopK());
         setDescription(builder.toString());
     }
 
@@ -243,6 +244,10 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
             builder.append(": ").append(description).append("\n");
         }
         builder.append("\n");
+    }
+
+    private void updateLastActivity() {
+        lastActivity.set(System.currentTimeMillis());
     }
 
     public interface SimpleChat {
