@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.ToString;
 import net.microfalx.bootstrap.help.HelpService;
 import net.microfalx.bootstrap.help.annotation.Help;
+import net.microfalx.bootstrap.security.SecurityContext;
 import net.microfalx.bootstrap.security.SecurityUtils;
 import net.microfalx.bootstrap.web.component.Item;
 import net.microfalx.bootstrap.web.component.Menu;
@@ -133,7 +134,9 @@ public class ChatController extends PageController {
     private void updateModel(Model model, net.microfalx.heimdall.llm.api.Chat chat) {
         requireNonNull(chat);
         updateHelp(model);
+        Collection<Chat> chats = llmService.getChats(SecurityContext.get().getPrincipal());
         model.addAttribute("chat", chat);
+        model.addAttribute("chats", chats);
         model.addAttribute("chatTools", new ChatTools(chat));
         updateMenu(model);
     }

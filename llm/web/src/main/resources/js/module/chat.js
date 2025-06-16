@@ -69,10 +69,12 @@ Chat.send = function (chatId) {
     let messageBox = $("#chat-message");
     let message = messageBox.text();
     messageBox.text("");
+    Chat._chatBody = null;
     if (Utils.isEmpty(message)) return;
     chatId = Chat.getCurrent(chatId);
     Application.post("question/" + chatId, {}, function (data) {
         $(".llm-chat-messages").append(data);
+        Chat.focus();
         let target = $('.llm-chat-messages .llm-chat-msg:last-child')
         Chat.receive(chatId, target);
     }, {
@@ -98,7 +100,18 @@ Chat.receive = function (chatId, target) {
         markdown += json.token;
         let html = marked.parse(markdown);
         textElement.html(html);
+        Chat.focus();
     });
+}
+
+/**
+ * Focuses the chat body, scrolling to the bottom.
+ */
+Chat.focus = function () {
+    if (!this._chatBody) {
+        this._chatBody = $(".llm-chat-body");
+    }
+    Chat._chatBody.scrollTop(this._chatBody[0].scrollHeight);
 }
 
 Application.bind("chat.model", Chat.showModel);

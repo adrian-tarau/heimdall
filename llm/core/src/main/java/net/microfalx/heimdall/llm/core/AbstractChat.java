@@ -42,12 +42,12 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractChat.class);
 
     private final Model model;
+    private final Prompt prompt;
     private final LocalDateTime startAt = LocalDateTime.now();
     private LocalDateTime finishAt;
     private int tokenCount;
     private ChatModel chatModel;
     private StreamingChatModel streamingChatModel;
-    private Prompt prompt;
 
     private ChatMemory chatMemory;
     private SimpleChat chat;
@@ -154,6 +154,11 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
             String[] parts = StringUtils.split(answer, " ");
             return new TokenStreamImpl(Arrays.asList(parts).iterator());
         }
+    }
+
+    public void updateName(String name) {
+        requireNonNull(name);
+        setName(name);
     }
 
     public final AbstractChat setChatModel(ChatModel chatModel) {

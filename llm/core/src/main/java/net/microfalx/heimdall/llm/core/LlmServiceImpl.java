@@ -22,11 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.security.Principal;
 import java.time.Duration;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -105,6 +103,16 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         activeChats.put(toIdentifier(chat.getId()), chat);
         if (chat instanceof AbstractChat abstractChat) abstractChat.initialize(this);
         return chat;
+    }
+
+    @Override
+    public Collection<Chat> getChats(Principal principal) {
+        requireNonNull(principal);
+        Collection<Chat> chats = new ArrayList<>();
+        activeChats.values().forEach(chat -> {
+            if (principal.equals(chat.getUser())) chats.add(chat);
+        });
+        return chats;
     }
 
     @Override

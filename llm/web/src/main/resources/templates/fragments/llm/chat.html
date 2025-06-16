@@ -36,5 +36,9 @@
     </div>
 </div>
 
+<div th:fragment="render-chats(chats, activeChat)" class="list-group">
+    <a href="#" class="list-group-item list-group-item-action" th:classappend="${#bootstrap.getActiveClass(chat, activeChat)}" th:each="chat : ${chats}" th:text="${chat.name}"></a>
+</div>
+
 </body>
 </html>

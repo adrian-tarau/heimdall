@@ -1,8 +1,18 @@
 
-.llm-chat .card-body {
-    position: relative;
+.llm-chat {
+    /*position: relative;*/
     padding: 0;
     overflow-x: hidden;
+}
+
+.llm-chat-body {
+    max-height: 500px;
+    overflow-y: scroll;
+}
+
+.llm-chat-list {
+    max-height: 500px;
+    overflow-y: scroll;
 }
 
 .llm-chat.chat-pane-open .llm-chat-contacts {
@@ -35,10 +45,7 @@
 
 .llm-chat-messages {
     max-width: 900px !important;
-    height: 100%;
-    padding: 10px;
-    overflow: auto;
-    transform: translate(0, 0);
+    padding: 5px;
 }
 
 .llm-chat-input {

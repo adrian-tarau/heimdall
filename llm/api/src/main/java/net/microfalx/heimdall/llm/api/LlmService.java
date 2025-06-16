@@ -2,6 +2,7 @@ package net.microfalx.heimdall.llm.api;
 
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.Collection;
 
 /**
@@ -41,6 +42,14 @@ public interface LlmService {
      * @return a non-null instance
      */
     Chat createChat(Prompt prompt, Model model);
+
+    /**
+     * Returns the chat sessions for a given user.
+     *
+     * @param principal the user principal
+     * @return a non-null instance
+     */
+    Collection<Chat> getChats(Principal principal);
 
     /**
      * Returns a chat session with a given identifier.
