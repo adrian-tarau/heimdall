@@ -1,14 +1,20 @@
 package net.microfalx.heimdall.protocol.core.simulator;
 
+import net.microfalx.bootstrap.dsv.DsvDataSet;
 import net.microfalx.bootstrap.dsv.DsvField;
 import net.microfalx.bootstrap.dsv.DsvRecord;
 import net.microfalx.bootstrap.model.Metadata;
+import net.microfalx.lang.ExceptionUtils;
 import net.microfalx.resource.Resource;
-import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.util.Iterator;
 
+import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+
 public class DsvProtocolDataSet extends AbstractProtocolDataSet<DsvRecord, DsvField, String> {
+
+    private Iterator<DsvRecord> iterator;
 
     public DsvProtocolDataSet(Resource resource) {
         super(resource);
@@ -16,11 +22,28 @@ public class DsvProtocolDataSet extends AbstractProtocolDataSet<DsvRecord, DsvFi
 
     @Override
     public Metadata<DsvRecord, DsvField, String> getMetadata() {
-        return null;
+        try {
+            return getDsvDataSet().getMetadata();
+        } catch (Exception e) {
+            return ExceptionUtils.throwException(e);
+        }
     }
 
     @Override
-    public @NotNull Iterator<DsvRecord> iterator() {
-        return null;
+    public Iterator<DsvRecord> iterator() {
+        if (iterator == null) {
+            try {
+                DsvDataSet dsvDataSet = getDsvDataSet();
+                iterator = dsvDataSet.findAll().iterator();
+            } catch (Exception e) {
+                return ExceptionUtils.throwException(e);
+            }
+        }
+        return iterator;
+    }
+
+    private DsvDataSet getDsvDataSet() throws IOException {
+        requireNonNull(getResource());
+        return DsvDataSet.create(getResource());
     }
 }

@@ -5,21 +5,24 @@ import com.cloudbees.syslog.Severity;
 import net.datafaker.Faker;
 import net.microfalx.heimdall.protocol.core.Address;
 import net.microfalx.heimdall.protocol.core.Body;
+import net.microfalx.heimdall.protocol.core.simulator.ProtocolDataSetFactory;
 import net.microfalx.heimdall.protocol.core.simulator.ProtocolSimulator;
 import net.microfalx.heimdall.protocol.core.simulator.ProtocolSimulatorProperties;
 import net.microfalx.heimdall.protocol.gelf.GelfClient;
 import net.microfalx.heimdall.protocol.gelf.GelfEvent;
-import net.microfalx.heimdall.protocol.gelf.simulator.loghub.ZookeeperDataSet;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 
 @Component
 public class GelfSimulator extends ProtocolSimulator<GelfEvent, GelfClient> {
 
-    private GelfDataSet dataSet;
+    private Collection<GelfDataSet> dataSets;
+    private Iterator<GelfDataSet> nextDataSet;
 
     public GelfSimulator(ProtocolSimulatorProperties properties) {
         super(properties);
@@ -45,7 +48,7 @@ public class GelfSimulator extends ProtocolSimulator<GelfEvent, GelfClient> {
     protected void simulate(GelfClient client, Address sourceAddress, Address targetAddress, int index) throws IOException {
         GelfEvent event = new GelfEvent();
         if (shouldUseExternalDataSets()) {
-            getDataSet().update(event);
+            getDataSet().update(event, sourceAddress, targetAddress);
         } else {
             event.setBody(Body.create(getRandomText()));
             event.setGelfSeverity(getRandomEnum(Severity.class));
@@ -66,9 +69,22 @@ public class GelfSimulator extends ProtocolSimulator<GelfEvent, GelfClient> {
     }
 
     private GelfDataSet getDataSet() {
-        if (dataSet == null) {
-            dataSet = new ZookeeperDataSet.Factory().createDataSet();
+        if (dataSets == null) {
+            dataSets = new ArrayList<>();
+            Collection<ProtocolDataSetFactory> factories = ProtocolDataSetFactory.getFactories();
+            for (ProtocolDataSetFactory factory : factories) {
+                if (factory instanceof GelfDataSet.Factory) {
+                    dataSets.add(((GelfDataSet.Factory) factory).createDataSet());
+                }
+            }
         }
-        return dataSet;
+        if (nextDataSet == null || !nextDataSet.hasNext()) {
+            nextDataSet = dataSets.iterator();
+        }
+        if (nextDataSet.hasNext()) {
+            return nextDataSet.next();
+        } else {
+            throw new IllegalStateException("No more data sets available");
+        }
     }
 }
