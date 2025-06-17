@@ -24,6 +24,7 @@ public class ZookeeperDataSet extends GelfDataSet {
         event.setProcess(record.get("node"));
         event.setLogger(record.get("component"));
         event.setGelfSeverity(getSeverity(record.get("level")));
+        event.add("correlationalId", getCorrelationalId(record.get("EventId"), record.get("EventTemplate")));
     }
 
     @Provider

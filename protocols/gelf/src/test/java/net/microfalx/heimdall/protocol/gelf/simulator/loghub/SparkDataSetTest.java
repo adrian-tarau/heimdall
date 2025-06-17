@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class SparkDataSetTest {
 
@@ -24,11 +25,13 @@ class SparkDataSetTest {
         assertEquals(Severity.INFORMATIONAL, event1.getGelfSeverity());
         assertEquals("executor.CoarseGrainedExecutorBackend", event1.getLogger());
         assertEquals("Registered signal handlers for [TERM, HUP, INT]", event1.getBodyAsString());
+        assertNotNull(event1.get("correlationalId").getValue());
 
         GelfEvent event2 = new GelfEvent();
         dataSet.update(event2, Address.host("localhost"), Address.host("localhost"));
         assertEquals(Severity.INFORMATIONAL, event2.getGelfSeverity());
         assertEquals("spark.SecurityManager", event2.getLogger());
         assertEquals("Changing view acls to: yarn,curi", event2.getBodyAsString());
+        assertNotNull(event2.get("correlationalId").getValue());
     }
 }

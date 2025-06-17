@@ -21,6 +21,7 @@ public class ApacheDataSet extends GelfDataSet {
         event.addTarget(targetAddress);
         event.setBody(Body.create(record.get("content")));
         event.setGelfSeverity(getSeverity(record.get("level")));
+        event.add("correlationalId", getCorrelationalId(record.get("EventId"), record.get("EventTemplate")));
     }
 
     @Provider

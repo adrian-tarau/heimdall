@@ -5,6 +5,7 @@ import net.microfalx.heimdall.protocol.core.Address;
 import net.microfalx.heimdall.protocol.core.simulator.DsvProtocolDataSet;
 import net.microfalx.heimdall.protocol.core.simulator.DsvProtocolDataSetFactory;
 import net.microfalx.heimdall.protocol.gelf.GelfEvent;
+import net.microfalx.lang.Hashing;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.resource.Resource;
 
@@ -42,6 +43,21 @@ public abstract class GelfDataSet extends DsvProtocolDataSet {
             case "critical" -> Severity.CRITICAL;
             default -> Severity.INFORMATIONAL;
         };
+    }
+
+    /**
+     * Generates a correlational ID based on the event ID and event template.
+     *
+     * @param eventId       the event ID
+     * @param eventTemplate the event template
+     * @return a non-null instance
+     */
+    protected final String getCorrelationalId(String eventId, String eventTemplate) {
+        if (eventId == null && eventTemplate == null) return null;
+        Hashing hashing = Hashing.create();
+        hashing.update(eventId);
+        hashing.update(eventTemplate);
+        return hashing.asString();
     }
 
 

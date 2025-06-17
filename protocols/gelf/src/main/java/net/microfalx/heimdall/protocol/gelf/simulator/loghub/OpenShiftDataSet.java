@@ -23,6 +23,7 @@ public class OpenShiftDataSet extends GelfDataSet {
         event.setLogger(record.get("component"));
         event.setGelfSeverity(getSeverity(record.get("level")));
         event.add("pid", record.get("pid"));
+        event.add("correlationalId", getCorrelationalId(record.get("EventId"), record.get("EventTemplate")));
     }
 
     @Provider

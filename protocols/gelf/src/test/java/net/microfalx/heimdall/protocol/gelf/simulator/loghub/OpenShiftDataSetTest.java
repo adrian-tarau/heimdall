@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class OpenShiftDataSetTest {
 
@@ -25,6 +26,7 @@ class OpenShiftDataSetTest {
         assertEquals("nova.osapi_compute.wsgi.server", event1.getLogger());
         assertEquals("10.11.10.1 \"GET /v2/54fadb412c4e40cdbaed9335e4c35a9e/servers/detail HTTP/1.1\" status: 200 len: 1893 time: 0.2477829", event1.getBodyAsString());
         assertEquals("25746", event1.get("pid").asString());
+        assertNotNull(event1.get("correlationalId").getValue());
 
         GelfEvent event2 = new GelfEvent();
         dataSet.update(event2, Address.host("localhost"), Address.host("localhost"));
@@ -32,5 +34,6 @@ class OpenShiftDataSetTest {
         assertEquals("nova.osapi_compute.wsgi.server", event2.getLogger());
         assertEquals("10.11.10.1 \"GET /v2/54fadb412c4e40cdbaed9335e4c35a9e/servers/detail HTTP/1.1\" status: 200 len: 1893 time: 0.2577181", event2.getBodyAsString());
         assertEquals("25746", event2.get("pid").asString());
+        assertNotNull(event2.get("correlationalId").getValue());
     }
 }

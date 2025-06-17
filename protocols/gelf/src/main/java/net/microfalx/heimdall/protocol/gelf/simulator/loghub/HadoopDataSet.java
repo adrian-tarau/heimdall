@@ -23,6 +23,7 @@ public class HadoopDataSet extends GelfDataSet {
         event.setLogger(record.get("component"));
         event.setGelfSeverity(getSeverity(record.get("level")));
         event.add("process", record.get("process"));
+        event.add("correlationalId", getCorrelationalId(record.get("EventId"), record.get("EventTemplate")));
     }
 
     @Provider
