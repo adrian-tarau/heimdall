@@ -13,6 +13,7 @@ import lombok.Setter;
 import net.microfalx.bootstrap.search.Searcher;
 import net.microfalx.bootstrap.search.SearcherOptions;
 import net.microfalx.heimdall.llm.api.LlmException;
+import net.microfalx.lang.ExceptionUtils;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.UriUtils;
 import net.microfalx.resource.Resource;
@@ -21,6 +22,7 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.KnnFloatVectorField;
 import org.apache.lucene.document.StoredValue;
+import org.apache.lucene.index.IndexNotFoundException;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
@@ -29,10 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static net.microfalx.bootstrap.search.SearchUtils.SEARCH_METRICS;
 import static net.microfalx.heimdall.llm.lucene.LuceneFields.CONTENT_FIELD_NAME;
@@ -65,11 +64,21 @@ class LuceneContentRetriever implements ContentRetriever {
 
     public List<Content> retrieve(Query query, Embedding embedding) {
         requireNonNull(query);
+        if (!embeddingStore.isEnabled()) return Collections.emptyList();
         String queryText = query.text();
         org.apache.lucene.search.Query luceneQuery = buildQuery(queryText, embedding);
-        Searcher searcher = getSearcher(false);
-        TopFieldDocs topDocs = searcher.doWithSearcher("Query", s -> s.search(luceneQuery, queryParams.get().maxResults, RELEVANCE, true));
-        return extractContent(topDocs);
+        try {
+            Searcher searcher = getSearcher(false);
+            TopFieldDocs topDocs = searcher.doWithSearcher("Query", s -> s.search(luceneQuery, queryParams.get().maxResults, RELEVANCE, true));
+            return extractContent(topDocs);
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (rootCause instanceof IndexNotFoundException) {
+                return Collections.emptyList();
+            } else {
+                return ExceptionUtils.throwException(e);
+            }
+        }
     }
 
     private List<Content> extractContent(TopFieldDocs topDocs) {

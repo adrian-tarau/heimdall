@@ -1,5 +1,7 @@
 package net.microfalx.heimdall.llm.core;
 
+import dev.langchain4j.data.message.ChatMessage;
+import dev.langchain4j.data.message.ChatMessageSerializer;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import dev.langchain4j.store.memory.chat.InMemoryChatMemoryStore;
@@ -8,12 +10,15 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import net.microfalx.bootstrap.core.async.ThreadPoolFactory;
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
+import net.microfalx.bootstrap.resource.ResourceService;
 import net.microfalx.bootstrap.search.IndexService;
 import net.microfalx.bootstrap.search.SearchService;
 import net.microfalx.heimdall.llm.api.*;
-import net.microfalx.heimdall.llm.api.Chat;
 import net.microfalx.heimdall.llm.lucene.LuceneEmbeddingStore;
 import net.microfalx.lang.*;
+import net.microfalx.resource.Resource;
+import net.microfalx.resource.ResourceFactory;
+import net.microfalx.resource.rocksdb.RocksDbResource;
 import net.microfalx.threadpool.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,16 +27,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
 import java.security.Principal;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Collections.unmodifiableCollection;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.FileUtils.validateDirectoryExists;
 import static net.microfalx.lang.StringUtils.*;
+import static net.microfalx.lang.TimeUtils.millisSince;
 
 @Service
 public class LlmServiceImpl extends ApplicationContextSupport implements LlmService, InitializingBean {
@@ -44,6 +56,9 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     @Autowired
     private SearchService searchService;
 
+    @Autowired
+    private ResourceService resourceService;
+
     @Autowired(required = false)
     @Getter(AccessLevel.PROTECTED)
     private LlmProperties properties = new LlmProperties();
@@ -52,9 +67,9 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     private LuceneEmbeddingStore embeddingStore;
     private ContentRetriever contentRetriever;
     private ChatMemoryStore chatStore;
-    private volatile LlmCache cache = new LlmCache(null, this);
+    private volatile LlmCache cache = new LlmCache(this, null);
     private final Map<String, Tool> tools = new ConcurrentHashMap<>();
-    private final LlmPersistence llmPersistence = new LlmPersistence();
+    private final LlmPersistence persistence = new LlmPersistence(this);
     private final Collection<LlmListener> listeners = new CopyOnWriteArrayList<>();
     private final Collection<Provider.Factory> providerFactories = new CopyOnWriteArrayList<>();
     private final Map<String, net.microfalx.heimdall.llm.api.Chat> activeChats = new ConcurrentHashMap<>();
@@ -65,6 +80,9 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
 
     private ThreadPool chatPool;
     private ThreadPool embeddingPool;
+
+    private Resource chatsResource;
+    private static final Map<String, Long> lastAutoSave = new ConcurrentHashMap<>();
 
     public LlmServiceImpl() {
         // Workaround for classes not being loaded by Spring
@@ -233,7 +251,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     @Override
     public void reload() {
         if (!properties.isPersistenceEnabled()) return;
-        LlmCache cache = new LlmCache(this.cache, this);
+        LlmCache cache = new LlmCache(this, this.cache);
         cache.setApplicationContext(getApplicationContext());
         cache.load();
         this.defaultModel = null;
@@ -255,7 +273,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     public void registerPrompt(Prompt prompt) {
         requireNonNull(prompt);
         cache.registerPrompt(prompt);
-        llmPersistence.execute(prompt);
+        persistence.execute(prompt);
     }
 
     @Override
@@ -269,6 +287,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         registerProviders();
         initializeChatStore();
         initializeEmbeddingStore();
+        initResources();
         initTask();
     }
 
@@ -294,7 +313,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         requireNonNull(chat);
         activeChats.remove(chat.getId());
         closedChats.add(chat);
-        llmPersistence.execute(chat);
+        persistence.execute(chat);
     }
 
     /**
@@ -315,6 +334,23 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
             if (isNotEmpty(text)) break;
         }
         return isEmpty(text) ? originalText : text;
+    }
+
+    /**
+     * Stores the chat messages serialized in an external resource.
+     *
+     * @param chat the snapshot
+     * @return the resource where the snapshot was stored
+     * @throws IOException I/O exception if snapshot cannot be stored
+     */
+    Resource writeChatMessages(Chat chat) throws IOException {
+        Resource directory = chatsResource.resolve(DIRECTORY_DATE_FORMATTER.format(LocalDateTime.now()), Resource.Type.DIRECTORY);
+        Resource target = directory.resolve(String.format(FILE_NAME_FORMAT, getNextSequence()));
+        if (!directory.exists()) directory.create();
+        List<ChatMessage> messages = chatStore.getMessages(chat.getId());
+        String json = ChatMessageSerializer.messagesToJson(messages);
+        IOUtils.appendStream(target.getWriter(), new StringReader(json));
+        return target;
     }
 
     private void initDirectories() {
@@ -341,7 +377,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
 
     private void initializeEmbeddingStore() {
         this.embeddingStore = new LuceneEmbeddingStore(this, indexService, searchService)
-                .setThreadPool(getEmbeddingPool());
+                .setThreadPool(getEmbeddingPool()).setEnabled(properties.isEmbeddingEnabled());
         this.indexService.registerListener(this.embeddingStore);
         this.contentRetriever = this.embeddingStore.getContentRetriever();
     }
@@ -351,8 +387,25 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     }
 
     private void initializeApplicationContext() {
-        llmPersistence.setApplicationContext(getApplicationContext());
+        persistence.setApplicationContext(getApplicationContext());
         cache.setApplicationContext(getApplicationContext());
+    }
+
+    private void initResources() {
+        chatsResource = getSharedResource().resolve("chats", Resource.Type.DIRECTORY);
+        if (chatsResource.isLocal()) {
+            LOGGER.info("Chat messages are stored in a RocksDB database: {}", chatsResource);
+            Resource dbStatementsResource = RocksDbResource.create(chatsResource);
+            try {
+                dbStatementsResource.create();
+            } catch (IOException e) {
+                LOGGER.error("Failed to initialize statement store", e);
+                System.exit(10);
+            }
+            ResourceFactory.registerSymlink("db/statements", dbStatementsResource);
+        } else {
+            LOGGER.info("Database statements are stored in a remote storage: {}", chatsResource);
+        }
     }
 
     private void initThreadPools() {
@@ -363,7 +416,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     private void persistProvider(Provider provider) {
         if (!properties.isPersistenceEnabled()) return;
         for (Model model : provider.getModels()) {
-            llmPersistence.execute(model);
+            persistence.execute(model);
         }
     }
 
@@ -382,6 +435,10 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
                 LOGGER.atError().setCause(e).log("Failed to notify listener {}", ClassUtils.getName(listener));
             }
         }
+    }
+
+    private Resource getSharedResource() {
+        return resourceService.getShared("llm");
     }
 
     private void registerProviders() {
@@ -406,7 +463,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         try {
             Class.forName("net.microfalx.heimdall.llm.lucene.LuceneContentRetriever");
             Class.forName("net.microfalx.heimdall.llm.lucene.LuceneEmbeddingStore");
-        } catch (ClassNotFoundException e) {
+        } catch (Exception e) {
             ExceptionUtils.throwException(e);
         }
     }
@@ -421,11 +478,26 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     private void processPendingChats() {
         for (Chat chat : activeChats.values()) {
             long lastActivity = ((AbstractChat) chat).lastActivity.get();
-            if (TimeUtils.millisSince(lastActivity) > properties.getChatTimeout().toMillis()) {
+            long lastAutoSaveForChat = lastAutoSave.computeIfAbsent(chat.getId(), s -> TimeUtils.oneHourAgo());
+            if (millisSince(lastAutoSaveForChat) > properties.getChatAutoSaveInterval().toMillis()) {
+                persistence.execute(chat);
+                lastAutoSave.put(chat.getId(), System.currentTimeMillis());
+            }
+            if (millisSince(lastActivity) > properties.getChatTimeout().toMillis()) {
                 LOGGER.info("Closing chat {} due to inactivity", chat.getId());
                 chat.close();
             }
         }
+    }
+
+    private int getNextSequence() {
+        return resourceSequences.computeIfAbsent(LocalDate.now(), localDate -> {
+            int start = 1;
+            if (STARTUP.toLocalDate().equals(localDate)) {
+                start = STARTUP.toLocalTime().toSecondOfDay();
+            }
+            return new AtomicInteger(start);
+        }).getAndIncrement();
     }
 
     class MaintenanceTask implements Runnable {
@@ -439,4 +511,9 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
             }
         }
     }
+
+    private static final DateTimeFormatter DIRECTORY_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
+    private static final String FILE_NAME_FORMAT = "%09d";
+    private static final LocalDateTime STARTUP = LocalDateTime.now();
+    private static final Map<LocalDate, AtomicInteger> resourceSequences = new ConcurrentHashMap<>();
 }

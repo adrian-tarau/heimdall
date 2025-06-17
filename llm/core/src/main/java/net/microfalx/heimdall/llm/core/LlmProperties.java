@@ -55,6 +55,11 @@ public class LlmProperties {
     private Duration chatTimeout = Duration.ofMinutes(15);
 
     /**
+     * The interval to auto-save chat messages
+     */
+    private Duration chatAutoSaveInterval = Duration.ofSeconds(30);
+
+    /**
      * The default provider to use instead of the one selected.
      */
     private String defaultProvider;

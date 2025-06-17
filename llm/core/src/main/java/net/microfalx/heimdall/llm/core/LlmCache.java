@@ -35,9 +35,10 @@ public class LlmCache extends ApplicationContextSupport {
     private final Map<String, Provider> providers = new HashMap<>();
     private final Map<String, Prompt> prompts = new HashMap<>();
 
-    LlmCache(LlmCache oldCache, LlmServiceImpl llmService) {
-        this.oldCache = oldCache;
+    LlmCache(LlmServiceImpl llmService, LlmCache oldCache) {
+        requireNonNull(llmService);
         this.llmService = llmService;
+        this.oldCache = oldCache;
     }
 
     Map<String, Model> getModels() {

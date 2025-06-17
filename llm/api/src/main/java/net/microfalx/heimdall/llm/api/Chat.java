@@ -70,6 +70,13 @@ public interface Chat extends Identifiable<String>, Nameable, Descriptable {
     Collection<Message> getMessages();
 
     /**
+     * Returns the number of messages in the chat.
+     *
+     * @return a positive integer
+     */
+    int getMessageCount();
+
+    /**
      * Returns the content of the chat in text form.
      *
      * @return a non-null instance

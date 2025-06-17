@@ -51,6 +51,7 @@ public class LuceneEmbeddingStore implements IndexListener, EmbeddingStore<TextS
 
     private Indexer indexer;
     private ThreadPool threadPool;
+    private boolean enabled = false;
 
     private volatile LuceneContentRetriever contentRetriever;
 
@@ -73,14 +74,24 @@ public class LuceneEmbeddingStore implements IndexListener, EmbeddingStore<TextS
         return indexer;
     }
 
+    public boolean isEnabled() {
+        return enabled;
+    }
+
     public LuceneEmbeddingStore setThreadPool(ThreadPool threadPool) {
         this.threadPool = threadPool;
+        return this;
+    }
+
+    public LuceneEmbeddingStore setEnabled(boolean enabled) {
+        this.enabled = enabled;
         return this;
     }
 
     @Override
     public void afterIndexing(Collection<Document> documents) {
         requireNonNull(documents);
+        if (!enabled) return;
         for (Document document : documents) {
             getThreadPool().execute(() -> index(document));
         }

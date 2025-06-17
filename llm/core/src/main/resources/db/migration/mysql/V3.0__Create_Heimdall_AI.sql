@@ -46,18 +46,17 @@ create table llm_model
 
 create table llm_chat
 (
-    id                              int                 not null primary key auto_increment,
-    natural_id                      varchar(100)        not null,
+    id                              varchar(100)        not null primary key,
     user_id                         varchar(50)         not null,
     model_id                        int                 not null,
     name                            varchar(100)        not null,
     start_at                        datetime            not null,
     finish_at                       datetime,
-    content                         longtext            not null,
+    resource                        varchar(500)        not null,
     tags                            varchar(500),
     token_count                     int                 not null,
     duration                        int                 not null,
-    constraint nk$llm_chat$natural_id unique key (natural_id),
+    description                     varchar(1000),
     constraint fk$llm_chat$user_id foreign key (user_id) references security_users (username),
     constraint fk$llm_chat$model_id foreign key (model_id) references llm_model (id)
 ) ENGINE = InnoDB;

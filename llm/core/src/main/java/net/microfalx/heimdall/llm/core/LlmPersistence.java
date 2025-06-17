@@ -4,17 +4,26 @@ import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
 import net.microfalx.bootstrap.jdbc.jpa.NaturalIdEntityUpdater;
 import net.microfalx.bootstrap.jdbc.jpa.NaturalJpaRepository;
 import net.microfalx.bootstrap.model.MetadataService;
+import net.microfalx.heimdall.llm.api.LlmException;
 import net.microfalx.heimdall.llm.api.Model;
 import net.microfalx.heimdall.llm.api.Provider;
-import net.microfalx.heimdall.llm.core.jpa.ModelRepository;
-import net.microfalx.heimdall.llm.core.jpa.Prompt;
-import net.microfalx.heimdall.llm.core.jpa.PromptRepository;
-import net.microfalx.heimdall.llm.core.jpa.ProviderRepository;
+import net.microfalx.heimdall.llm.core.jpa.*;
 import net.microfalx.lang.CollectionUtils;
+import net.microfalx.resource.Resource;
 
+import java.io.IOException;
+
+import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.CollectionUtils.setToString;
 
-public class LlmPersistence extends ApplicationContextSupport {
+class LlmPersistence extends ApplicationContextSupport {
+
+    private LlmServiceImpl llmService;
+
+    public LlmPersistence(LlmServiceImpl llmService) {
+        requireNonNull(llmService);
+        this.llmService = llmService;
+    }
 
     net.microfalx.heimdall.llm.core.jpa.Provider execute(Provider provider) {
         NaturalIdEntityUpdater<net.microfalx.heimdall.llm.core.jpa.Provider, Integer> updater = getUpdater(ProviderRepository.class);
@@ -70,18 +79,25 @@ public class LlmPersistence extends ApplicationContextSupport {
     }
 
     void execute(net.microfalx.heimdall.llm.api.Chat chat) {
-        NaturalIdEntityUpdater<Chat, Integer> updater = getUpdater(ChatRepository.class);
+        if (chat.getMessageCount() == 0) return;
+        Resource resource;
+        try {
+            resource = llmService.writeChatMessages(chat);
+        } catch (IOException e) {
+            throw new LlmException("Failed to write chat messages for " + chat.getId(), e);
+        }
+        ChatRepository repository = getBean(ChatRepository.class);
         Chat jpaChat = new Chat();
+        jpaChat.setId(chat.getId());
         jpaChat.setModel(execute(chat.getModel()));
-        jpaChat.setNaturalId(chat.getId());
         jpaChat.setName(chat.getName());
-        jpaChat.setContent("");
+        jpaChat.setResource(resource.toURI().toASCIIString());
         jpaChat.setDuration(chat.getDuration());
         jpaChat.setUser(chat.getUser().getName());
         jpaChat.setFinishAt(chat.getFinishAt());
         jpaChat.setStartAt(chat.getStartAt());
         jpaChat.setTokenCount(chat.getTokenCount());
-        updater.findByNaturalIdAndUpdate(jpaChat);
+        repository.saveAndFlush(jpaChat);
     }
 
     void execute(net.microfalx.heimdall.llm.api.Prompt prompt) {

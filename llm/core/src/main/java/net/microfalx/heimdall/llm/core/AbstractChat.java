@@ -26,6 +26,7 @@ import java.security.Principal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
@@ -60,11 +61,13 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
     private final AtomicInteger inputTokenCount = new AtomicInteger();
     private final AtomicInteger outputTokenCount = new AtomicInteger();
 
+    private static final Map<String, AtomicInteger> CHAT_COUNTERS = new ConcurrentHashMap<>();
+
     public AbstractChat(Prompt prompt, Model model) {
         requireNonNull(prompt);
         requireNonNull(model);
         setId(UUID.randomUUID().toString());
-        setName("New Chat");
+        setName("Unnamed Chat");
         this.prompt = prompt;
         this.model = model;
     }
@@ -120,6 +123,11 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
         return chatMemory.messages().stream()
                 .map(MessageImpl::create)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public int getMessageCount() {
+        return chatMemory.messages().size();
     }
 
     @Override
@@ -226,6 +234,7 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
 
     private void initializePrincipal() {
         principal = SecurityContext.get().getPrincipal();
+        setName("Chat " + String.format("%03d", getNextChatIndex()));
     }
 
     private <T> AiServices<T> updateAiService(AiServices<T> aiService) {
@@ -253,6 +262,11 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
 
     private void updateLastActivity() {
         lastActivity.set(System.currentTimeMillis());
+    }
+
+    private int getNextChatIndex() {
+        AtomicInteger counter = CHAT_COUNTERS.computeIfAbsent(getUser().getName(), id -> new AtomicInteger(1));
+        return counter.getAndIncrement();
     }
 
     public interface SimpleChat {
