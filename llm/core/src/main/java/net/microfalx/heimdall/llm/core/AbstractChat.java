@@ -27,6 +27,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
@@ -42,11 +43,12 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractChat.class);
 
+    private static final String DEFAULT_NAME = "Unnamed Chat";
+
     private final Model model;
     private final Prompt prompt;
     private final LocalDateTime startAt = LocalDateTime.now();
     private LocalDateTime finishAt;
-    private int tokenCount;
     private ChatModel chatModel;
     private StreamingChatModel streamingChatModel;
 
@@ -60,6 +62,7 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
     final AtomicLong lastActivity = new AtomicLong(System.currentTimeMillis());
     private final AtomicInteger inputTokenCount = new AtomicInteger();
     private final AtomicInteger outputTokenCount = new AtomicInteger();
+    final AtomicBoolean changed = new AtomicBoolean();
 
     private static final Map<String, AtomicInteger> CHAT_COUNTERS = new ConcurrentHashMap<>();
 
@@ -67,7 +70,7 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
         requireNonNull(prompt);
         requireNonNull(model);
         setId(UUID.randomUUID().toString());
-        setName("Unnamed Chat");
+        setName(DEFAULT_NAME);
         this.prompt = prompt;
         this.model = model;
     }
@@ -104,7 +107,7 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
 
     @Override
     public int getTokenCount() {
-        return tokenCount;
+        return inputTokenCount.get() + outputTokenCount.get();
     }
 
     @Override
@@ -134,16 +137,13 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
     public String ask(String message) {
         validate();
         if (chatModel != null) {
-            String answer = chatModel.chat(message);
-            tokenCount = StringUtils.split(answer, " ").length;
-            return answer;
+            return chatModel.chat(message);
         } else {
             StringBuilder builder = new StringBuilder();
             Iterator<String> stream = chat(message);
             while (stream.hasNext()) {
                 String token = stream.next();
                 builder.append(token);
-                tokenCount++;
             }
             return builder.toString();
         }
@@ -208,7 +208,7 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
         initializePrincipal();
         this.service = service;
         HuggingFaceTokenCountEstimator tokenCountEstimator = new HuggingFaceTokenCountEstimator();
-        this.chatMemory = TokenWindowChatMemory.builder().id(getId())
+        this.chatMemory = TokenWindowChatMemory.builder().id("default")
                 .maxTokens(model.getMaximumContextLength(), tokenCountEstimator)
                 .chatMemoryStore(service.getChatStore())
                 .build();
@@ -230,11 +230,12 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
         addDefinitionList(builder, "Parameters", "_Temperature_: " + formatNumber(model.getTemperature())
                 + ", _TopP_: " + model.getTopP() + ", _TopK_: " + model.getTopK());
         setDescription(builder.toString());
+        changed.set(true);
     }
 
     private void initializePrincipal() {
         principal = SecurityContext.get().getPrincipal();
-        setName("Chat " + String.format("%03d", getNextChatIndex()));
+        setName(DEFAULT_NAME + String.format(" %03d", getNextChatIndex()));
     }
 
     private <T> AiServices<T> updateAiService(AiServices<T> aiService) {

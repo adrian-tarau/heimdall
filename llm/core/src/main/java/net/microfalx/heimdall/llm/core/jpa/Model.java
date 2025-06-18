@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
+import net.microfalx.bootstrap.jdbc.entity.surrogate.NamedAndTaggedAndTimestampedIdentityAware;
 import net.microfalx.heimdall.llm.api.ResponseFormat;
 import net.microfalx.lang.annotation.Name;
 import net.microfalx.lang.annotation.NaturalId;

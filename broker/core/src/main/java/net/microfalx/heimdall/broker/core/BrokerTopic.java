@@ -8,7 +8,7 @@ import lombok.ToString;
 import net.microfalx.bootstrap.broker.Topic;
 import net.microfalx.bootstrap.dataset.Alert;
 import net.microfalx.bootstrap.dataset.annotation.*;
-import net.microfalx.bootstrap.jdbc.entity.NamedAndTimestampedIdentityAware;
+import net.microfalx.bootstrap.jdbc.entity.surrogate.NamedAndTimestampedIdentityAware;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.lang.annotation.*;
 import net.microfalx.resource.MimeType;

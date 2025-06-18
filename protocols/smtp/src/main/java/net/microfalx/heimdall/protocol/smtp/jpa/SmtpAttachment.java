@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import net.microfalx.bootstrap.jdbc.entity.IdentityAware;
+import net.microfalx.bootstrap.jdbc.entity.surrogate.IdentityAware;
 import net.microfalx.heimdall.protocol.core.jpa.Part;
 import net.microfalx.lang.annotation.Description;
 import net.microfalx.lang.annotation.Position;

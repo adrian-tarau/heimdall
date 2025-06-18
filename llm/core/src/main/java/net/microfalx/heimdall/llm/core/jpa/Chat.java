@@ -3,7 +3,7 @@ package net.microfalx.heimdall.llm.core.jpa;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedIdentityAware;
+import net.microfalx.bootstrap.jdbc.entity.natural.NamedAndTaggedIdentityAware;
 import net.microfalx.bootstrap.jdbc.jpa.DurationConverter;
 import net.microfalx.lang.annotation.Name;
 

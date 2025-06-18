@@ -9,7 +9,7 @@ import lombok.ToString;
 import net.microfalx.bootstrap.dataset.Alert;
 import net.microfalx.bootstrap.dataset.annotation.*;
 import net.microfalx.bootstrap.dataset.lookup.TimeZoneLookup;
-import net.microfalx.bootstrap.jdbc.entity.NamedAndTimestampedIdentityAware;
+import net.microfalx.bootstrap.jdbc.entity.surrogate.NamedAndTimestampedIdentityAware;
 import net.microfalx.bootstrap.jdbc.jpa.EncryptAttributeConverter;
 import net.microfalx.bootstrap.jdbc.support.Node;
 import net.microfalx.bootstrap.model.Field;

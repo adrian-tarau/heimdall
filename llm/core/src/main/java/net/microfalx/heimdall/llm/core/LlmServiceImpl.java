@@ -39,6 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.unmodifiableCollection;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.FileUtils.validateDirectoryExists;
@@ -120,6 +121,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         net.microfalx.heimdall.llm.api.Chat chat = chatFactory.createChat(prompt, model);
         activeChats.put(toIdentifier(chat.getId()), chat);
         if (chat instanceof AbstractChat abstractChat) abstractChat.initialize(this);
+        ThreadPool.get().execute(() -> persistence.execute(chat));
         return chat;
     }
 
@@ -278,12 +280,12 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        initializeApplicationContext();
         registerLibraryPaths();
         initThreadPools();
         initDirectories();
         initListeners();
         initProviderFactories();
-        initializeApplicationContext();
         registerProviders();
         initializeChatStore();
         initializeEmbeddingStore();
@@ -478,10 +480,12 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     private void processPendingChats() {
         for (Chat chat : activeChats.values()) {
             long lastActivity = ((AbstractChat) chat).lastActivity.get();
+            boolean changed = ((AbstractChat) chat).changed.get();
             long lastAutoSaveForChat = lastAutoSave.computeIfAbsent(chat.getId(), s -> TimeUtils.oneHourAgo());
-            if (millisSince(lastAutoSaveForChat) > properties.getChatAutoSaveInterval().toMillis()) {
+            if (changed && millisSince(lastAutoSaveForChat) > properties.getChatAutoSaveInterval().toMillis()) {
                 persistence.execute(chat);
-                lastAutoSave.put(chat.getId(), System.currentTimeMillis());
+                lastAutoSave.put(chat.getId(), currentTimeMillis());
+                ((AbstractChat) chat).changed.set(false);
             }
             if (millisSince(lastActivity) > properties.getChatTimeout().toMillis()) {
                 LOGGER.info("Closing chat {} due to inactivity", chat.getId());

@@ -6,7 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.dataset.annotation.OrderBy;
-import net.microfalx.bootstrap.jdbc.entity.IdentityAware;
+import net.microfalx.bootstrap.jdbc.entity.surrogate.IdentityAware;
 import net.microfalx.bootstrap.jdbc.jpa.DurationConverter;
 import net.microfalx.heimdall.infrastructure.api.Status;
 import net.microfalx.heimdall.infrastructure.core.system.Server;

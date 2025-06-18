@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import net.microfalx.bootstrap.jdbc.entity.IdentityAware;
+import net.microfalx.bootstrap.jdbc.entity.surrogate.IdentityAware;
 import net.microfalx.lang.annotation.Name;
 import net.microfalx.lang.annotation.Position;
 import net.microfalx.resource.MimeType;

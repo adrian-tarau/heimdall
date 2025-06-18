@@ -10,7 +10,7 @@ import net.microfalx.bootstrap.dataset.annotation.Component;
 import net.microfalx.bootstrap.dataset.annotation.Filterable;
 import net.microfalx.bootstrap.dataset.annotation.Lookup;
 import net.microfalx.bootstrap.dataset.lookup.TimeZoneLookup;
-import net.microfalx.bootstrap.jdbc.entity.NamedAndTimestampedIdentityAware;
+import net.microfalx.bootstrap.jdbc.entity.surrogate.NamedAndTimestampedIdentityAware;
 import net.microfalx.lang.annotation.*;
 
 import java.time.ZoneId;

@@ -1,7 +1,7 @@
 package net.microfalx.heimdall.rest.core.common;
 
-import jakarta.persistence.Id;
 import jakarta.persistence.*;
+import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -9,7 +9,7 @@ import net.microfalx.bootstrap.dataset.annotation.Component;
 import net.microfalx.bootstrap.dataset.annotation.Filterable;
 import net.microfalx.bootstrap.dataset.annotation.Tab;
 import net.microfalx.bootstrap.dataset.annotation.Tabs;
-import net.microfalx.bootstrap.jdbc.entity.TimestampAware;
+import net.microfalx.bootstrap.jdbc.entity.surrogate.TimestampAware;
 import net.microfalx.heimdall.infrastructure.core.system.Environment;
 import net.microfalx.heimdall.rest.core.system.RestSimulation;
 import net.microfalx.lang.annotation.*;

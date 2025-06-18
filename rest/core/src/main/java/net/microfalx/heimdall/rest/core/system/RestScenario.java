@@ -7,7 +7,7 @@ import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.dataset.annotation.Tab;
 import net.microfalx.bootstrap.dataset.annotation.Tabs;
-import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
+import net.microfalx.bootstrap.jdbc.entity.surrogate.NamedAndTaggedAndTimestampedIdentityAware;
 import net.microfalx.bootstrap.jdbc.jpa.UpdateStrategy;
 import net.microfalx.lang.annotation.*;
 import org.hibernate.annotations.NaturalId;

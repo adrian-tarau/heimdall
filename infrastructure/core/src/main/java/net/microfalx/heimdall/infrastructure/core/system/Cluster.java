@@ -7,7 +7,7 @@ import lombok.ToString;
 import net.microfalx.bootstrap.dataset.annotation.Lookup;
 import net.microfalx.bootstrap.dataset.annotation.Tabs;
 import net.microfalx.bootstrap.dataset.lookup.TimeZoneLookup;
-import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
+import net.microfalx.bootstrap.jdbc.entity.surrogate.NamedAndTaggedAndTimestampedIdentityAware;
 import net.microfalx.heimdall.infrastructure.api.Server;
 import net.microfalx.lang.annotation.Description;
 import net.microfalx.lang.annotation.Name;

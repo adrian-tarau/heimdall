@@ -9,7 +9,7 @@ import net.microfalx.bootstrap.dataset.annotation.Lookup;
 import net.microfalx.bootstrap.dataset.annotation.Tab;
 import net.microfalx.bootstrap.dataset.annotation.Tabs;
 import net.microfalx.bootstrap.dataset.lookup.TimeZoneLookup;
-import net.microfalx.bootstrap.jdbc.entity.NamedAndTaggedAndTimestampedIdentityAware;
+import net.microfalx.bootstrap.jdbc.entity.surrogate.NamedAndTaggedAndTimestampedIdentityAware;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.annotation.*;
 import org.hibernate.annotations.NaturalId;

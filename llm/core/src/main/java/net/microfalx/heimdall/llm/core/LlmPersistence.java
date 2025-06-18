@@ -87,17 +87,20 @@ class LlmPersistence extends ApplicationContextSupport {
             throw new LlmException("Failed to write chat messages for " + chat.getId(), e);
         }
         ChatRepository repository = getBean(ChatRepository.class);
-        Chat jpaChat = new Chat();
-        jpaChat.setId(chat.getId());
-        jpaChat.setModel(execute(chat.getModel()));
+        Chat jpaChat = repository.findById(chat.getId()).orElse(null);
+        if (jpaChat == null) {
+            jpaChat = new Chat();
+            jpaChat.setId(chat.getId());
+            jpaChat.setModel(execute(chat.getModel()));
+            jpaChat.setUser(chat.getUser().getName());
+        }
         jpaChat.setName(chat.getName());
         jpaChat.setResource(resource.toURI().toASCIIString());
         jpaChat.setDuration(chat.getDuration());
-        jpaChat.setUser(chat.getUser().getName());
         jpaChat.setFinishAt(chat.getFinishAt());
         jpaChat.setStartAt(chat.getStartAt());
         jpaChat.setTokenCount(chat.getTokenCount());
-        repository.saveAndFlush(jpaChat);
+        repository.save(jpaChat);
     }
 
     void execute(net.microfalx.heimdall.llm.api.Prompt prompt) {
