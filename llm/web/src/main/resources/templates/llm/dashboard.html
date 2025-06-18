@@ -16,12 +16,12 @@
             </div>
             <div class="card-body llm-chat" th:id="${chat.id}">
                 <div class="container-fluid">
-                    <div class="row mt-2">
-                        <div class="col-9 llm-chat-body">
+                    <div class="row mt-2 gx-2">
+                        <div class="col-9 llm-chat-body hover-scroll">
                             <div class="help llm-chat-intro mx-auto" th:utext="${chatIntro}"></div>
                             <div th:replace="~{ fragments/llm/chat :: render-messages(${chat})}"></div>
                         </div>
-                        <div class="col-3 llm-chat-list">
+                        <div class="col-3 llm-chat-list hover-scroll border-start border-2">
                             <div th:replace="~{ fragments/llm/chat :: render-chats(${chats},${chat})}"></div>
                         </div>
                     </div>

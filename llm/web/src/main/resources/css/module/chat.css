@@ -1,17 +1,16 @@
 
 .llm-chat {
-    /*position: relative;*/
     padding: 0;
     overflow-x: hidden;
 }
 
 .llm-chat-body {
-    max-height: 500px;
+    max-height: 600px;
     overflow-y: scroll;
 }
 
 .llm-chat-list {
-    max-height: 500px;
+    max-height: 600px;
     overflow-y: scroll;
 }
 

@@ -14,7 +14,7 @@ const CHAT_MODAL_ID = "chat-modal";
  * @see DataSet.get
  */
 Chat.loadModal = function (path, params, options) {
-    let me = CodeEditor;
+    let me = Chat;
     Logger.info("Load dialog, path '" + path + "'");
     me.source = {
         path: path,
@@ -32,13 +32,15 @@ Chat.loadModal = function (path, params, options) {
  * If the chatId is not provided, it will try to find the last chat element in the DOM.
  *
  * @param {String} [chatId] the chat identifier
+ * @param {Boolean} [required=true] true if the identifier is required, false otherwise
  * @return {String} the identifier
  */
-Chat.getCurrent = function (chatId) {
+Chat.getCurrent = function (chatId, required) {
+    if (Utils.isUndefined(required)) required = true;
     if (Utils.isEmpty(chatId)) {
         chatId = $(".llm-chat").attr('id');
     }
-    if (Utils.isEmpty(chatId)) throw new Error("No chat is currently selected");
+    if (Utils.isEmpty(chatId) && required) throw new Error("No chat is currently selected");
     return chatId;
 }
 
@@ -61,22 +63,34 @@ Chat.showPrompt = function () {
 }
 
 /**
+ * Returns the message input element.
+ */
+Chat.getMessageInput = function () {
+    let messageInput = $("#chat-message");
+    if (messageInput.length === 0) {
+        throw new Error("Chat message input not found");
+    }
+    return messageInput;
+}
+
+/**
  * Sends the current chat message.
  *
- * @param {String} chatId the chat identifier
+ * @param {String} [chatId] the chat identifier
  */
 Chat.send = function (chatId) {
-    let messageBox = $("#chat-message");
-    let message = messageBox.text();
-    messageBox.text("");
-    Chat._chatBody = null;
+    let me = Chat;
+    let messageInput = me.getMessageInput();
+    let message = messageInput.text();
+    messageInput.text("");
+    me._chatBody = null;
     if (Utils.isEmpty(message)) return;
-    chatId = Chat.getCurrent(chatId);
+    chatId = me.getCurrent(chatId);
     Application.post("question/" + chatId, {}, function (data) {
         $(".llm-chat-messages").append(data);
-        Chat.focus();
+        me.focusMessage();
         let target = $('.llm-chat-messages .llm-chat-msg:last-child')
-        Chat.receive(chatId, target);
+        me.receive(chatId, target);
     }, {
         data: message,
         contentType: "text/plain"
@@ -91,7 +105,8 @@ Chat.send = function (chatId) {
  * @package {String|jQuery} target the target element to display the tokens
  */
 Chat.receive = function (chatId, target) {
-    chatId = Chat.getCurrent(chatId);
+    let me = Chat;
+    chatId = me.getCurrent(chatId);
     target = $(target);
     let textElement = target.find('.llm-chat-text');
     let markdown = "";
@@ -100,19 +115,45 @@ Chat.receive = function (chatId, target) {
         markdown += json.token;
         let html = marked.parse(markdown);
         textElement.html(html);
-        Chat.focus();
+        me.focusMessage();
     });
 }
 
 /**
  * Focuses the chat body, scrolling to the bottom.
  */
-Chat.focus = function () {
-    if (!this._chatBody) {
-        this._chatBody = $(".llm-chat-body");
+Chat.focusMessage = function () {
+    let me = Chat;
+    if (!me._chatBody) {
+        me._chatBody = $(".llm-chat-body");
     }
-    Chat._chatBody.scrollTop(this._chatBody[0].scrollHeight);
+    me._chatBody.scrollTop(me._chatBody[0].scrollHeight);
 }
 
+/**
+ * Focuses the chat input field.
+ */
+Chat.focusInput = function () {
+    let me = Chat;
+    me.getMessageInput().focus();
+}
+
+/**
+ * Initializes the chat module.
+ */
+Chat.start = function () {
+    let me = Chat;
+    if (me.getCurrent(null, false)) {
+        me.getMessageInput().keydown(function (e) {
+            if (e.keyCode === 13 && !e.shiftKey) {
+                e.preventDefault();
+                me.send();
+            }
+        });
+        me.focusInput();
+    }
+}
+
+Application.bind("start", Chat.start);
 Application.bind("chat.model", Chat.showModel);
 Application.bind("chat.prompt", Chat.showPrompt);
