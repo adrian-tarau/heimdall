@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
+import net.microfalx.bootstrap.dataset.DataSetRequest;
+import net.microfalx.bootstrap.dataset.DataSetService;
 import net.microfalx.bootstrap.help.HelpService;
 import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.security.SecurityContext;
@@ -52,16 +54,18 @@ public class ChatController extends PageController {
 
     @Autowired private HelpService helpService;
     @Autowired private LlmService llmService;
+    @Autowired private DataSetService dataSetService;
 
     @GetMapping("")
     public String start(Model model) {
-        return doStart(model, Prompt.empty(), Mode.DASHBOARD);
+        return doStart(model, Prompt.empty(), Mode.DASHBOARD, null);
     }
 
     @GetMapping("{id}")
-    public String start(Model model, @PathVariable("id") String promptId) {
+    public String start(Model model, @PathVariable("id") String promptId, @RequestParam("dataSet") String dataSet) {
         Prompt prompt = llmService.getPrompt(promptId);
-        return doStart(model, prompt, Mode.DIALOG);
+        DataSetRequest<?, ?, ?> request = dataSetService.getRequest(dataSet);
+        return doStart(model, prompt, Mode.DIALOG, request);
     }
 
     @GetMapping("info/model/{id}")
@@ -106,7 +110,7 @@ public class ChatController extends PageController {
         return emitter;
     }
 
-    private String doStart(Model model, Prompt prompt, Mode mode) {
+    private String doStart(Model model, Prompt prompt, Mode mode, DataSetRequest<?, ?, ?> request) {
         net.microfalx.heimdall.llm.api.Chat chat = llmService.createChat(prompt, llmService.getDefaultModel());
         updateModel(model, chat);
         updateIntro(model);
@@ -153,9 +157,9 @@ public class ChatController extends PageController {
 
     private void updateMenu(Model model) {
         Menu menu = new Menu();
-        menu.add(new Item().setAction("chat.model").setText("Model").setIcon("fa-solid fa-square-binary")
+        menu.add(new Item().setAction("chat.info.model").setText("Model").setIcon("fa-solid fa-square-binary")
                 .setDescription("Displays information about the model"));
-        menu.add(new Item().setAction("chat.prompt").setText("Prompt").setIcon("fa-solid fa-terminal")
+        menu.add(new Item().setAction("chat.info.prompt").setText("Prompt").setIcon("fa-solid fa-terminal")
                 .setDescription("Displays information about the prompt"));
         model.addAttribute("chatInfoMenu", menu);
     }

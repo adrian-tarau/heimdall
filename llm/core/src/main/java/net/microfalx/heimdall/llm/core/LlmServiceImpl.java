@@ -51,14 +51,11 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LlmService.class);
 
-    @Autowired
-    private IndexService indexService;
+    @Autowired private IndexService indexService;
+    @Autowired private SearchService searchService;
+    @Autowired private ResourceService resourceService;
 
-    @Autowired
-    private SearchService searchService;
-
-    @Autowired
-    private ResourceService resourceService;
+    @Autowired private LlmPersistence persistence;
 
     @Autowired(required = false)
     @Getter(AccessLevel.PROTECTED)
@@ -70,7 +67,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     private ChatMemoryStore chatStore;
     private volatile LlmCache cache = new LlmCache(this, null);
     private final Map<String, Tool> tools = new ConcurrentHashMap<>();
-    private final LlmPersistence persistence = new LlmPersistence(this);
+
     private final Collection<LlmListener> listeners = new CopyOnWriteArrayList<>();
     private final Collection<Provider.Factory> providerFactories = new CopyOnWriteArrayList<>();
     private final Map<String, net.microfalx.heimdall.llm.api.Chat> activeChats = new ConcurrentHashMap<>();
@@ -267,6 +264,22 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     }
 
     @Override
+    public Collection<Prompt> getPrompts(Collection<String> tags) {
+        Collection<Prompt> filteredPrompts = new ArrayList<>();
+        for (Prompt prompt : cache.getPrompts().values()) {
+            for (String tag : tags) {
+                if (prompt.getTags().contains(tag)) filteredPrompts.add(prompt);
+            }
+        }
+        return filteredPrompts;
+    }
+
+    @Override
+    public Collection<Prompt> getPrompts(String... tags) {
+        return getPrompts(Arrays.asList(tags));
+    }
+
+    @Override
     public Prompt getPrompt(String id) {
         return cache.getPrompt(id);
     }
@@ -389,6 +402,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     }
 
     private void initializeApplicationContext() {
+        persistence.llmService = this;
         persistence.setApplicationContext(getApplicationContext());
         cache.setApplicationContext(getApplicationContext());
     }

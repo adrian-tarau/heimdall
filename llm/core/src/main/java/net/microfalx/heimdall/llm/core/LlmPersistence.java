@@ -1,32 +1,44 @@
 package net.microfalx.heimdall.llm.core;
 
-import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
+import lombok.Getter;
+import net.microfalx.bootstrap.jdbc.jpa.JpaPersistence;
 import net.microfalx.bootstrap.jdbc.jpa.NaturalIdEntityUpdater;
-import net.microfalx.bootstrap.jdbc.jpa.NaturalJpaRepository;
-import net.microfalx.bootstrap.model.MetadataService;
 import net.microfalx.heimdall.llm.api.LlmException;
 import net.microfalx.heimdall.llm.api.Model;
 import net.microfalx.heimdall.llm.api.Provider;
 import net.microfalx.heimdall.llm.core.jpa.*;
 import net.microfalx.lang.CollectionUtils;
 import net.microfalx.resource.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.CollectionUtils.setToString;
 
-class LlmPersistence extends ApplicationContextSupport {
+@Component
+class LlmPersistence extends JpaPersistence {
 
-    private LlmServiceImpl llmService;
+    @Getter
+    @Autowired
+    private ProviderRepository providerRepository;
 
-    public LlmPersistence(LlmServiceImpl llmService) {
-        requireNonNull(llmService);
-        this.llmService = llmService;
-    }
+    @Getter
+    @Autowired
+    private ModelRepository modelRepository;
+
+    @Getter
+    @Autowired
+    private PromptRepository promptRepository;
+
+    @Getter
+    @Autowired
+    private ChatRepository chatRepository;
+
+    LlmServiceImpl llmService;
 
     net.microfalx.heimdall.llm.core.jpa.Provider execute(Provider provider) {
-        NaturalIdEntityUpdater<net.microfalx.heimdall.llm.core.jpa.Provider, Integer> updater = getUpdater(ProviderRepository.class);
+        NaturalIdEntityUpdater<net.microfalx.heimdall.llm.core.jpa.Provider, Integer> updater = getUpdater(providerRepository);
         net.microfalx.heimdall.llm.core.jpa.Provider jpaProvider = new net.microfalx.heimdall.llm.core.jpa.Provider();
         jpaProvider.setLicense(provider.getLicense());
         jpaProvider.setAuthor(provider.getAuthor());
@@ -46,7 +58,7 @@ class LlmPersistence extends ApplicationContextSupport {
     }
 
     net.microfalx.heimdall.llm.core.jpa.Model execute(Model model) {
-        NaturalIdEntityUpdater<net.microfalx.heimdall.llm.core.jpa.Model, Integer> updater = getUpdater(ModelRepository.class);
+        NaturalIdEntityUpdater<net.microfalx.heimdall.llm.core.jpa.Model, Integer> updater = getUpdater(modelRepository);
         net.microfalx.heimdall.llm.core.jpa.Model jpaModel = new net.microfalx.heimdall.llm.core.jpa.Model();
         jpaModel.setNaturalId(model.getId());
         jpaModel.setModelName(model.getModelName());
@@ -86,8 +98,7 @@ class LlmPersistence extends ApplicationContextSupport {
         } catch (IOException e) {
             throw new LlmException("Failed to write chat messages for " + chat.getId(), e);
         }
-        ChatRepository repository = getBean(ChatRepository.class);
-        Chat jpaChat = repository.findById(chat.getId()).orElse(null);
+        Chat jpaChat = chatRepository.findById(chat.getId()).orElse(null);
         if (jpaChat == null) {
             jpaChat = new Chat();
             jpaChat.setId(chat.getId());
@@ -100,11 +111,11 @@ class LlmPersistence extends ApplicationContextSupport {
         jpaChat.setFinishAt(chat.getFinishAt());
         jpaChat.setStartAt(chat.getStartAt());
         jpaChat.setTokenCount(chat.getTokenCount());
-        repository.save(jpaChat);
+        chatRepository.save(jpaChat);
     }
 
     void execute(net.microfalx.heimdall.llm.api.Prompt prompt) {
-        NaturalIdEntityUpdater<Prompt, Integer> updater = getUpdater(PromptRepository.class);
+        NaturalIdEntityUpdater<Prompt, Integer> updater = getUpdater(promptRepository);
         Prompt jpaPrompt = new Prompt();
         jpaPrompt.setNaturalId(prompt.getId());
         jpaPrompt.setName(prompt.getName());
@@ -121,11 +132,4 @@ class LlmPersistence extends ApplicationContextSupport {
         updater.findByNaturalIdAndUpdate(jpaPrompt);
     }
 
-
-    private <M, ID> NaturalIdEntityUpdater<M, ID> getUpdater(Class<? extends NaturalJpaRepository<M, ID>> repositoryClass) {
-        NaturalJpaRepository<M, ID> repository = getBean(repositoryClass);
-        NaturalIdEntityUpdater<M, ID> updater = new NaturalIdEntityUpdater<>(getBean(MetadataService.class), repository);
-        updater.setApplicationContext(getApplicationContext());
-        return updater;
-    }
 }

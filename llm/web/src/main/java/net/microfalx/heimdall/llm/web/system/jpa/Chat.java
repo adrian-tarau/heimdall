@@ -1,4 +1,4 @@
-package net.microfalx.heimdall.llm.web.system;
+package net.microfalx.heimdall.llm.web.system.jpa;
 
 import jakarta.persistence.*;
 import lombok.Getter;

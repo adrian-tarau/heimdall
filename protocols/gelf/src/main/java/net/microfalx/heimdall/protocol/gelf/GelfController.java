@@ -17,7 +17,7 @@ import static net.microfalx.bootstrap.model.AttributeUtils.shouldDisplayAsBadge;
 
 @Controller
 @RequestMapping("/protocol/gelf")
-@DataSet(model = GelfEvent.class, viewTemplate = "gelf/event_view", viewClasses = "modal-xl")
+@DataSet(model = GelfEvent.class, viewTemplate = "gelf/event_view", viewClasses = "modal-xl", tags = {"ai", "gelf"})
 @Help("protocol/gelf")
 public class GelfController extends ProtocolController<GelfEvent> {
 

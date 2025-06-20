@@ -4,6 +4,7 @@
 window.Chat = window.Chat || {};
 
 const CHAT_MODAL_ID = "chat-modal";
+const CHAT_PATH = "ai/chat/";
 
 /**
  * Loads a chat dialog
@@ -15,15 +16,26 @@ const CHAT_MODAL_ID = "chat-modal";
  */
 Chat.loadModal = function (path, params, options) {
     let me = Chat;
+    path = CHAT_PATH + path;
     Logger.info("Load dialog, path '" + path + "'");
-    me.source = {
-        path: path,
-        params: params,
-        options: options || {},
-    };
+    options = options || {};
+    options.self = false;
     Application.get(path, params, function (data) {
         me.modal = Application.loadModal(CHAT_MODAL_ID, data);
     }, options);
+}
+
+/**
+ * Starts a chat by asking a chat for a given prompt and data set.
+ *
+ * @param {String} prompt the prompt identifier
+ * @param {String} dataSet the data set request identifier
+ */
+Chat.prompt = function (prompt, dataSet) {
+    let me = Chat;
+    if (Utils.isEmpty(prompt)) throw new Error("Prompt is required");
+    if (Utils.isEmpty(dataSet)) throw new Error("DataSet is required");
+    me.loadModal(prompt, {dataSet: dataSet});
 }
 
 /**
@@ -48,18 +60,18 @@ Chat.getCurrent = function (chatId, required) {
  * Displays information about the model.
  */
 Chat.showModel = function () {
-    Application.get("info/model/" + Chat.getCurrent(), {}, function (data) {
+    Application.get(CHAT_PATH + "info/model/" + Chat.getCurrent(), {}, function (data) {
         Application.loadModal(CHAT_MODAL_ID, data);
-    });
+    }, {self: false});
 }
 
 /**
- * Displays information about the prommpt.
+ * Displays information about the prompt.
  */
 Chat.showPrompt = function () {
     Application.get("info/prompt/" + Chat.getCurrent(), {}, function (data) {
         Application.loadModal(CHAT_MODAL_ID, data);
-    });
+    }, {self: false});
 }
 
 /**
@@ -92,6 +104,7 @@ Chat.send = function (chatId) {
         let target = $('.llm-chat-messages .llm-chat-msg:last-child')
         me.receive(chatId, target);
     }, {
+        self: false,
         data: message,
         contentType: "text/plain"
     });
@@ -116,7 +129,7 @@ Chat.receive = function (chatId, target) {
         let html = marked.parse(markdown);
         textElement.html(html);
         me.focusMessage();
-    });
+    }, {}, {self: false});
 }
 
 /**
@@ -155,5 +168,6 @@ Chat.start = function () {
 }
 
 Application.bind("start", Chat.start);
-Application.bind("chat.model", Chat.showModel);
-Application.bind("chat.prompt", Chat.showPrompt);
+Application.bind("chat.prompt", Chat.prompt);
+Application.bind("chat.info.model", Chat.showModel);
+Application.bind("chat.info.prompt", Chat.showPrompt);

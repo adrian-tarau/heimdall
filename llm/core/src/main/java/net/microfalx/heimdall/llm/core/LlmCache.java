@@ -186,8 +186,8 @@ public class LlmCache extends ApplicationContextSupport {
     }
 
     private void loadPrompts() {
-        List<net.microfalx.heimdall.llm.core.jpa.Prompt> modelJpas = getBean(PromptRepository.class).findAll();
-        modelJpas.forEach(promptJpa -> {
+        List<net.microfalx.heimdall.llm.core.jpa.Prompt> promptJpas = getBean(PromptRepository.class).findAll();
+        promptJpas.forEach(promptJpa -> {
             Prompt.Builder builder = new Prompt.Builder()
                     .chainOfThought(promptJpa.isChainOfThought())
                     .context(promptJpa.getContext())
@@ -198,7 +198,8 @@ public class LlmCache extends ApplicationContextSupport {
                     .role(promptJpa.getRole())
                     .useOnlyContext(promptJpa.isUseOnlyContext());
             builder.tags(CollectionUtils.setFromString(promptJpa.getTags()))
-                    .name(promptJpa.getName()).description(promptJpa.getDescription());
+                    .name(promptJpa.getName()).description(promptJpa.getDescription())
+                    .id(promptJpa.getNaturalId());
             registerPrompt(builder.build());
         });
     }

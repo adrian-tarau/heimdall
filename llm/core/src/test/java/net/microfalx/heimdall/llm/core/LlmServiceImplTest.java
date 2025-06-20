@@ -6,7 +6,6 @@ import net.microfalx.bootstrap.search.SearchService;
 import net.microfalx.bootstrap.test.AbstractBootstrapServiceTestCase;
 import net.microfalx.bootstrap.test.answer.RepositoryAnswer;
 import net.microfalx.heimdall.llm.api.*;
-import net.microfalx.heimdall.llm.api.Chat;
 import net.microfalx.heimdall.llm.core.jpa.ModelRepository;
 import net.microfalx.heimdall.llm.core.jpa.ProviderRepository;
 import org.junit.jupiter.api.Test;

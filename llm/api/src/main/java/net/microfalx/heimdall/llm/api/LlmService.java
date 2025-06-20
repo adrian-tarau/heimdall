@@ -169,6 +169,20 @@ public interface LlmService {
     Collection<Prompt> getPrompts();
 
     /**
+     * Returns registered prompts which have at least one of the given tags.
+     *
+     * @return a non-null instance
+     */
+    Collection<Prompt> getPrompts(Collection<String> tags);
+
+    /**
+     * Returns registered prompts which have at least one of the given tags.
+     *
+     * @return a non-null instance
+     */
+    Collection<Prompt> getPrompts(String... tags);
+
+    /**
      * Returns a prompt with a given identifier.
      *
      * @param id the prompt identifier
