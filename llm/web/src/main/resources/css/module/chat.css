@@ -4,12 +4,28 @@
     overflow-x: hidden;
 }
 
+.llm-dashboard {
+
+}
+
+.llm-dialog {
+
+}
+
 .llm-chat-body {
+    min-height: 450px;
+}
+
+.llm-dashboard .llm-chat-body {
     height: 600px;
     overflow-y: scroll;
 }
 
 .llm-chat-list {
+    min-height: 450px;
+}
+
+.llm-dashboard .llm-chat-list {
     height: 600px;
     overflow-y: scroll;
 }

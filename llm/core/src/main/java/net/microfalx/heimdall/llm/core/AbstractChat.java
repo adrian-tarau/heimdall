@@ -27,6 +27,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -62,6 +63,7 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
     final AtomicLong lastActivity = new AtomicLong(System.currentTimeMillis());
     private final AtomicInteger inputTokenCount = new AtomicInteger();
     private final AtomicInteger outputTokenCount = new AtomicInteger();
+    private final Set<Object> features = new CopyOnWriteArraySet<>();
     final AtomicBoolean changed = new AtomicBoolean();
 
     private static final Map<String, AtomicInteger> CHAT_COUNTERS = new ConcurrentHashMap<>();
@@ -162,6 +164,22 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
             String[] parts = StringUtils.split(answer, " ");
             return new TokenStreamImpl(Arrays.asList(parts).iterator());
         }
+    }
+
+    @Override
+    public <F> void addFeature(F feature) {
+        if (feature != null) this.features.add(feature);
+    }
+
+    @Override
+    public <F> F getFeature(Class<F> featureType) {
+        requireNonNull(featureType);
+        for (Object feature : features) {
+            if (featureType.isInstance(feature)) {
+                return featureType.cast(feature);
+            }
+        }
+        return null;
     }
 
     public void updateName(String name) {
@@ -284,7 +302,7 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
 
         @Override
         public String apply(Object o) {
-            return service.getSystemMessage(model, prompt);
+            return service.getSystemMessage(AbstractChat.this);
         }
     }
 
@@ -294,21 +312,6 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
         public ToolProviderResult provideTools(ToolProviderRequest request) {
             ToolProviderResult result = new ToolProviderResult(Collections.emptyMap());
             return result;
-        }
-    }
-
-    private static class PrincipalImpl implements java.security.Principal {
-
-        private final String name;
-
-        public PrincipalImpl(String name) {
-            requireNonNull(name);
-            this.name = name;
-        }
-
-        @Override
-        public String getName() {
-            return name;
         }
     }
 }
