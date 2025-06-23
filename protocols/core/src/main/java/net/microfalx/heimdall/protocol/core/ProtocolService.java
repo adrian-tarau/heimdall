@@ -91,10 +91,10 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
     private PartRepository partRepository;
 
     @Autowired
-    private ProtocolSimulatorProperties simulatorProperties;
+    private ProtocolSimulatorProperties simulatorProperties = new ProtocolSimulatorProperties();
 
     @Autowired
-    private ProtocolProperties properties;
+    private ProtocolProperties properties = new ProtocolProperties();
 
     @Autowired
     private PlatformTransactionManager transactionManager;
@@ -405,6 +405,18 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
     }
 
     /**
+     * Returns whether the simulator is enabled.
+     * <p>
+     * Subclass implementations can override the global setting.
+     *
+     * @param enabled the global simulator enabled flag
+     * @return {@code false} if the simulator is not enabled, {@code true} if it is enabled
+     */
+    protected boolean isSimulatorEnabled(boolean enabled) {
+        return enabled;
+    }
+
+    /**
      * Persists the event part in the database.
      *
      * @param part the part
@@ -443,8 +455,8 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
     }
 
     private void initializeSimulator() {
-        if (!simulatorProperties.isEnabled()) return;
-        LOGGER.info("Simulator is enabled, interval {}", simulatorProperties.getInterval());
+        if (!isSimulatorEnabled(simulatorProperties.isEnabled())) return;
+        LOGGER.info("Simulator is enabled for {}, interval {}", getEventType(), simulatorProperties.getInterval());
         getThreadPool().scheduleAtFixedRate(new SimulatorWorker(), simulatorProperties.getInterval());
     }
 
@@ -592,9 +604,7 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
         @Override
         public void run() {
             ProtocolSimulator<E, ?> simulator = getSimulator();
-            if (simulator != null) {
-                simulator.simulate();
-            }
+            if (simulator != null) simulator.simulate();
         }
     }
 

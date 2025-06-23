@@ -266,7 +266,7 @@ public class MibService implements InitializingBean {
         String tokenIdLc = tokenId.toLowerCase();
         boolean registered = registeredModules.contains(tokenIdLc) || resolvedModules.contains(tokenIdLc);
         if (!registered && tokenIdLc.endsWith("mib")) {
-            tokenId = tokenIdLc.substring(0, tokenId.length() - 3);
+            tokenIdLc = tokenIdLc.substring(0, tokenId.length() - 3);
         }
         return registeredModules.contains(tokenIdLc) || resolvedModules.contains(tokenIdLc);
     }
@@ -300,9 +300,9 @@ public class MibService implements InitializingBean {
     }
 
     private void doRegisterMibs(Collection<Resource> resources, MibType type) {
-        LOGGER.info("Register " + formatNumber(resources.size()) + " MIBs, type " + type);
+        LOGGER.info("Register {} MIBs, type {}", formatNumber(resources.size()), type);
         for (Resource resource : resources) {
-            LOGGER.debug(" - " + resource.toURI());
+            LOGGER.debug(" - {}", resource.toURI());
             MibParser parser = new MibParser(resource, type);
             try {
                 MibModule module = parser.parse();
@@ -310,7 +310,7 @@ public class MibService implements InitializingBean {
                 persistMib(module);
                 registeredModules.add(module.getIdToken().toLowerCase());
             } catch (Exception e) {
-                LOGGER.error("Failed to register MIB from " + resource.toURI(), e);
+                LOGGER.atError().setCause(e).log("Failed to register MIB from {}", resource.toURI());
             }
         }
     }

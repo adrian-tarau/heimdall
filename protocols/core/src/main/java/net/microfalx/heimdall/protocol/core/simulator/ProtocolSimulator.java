@@ -89,7 +89,7 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
             try {
                 simulate(client, sourceAddress, targetAddress, i + 1);
             } catch (IOException e) {
-                LOGGER.warn("Failed to send simulated event to " + client.getHostName(), e);
+                LOGGER.atWarn().setCause(e).log("Failed to send simulated event to {}", client.getHostName());
             }
         }
     }

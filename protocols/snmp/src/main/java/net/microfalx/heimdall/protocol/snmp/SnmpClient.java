@@ -1,5 +1,7 @@
 package net.microfalx.heimdall.protocol.snmp;
 
+import lombok.Getter;
+import lombok.Setter;
 import net.microfalx.bootstrap.model.Attribute;
 import net.microfalx.heimdall.protocol.core.ProtocolClient;
 import net.microfalx.heimdall.protocol.core.ProtocolException;
@@ -22,43 +24,19 @@ public class SnmpClient extends ProtocolClient<SnmpEvent> {
     public static String DEFAULT_MESSAGE_OID = sysDescr.toDottedString();
 
     private static final long startTime = System.currentTimeMillis();
+
+    /**
+     * The SNMP version to be used.
+     */
+    @Setter
+    @Getter
     private int version = SnmpConstants.version2c;
     private String messageOid = DEFAULT_MESSAGE_OID;
+    private Snmp cachedSnmp;
 
     @Override
     protected int getDefaultPort() {
         return 162;
-    }
-
-    /**
-     * Returns the SNMP version to be used.
-     *
-     * @return the version
-     * @see SnmpConstants#version1
-     * @see SnmpConstants#version2c
-     * @see SnmpConstants#version3
-     */
-    public int getVersion() {
-        return version;
-    }
-
-    /**
-     * Changes the SNMP version to be sued
-     *
-     * @param version the version
-     * @see #getVersion()
-     */
-    public void setVersion(int version) {
-        this.version = version;
-    }
-
-    /**
-     * Returns the OID which carries the event message.
-     *
-     * @return a non-null instance
-     */
-    public String getMessageOid() {
-        return messageOid;
     }
 
     /**
@@ -77,7 +55,7 @@ public class SnmpClient extends ProtocolClient<SnmpEvent> {
         updateBindings(pdu, event);
         Target<IpAddress> target = updateVersionAndTarget(pdu, event);
 
-        Snmp snmp = new Snmp(getTransport() == Transport.UDP ? new DefaultUdpTransportMapping() : new DefaultTcpTransportMapping());
+        Snmp snmp = getSnmp();
         ResponseEvent<IpAddress> response = snmp.send(pdu, target);
         if (response != null && response.getResponse() == null && response.getResponse().getErrorStatus() != SNMP_ERROR_SUCCESS) {
             throw new ProtocolException("Failed to send SNMP trap to " + getHostName() + ", reason: " + response.getResponse().getErrorStatusText());
@@ -148,6 +126,13 @@ public class SnmpClient extends ProtocolClient<SnmpEvent> {
         } else {
             return new TcpAddress(getAddress(), getPort());
         }
+    }
+
+    private Snmp getSnmp() throws IOException {
+        if (cachedSnmp == null) {
+            cachedSnmp = new Snmp(getTransport() == Transport.UDP ? new DefaultUdpTransportMapping() : new DefaultTcpTransportMapping());
+        }
+        return cachedSnmp;
     }
 
     private int getSysUpTime() {

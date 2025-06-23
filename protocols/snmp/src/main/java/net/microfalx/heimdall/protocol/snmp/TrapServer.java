@@ -1,33 +1,20 @@
 package net.microfalx.heimdall.protocol.snmp;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import net.microfalx.bootstrap.model.Attribute;
 import net.microfalx.heimdall.protocol.core.Body;
-import net.microfalx.heimdall.protocol.core.ProtocolException;
 import net.microfalx.heimdall.protocol.snmp.mib.MibModule;
 import net.microfalx.heimdall.protocol.snmp.mib.MibService;
 import net.microfalx.heimdall.protocol.snmp.mib.MibVariable;
-import net.microfalx.lang.IOUtils;
-import net.microfalx.threadpool.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snmp4j.*;
-import org.snmp4j.mp.MPv1;
-import org.snmp4j.mp.MPv2c;
-import org.snmp4j.mp.MPv3;
-import org.snmp4j.security.SecurityModels;
-import org.snmp4j.security.SecurityProtocols;
-import org.snmp4j.security.USM;
+import org.snmp4j.CommandResponder;
+import org.snmp4j.CommandResponderEvent;
+import org.snmp4j.PDU;
 import org.snmp4j.smi.*;
-import org.snmp4j.transport.DefaultUdpTransportMapping;
-import org.snmp4j.util.MultiThreadedMessageDispatcher;
-import org.snmp4j.util.WorkerPool;
-import org.snmp4j.util.WorkerTask;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -39,33 +26,29 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static net.microfalx.heimdall.protocol.core.ProtocolConstants.MAX_NAME_LENGTH;
-import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.heimdall.protocol.snmp.SnmpUtils.describeAddress;
 import static net.microfalx.lang.StringUtils.append;
 import static org.apache.commons.lang3.StringUtils.abbreviate;
 
 @Component
-public class SnmpServer implements CommandResponder {
+public class TrapServer implements CommandResponder, InitializingBean {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SnmpServer.class);
-
-    @Autowired
-    private SnmpProperties configuration;
+    private static final Logger LOGGER = LoggerFactory.getLogger(TrapServer.class);
 
     @Autowired
     private SnmpService snmpService;
-
-    private MessageDispatcher messageDispatcher;
-    private Snmp snmpV2server;
-    private Snmp snmpV3server;
 
     @Autowired
     private MibService mibService;
 
     @Override
     public <A extends Address> void processPdu(CommandResponderEvent<A> event) {
+        if (event.getPDU().getType() != PDU.TRAP) return;
         event.setProcessed(true);
         PDU pdu = event.getPDU();
-        if (LOGGER.isDebugEnabled()) LOGGER.debug("Received trap from {}, PDU: {}", event.getPeerAddress(), pdu);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Received trap from {}, PDU: {}", describeAddress(event.getPeerAddress()), pdu);
+        }
         SnmpEvent snmpEvent = new SnmpEvent();
         for (VariableBinding variable : pdu.getVariableBindings()) {
             updateBindings(snmpEvent, variable);
@@ -75,60 +58,9 @@ public class SnmpServer implements CommandResponder {
         snmpService.accept(snmpEvent);
     }
 
-    @PostConstruct
-    protected void initialize() {
-        initializeV2Server();
-        initializeV3Server();
-    }
-
-    @PreDestroy
-    protected void destroy() {
-        if (snmpV2server != null) IOUtils.closeQuietly(snmpV2server);
-        if (snmpV3server != null) IOUtils.closeQuietly(snmpV3server);
-    }
-
-    private void initializeV2Server() {
-        initializeDispatcher();
-        try {
-            TransportMapping<UdpAddress> transport = new DefaultUdpTransportMapping(new UdpAddress("0.0.0.0/" + configuration.getUdpPort()));
-            snmpV2server = new Snmp(messageDispatcher);
-            snmpV2server.addTransportMapping(transport);
-            snmpV2server.addCommandResponder(this);
-            snmpV2server.listen();
-            LOGGER.info("Listen on " + transport.getListenAddress().getPort() + " SNMP v2");
-        } catch (IOException e) {
-            throw new ProtocolException("Failed to start SNMP server on " + configuration.getUdpPort(), e);
-        }
-    }
-
-    private void initializeV3Server() {
-        initializeDispatcher();
-        try {
-            TransportMapping<UdpAddress> transport = new DefaultUdpTransportMapping(new UdpAddress("0.0.0.0/" + (configuration.getUdpPort() + 1)));
-            snmpV3server = new Snmp(messageDispatcher);
-            byte[] localEngineID = MPv3.createLocalEngineID();
-            USM usm = new USM(SecurityProtocols.getInstance(), new OctetString(localEngineID), 0);
-            SecurityModels.getInstance().addSecurityModel(usm);
-            snmpV3server.setLocalEngine(localEngineID, 0, 0);
-            // TODO Add the configured user to the USM
-            snmpV3server.addTransportMapping(transport);
-            snmpV3server.addCommandResponder(this);
-            snmpV3server.listen();
-            LOGGER.info("Listen on " + transport.getListenAddress().getPort() + " SNMP v3");
-        } catch (IOException e) {
-            throw new ProtocolException("Failed to start SNMP server on " + configuration.getUdpPort(), e);
-        }
-    }
-
-    private void initializeDispatcher() {
-        if (messageDispatcher != null) return;
-        MessageDispatcher dispatcher = new MessageDispatcherImpl();
-        dispatcher.addCommandResponder(this);
-        dispatcher.addMessageProcessingModel(new MPv1());
-        dispatcher.addMessageProcessingModel(new MPv2c());
-        dispatcher.addMessageProcessingModel(new MPv3());
-        SecurityProtocols.getInstance().addDefaultProtocols();
-        messageDispatcher = new MultiThreadedMessageDispatcher(new WorkerPoolImpl(snmpService.getThreadPool()), dispatcher);
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        snmpService.getDispatcher().addCommandResponder(this);
     }
 
     private void updateCommonAttributes(SnmpEvent event, PDU pdu) {
@@ -242,47 +174,10 @@ public class SnmpServer implements CommandResponder {
         return false;
     }
 
-    static class WorkerPoolImpl implements WorkerPool {
-
-        private final ThreadPool threadPool;
-
-        WorkerPoolImpl(ThreadPool executor) {
-            requireNonNull(executor);
-            this.threadPool = executor;
-        }
-
-        @Override
-        public void execute(WorkerTask task) {
-            threadPool.execute(task);
-        }
-
-        @Override
-        public boolean tryToExecute(WorkerTask task) {
-            try {
-                threadPool.execute(task);
-                return true;
-            } catch (Exception e) {
-                return false;
-            }
-        }
-
-        @Override
-        public void stop() {
-        }
-
-        @Override
-        public void cancel() {
-        }
-
-        @Override
-        public boolean isIdle() {
-            return false;
-        }
-    }
-
     private static final Set<String> commonOidPrefixes = new HashSet<>();
 
     static {
+        SnmpLogger.init();
         commonOidPrefixes.add("1.3.6.1.2.1.1");
         commonOidPrefixes.add("1.3.6.1.6.3.1.1.4");
     }

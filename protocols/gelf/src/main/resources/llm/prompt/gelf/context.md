@@ -1,0 +1,1 @@
+Using only the following {{DATASET}} and using the schema {{SCHEMA}} please provide a detailed response based on the context provided and the question being asked.
