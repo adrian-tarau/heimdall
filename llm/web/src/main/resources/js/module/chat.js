@@ -4,10 +4,20 @@
 window.Chat = window.Chat || {};
 
 const CHAT_MODAL_ID = "chat-modal";
-const CHAT_PATH = "ai/chat/";
+const CHAT_PATH = "ai/chat";
 
 /**
- * Loads a chat dialog
+ * Returns the full controller path for a given relative path.
+ *
+ * @param {String} basePath the relative path
+ * @param {String} [pathParams] the relative path
+ */
+Chat.getPath = function (basePath, pathParams) {
+    return Utils.joinPaths(CHAT_PATH, basePath, pathParams);
+}
+
+/**
+ * Loads a chat dialog.
  *
  * @param {String} path the path
  * @param {Object} [params] the query parameters
@@ -16,26 +26,37 @@ const CHAT_PATH = "ai/chat/";
  */
 Chat.loadModal = function (path, params, options) {
     let me = Chat;
-    path = CHAT_PATH + path;
-    Logger.info("Load dialog, path '" + path + "'");
     options = options || {};
     options.self = false;
-    Application.get(path, params, function (data) {
+    Application.get(me.getPath(path), params, function (data) {
         me.modal = Application.loadModal(CHAT_MODAL_ID, data);
+        me.askDefaultQuestion();
     }, options);
 }
 
 /**
- * Starts a chat by asking a chat for a given prompt and data set.
+ * Starts a chat by asking for a chat session for a given prompt and data set.
+ *
+ * @param {String} model the model identifier
+ * @param {String} [prompt] the prompt identifier
+ */
+Chat.chat = function (model, prompt) {
+    let me = Chat;
+    if (Utils.isEmpty(prompt)) throw new Error("Prompt is required");
+    me.loadModal("chat/" + prompt, {model: model});
+}
+
+/**
+ * Starts a chat by asking for a chat session using the default model and using
+ * a given prompt and data set.
  *
  * @param {String} prompt the prompt identifier
- * @param {String} dataSet the data set request identifier
+ * @param {String} [dataSet] the data set request identifier
  */
 Chat.prompt = function (prompt, dataSet) {
     let me = Chat;
     if (Utils.isEmpty(prompt)) throw new Error("Prompt is required");
-    if (Utils.isEmpty(dataSet)) throw new Error("DataSet is required");
-    me.loadModal(prompt, {dataSet: dataSet});
+    me.loadModal("prompt/" + prompt, {dataSet: dataSet});
 }
 
 /**
@@ -60,7 +81,8 @@ Chat.getCurrent = function (chatId, required) {
  * Displays information about the model.
  */
 Chat.showModel = function () {
-    Application.get(CHAT_PATH + "info/model/" + Chat.getCurrent(), {}, function (data) {
+    let me = Chat;
+    Application.get(me.getPath("info/model", Chat.getCurrent()), {}, function (data) {
         Application.loadModal(CHAT_MODAL_ID, data);
     }, {self: false});
 }
@@ -69,8 +91,10 @@ Chat.showModel = function () {
  * Displays information about the prompt.
  */
 Chat.showPrompt = function () {
-    Application.get("info/prompt/" + Chat.getCurrent(), {}, function (data) {
+    let me = Chat;
+    Application.get(me.getPath("info/prompt", Chat.getCurrent()), {}, function (data) {
         Application.loadModal(CHAT_MODAL_ID, data);
+        me.start();
     }, {self: false});
 }
 
@@ -89,16 +113,19 @@ Chat.getMessageInput = function () {
  * Sends the current chat message.
  *
  * @param {String} [chatId] the chat identifier
+ * @param {String} [message] the chat identifier
  */
-Chat.send = function (chatId) {
+Chat.send = function (chatId, message) {
     let me = Chat;
-    let messageInput = me.getMessageInput();
-    let message = messageInput.text();
-    messageInput.text("");
+    if (Utils.isEmpty(message)) {
+        let messageInput = me.getMessageInput();
+        message = messageInput.text();
+        messageInput.text("");
+    }
     me._chatBody = null;
     if (Utils.isEmpty(message)) return;
     chatId = me.getCurrent(chatId);
-    Application.post("question/" + chatId, {}, function (data) {
+    Application.post(me.getPath("question", chatId), {}, function (data) {
         $(".llm-chat-messages").append(data);
         me.focusMessage();
         let target = $('.llm-chat-messages .llm-chat-msg:last-child')
@@ -115,7 +142,7 @@ Chat.send = function (chatId) {
  * Receives tokens from the server for a given chat.
  *
  * @param {String} chatId the chat identifier
- * @package {String|jQuery} target the target element to display the tokens
+ * @param {String|jQuery} target the target element to display the tokens
  */
 Chat.receive = function (chatId, target) {
     let me = Chat;
@@ -123,7 +150,7 @@ Chat.receive = function (chatId, target) {
     target = $(target);
     let textElement = target.find('.llm-chat-text');
     let markdown = "";
-    Application.Sse.start("tokens/" + chatId, function (data, event) {
+    Application.Sse.start(me.getPath("tokens", chatId), function (data, event) {
         let json = JSON.parse(data);
         markdown += json.token;
         let html = marked.parse(markdown);
@@ -149,6 +176,19 @@ Chat.focusMessage = function () {
 Chat.focusInput = function () {
     let me = Chat;
     me.getMessageInput().focus();
+}
+
+/**
+ * Fires the question defined in the body of the chat
+ */
+Chat.askDefaultQuestion = function () {
+    let me = Chat;
+    debugger
+    let questionElement = $(".llm-chat #chat-question");
+    if (questionElement.length === 0) return;
+    let question = questionElement.text().trim();
+    questionElement.remove();
+    me.send(null, question);
 }
 
 /**

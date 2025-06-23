@@ -3,10 +3,9 @@
 <body>
 
 <span th:fragment="info">
-    <a href="#" data-bs-toggle="dropdown"
-       component:tooltip-text="Displays information about the current chat">
-                            <i class="fa-solid fa-circle-info page-header-icon"></i>
-                        </a>
+    <a href="#" data-bs-toggle="dropdown" class="text-secondary icon-link" component:tooltip-text="Displays information about the current chat">
+        <i class="fa-solid fa-circle-info"></i>
+    </a>
     <div th:replace="~{ fragments/component :: render-dropdown-menu(${chatInfoMenu},'')}"></div>
 </span>
 

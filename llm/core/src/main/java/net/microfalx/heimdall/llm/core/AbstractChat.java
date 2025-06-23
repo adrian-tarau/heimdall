@@ -208,7 +208,7 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
         initializePrincipal();
         this.service = service;
         HuggingFaceTokenCountEstimator tokenCountEstimator = new HuggingFaceTokenCountEstimator();
-        this.chatMemory = TokenWindowChatMemory.builder().id("default")
+        this.chatMemory = TokenWindowChatMemory.builder().id(getId())
                 .maxTokens(model.getMaximumContextLength(), tokenCountEstimator)
                 .chatMemoryStore(service.getChatStore())
                 .build();

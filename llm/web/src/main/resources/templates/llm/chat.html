@@ -9,15 +9,33 @@
 </div>
 
 <div th:fragment="dialog" id="chat-modal" tabindex="-1"
-     th:class="|modal fade ${modalClasses}|" data-bs-backdrop="static" data-bs-keyboard="false">
+     class="modal fade modal-lg" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" th:text="${title}"></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-header pb-0">
+                <div class="d-flex w-100">
+                    <h5 class="modal-title flex-grow-1" th:text="${title}"></h5>
+                    <div class="p-2">
+                        <span th:replace="~{ fragments/llm/chat :: info}"></span>
+                        <span th:replace="~{ fragments/dialog :: header-separator}"></span>
+                        <span th:replace="~{ fragments/dialog :: header-close}"></span>
+                    </div>
+                </div>
             </div>
-            <div class="modal-body llm-chat">
-                <div class="llm-chat-info help" th:utext="${content}"></div>
+            <div class="modal-body llm-chat" th:id="${chat.id}">
+                <div class="container-fluid">
+                    <div class="row m-2">
+                        <div class="llm-chat-body hover-scroll">
+                            <div th:replace="~{ fragments/llm/chat :: render-messages(${chat})}"></div>
+                        </div>
+                    </div>
+                    <div class="row m-2">
+                        <div class="border-top-2">
+                            <div th:replace="~{ fragments/llm/chat :: render-input(${chat})}"></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="chat-question" class="d-none" th:utext="${question}"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary btn-sm dataset-btn-sm"

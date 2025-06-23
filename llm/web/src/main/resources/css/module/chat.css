@@ -5,12 +5,12 @@
 }
 
 .llm-chat-body {
-    max-height: 600px;
+    height: 600px;
     overflow-y: scroll;
 }
 
 .llm-chat-list {
-    max-height: 600px;
+    height: 600px;
     overflow-y: scroll;
 }
 

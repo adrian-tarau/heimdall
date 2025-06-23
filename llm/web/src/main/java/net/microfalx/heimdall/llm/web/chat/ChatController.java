@@ -16,6 +16,7 @@ import net.microfalx.bootstrap.web.controller.PageController;
 import net.microfalx.heimdall.llm.api.*;
 import net.microfalx.heimdall.llm.core.MessageImpl;
 import net.microfalx.lang.ExceptionUtils;
+import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.annotation.Name;
 import net.microfalx.resource.Resource;
 import net.microfalx.threadpool.ThreadPool;
@@ -40,6 +41,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static net.microfalx.heimdall.llm.core.LlmUtils.getChatThreadPool;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.StringUtils.EMPTY_STRING;
+import static net.microfalx.lang.StringUtils.isNotEmpty;
 import static net.microfalx.lang.ThreadUtils.sleepMillis;
 
 @Controller()
@@ -58,14 +60,28 @@ public class ChatController extends PageController {
 
     @GetMapping("")
     public String start(Model model) {
-        return doStart(model, Prompt.empty(), Mode.DASHBOARD, null);
+        return doStart(model, Prompt.empty(), Mode.DASHBOARD, null, null);
     }
 
-    @GetMapping("{id}")
-    public String start(Model model, @PathVariable("id") String promptId, @RequestParam("dataSet") String dataSet) {
+    @GetMapping("prompt/{id}")
+    public String startDefaultModel(Model model, @PathVariable("id") String promptId,
+                                    @RequestParam(value = "dataSet", required = false) String dataSetId) {
         Prompt prompt = llmService.getPrompt(promptId);
-        DataSetRequest<?, ?, ?> request = dataSetService.getRequest(dataSet);
-        return doStart(model, prompt, Mode.DIALOG, request);
+        model.addAttribute("title", prompt.getName());
+        model.addAttribute("question", renderMarkdown(prompt.getQuestion()));
+        DataSetRequest<?, ?, ?> request = getDataSetRequest(dataSetId);
+        return doStart(model, prompt, Mode.DIALOG, null, request);
+    }
+
+    @GetMapping("model/{id}")
+    public String startModel(Model model, @PathVariable("id") String modelId,
+                             @RequestParam(value = "prompt", required = false) String promptId,
+                             @RequestParam(value = "dataSet", required = false) String dataSetId) {
+        net.microfalx.heimdall.llm.api.Model chatModel = llmService.getModel(promptId);
+        model.addAttribute("title", chatModel.getName());
+        Prompt prompt = isNotEmpty(promptId) ? llmService.getPrompt(promptId) : Prompt.empty();
+        DataSetRequest<?, ?, ?> request = getDataSetRequest(dataSetId);
+        return doStart(model, prompt, Mode.DIALOG, chatModel, request);
     }
 
     @GetMapping("info/model/{id}")
@@ -78,7 +94,7 @@ public class ChatController extends PageController {
     }
 
     @GetMapping("info/prompt/{id}")
-    public String showPrompth(Model model, @PathVariable("id") String chatId) {
+    public String showPrompt(Model model, @PathVariable("id") String chatId) {
         net.microfalx.heimdall.llm.api.Chat chat = llmService.getChat(chatId);
         updateModel(model, chat);
         model.addAttribute("title", "Model");
@@ -87,7 +103,8 @@ public class ChatController extends PageController {
         return "llm/chat :: dialog";
     }
 
-    @PostMapping(value = "question/{id}", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.TEXT_HTML_VALUE)
+    @PostMapping(value = "question/{id}", consumes = MediaType.TEXT_PLAIN_VALUE,
+            produces = MediaType.TEXT_HTML_VALUE)
     public String question(Model model, @PathVariable("id") String chatId, @RequestBody String message) {
         net.microfalx.heimdall.llm.api.Chat chat = llmService.getChat(chatId);
         TokenStream stream = chat.chat(message);
@@ -110,16 +127,26 @@ public class ChatController extends PageController {
         return emitter;
     }
 
-    private String doStart(Model model, Prompt prompt, Mode mode, DataSetRequest<?, ?, ?> request) {
-        net.microfalx.heimdall.llm.api.Chat chat = llmService.createChat(prompt, llmService.getDefaultModel());
+    private String doStart(Model model, Prompt prompt, Mode mode, net.microfalx.heimdall.llm.api.Model chatModel,
+                           DataSetRequest<?, ?, ?> request) {
+        if (chatModel == null) chatModel = llmService.getDefaultModel();
+        net.microfalx.heimdall.llm.api.Chat chat = llmService.createChat(prompt, chatModel);
         updateModel(model, chat);
         updateIntro(model);
         model.addAttribute("mode", mode);
         if (mode == Mode.DASHBOARD) {
             return "llm/dashboard";
         } else {
-            return "llm/dialog";
+            return "llm/chat::dialog";
         }
+    }
+
+    private DataSetRequest<?, ?, ?> getDataSetRequest(String dataSetId) {
+        DataSetRequest<?, ?, ?> request = null;
+        if (StringUtils.isNotEmpty(dataSetId)) {
+            request = dataSetService.getRequest(dataSetId);
+        }
+        return request;
     }
 
     private String renderMarkdown(String text) {

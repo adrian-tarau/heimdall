@@ -4,6 +4,13 @@ import lombok.ToString;
 import net.microfalx.lang.IdentityAware;
 import net.microfalx.lang.NamedAndTaggedIdentifyAware;
 import net.microfalx.lang.StringUtils;
+import net.microfalx.resource.ClassPathResource;
+import net.microfalx.resource.Resource;
+
+import java.io.IOException;
+
+import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.StringUtils.isNotEmpty;
 
 /**
  * Represents a prompt in the LLM (Large Language Model) API.
@@ -45,7 +52,6 @@ public class Prompt extends NamedAndTaggedIdentifyAware<String> {
      * @param name the name of the prompt
      * @return a new instance of {@link Prompt} with the specified id and name
      */
-
     public static Builder create(String id, String name) {
         return (Builder) new Builder().name(name).id(id);
     }
@@ -208,6 +214,17 @@ public class Prompt extends NamedAndTaggedIdentifyAware<String> {
             return this;
         }
 
+        public Builder fromResources(String module) {
+            requireNonNull(module);
+            if (StringUtils.isEmpty(role)) role = loadResource(module, "role.md");
+            if (StringUtils.isEmpty(examples)) examples = loadResource(module, "examples.md");
+            if (StringUtils.isEmpty(context)) context = loadResource(module, "context.md");
+            if (StringUtils.isEmpty(question)) question = loadResource(module, "question.md");
+            updateIdWithModule(module);
+            tag(module);
+            return this;
+        }
+
         @Override
         protected IdentityAware<String> create() {
             return new Prompt();
@@ -225,6 +242,36 @@ public class Prompt extends NamedAndTaggedIdentifyAware<String> {
             prompt.chainOfThought = chainOfThought;
             prompt.useOnlyContext = useOnlyContext;
             return prompt;
+        }
+
+        private void updateIdWithModule(String module) {
+            id(module + "." + id());
+        }
+
+        private String getPath(String module, String extraPath) {
+            String path = "llm/prompt/";
+            if (isNotEmpty(module)) path += module + "/";
+            if (isNotEmpty(extraPath)) path += extraPath + "/";
+            return path;
+        }
+
+        private String loadResource(String module, String fileName) {
+            String path = getPath(module, id());
+            try {
+                Resource resource = ClassPathResource.file(path + fileName);
+                if (resource.exists()) {
+                    return resource.loadAsString();
+                } else {
+                    path = getPath(module, null);
+                    resource = ClassPathResource.file(path + fileName);
+                    if (resource.exists()) {
+                        return resource.loadAsString();
+                    }
+                }
+            } catch (IOException e) {
+                return "Error: failed to load resource " + path + " - " + e.getMessage();
+            }
+            return null;
         }
     }
 }
