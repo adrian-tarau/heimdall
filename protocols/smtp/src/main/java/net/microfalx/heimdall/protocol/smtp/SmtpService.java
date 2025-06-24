@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Properties;
 
+import static net.microfalx.heimdall.protocol.core.ProtocolConstants.MAX_NAME_LENGTH;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.StringUtils.isNotEmpty;
 
@@ -80,7 +81,7 @@ public final class SmtpService extends ProtocolService<SmtpEvent, net.microfalx.
         jpaSmtpEvent.setReceivedAt(smtpEvent.getReceivedAt().toLocalDateTime());
         Body messageBody = Body.create(smtpEvent.getResource().orElseThrow(), smtpEvent);
         jpaSmtpEvent.setMessage(persistPart(messageBody));
-        jpaSmtpEvent.setSubject(org.apache.commons.lang3.StringUtils.abbreviate(smtpEvent.getName(), 490));
+        jpaSmtpEvent.setSubject(org.apache.commons.lang3.StringUtils.abbreviate(smtpEvent.getName(), MAX_NAME_LENGTH));
         updateAddresses(smtpEvent, jpaSmtpEvent);
         List<SmtpAttachment> attachments = smtpEvent.getParts().stream().map(part -> {
             SmtpAttachment attachment = new SmtpAttachment();

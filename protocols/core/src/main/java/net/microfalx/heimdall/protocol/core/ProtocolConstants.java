@@ -5,6 +5,6 @@ package net.microfalx.heimdall.protocol.core;
  */
 public class ProtocolConstants {
 
-    public static final int MAX_NAME_LENGTH = 100;
+    public static final int MAX_NAME_LENGTH = 500;
     public static final int MAX_DESCRIPTION_LENGTH = 250;
 }

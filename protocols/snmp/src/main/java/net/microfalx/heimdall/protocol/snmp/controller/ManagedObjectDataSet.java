@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import static net.microfalx.heimdall.protocol.snmp.SnmpUtils.*;
-import static net.microfalx.lang.TextUtils.abbreviateMiddle;
 
 @Provider
 public class ManagedObjectDataSet extends MemoryDataSet<ManagedObject, PojoField<ManagedObject>, String> {
@@ -42,7 +41,7 @@ public class ManagedObjectDataSet extends MemoryDataSet<ManagedObject, PojoField
         amo.setId(getScopeID(mo.getScope()));
         amo.setName(getMoName(mo));
         amo.setType(describeMoType(mo));
-        amo.setValue(abbreviateMiddle(describeMoValue(mo, false), 60));
+        amo.setValue(describeMoValue(mo, false));
         updateTable(amo, mo);
         return amo;
     }

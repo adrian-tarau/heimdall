@@ -1,7 +1,7 @@
 create table protocol_addresses
 (
     id          integer                             not null auto_increment primary key,
-    name        varchar(100)                        not null,
+    name        varchar(200)                        not null,
     `type`      ENUM ('EMAIL', 'HOSTNAME', 'OTHER') not null,
     `value`     varchar(500)                        not null,
     created_at  datetime                            not null,
@@ -15,7 +15,7 @@ create table protocol_parts
 (
     id         integer                                    not null auto_increment primary key,
     type       ENUM ('BODY', 'ATTACHMENT')                not null,
-    name       varchar(100),
+    name       varchar(500),
     file_name  varchar(200),
     length     integer                                    not null,
     mime_type  ENUM ('TEXT_PLAIN','TEXT_CSS','TEXT_JAVASCRIPT','TEXT_HTML','TEXT_XML','TEXT'

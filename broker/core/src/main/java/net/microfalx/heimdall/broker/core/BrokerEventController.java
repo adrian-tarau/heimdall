@@ -8,7 +8,6 @@ import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.model.Attributes;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.web.dataset.DataSetController;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,7 +31,7 @@ public class BrokerEventController extends DataSetController<BrokerEvent, Intege
     protected void beforeBrowse(net.microfalx.bootstrap.dataset.DataSet<BrokerEvent, Field<BrokerEvent>, Integer> dataSet, Model controllerModel, BrokerEvent dataSetModel) {
         super.beforeBrowse(dataSet, controllerModel, dataSetModel);
         if (dataSetModel != null) {
-            dataSetModel.setEventName(StringUtils.abbreviate(net.microfalx.lang.StringUtils.removeLineBreaks(dataSetModel.getEventName()), 50));
+            dataSetModel.setEventName(net.microfalx.lang.StringUtils.removeLineBreaks(dataSetModel.getEventName()));
         }
     }
 

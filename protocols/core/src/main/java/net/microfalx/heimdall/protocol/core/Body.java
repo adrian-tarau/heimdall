@@ -1,11 +1,9 @@
 package net.microfalx.heimdall.protocol.core;
 
-import net.microfalx.lang.StringUtils;
 import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.MimeType;
 import net.microfalx.resource.Resource;
 
-import static net.microfalx.heimdall.protocol.core.ProtocolConstants.MAX_NAME_LENGTH;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
 /**
@@ -42,7 +40,7 @@ public class Body extends AbstractPart {
     public static Body create(String text) {
         Body body = new Body();
         body.setResource(MemoryResource.create(text).withMimeType(MimeType.TEXT_PLAIN));
-        body.setName(org.apache.commons.lang3.StringUtils.abbreviate(StringUtils.removeLineBreaks(text), MAX_NAME_LENGTH));
+        body.setName(text);
         return body;
     }
 

@@ -28,6 +28,7 @@ public class SmtpEvent extends Event {
     @Name
     @Position(1)
     @Description("The subject in the email")
+    @Width("30%")
     private String subject;
 
     @ManyToOne

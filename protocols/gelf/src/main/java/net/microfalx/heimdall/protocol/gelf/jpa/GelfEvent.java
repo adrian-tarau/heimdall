@@ -37,6 +37,7 @@ public class GelfEvent extends Event {
     @Label("Message")
     @Description("The short version of the log event")
     @Filterable
+    @Width("30%")
     private Part shortMessage;
 
     @JoinColumn(name = "long_message_id")
@@ -73,6 +74,7 @@ public class GelfEvent extends Event {
     @Column(name = "logger_name", nullable = false)
     @Position(27)
     @Description("Identify the logger which logged of the log event")
+    @Width("20%")
     private String logger;
 
     @Column(name = "thread_name", nullable = false)
