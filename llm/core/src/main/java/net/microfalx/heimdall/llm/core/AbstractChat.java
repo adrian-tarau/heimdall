@@ -59,6 +59,7 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
     private LlmServiceImpl service;
 
     private volatile Principal principal;
+    private volatile String systemMessage;
 
     final AtomicLong lastActivity = new AtomicLong(System.currentTimeMillis());
     private final AtomicInteger inputTokenCount = new AtomicInteger();
@@ -242,7 +243,8 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
         inputTokenCount.addAndGet(tokenStream.getInputTokenCount());
         outputTokenCount.addAndGet(tokenStream.getOutputTokenCount());
         StringBuilder builder = new StringBuilder();
-        addDefinitionList(builder, "Model", model.getName() + " (" + model.getProvider().getName() + ")");
+        addDefinitionList(builder, "Model", model.getName() + " (" + model.getProvider().getName()
+                + "), content length: " + model.getMaximumContextLength());
         addDefinitionList(builder, "Tokens", "_Input_: " + inputTokenCount.get()
                 + ", _Output_: " + outputTokenCount.get() + ", _Total_: " + (inputTokenCount.get() + outputTokenCount.get()));
         addDefinitionList(builder, "Parameters", "_Temperature_: " + formatNumber(model.getTemperature())
@@ -302,7 +304,10 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
 
         @Override
         public String apply(Object o) {
-            return service.getSystemMessage(AbstractChat.this);
+            if (systemMessage == null) {
+                systemMessage = service.getSystemMessage(AbstractChat.this);
+            }
+            return systemMessage;
         }
     }
 

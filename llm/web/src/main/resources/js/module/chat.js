@@ -32,7 +32,7 @@ Chat.loadModal = function (id, path, params, options) {
     options.self = false;
     Application.get(me.getPath(path), params, function (data) {
         me.modal = Application.loadModal(id, data);
-        me.askDefaultQuestion();
+        me.askDefaultQuestion(id);
     }, options);
 }
 
@@ -117,13 +117,17 @@ Chat.getMessageInput = function () {
  * @param {String} [chatId] the chat identifier
  * @param {String} [message] the chat identifier
  */
-Chat.send = function (chatId, message) {
+Chat.send = function (chatId, message, options) {
     let me = Chat;
     if (Utils.isEmpty(message)) {
         let messageInput = me.getMessageInput();
         message = messageInput.text();
         messageInput.text("");
     }
+    options = options || {};
+    options.self = false;
+    options.data = message;
+    options.contentType = "text/plain";
     me._chatBody = null;
     if (Utils.isEmpty(message)) return;
     chatId = me.getCurrent(chatId);
@@ -132,11 +136,7 @@ Chat.send = function (chatId, message) {
         me.focusMessage();
         let target = $('.llm-chat-messages .llm-chat-msg:last-child')
         me.receive(chatId, target);
-    }, {
-        self: false,
-        data: message,
-        contentType: "text/plain"
-    });
+    }, options);
 
 }
 
@@ -183,13 +183,13 @@ Chat.focusInput = function () {
 /**
  * Fires the question defined in the body of the chat
  */
-Chat.askDefaultQuestion = function () {
+Chat.askDefaultQuestion = function (id) {
     let me = Chat;
     let questionElement = $(".llm-chat #chat-question");
     if (questionElement.length === 0) return;
     let question = questionElement.text().trim();
     questionElement.remove();
-    me.send(null, question);
+    me.send(null, question, {mask: "#" + id, maskMessage: "Loading chat..."});
 }
 
 /**

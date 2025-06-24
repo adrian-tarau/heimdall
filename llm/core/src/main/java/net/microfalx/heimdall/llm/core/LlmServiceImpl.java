@@ -250,7 +250,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     public String getSystemMessage(Chat chat) {
         SystemMessageBuilder builder = new SystemMessageBuilder(this, chat.getModel(), chat.getPrompt());
         Map<String, Object> variables = new HashMap<>();
-        variables.put("DATASET", getDataSetAsJson(chat));
+        getDataSetAsJson(chat, variables);
         return PromptTemplate.from(builder.build()).apply(variables).text();
     }
 
@@ -345,28 +345,36 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
      * @return the data set as a JSON string, never null
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    String getDataSetAsJson(Chat chat) {
+    void getDataSetAsJson(Chat chat, Map<String, Object> variables) {
         requireNonNull(chat);
-        String json = "{message = 'No data set found'}";
         Page page = null;
-        DataSetRequest dataSetRequest = chat.getFeature(DataSetRequest.class);
-        if (dataSetRequest != null) {
-            page = fireGetDataSet(chat, dataSetRequest);
+        DataSetRequest request = chat.getFeature(DataSetRequest.class);
+        if (request != null) {
+            page = fireGetDataSet(chat, request);
         }
+        update(chat, request, "SCHEMA", true, page, variables);
+        update(chat, request, "DATASET", false, page, variables);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private void update(Chat chat, DataSetRequest dataSetRequest, String name, boolean schema,
+                        Page page, Map<String, Object> variables) {
         Resource resource;
         if (page != null) {
-            DataSetExport<Object, Field<Object>, Object> dataSetExport = DataSetExport.create(DataSetExport.Format.JSON);
+            DataSetExport<Object, Field<Object>, Object> dataSetExport = DataSetExport.create(DataSetExport.Format.JSON)
+                    .setIncludeMetadata(schema).setIncludeData(!schema);
             resource = dataSetExport.export(dataSetRequest.getDataSet(), page);
         } else {
             LOGGER.warn("No data set found for chat {}", chat.getId());
-            resource = Resource.text(json);
+            resource = Resource.text(JSON_ERROR);
         }
+        String json = JSON_ERROR;
         try {
-            return resource.loadAsString();
+            json = resource.loadAsString();
         } catch (IOException e) {
             LOGGER.warn("Failed to load data set for chat {}", chat.getId());
-            return json;
         }
+        variables.put(name, json);
     }
 
     /**
@@ -583,6 +591,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         }
     }
 
+    private static final String JSON_ERROR = "{message = 'No data set found'}";
     private static final DateTimeFormatter DIRECTORY_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
     private static final String FILE_NAME_FORMAT = "%09d";
     private static final LocalDateTime STARTUP = LocalDateTime.now();
