@@ -1,1 +1,1 @@
-Please summarize the following logs in a few sentences.
+Please summarize the provided logs provided in a few sentences. Do not generate code. Read the content of the logs entries and extract the most important information. Focus on the main events, errors, or warnings that occurred, and provide a concise overview of the situation described in the logs.

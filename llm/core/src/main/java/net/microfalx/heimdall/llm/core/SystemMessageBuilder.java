@@ -40,23 +40,31 @@ class SystemMessageBuilder {
             if (isNotEmpty(properties.getDefaultGuidanceMessage())) {
                 LlmUtils.appendSentence(builder, properties.getDefaultGuidanceMessage());
             }
-            builder.append("\n");
+            newParagraph(builder);
         }
         if (isNotEmpty(prompt.getContext())) {
             String context = service.getPromptFragment(model, prompt, Prompt.Fragment.CONTEXT, prompt.getContext());
             if (isNotEmpty(context)) {
                 LlmUtils.appendSentence(builder, context).append("\n");
             }
+            newParagraph(builder);
         }
         if (isNotEmpty(prompt.getExamples())) {
             String context = service.getPromptFragment(model, prompt, Prompt.Fragment.EXAMPLES, prompt.getExamples());
             if (isNotEmpty(context)) {
                 LlmUtils.appendSentence(builder, context).append("\n");
             }
+            newParagraph(builder);
         }
         String promptText = builder.toString().trim();
         if (isEmpty(promptText)) promptText = properties.getDefaultRole();
         return promptText;
+    }
+
+    private void newParagraph(StringBuilder builder) {
+        if (!builder.isEmpty() && !builder.toString().endsWith("\n\n")) {
+            builder.append("\n\n");
+        }
     }
 
 

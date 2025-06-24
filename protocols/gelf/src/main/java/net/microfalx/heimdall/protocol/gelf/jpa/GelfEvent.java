@@ -43,7 +43,7 @@ public class GelfEvent extends Event {
     @OneToOne
     @Position(6)
     @Visible(modes = Visible.Mode.VIEW)
-    @Description("The full version of th emessage")
+    @Description("The full version of th message")
     @Filterable
     private Part longMessage;
 
