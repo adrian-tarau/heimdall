@@ -19,7 +19,7 @@ public abstract class AbstractEvent extends AbstractAttributes<Attribute> implem
     private String id = ULID.random();
     private String name;
     private Address source;
-    private Collection<Address> targets = new ArrayList<>();
+    private final Collection<Address> targets = new ArrayList<>();
     private final Type type;
     private Severity severity = Severity.INFO;
     private ZonedDateTime receivedAt;
@@ -27,7 +27,7 @@ public abstract class AbstractEvent extends AbstractAttributes<Attribute> implem
     private ZonedDateTime sentAt;
 
     private Resource resource;
-    private Collection<Part> parts = new ArrayList<>();
+    private final Collection<Part> parts = new ArrayList<>();
 
     public AbstractEvent(Type type) {
         requireNonNull(type);
@@ -47,6 +47,7 @@ public abstract class AbstractEvent extends AbstractAttributes<Attribute> implem
     }
 
     protected void setId(String id) {
+        requireNonNull(id);
         this.id = id;
     }
 

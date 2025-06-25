@@ -2,6 +2,7 @@ package net.microfalx.heimdall.llm.core;
 
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.ChatMessageSerializer;
+import dev.langchain4j.model.input.PromptTemplate;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import dev.langchain4j.store.memory.chat.InMemoryChatMemoryStore;
@@ -10,6 +11,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import net.microfalx.bootstrap.core.async.ThreadPoolFactory;
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
+import net.microfalx.bootstrap.dataset.DataSetExport;
+import net.microfalx.bootstrap.dataset.DataSetRequest;
+import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.resource.ResourceService;
 import net.microfalx.bootstrap.search.IndexService;
 import net.microfalx.bootstrap.search.SearchService;
@@ -24,6 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -238,13 +244,14 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     /**
      * Returns the final prompt text for the given model and prompt.
      *
-     * @param model  the model to use
-     * @param prompt the prompt to use
+     * @param chat  the chat to use
      * @return a non-null string
      */
-    public String getSystemMessage(Model model, Prompt prompt) {
-        SystemMessageBuilder builder = new SystemMessageBuilder(this, model, prompt);
-        return builder.build();
+    public String getSystemMessage(Chat chat) {
+        SystemMessageBuilder builder = new SystemMessageBuilder(this, chat.getModel(), chat.getPrompt());
+        Map<String, Object> variables = new HashMap<>();
+        getDataSetAsJson(chat, variables);
+        return PromptTemplate.from(builder.build()).apply(variables).text();
     }
 
     @Override
@@ -332,6 +339,45 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     }
 
     /**
+     * Returns any data set associated with the chat as a JSON string.
+     *
+     * @param chat the chat to get the data set from
+     * @return the data set as a JSON string, never null
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    void getDataSetAsJson(Chat chat, Map<String, Object> variables) {
+        requireNonNull(chat);
+        Page page = null;
+        DataSetRequest request = chat.getFeature(DataSetRequest.class);
+        if (request != null) {
+            page = fireGetDataSet(chat, request);
+        }
+        update(chat, request, "SCHEMA", true, page, variables);
+        update(chat, request, "DATASET", false, page, variables);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private void update(Chat chat, DataSetRequest dataSetRequest, String name, boolean schema,
+                        Page page, Map<String, Object> variables) {
+        Resource resource;
+        if (page != null) {
+            DataSetExport<Object, Field<Object>, Object> dataSetExport = DataSetExport.create(DataSetExport.Format.JSON)
+                    .setIncludeMetadata(schema).setIncludeData(!schema);
+            resource = dataSetExport.export(dataSetRequest.getDataSet(), page);
+        } else {
+            LOGGER.warn("No data set found for chat {}", chat.getId());
+            resource = Resource.text(JSON_ERROR);
+        }
+        String json = JSON_ERROR;
+        try {
+            json = resource.loadAsString();
+        } catch (IOException e) {
+            LOGGER.warn("Failed to load data set for chat {}", chat.getId());
+        }
+        variables.put(name, json);
+    }
+
+    /**
      * Returns a fragment of the prompt text.
      *
      * @param model    the model to use
@@ -377,6 +423,9 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         LOGGER.info("Register {} listeners", loadedListeners.size());
         for (LlmListener listener : loadedListeners) {
             LOGGER.debug(" - {}", ClassUtils.getName(loadedListeners));
+            if (listener instanceof ApplicationContextAware applicationContextAware) {
+                applicationContextAware.setApplicationContext(getApplicationContext());
+            }
             this.listeners.add(listener);
         }
     }
@@ -451,6 +500,18 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
                 LOGGER.atError().setCause(e).log("Failed to notify listener {}", ClassUtils.getName(listener));
             }
         }
+    }
+
+    private <M, F extends Field<M>, ID> Page<M> fireGetDataSet(Chat chat, DataSetRequest<M, F, ID> request) {
+        for (LlmListener listener : listeners) {
+            try {
+                Page<M> page = listener.getPage(chat, request);
+                if (page != null) return page;
+            } catch (Exception e) {
+                LOGGER.atError().setCause(e).log("Failed to build data set result for {} with listener {}", chat.getName(), ClassUtils.getName(listener));
+            }
+        }
+        return null;
     }
 
     private Resource getSharedResource() {
@@ -530,6 +591,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         }
     }
 
+    private static final String JSON_ERROR = "{message = 'No data set found'}";
     private static final DateTimeFormatter DIRECTORY_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
     private static final String FILE_NAME_FORMAT = "%09d";
     private static final LocalDateTime STARTUP = LocalDateTime.now();

@@ -10,7 +10,7 @@
 
 <div th:fragment="dialog" id="chat-modal" tabindex="-1"
      class="modal fade modal-lg" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable llm-dialog hover-scroll">
         <div class="modal-content">
             <div class="modal-header pb-0">
                 <div class="d-flex w-100">
@@ -25,7 +25,7 @@
             <div class="modal-body llm-chat" th:id="${chat.id}">
                 <div class="container-fluid">
                     <div class="row m-2">
-                        <div class="llm-chat-body hover-scroll">
+                        <div class="llm-chat-body">
                             <div th:replace="~{ fragments/llm/chat :: render-messages(${chat})}"></div>
                         </div>
                     </div>
@@ -36,6 +36,25 @@
                     </div>
                 </div>
                 <div id="chat-question" class="d-none" th:utext="${question}"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm dataset-btn-sm"
+                        th:attr="onclick=|Application.closeModal()|">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:fragment="info" id="info-modal" tabindex="-1"
+     th:class="|modal fade ${modalClasses}|" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable llm-dialog hover-scroll">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" th:text="${title}"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body llm-chat">
+                <div class="llm-chat-info" th:utext="${content}"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary btn-sm dataset-btn-sm"

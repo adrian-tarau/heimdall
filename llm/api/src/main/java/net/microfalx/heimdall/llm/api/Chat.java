@@ -107,6 +107,25 @@ public interface Chat extends Identifiable<String>, Nameable, Descriptable {
     TokenStream chat(String message);
 
     /**
+     * Registers a feature with the chat session. Features can be used to add context to the chat session.
+     * <p>
+     * If the feature object is null or If the feature already exists, it will be ignored.
+     *
+     * @param feature the feature to add
+     * @param <F>     the feature type
+     */
+    <F> void addFeature(F feature);
+
+    /**
+     * Returns a feature of the specified type from the chat session.
+     *
+     * @param featureType the type of the feature to retrieve
+     * @param <F>         the feature type
+     * @return the feature of the specified type, or null if not found
+     */
+    <F> F getFeature(Class<F> featureType);
+
+    /**
      * Completes the chat session and records the chat in the history.
      */
     void close();

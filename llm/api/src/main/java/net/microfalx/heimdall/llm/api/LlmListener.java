@@ -1,5 +1,9 @@
 package net.microfalx.heimdall.llm.api;
 
+import net.microfalx.bootstrap.dataset.DataSetRequest;
+import net.microfalx.bootstrap.model.Field;
+import org.springframework.data.domain.Page;
+
 /**
  * A listener interface for {@link LlmService}.
  */
@@ -12,6 +16,17 @@ public interface LlmListener {
      */
     default void onStart(LlmService service) {
         // empty default implementation
+    }
+
+    /**
+     * Invoked when data is needed if a prompt.
+     *
+     * @param chat    the chat session
+     * @param request the data set request
+     * @return the page requested or null if no data is available
+     */
+    default <M, F extends Field<M>, ID> Page<M> getPage(Chat chat, DataSetRequest<M, F, ID> request) {
+        return null;
     }
 
     /**

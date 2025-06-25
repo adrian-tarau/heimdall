@@ -49,6 +49,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static net.microfalx.bootstrap.search.Document.*;
+import static net.microfalx.heimdall.protocol.core.ProtocolConstants.MAX_NAME_LENGTH;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
 import static net.microfalx.lang.StringUtils.*;
@@ -427,7 +428,7 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
             net.microfalx.heimdall.protocol.core.jpa.Part partJpa = new net.microfalx.heimdall.protocol.core.jpa.Part();
             partJpa.setType(part.getType());
             if (!NA_STRING.equals(part.getName())) {
-                partJpa.setName(org.apache.commons.lang3.StringUtils.abbreviate(part.getName(), 90));
+                partJpa.setName(org.apache.commons.lang3.StringUtils.abbreviate(part.getName(), MAX_NAME_LENGTH));
             }
             partJpa.setFileName(part.getFileName());
             if (part instanceof AbstractPart apart) {

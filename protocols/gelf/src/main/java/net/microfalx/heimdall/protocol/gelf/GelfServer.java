@@ -28,10 +28,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
-import static net.microfalx.heimdall.protocol.core.ProtocolConstants.MAX_NAME_LENGTH;
 import static net.microfalx.lang.IOUtils.appendStream;
 import static net.microfalx.lang.StringUtils.*;
-import static org.apache.commons.lang3.StringUtils.abbreviate;
 
 @Component
 public class GelfServer implements InitializingBean, ProtocolServerHandler {
@@ -145,7 +143,7 @@ public class GelfServer implements InitializingBean, ProtocolServerHandler {
         String host = net.microfalx.lang.StringUtils.defaultIfNull(getField(jsonNode, "host"), "0.0.0.0");
         GelfEvent message = new GelfEvent();
         message.setFacility(parseFacility(getField(jsonNode, "facility")));
-        message.setName(abbreviate(removeLineBreaks(shortMessage), MAX_NAME_LENGTH));
+        message.setName(removeLineBreaks(shortMessage));
         message.setReceivedAt(ZonedDateTime.now());
         message.setSource(Address.create(Address.Type.HOSTNAME, host));
         message.addPart(Body.create(shortMessage));

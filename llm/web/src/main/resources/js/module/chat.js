@@ -4,6 +4,7 @@
 window.Chat = window.Chat || {};
 
 const CHAT_MODAL_ID = "chat-modal";
+const INFO_MODAL_ID = "info-modal";
 const CHAT_PATH = "ai/chat";
 
 /**
@@ -19,18 +20,19 @@ Chat.getPath = function (basePath, pathParams) {
 /**
  * Loads a chat dialog.
  *
+ * @param {String} id the identifier of the modal
  * @param {String} path the path
  * @param {Object} [params] the query parameters
  * @param {Object} [options] an optional object, to control how parameters are calculated
  * @see DataSet.get
  */
-Chat.loadModal = function (path, params, options) {
+Chat.loadModal = function (id, path, params, options) {
     let me = Chat;
     options = options || {};
     options.self = false;
     Application.get(me.getPath(path), params, function (data) {
-        me.modal = Application.loadModal(CHAT_MODAL_ID, data);
-        me.askDefaultQuestion();
+        me.modal = Application.loadModal(id, data);
+        me.askDefaultQuestion(id);
     }, options);
 }
 
@@ -43,7 +45,7 @@ Chat.loadModal = function (path, params, options) {
 Chat.chat = function (model, prompt) {
     let me = Chat;
     if (Utils.isEmpty(prompt)) throw new Error("Prompt is required");
-    me.loadModal("chat/" + prompt, {model: model});
+    me.loadModal(CHAT_MODAL_ID, "chat/" + prompt, {model: model});
 }
 
 /**
@@ -56,7 +58,7 @@ Chat.chat = function (model, prompt) {
 Chat.prompt = function (prompt, dataSet) {
     let me = Chat;
     if (Utils.isEmpty(prompt)) throw new Error("Prompt is required");
-    me.loadModal("prompt/" + prompt, {dataSet: dataSet});
+    me.loadModal(CHAT_MODAL_ID, "prompt/" + prompt, {dataSet: dataSet});
 }
 
 /**
@@ -83,7 +85,7 @@ Chat.getCurrent = function (chatId, required) {
 Chat.showModel = function () {
     let me = Chat;
     Application.get(me.getPath("info/model", Chat.getCurrent()), {}, function (data) {
-        Application.loadModal(CHAT_MODAL_ID, data);
+        Application.loadModal(INFO_MODAL_ID, data);
     }, {self: false});
 }
 
@@ -93,7 +95,7 @@ Chat.showModel = function () {
 Chat.showPrompt = function () {
     let me = Chat;
     Application.get(me.getPath("info/prompt", Chat.getCurrent()), {}, function (data) {
-        Application.loadModal(CHAT_MODAL_ID, data);
+        Application.loadModal(INFO_MODAL_ID, data);
         me.start();
     }, {self: false});
 }
@@ -115,13 +117,17 @@ Chat.getMessageInput = function () {
  * @param {String} [chatId] the chat identifier
  * @param {String} [message] the chat identifier
  */
-Chat.send = function (chatId, message) {
+Chat.send = function (chatId, message, options) {
     let me = Chat;
     if (Utils.isEmpty(message)) {
         let messageInput = me.getMessageInput();
         message = messageInput.text();
         messageInput.text("");
     }
+    options = options || {};
+    options.self = false;
+    options.data = message;
+    options.contentType = "text/plain";
     me._chatBody = null;
     if (Utils.isEmpty(message)) return;
     chatId = me.getCurrent(chatId);
@@ -130,11 +136,7 @@ Chat.send = function (chatId, message) {
         me.focusMessage();
         let target = $('.llm-chat-messages .llm-chat-msg:last-child')
         me.receive(chatId, target);
-    }, {
-        self: false,
-        data: message,
-        contentType: "text/plain"
-    });
+    }, options);
 
 }
 
@@ -181,14 +183,13 @@ Chat.focusInput = function () {
 /**
  * Fires the question defined in the body of the chat
  */
-Chat.askDefaultQuestion = function () {
+Chat.askDefaultQuestion = function (id) {
     let me = Chat;
-    debugger
     let questionElement = $(".llm-chat #chat-question");
     if (questionElement.length === 0) return;
     let question = questionElement.text().trim();
     questionElement.remove();
-    me.send(null, question);
+    me.send(null, question, {mask: "#" + id, maskMessage: "Loading chat..."});
 }
 
 /**

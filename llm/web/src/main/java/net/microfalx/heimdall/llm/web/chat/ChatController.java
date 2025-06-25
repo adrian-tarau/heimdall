@@ -90,7 +90,7 @@ public class ChatController extends PageController {
         updateModel(model, chat);
         model.addAttribute("title", "Model");
         model.addAttribute("content", renderMarkdown(chat.getDescription()));
-        return "llm/chat :: dialog";
+        return "llm/chat :: info";
     }
 
     @GetMapping("info/prompt/{id}")
@@ -100,7 +100,7 @@ public class ChatController extends PageController {
         model.addAttribute("title", "Model");
         model.addAttribute("content", renderMarkdown(chat.getSystemMessage().getText()));
         model.addAttribute("modalClasses", "modal-lg");
-        return "llm/chat :: dialog";
+        return "llm/chat :: info";
     }
 
     @PostMapping(value = "question/{id}", consumes = MediaType.TEXT_PLAIN_VALUE,
@@ -131,6 +131,7 @@ public class ChatController extends PageController {
                            DataSetRequest<?, ?, ?> request) {
         if (chatModel == null) chatModel = llmService.getDefaultModel();
         net.microfalx.heimdall.llm.api.Chat chat = llmService.createChat(prompt, chatModel);
+        chat.addFeature(request);
         updateModel(model, chat);
         updateIntro(model);
         model.addAttribute("mode", mode);

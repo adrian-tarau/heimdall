@@ -8,7 +8,6 @@ import net.microfalx.bootstrap.web.dataset.DataSetController;
 import net.microfalx.resource.MimeType;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceFactory;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -47,7 +46,7 @@ public class StatementController extends DataSetController<Statement, Integer> {
         Resource resource = getResource(dataSetModel);
         try {
             if (resource.exists()) {
-                dataSetModel.setContent(StringUtils.abbreviate(resource.loadAsString(), 70));
+                dataSetModel.setContent(resource.loadAsString());
             }
         } catch (IOException e) {
             dataSetModel.setContent(net.microfalx.lang.StringUtils.NA_STRING);

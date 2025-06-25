@@ -64,6 +64,7 @@ public class BrokerEvent extends IdentityAware<Integer> {
     @Name
     @NotNull
     @Filterable()
+    @Width("30%")
     private String eventName;
 
     @Column(name = "created_at", nullable = false, updatable = false)
