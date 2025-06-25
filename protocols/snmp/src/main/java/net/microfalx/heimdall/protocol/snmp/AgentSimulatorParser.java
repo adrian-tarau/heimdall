@@ -120,14 +120,14 @@ public class AgentSimulatorParser {
                 case "cumulative" -> cumulative = Integer.parseInt(paramValue);
             }
         }
-        if (parameterCount == 2) {
+        if (parameterCount >= 2) {
             if (initialValue != null && rateValue != null) {
+                if (cumulative != null) return new AgentSimulatorRule.CumulativeFunction(initialValue, cumulative);
                 return new AgentSimulatorRule.LinearFunction(initialValue, rateValue);
             } else if (initialValue != null && deviationValue != null) {
+                if (cumulative != null) return new AgentSimulatorRule.CumulativeFunction(initialValue, cumulative);
                 return new AgentSimulatorRule.RandomFunction(initialValue, deviationValue);
             }
-        } else if (parameterCount == 3) {
-
         }
         LOGGER.warn("Unsupported numeric function: {}", value);
         return new AgentSimulatorRule.ConstantFunction(initialValue != null ? initialValue : 0);

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 import org.apache.commons.math3.distribution.NormalDistribution;
+import org.apache.commons.math3.random.RandomDataGenerator;
 import org.snmp4j.smi.OID;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
@@ -103,6 +104,27 @@ public class AgentSimulatorRule {
         @Override
         public double getNext(AgentSimulatorRule rule) {
             setValue(normalDistribution.sample());
+            return getValue().doubleValue();
+        }
+    }
+
+    public static class CumulativeFunction extends AbstractFunction {
+
+        private int cumulative;
+        private final RandomDataGenerator randomGen = new RandomDataGenerator();
+
+        public CumulativeFunction(Number initialValue, int cumulative) {
+            super(initialValue);
+            this.cumulative = cumulative;
+        }
+
+        @Override
+        public double getNext(AgentSimulatorRule rule) {
+            for (int i = 0; i < 10; i++) {
+                double value = randomGen.nextUniform(1.0, 10.0);
+                cumulative+= (int) value;
+            }
+            setValue(cumulative);
             return getValue().doubleValue();
         }
     }
