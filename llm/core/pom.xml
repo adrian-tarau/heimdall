@@ -33,7 +33,7 @@
         <version>0.9.0-SNAPSHOT</version>
     </parent>
 
-    <name>Heimdall :: Large Language Model :: Core</name>
+    <name>Heimdall :: LLM :: Core</name>
 
     <dependencies>
 

@@ -33,7 +33,7 @@
         <version>0.9.0-SNAPSHOT</version>
     </parent>
 
-    <name>Heimdall :: Large Language Model :: RCA</name>
+    <name>Heimdall :: LLM :: RCA</name>
 
     <dependencies>
 

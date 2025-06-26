@@ -33,7 +33,7 @@
         <version>0.9.0-SNAPSHOT</version>
     </parent>
 
-    <name>Heimdall :: Large Language Model :: Providers :: Jlama</name>
+    <name>Heimdall :: LLM :: Providers :: Jlama</name>
 
     <dependencies>
 

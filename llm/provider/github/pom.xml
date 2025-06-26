@@ -33,7 +33,7 @@
         <version>0.9.0-SNAPSHOT</version>
     </parent>
 
-    <name>Heimdall :: Large Language Model :: Providers :: GitHub</name>
+    <name>Heimdall :: LLM :: Providers :: GitHub</name>
 
     <dependencies>
 

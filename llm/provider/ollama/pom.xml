@@ -33,7 +33,7 @@
         <version>0.9.0-SNAPSHOT</version>
     </parent>
 
-    <name>Heimdall :: Large Language Model :: Providers :: Ollama</name>
+    <name>Heimdall :: LLM :: Providers :: Ollama</name>
 
     <dependencies>
 

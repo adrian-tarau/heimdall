@@ -34,7 +34,7 @@
         <version>0.9.0-SNAPSHOT</version>
     </parent>
 
-    <name>Heimdall :: Large Language Model :: Providers</name>
+    <name>Heimdall :: LLM :: Providers</name>
 
     <modules>
         <module>hugging-face</module>

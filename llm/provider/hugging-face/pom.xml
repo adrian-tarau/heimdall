@@ -33,7 +33,7 @@
         <version>0.9.0-SNAPSHOT</version>
     </parent>
 
-    <name>Heimdall :: Large Language Model :: Providers :: Hugging Face</name>
+    <name>Heimdall :: LLM :: Providers :: Hugging Face</name>
 
     <dependencies>
 
