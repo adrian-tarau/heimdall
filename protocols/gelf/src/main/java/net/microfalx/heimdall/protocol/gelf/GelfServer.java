@@ -34,10 +34,10 @@ import static net.microfalx.lang.StringUtils.*;
 @Component
 public class GelfServer implements InitializingBean, ProtocolServerHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GelfServer.class);
 
-    @Autowired
-    private GelfConfiguration configuration;
+    @Autowired(required = false)
+    private GelfProperties properties = new GelfProperties();
 
     @Autowired
     private GelfService gelfService;
@@ -65,7 +65,7 @@ public class GelfServer implements InitializingBean, ProtocolServerHandler {
 
     private void initializeTcpServer() {
         tcpServer = new TcpProtocolServer();
-        tcpServer.setPort(configuration.getTcpPort());
+        tcpServer.setPort(properties.getTcpPort());
         tcpServer.setThreadPool(gelfService.getThreadPool());
         tcpServer.setHandler(this);
         tcpServer.listen();
@@ -74,7 +74,7 @@ public class GelfServer implements InitializingBean, ProtocolServerHandler {
 
     private void initializeUdpServer() {
         udpServer = new UdpProtocolServer();
-        udpServer.setPort(configuration.getUdpPort());
+        udpServer.setPort(properties.getUdpPort());
         udpServer.setThreadPool(gelfService.getThreadPool());
         udpServer.setHandler(this);
         udpServer.listen();

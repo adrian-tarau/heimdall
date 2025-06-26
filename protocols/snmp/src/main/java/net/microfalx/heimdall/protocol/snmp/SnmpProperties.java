@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import java.time.Duration;
 
 @Configuration
-@ConfigurationProperties("heimdall.snmp")
+@ConfigurationProperties("heimdall.protocol.snmp")
 @Getter
 @Setter
 public class SnmpProperties {

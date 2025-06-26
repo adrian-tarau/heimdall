@@ -16,9 +16,9 @@ public class GelfTestHelper {
     private static final int PORT_RANGE = 10000;
 
     private ProtocolClient.Transport transport = ProtocolClient.Transport.TCP;
-    private final GelfConfiguration configuration;
+    private final GelfProperties configuration;
 
-    GelfTestHelper(GelfConfiguration configuration) {
+    GelfTestHelper(GelfProperties configuration) {
         this.configuration = configuration;
     }
 

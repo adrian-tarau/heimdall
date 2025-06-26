@@ -37,7 +37,7 @@ public class SyslogServiceIntegrationTest {
     private SyslogService syslogService;
 
     @Autowired
-    private SyslogConfiguration configuration = new SyslogConfiguration();
+    private SyslogProperties configuration = new SyslogProperties();
 
     private SyslogMessage syslogMessage = new SyslogMessage();
 

@@ -8,16 +8,14 @@ import com.cloudbees.syslog.sender.SyslogMessageSender;
 import com.cloudbees.syslog.sender.TcpSyslogMessageSender;
 import com.cloudbees.syslog.sender.UdpSyslogMessageSender;
 import net.microfalx.heimdall.protocol.core.ProtocolClient;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.util.Date;
 
 public class SyslogClient extends ProtocolClient<SyslogMessage> {
 
-    @Autowired
-    private final SyslogConfiguration syslogConfiguration = new SyslogConfiguration();
-    private SyslogMessageSender sender = createSyslogSender();
+    private final SyslogProperties properties = new SyslogProperties();
+    private final SyslogMessageSender sender = createSyslogSender();
 
     @Override
     protected int getDefaultPort() {
@@ -55,11 +53,11 @@ public class SyslogClient extends ProtocolClient<SyslogMessage> {
         AbstractSyslogMessageSender messageSender;
         if (getTransport().equals(Transport.UDP)) {
             UdpSyslogMessageSender udpMessageSender = new UdpSyslogMessageSender();
-            udpMessageSender.setSyslogServerPort(syslogConfiguration.getUdpPort());
+            udpMessageSender.setSyslogServerPort(properties.getUdpPort());
             messageSender = udpMessageSender;
         } else {
             TcpSyslogMessageSender tcpMessageSender = new TcpSyslogMessageSender();
-            tcpMessageSender.setSyslogServerPort(syslogConfiguration.getTcpPort());
+            tcpMessageSender.setSyslogServerPort(properties.getTcpPort());
             messageSender = tcpMessageSender;
         }
         messageSender.setSyslogServerHostname("localhost");
@@ -68,8 +66,8 @@ public class SyslogClient extends ProtocolClient<SyslogMessage> {
         return messageSender;
     }
 
-    public SyslogConfiguration getSyslogConfiguration() {
-        return syslogConfiguration;
+    public SyslogProperties getSyslogConfiguration() {
+        return properties;
     }
 
     public SyslogMessageSender getSender() {

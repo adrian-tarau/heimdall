@@ -10,10 +10,7 @@ import net.microfalx.bootstrap.dataset.annotation.Filterable;
 import net.microfalx.heimdall.protocol.core.jpa.Address;
 import net.microfalx.heimdall.protocol.core.jpa.Event;
 import net.microfalx.heimdall.protocol.core.jpa.Part;
-import net.microfalx.lang.annotation.Description;
-import net.microfalx.lang.annotation.Name;
-import net.microfalx.lang.annotation.Position;
-import net.microfalx.lang.annotation.ReadOnly;
+import net.microfalx.lang.annotation.*;
 
 @Entity
 @Table(name = "protocol_syslog_events")
@@ -27,6 +24,7 @@ public class SyslogEvent extends Event {
     @ManyToOne
     @JoinColumn(name = "address_id", nullable = false)
     @Position(1)
+    @Width("200px")
     @Description("the name of the host, source or application that sent the Syslog log event")
     private Address address;
 
@@ -34,6 +32,7 @@ public class SyslogEvent extends Event {
     @JoinColumn(name = "message_id", nullable = false)
     @Name
     @Position(1)
+    @Width("60%")
     @Description("The content of the Syslog log event")
     @Filterable
     private Part message;
@@ -41,11 +40,13 @@ public class SyslogEvent extends Event {
     @Column(name = "severity", nullable = false)
     @Position(10)
     @Description("Identify the importance of the Syslog log event")
+    @Width("120px")
     @Filterable(true)
     private Severity severity;
 
     @Column(name = "facility", nullable = false)
     @Position(10)
+    @Width("120px")
     @Description("Determines which process of the machine created the Syslog log event")
     @Filterable(true)
     private Facility facility;

@@ -17,13 +17,13 @@ import java.util.Iterator;
 public final class GelfService extends ProtocolService<GelfEvent, net.microfalx.heimdall.protocol.gelf.jpa.GelfEvent> {
 
     @Autowired
-    private GelfEventRepository gelfEventRepository;
+    private GelfEventRepository eventRepository;
 
     @Autowired
-    private GelfSimulator gelfSimulator;
+    private GelfSimulator simulator;
 
     @Autowired
-    private GelfConfiguration gelfConfiguration;
+    private GelfProperties properties;
 
     @Override
     protected Event.Type getEventType() {
@@ -59,13 +59,13 @@ public final class GelfService extends ProtocolService<GelfEvent, net.microfalx.
         Attachment fields = Attachment.create(message.toJson());
         message.addPart(fields);
         gelfEvent.setFields(persistPart(fields));
-        gelfEventRepository.save(gelfEvent);
+        eventRepository.save(gelfEvent);
         updateReference(message, gelfEvent.getId());
     }
 
     @Override
     protected GelfSimulator getSimulator() {
-        return gelfSimulator;
+        return simulator;
     }
 
     @Override

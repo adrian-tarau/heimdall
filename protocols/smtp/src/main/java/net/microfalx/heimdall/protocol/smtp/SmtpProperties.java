@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties("heimdall.smtp")
+@ConfigurationProperties("heimdall.protocol.smtp")
 @Getter
 @Setter
 public class SmtpProperties {

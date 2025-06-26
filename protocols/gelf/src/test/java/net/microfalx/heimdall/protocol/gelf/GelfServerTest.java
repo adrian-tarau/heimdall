@@ -22,7 +22,7 @@ class GelfServerTest {
     private GelfService syslogService;
 
     @Spy
-    private GelfConfiguration configuration = new GelfConfiguration();
+    private GelfProperties configuration = new GelfProperties();
 
     private GelfTestHelper helper;
 

@@ -21,7 +21,7 @@ class SyslogServerTest {
     private SyslogService syslogService;
 
     @Spy
-    private SyslogConfiguration configuration = new SyslogConfiguration();
+    private SyslogProperties configuration = new SyslogProperties();
 
     private SyslogTestHelper helper;
 

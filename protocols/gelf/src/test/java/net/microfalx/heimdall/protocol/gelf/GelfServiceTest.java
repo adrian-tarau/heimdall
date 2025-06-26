@@ -26,7 +26,7 @@ import java.time.ZonedDateTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@ContextConfiguration(classes = {ProtocolSimulatorProperties.class, GelfService.class, GelfConfiguration.class})
+@ContextConfiguration(classes = {ProtocolSimulatorProperties.class, GelfService.class, GelfProperties.class})
 public class GelfServiceTest extends AbstractBootstrapServiceTestCase {
 
     @MockBean

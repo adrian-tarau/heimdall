@@ -28,6 +28,7 @@ public class GelfEvent extends Event {
     @NotNull
     @Position(1)
     @Description("The name of the host, source or application that sent the log event")
+    @Width("200px")
     private Address address;
 
     @JoinColumn(name = "short_message_id")
@@ -37,7 +38,7 @@ public class GelfEvent extends Event {
     @Label("Message")
     @Description("The short version of the log event")
     @Filterable
-    @Width("30%")
+    @Width("40%")
     private Part shortMessage;
 
     @JoinColumn(name = "long_message_id")

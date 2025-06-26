@@ -39,7 +39,7 @@ class SyslogServiceTest {
     PartRepository partRepository;
 
     @Spy
-    private SyslogConfiguration configuration;
+    private SyslogProperties configuration;
 
     private SyslogMessage message = new SyslogMessage();
 

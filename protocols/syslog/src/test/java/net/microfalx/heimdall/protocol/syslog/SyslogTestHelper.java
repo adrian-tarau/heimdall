@@ -17,10 +17,10 @@ class SyslogTestHelper {
     private static final AtomicInteger IDENTIFIER = new AtomicInteger(1);
 
     private String protocol = "tcp";
-    private final SyslogConfiguration configuration;
+    private final SyslogProperties configuration;
     private SyslogClient syslogClient = new SyslogClient();
 
-    SyslogTestHelper(SyslogConfiguration configuration) {
+    SyslogTestHelper(SyslogProperties configuration) {
         this.configuration = configuration;
     }
 

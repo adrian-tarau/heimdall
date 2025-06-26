@@ -39,7 +39,7 @@ public class GelfServiceIntegrationTest {
     private GelfService gelfService;
 
     @Autowired
-    private GelfConfiguration gelfConfiguration;
+    private GelfProperties gelfProperties;
 
     private GelfEvent gelfEvent = new GelfEvent();
 
@@ -47,7 +47,7 @@ public class GelfServiceIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        helper = new GelfTestHelper(gelfConfiguration);
+        helper = new GelfTestHelper(gelfProperties);
     }
 
     @Test

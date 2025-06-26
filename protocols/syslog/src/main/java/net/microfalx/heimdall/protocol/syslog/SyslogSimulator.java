@@ -17,11 +17,11 @@ import java.util.Collection;
 @Component
 public class SyslogSimulator extends ProtocolSimulator<SyslogMessage, SyslogClient> {
 
-    private SyslogConfiguration syslogConfiguration;
+    private final SyslogProperties properties;
 
-    public SyslogSimulator(ProtocolSimulatorProperties properties, SyslogConfiguration syslogConfiguration) {
+    public SyslogSimulator(ProtocolSimulatorProperties properties, SyslogProperties syslogProperties) {
         super(properties);
-        this.syslogConfiguration = syslogConfiguration;
+        this.properties = syslogProperties;
     }
 
     /**
@@ -52,7 +52,7 @@ public class SyslogSimulator extends ProtocolSimulator<SyslogMessage, SyslogClie
     @Override
     protected Collection<SyslogClient> createClients() {
         SyslogClient syslogClient = new SyslogClient();
-        syslogClient.setPort(syslogConfiguration.getUdpPort());
+        syslogClient.setPort(properties.getUdpPort());
         syslogClient.setTransport(ProtocolClient.Transport.UDP);
         return Arrays.asList(syslogClient);
     }

@@ -17,7 +17,7 @@ public final class SyslogService extends ProtocolService<SyslogMessage, SyslogEv
     private SyslogSimulator syslogSimulator;
 
     @Autowired
-    private SyslogConfiguration syslogConfiguration;
+    private SyslogProperties syslogProperties;
 
     @Override
     protected Event.Type getEventType() {

@@ -39,7 +39,7 @@ public class SyslogServer implements InitializingBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(SyslogServer.class);
 
     @Autowired
-    private SyslogConfiguration configuration;
+    private SyslogProperties properties;
 
     @Autowired
     private SyslogService syslogService;
@@ -48,8 +48,8 @@ public class SyslogServer implements InitializingBean {
     private TCPNetSyslogServer tcpServer;
     private UDPNetSyslogServer udpServer;
 
-    public SyslogConfiguration getConfiguration() {
-        return configuration;
+    public SyslogProperties getProperties() {
+        return properties;
     }
 
     @Override
@@ -69,7 +69,7 @@ public class SyslogServer implements InitializingBean {
     }
 
     private void initializeTcpServer() {
-        TCPNetSyslogServerConfig config = new TCPNetSyslogServerConfig(configuration.getTcpPort());
+        TCPNetSyslogServerConfig config = new TCPNetSyslogServerConfig(properties.getTcpPort());
         config.addEventHandler(listener);
         config.setUseDaemonThread(true);
         config.setUseStructuredData(true);
@@ -80,7 +80,7 @@ public class SyslogServer implements InitializingBean {
     }
 
     private void initializeUdpServer() {
-        UDPNetSyslogServerConfig config = new UDPNetSyslogServerConfig(configuration.getUdpPort());
+        UDPNetSyslogServerConfig config = new UDPNetSyslogServerConfig(properties.getUdpPort());
         config.addEventHandler(listener);
         config.setUseDaemonThread(true);
         config.setUseStructuredData(true);

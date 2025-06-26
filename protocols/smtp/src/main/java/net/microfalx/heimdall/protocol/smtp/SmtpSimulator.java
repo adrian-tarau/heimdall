@@ -25,8 +25,8 @@ import java.util.zip.GZIPOutputStream;
 @Component
 public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
 
-    private static AtomicLong COUNTER = new AtomicLong();
-    private SmtpProperties smtpProperties;
+    private static final AtomicLong COUNTER = new AtomicLong();
+    private final SmtpProperties smtpProperties;
 
     public SmtpSimulator(ProtocolSimulatorProperties properties, SmtpProperties smtpProperties) {
         super(properties);
