@@ -1,6 +1,5 @@
 package net.microfalx.heimdall.protocol.snmp;
 
-import net.microfalx.lang.ExceptionUtils;
 import net.microfalx.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +24,7 @@ public class AgentSimulatorParser {
      * @param resource the resource to parse
      * @return a collection of agent simulator rules
      */
-    public Collection<AgentSimulatorRule> parse(Resource resource) {
+    public Collection<AgentSimulatorRule> parse(Resource resource) throws IOException {
         Collection<AgentSimulatorRule> rules = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(resource.getReader())) {
             String line;
@@ -56,8 +55,6 @@ public class AgentSimulatorParser {
                 AgentSimulatorRule agentSimulatorRule = new AgentSimulatorRule(oid, type, value, function);
                 rules.add(agentSimulatorRule);
             }
-        } catch (IOException e) {
-            ExceptionUtils.throwException(e);
         }
         return rules;
     }

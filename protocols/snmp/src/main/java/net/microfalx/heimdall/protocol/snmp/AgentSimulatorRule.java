@@ -3,6 +3,7 @@ package net.microfalx.heimdall.protocol.snmp;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
+import net.microfalx.lang.Identifiable;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.snmp4j.smi.OID;
@@ -12,13 +13,18 @@ import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 @AllArgsConstructor
 @Getter
 @ToString
-public class AgentSimulatorRule {
+public class AgentSimulatorRule implements Identifiable<String> {
 
     private final OID oid;
     private final int type;
     private final String value;
 
     private Function function;
+
+    @Override
+    public String getId() {
+        return oid.toDottedString();
+    }
 
     /**
      * A function to compute the next value for an OID.
@@ -122,7 +128,7 @@ public class AgentSimulatorRule {
         public double getNext(AgentSimulatorRule rule) {
             for (int i = 0; i < 10; i++) {
                 double value = randomGen.nextUniform(1.0, 10.0);
-                cumulative+= (int) value;
+                cumulative += (int) value;
             }
             setValue(cumulative);
             return getValue().doubleValue();

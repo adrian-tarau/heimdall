@@ -7,5 +7,6 @@
         <item id="symbol" text="SNMP / Symbols" parent="protocols_admin" action="/system/protocol/snmp/symbol" roles="admin" icon="fa-solid fa-wave-square"/>
         <item id="variable" text="SNMP / Variables" parent="protocols_admin" action="/system/protocol/snmp/variable" roles="admin" icon="fa-regular fa-rectangle-list"/>
         <item id="mo" text="SNMP / MOs" parent="protocols_admin" action="/system/protocol/snmp/mo" roles="admin" icon="fa-regular fa-rectangle-list"/>
+        <item id="agent_simulator_rule" text="SNMP / Agent Simulator Rules" parent="protocols_admin" action="/protocol/snmp/agent_simulator_rule" roles="admin" icon="fa-regular fa-rectangle-list"/>
     </menu>
 </navigations>
