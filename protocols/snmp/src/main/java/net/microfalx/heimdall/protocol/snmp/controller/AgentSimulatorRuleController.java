@@ -14,7 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/protocol/snmp/agent_simulator_rule")
-@DataSet(model = AgentSimulatorRule.class, timeFilter = false, canAdd = false, canUpload = true, canDownload = true)
+@DataSet(model = AgentSimulatorRule.class, timeFilter = false, canAdd = false, canUpload = true, canDownload = true,
+        viewTemplate = "snmp/agent_simulator_rule.html", viewClasses = "modal-xl")
 public class AgentSimulatorRuleController extends SystemDataSetController<AgentSimulatorRule, Integer> {
 
     @Autowired

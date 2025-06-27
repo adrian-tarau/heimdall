@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="fields">
+        <div class="container-fluid">
+            <div class="row border rounded bg-body-secondary mb-1 p-1 fs-6">
+                <div class="row">
+                    <div class="col-md-4"><span class="fw-bold">Name: </span><span class="fst-italic" th:text="${model.name}"></span></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="dataset-text-mono" th:text="${model.content}"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
