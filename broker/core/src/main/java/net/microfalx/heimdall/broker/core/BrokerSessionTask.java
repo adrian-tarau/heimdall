@@ -41,6 +41,7 @@ import java.util.zip.ZipOutputStream;
 import static java.time.Duration.ofSeconds;
 import static net.microfalx.bootstrap.search.Document.SOURCE_FIELD;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.ExceptionUtils.rethrowException;
 import static net.microfalx.lang.StringUtils.*;
 
 class BrokerSessionTask extends AbstractRunnable {
@@ -221,7 +222,7 @@ class BrokerSessionTask extends AbstractRunnable {
         } catch (ZipException e) {
             String message = defaultIfNull(e.getMessage(), EMPTY_STRING);
             if (message.startsWith("duplicate entry:")) return;
-            ExceptionUtils.throwException(e);
+            rethrowException(e);
         }
         event.serialize(IOUtils.getUnclosableOutputStream(zipOutputStream));
         zipOutputStream.closeEntry();

@@ -19,7 +19,7 @@ import static net.microfalx.bootstrap.core.utils.HostnameUtils.getServerNameFrom
 import static net.microfalx.bootstrap.core.utils.HostnameUtils.isHostname;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
-import static net.microfalx.lang.ExceptionUtils.throwException;
+import static net.microfalx.lang.ExceptionUtils.rethrowException;
 import static net.microfalx.lang.StringUtils.isEmpty;
 import static net.microfalx.lang.StringUtils.toIdentifier;
 
@@ -170,7 +170,7 @@ public class Server extends NamedAndTaggedIdentifyAware<String> implements Infra
             try {
                 LOCAL_ADDRESS = InetAddress.getByName("localhost");
             } catch (UnknownHostException ex) {
-                throwException(e);
+                rethrowException(e);
             }
         }
     }

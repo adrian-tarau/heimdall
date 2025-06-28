@@ -359,7 +359,7 @@ class PingExecutorTest {
             httpServer.setExecutor(Executors.newCachedThreadPool());
             httpServer.start();
         } catch (IOException e) {
-            ExceptionUtils.throwException(e);
+            ExceptionUtils.rethrowException(e);
         }
     }
 

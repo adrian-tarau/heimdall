@@ -26,6 +26,7 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 import static net.microfalx.heimdall.rest.api.RestConstants.SCRIPT_ATTR;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ExceptionUtils.getRootCauseMessage;
+import static net.microfalx.lang.ExceptionUtils.rethrowException;
 import static net.microfalx.lang.FileUtils.validateDirectoryExists;
 import static net.microfalx.lang.StringUtils.*;
 import static net.microfalx.lang.TextUtils.insertSpaces;
@@ -125,7 +126,7 @@ public class RestProjectManager {
             try {
                 timedOut = !process.waitFor(5, MINUTES);
             } catch (InterruptedException e) {
-                ExceptionUtils.rethrowInterruptedException(e);
+                rethrowException(e);
             }
             if (timedOut) {
                 throw new IOException("Timeout wait waiting for process to finish");

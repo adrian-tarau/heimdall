@@ -1,7 +1,5 @@
 package net.microfalx.heimdall.protocol.core;
 
-import net.microfalx.lang.ExceptionUtils;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ProtocolException;
@@ -9,6 +7,7 @@ import java.net.UnknownHostException;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
+import static net.microfalx.lang.ExceptionUtils.rethrowExceptionAndReturn;
 
 /**
  * Base class for all clients.
@@ -37,7 +36,7 @@ public abstract class ProtocolClient<E extends Event> {
         try {
             return InetAddress.getByName(hostName);
         } catch (UnknownHostException e) {
-            return ExceptionUtils.throwException(e);
+            return rethrowExceptionAndReturn(e);
         }
     }
 

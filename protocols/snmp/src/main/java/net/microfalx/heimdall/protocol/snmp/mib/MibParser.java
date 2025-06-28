@@ -2,7 +2,6 @@ package net.microfalx.heimdall.protocol.snmp.mib;
 
 import com.google.common.collect.Iterables;
 import net.microfalx.lang.EnumUtils;
-import net.microfalx.lang.ExceptionUtils;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceUtils;
 import net.microfalx.resource.TemporaryFileResource;
@@ -28,6 +27,7 @@ import java.util.stream.Collectors;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.unmodifiableCollection;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.ExceptionUtils.rethrowExceptionAndReturn;
 import static net.microfalx.lang.StringUtils.isNotEmpty;
 
 /**
@@ -236,7 +236,7 @@ public class MibParser {
                 try {
                     tmpResource.copyFrom(resource);
                 } catch (IOException e) {
-                    return ExceptionUtils.throwException(e);
+                    return rethrowExceptionAndReturn(e);
                 }
                 url = tmpResource.toURL();
             }

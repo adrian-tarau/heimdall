@@ -59,6 +59,12 @@
             </exclusions>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.james</groupId>
+            <artifactId>apache-mime4j</artifactId>
+            <version>0.8.12</version>
+        </dependency>
+
     </dependencies>
 
 </project>

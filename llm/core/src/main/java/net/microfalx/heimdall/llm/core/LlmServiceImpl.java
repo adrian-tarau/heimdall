@@ -48,6 +48,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.unmodifiableCollection;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.ExceptionUtils.rethrowException;
 import static net.microfalx.lang.FileUtils.validateDirectoryExists;
 import static net.microfalx.lang.StringUtils.*;
 import static net.microfalx.lang.TimeUtils.millisSince;
@@ -541,7 +542,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
             Class.forName("net.microfalx.heimdall.llm.lucene.LuceneContentRetriever");
             Class.forName("net.microfalx.heimdall.llm.lucene.LuceneEmbeddingStore");
         } catch (Exception e) {
-            ExceptionUtils.throwException(e);
+            rethrowException(e);
         }
     }
 

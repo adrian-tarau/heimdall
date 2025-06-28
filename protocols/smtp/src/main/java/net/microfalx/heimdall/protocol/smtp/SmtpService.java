@@ -8,7 +8,6 @@ import net.microfalx.heimdall.protocol.core.ProtocolService;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpAttachment;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpAttachmentRepository;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpEventRepository;
-import net.microfalx.lang.ExceptionUtils;
 import net.microfalx.resource.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -20,6 +19,7 @@ import java.util.Properties;
 
 import static net.microfalx.heimdall.protocol.core.ProtocolConstants.MAX_NAME_LENGTH;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.ExceptionUtils.rethrowException;
 import static net.microfalx.lang.StringUtils.isNotEmpty;
 
 @Service
@@ -64,7 +64,7 @@ public final class SmtpService extends ProtocolService<SmtpEvent, net.microfalx.
             MimeMessage mimeMessage = mailSender.createMimeMessage(resource.getInputStream());
             mailSender.send(mimeMessage);
         } catch (Exception e) {
-            ExceptionUtils.throwException(e);
+            rethrowException(e);
         }
     }
 

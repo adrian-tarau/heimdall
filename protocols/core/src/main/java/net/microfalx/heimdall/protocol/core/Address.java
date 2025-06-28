@@ -1,10 +1,10 @@
 package net.microfalx.heimdall.protocol.core;
 
-import net.microfalx.lang.ExceptionUtils;
-
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+
+import static net.microfalx.lang.ExceptionUtils.rethrowExceptionAndReturn;
 
 /**
  * Represents an address (email, host, etc).
@@ -84,7 +84,7 @@ public interface Address {
         try {
             return host(InetAddress.getLocalHost());
         } catch (UnknownHostException e) {
-            return ExceptionUtils.throwException(e);
+            return rethrowExceptionAndReturn(e);
         }
     }
 

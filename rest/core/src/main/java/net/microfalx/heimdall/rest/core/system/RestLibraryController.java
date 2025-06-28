@@ -9,7 +9,6 @@ import net.microfalx.heimdall.rest.api.Library;
 import net.microfalx.heimdall.rest.api.Project;
 import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.heimdall.rest.core.common.AbstractLibraryController;
-import net.microfalx.lang.ExceptionUtils;
 import net.microfalx.resource.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -20,6 +19,7 @@ import java.io.IOException;
 import java.util.Collection;
 
 import static net.microfalx.heimdall.rest.core.RestUtils.prepareContent;
+import static net.microfalx.lang.ExceptionUtils.rethrowException;
 
 @Controller("SystemLibraryController")
 @DataSet(model = RestLibrary.class, timeFilter = false, canAdd = false, canUpload = true,
@@ -97,7 +97,7 @@ public class RestLibraryController extends AbstractLibraryController<RestLibrary
             builder.tags(simulation.getTags()).name(simulation.getName()).description(simulation.getDescription());
             restService.registerLibrary(builder.build());
         } catch (IOException e) {
-            ExceptionUtils.throwException(e);
+            rethrowException(e);
         }
     }
 }

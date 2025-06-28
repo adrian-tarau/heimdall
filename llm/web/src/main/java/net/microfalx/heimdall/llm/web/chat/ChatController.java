@@ -15,7 +15,6 @@ import net.microfalx.bootstrap.web.component.Menu;
 import net.microfalx.bootstrap.web.controller.PageController;
 import net.microfalx.heimdall.llm.api.*;
 import net.microfalx.heimdall.llm.core.MessageImpl;
-import net.microfalx.lang.ExceptionUtils;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.annotation.Name;
 import net.microfalx.resource.Resource;
@@ -40,6 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static net.microfalx.heimdall.llm.core.LlmUtils.getChatThreadPool;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.ExceptionUtils.rethrowException;
 import static net.microfalx.lang.StringUtils.EMPTY_STRING;
 import static net.microfalx.lang.StringUtils.isNotEmpty;
 import static net.microfalx.lang.ThreadUtils.sleepMillis;
@@ -279,7 +279,7 @@ public class ChatController extends PageController {
                 builder.data(data);
                 emitter.send(builder);
             } catch (IllegalStateException e) {
-                ExceptionUtils.throwException(e);
+                rethrowException(e);
             } catch (Exception e) {
                 LOGGER.error("Failed to send token for chat: {}", chat.getId(), e);
             }

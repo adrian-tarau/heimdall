@@ -37,6 +37,7 @@ import static net.microfalx.bootstrap.search.SearchUtils.SEARCH_METRICS;
 import static net.microfalx.heimdall.llm.lucene.LuceneFields.CONTENT_FIELD_NAME;
 import static net.microfalx.heimdall.llm.lucene.LuceneFields.TOKEN_COUNT_FIELD_NAME;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.ExceptionUtils.rethrowExceptionAndReturn;
 import static net.microfalx.lang.StringUtils.isEmpty;
 import static org.apache.lucene.search.Sort.RELEVANCE;
 
@@ -76,7 +77,7 @@ class LuceneContentRetriever implements ContentRetriever {
             if (rootCause instanceof IndexNotFoundException) {
                 return Collections.emptyList();
             } else {
-                return ExceptionUtils.throwException(e);
+                return rethrowExceptionAndReturn(e);
             }
         }
     }

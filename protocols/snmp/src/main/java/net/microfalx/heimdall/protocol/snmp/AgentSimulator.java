@@ -2,7 +2,6 @@ package net.microfalx.heimdall.protocol.snmp;
 
 import net.microfalx.heimdall.protocol.snmp.jpa.AgentSimulatorRuleRepository;
 import net.microfalx.heimdall.protocol.snmp.mib.MibService;
-import net.microfalx.lang.ExceptionUtils;
 import net.microfalx.resource.Resource;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -15,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.ExceptionUtils.rethrowException;
 import static net.microfalx.lang.StringUtils.toIdentifier;
 
 @Component
@@ -63,7 +63,7 @@ public class AgentSimulator implements InitializingBean {
             ruleRepository.save(agentSimulatorRule);
             load(resource);
         } catch (IOException e) {
-            ExceptionUtils.throwException(e);
+            rethrowException(e);
         }
     }
 
@@ -93,7 +93,7 @@ public class AgentSimulator implements InitializingBean {
             }
         } catch (IOException e) {
             LOGGER.error("Failed to load agent simulator rules from resource: {}", resource.getName(), e);
-            ExceptionUtils.throwException(e);
+            rethrowException(e);
         }
     }
 }

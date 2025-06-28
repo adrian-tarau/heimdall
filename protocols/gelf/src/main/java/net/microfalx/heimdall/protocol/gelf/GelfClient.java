@@ -6,7 +6,6 @@ import biz.paluch.logging.gelf.intern.GelfSender;
 import biz.paluch.logging.gelf.intern.GelfSenderFactory;
 import net.microfalx.bootstrap.model.Attribute;
 import net.microfalx.heimdall.protocol.core.ProtocolClient;
-import net.microfalx.lang.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +14,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.Set;
+
+import static net.microfalx.lang.ExceptionUtils.rethrowExceptionAndReturn;
 
 public class GelfClient extends ProtocolClient<GelfEvent> {
 
@@ -78,7 +79,7 @@ public class GelfClient extends ProtocolClient<GelfEvent> {
             try {
                 return message.getBody().getResource().loadAsString();
             } catch (IOException e) {
-                return ExceptionUtils.throwException(e);
+                return rethrowExceptionAndReturn(e);
             }
         }
 

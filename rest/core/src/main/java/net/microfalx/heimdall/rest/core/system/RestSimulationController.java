@@ -8,7 +8,6 @@ import net.microfalx.bootstrap.model.Field;
 import net.microfalx.heimdall.rest.api.Project;
 import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.heimdall.rest.core.common.AbstractLibraryController;
-import net.microfalx.lang.ExceptionUtils;
 import net.microfalx.resource.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -19,6 +18,7 @@ import java.io.IOException;
 import java.util.Collection;
 
 import static net.microfalx.heimdall.rest.core.RestUtils.prepareContent;
+import static net.microfalx.lang.ExceptionUtils.rethrowException;
 
 @Controller("SystemSimulationController")
 @DataSet(model = RestSimulation.class, timeFilter = false, canAdd = false, canUpload = true,
@@ -88,7 +88,7 @@ public class RestSimulationController extends AbstractLibraryController<RestSimu
             builder.project(Project.DEFAULT).resource(storedResource).path(resource.getFileName());
             restService.registerSimulation(builder.build());
         } catch (IOException e) {
-            ExceptionUtils.throwException(e);
+            rethrowException(e);
         }
     }
 

@@ -3,10 +3,11 @@ package net.microfalx.heimdall.llm.core;
 import net.microfalx.heimdall.llm.api.FinishReason;
 import net.microfalx.heimdall.llm.api.Message;
 import net.microfalx.heimdall.llm.api.TokenStream;
-import net.microfalx.lang.ExceptionUtils;
 import net.microfalx.lang.NumberUtils;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static net.microfalx.lang.ExceptionUtils.rethrowException;
 
 /**
  * Base class for token streams.
@@ -51,6 +52,6 @@ public abstract class AbstractTokenStream implements TokenStream {
     }
 
     protected final void raiseIfError() {
-        if (throwable != null) ExceptionUtils.throwException(throwable);
+        if (throwable != null) rethrowException(throwable);
     }
 }
