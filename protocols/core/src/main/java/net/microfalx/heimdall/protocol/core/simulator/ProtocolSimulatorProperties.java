@@ -25,6 +25,11 @@ public class ProtocolSimulatorProperties {
     private Duration interval = Duration.ofSeconds(10);
 
     /**
+     * The rate at which events are simulated, events per second
+     */
+    private float rate = 0.5f;
+
+    /**
      * The minimum number of events to simulate in one round of simulation.
      */
     private int minimumEventCount = 1;
@@ -61,7 +66,9 @@ public class ProtocolSimulatorProperties {
 
     /**
      * Whether to use external data sets for simulation.
+     *
+     * If a given simulator does not have its own data set, it will generate data using a random data generator.
      */
-    private boolean useExternalDataSets;
+    private boolean useExternalDataSets = true;
 
 }

@@ -26,6 +26,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationStartedEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -57,7 +59,8 @@ import static net.microfalx.lang.StringUtils.*;
 /**
  * Base class for all protocol services.
  */
-public abstract class ProtocolService<E extends Event, M extends net.microfalx.heimdall.protocol.core.jpa.Event> implements InitializingBean {
+public abstract class ProtocolService<E extends Event, M extends net.microfalx.heimdall.protocol.core.jpa.Event>
+        implements InitializingBean, ApplicationListener<ApplicationStartedEvent> {
 
     private final Logger LOGGER;
 
@@ -71,6 +74,7 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
     private static final LocalDateTime STARTUP = LocalDateTime.now();
     private final Map<String, net.microfalx.heimdall.protocol.core.jpa.Address> addressCache = new ConcurrentHashMap<>();
     private volatile Metrics metrics;
+    private volatile Metrics eventMetrics;
 
     public ProtocolService() {
         LOGGER = LoggerFactory.getLogger(getClass());
@@ -151,7 +155,7 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
             if (!directory.exists()) directory.create();
             target.copyFrom(resource);
         } catch (Exception e) {
-            LOGGER.error("Failed to copy resource part to storage: " + target.toURI() + ", retry later", e);
+            LOGGER.atError().setCause(e).log("Failed to copy resource part to storage: {}, retry later", target.toURI());
         }
         return target;
     }
@@ -193,8 +197,9 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
         }
         try {
             indexService.index(documents);
+            countEvent("Indexed", documents.size());
         } catch (Exception e) {
-            LOGGER.error("Failed to index events " + events.size(), e);
+            LOGGER.atError().setCause(e).log("Failed to index events {}", events.size());
         }
 
     }
@@ -396,13 +401,53 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
     }
 
     /**
+     * Counts a protocol operation.
+     *
+     * @param name the name
+     */
+    protected final void count(String name, int increment) {
+        Metrics metrics = getMetrics();
+        metrics.count(name, increment);
+    }
+
+    /**
+     * Counts a protocol operation.
+     *
+     * @param name the name
+     */
+    protected final void countEvent(String name) {
+        Metrics metrics = getEventMetrics();
+        metrics.count(name);
+    }
+
+    /**
+     * Counts a protocol operation.
+     *
+     * @param name the name
+     */
+    protected final void countEvent(String name, int increment) {
+        Metrics metrics = getEventMetrics();
+        metrics.count(name, increment);
+    }
+
+    /**
      * Returns the metrics associated with this protocol.
      *
      * @return a non-null instance
      */
     protected final Metrics getMetrics() {
-        if (metrics == null) metrics = Metrics.of("Protocol").withGroup(getEventType().name());
+        if (metrics == null) metrics = ProtocolUtils.getMetrics(getEventType());
         return metrics;
+    }
+
+    /**
+     * Returns the metrics associated with this protocol.
+     *
+     * @return a non-null instance
+     */
+    protected final Metrics getEventMetrics() {
+        if (eventMetrics == null) eventMetrics = getMetrics().withGroup("Event");
+        return eventMetrics;
     }
 
     /**
@@ -450,12 +495,16 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
     @Override
     public void afterPropertiesSet() throws Exception {
         initializeThreadPool();
-        initializeSimulator();
         initializeQueue();
         initResources();
     }
 
-    private void initializeSimulator() {
+    @Override
+    public void onApplicationEvent(ApplicationStartedEvent event) {
+        startSimulator();
+    }
+
+    private void startSimulator() {
         if (!isSimulatorEnabled(simulatorProperties.isEnabled())) return;
         LOGGER.info("Simulator is enabled for {}, interval {}", getEventType(), simulatorProperties.getInterval());
         getThreadPool().scheduleAtFixedRate(new SimulatorWorker(), simulatorProperties.getInterval());
@@ -552,11 +601,11 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
 
     private void prepare(Collection<E> events) {
         for (E event : events) {
-            count("Events");
+            countEvent("Received");
             try {
                 prepare(event);
             } catch (Exception e) {
-                LOGGER.error("Failed to prepare event " + event, e);
+                LOGGER.atError().setCause(e).log("Failed to prepare event {}", event);
             }
         }
     }
@@ -567,12 +616,12 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
         transactionTemplate.execute(status -> {
             for (E event : events) {
                 try {
-                    time("Persist", (t) -> persist(event));
+                    time("Persist", (t) -> doPersist(event));
                 } catch (Exception e) {
                     status.setRollbackOnly();
                     persisted.set(false);
-                    LOGGER.warn("Failed to persist event in a common transaction, rollback and persist " +
-                            "individual events, current event: " + event, e);
+                    LOGGER.atError().setCause(e).log("Failed to persist event in a common transaction, rollback and persist " +
+                            "individual events, current event: {}", event);
                 }
             }
             return null;
@@ -587,12 +636,21 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
             try {
                 TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
                 transactionTemplate.execute(status -> {
-                    time("Persist", (t) -> persist(event));
+                    time("Persist", (t) -> doPersist(event));
                     return null;
                 });
             } catch (Exception e) {
-                LOGGER.error("Failed to persist event: " + event, e);
+                LOGGER.atWarn().setCause(e).log("Failed to persist event: {}", event);
             }
+        }
+    }
+
+    private void doPersist(E event) {
+        try {
+            persist(event);
+            countEvent("Persisted");
+        } catch (Exception e) {
+            LOGGER.atError().setCause(e).log("Failed to persist event {}", event);
         }
     }
 

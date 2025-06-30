@@ -5,7 +5,7 @@ import net.datafaker.providers.base.Shakespeare;
 import net.microfalx.heimdall.protocol.core.Address;
 import net.microfalx.heimdall.protocol.core.Event;
 import net.microfalx.heimdall.protocol.core.ProtocolClient;
-import net.microfalx.heimdall.protocol.core.ProtocolService;
+import net.microfalx.lang.ThreadUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.zip.GZIPOutputStream;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
@@ -28,7 +30,7 @@ import static net.microfalx.lang.ArgumentUtils.requireNonNull;
  */
 public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClient<E>> implements InitializingBean {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolSimulator.class);
 
     private final ProtocolSimulatorProperties properties;
 
@@ -39,6 +41,7 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
     private final List<Address> targetAddresses = new ArrayList<>();
     private final List<ProtocolClient<E>> clients = new ArrayList<>();
     private final Faker faker = new Faker();
+    private final Lock lock = new ReentrantLock();
 
     public ProtocolSimulator(ProtocolSimulatorProperties properties) {
         requireNonNull(properties);
@@ -77,19 +80,17 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
     }
 
     /**
-     * Invoked to simulate an event, if the simulator is enabled.
+     * Invoked to simulate events.
+     * <p>
+     * If the simulator is not enabled, the method returns right away.
      */
     public final void simulate() {
         if (!isEnabled()) return;
-        int eventCount = properties.getMinimumEventCount() + ThreadLocalRandom.current().nextInt(properties.getMaximumEventCount());
-        for (int i = 0; i < eventCount; i++) {
-            Address sourceAddress = getRandomSourceAddress();
-            Address targetAddress = getRandomTargetAddress();
-            C client = (C) getRandomClient();
+        if (lock.tryLock()) {
             try {
-                simulate(client, sourceAddress, targetAddress, i + 1);
-            } catch (IOException e) {
-                LOGGER.atWarn().setCause(e).log("Failed to send simulated event to {}", client.getHostName());
+                simulateUnderLock();
+            } finally {
+                lock.unlock();
             }
         }
     }
@@ -304,6 +305,25 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
             }
         }
         return data;
+    }
+
+    private void simulateUnderLock() {
+        int eventCount = properties.getMinimumEventCount() + ThreadLocalRandom.current().nextInt(properties.getMaximumEventCount());
+        for (int i = 0; i < eventCount; i++) {
+            Address sourceAddress = getRandomSourceAddress();
+            Address targetAddress = getRandomTargetAddress();
+            C client = (C) getRandomClient();
+            try {
+                simulate(client, sourceAddress, targetAddress, i + 1);
+            } catch (IOException e) {
+                LOGGER.atWarn().setCause(e).log("Failed to send simulated event to {}", client.getHostName());
+            }
+            waitForRate();
+        }
+    }
+
+    private void waitForRate() {
+        ThreadUtils.sleepMillis(1000 / properties.getRate());
     }
 
     private String getNextSentence() {

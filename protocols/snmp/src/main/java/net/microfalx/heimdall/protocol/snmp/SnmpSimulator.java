@@ -20,15 +20,24 @@ import static net.microfalx.lang.ConcurrencyUtils.await;
 @Component
 public class SnmpSimulator extends ProtocolSimulator<SnmpEvent, SnmpClient> {
 
-    private final SnmpProperties configuration;
+    private final SnmpProperties properties;
     private final MibService mibService;
     private final CountDownLatch latch = new CountDownLatch(1);
     private volatile List<MibModule> modules = Collections.emptyList();
 
-    public SnmpSimulator(ProtocolSimulatorProperties properties, SnmpProperties configuration, MibService mibService) {
+    public SnmpSimulator(ProtocolSimulatorProperties properties, SnmpProperties snmpProperties, MibService mibService) {
         super(properties);
-        this.configuration = configuration;
+        this.properties = snmpProperties;
         this.mibService = mibService;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        if (super.isEnabled()) {
+            return true;
+        } else {
+            return properties.isSimulatorEnabled();
+        }
     }
 
     @Override
@@ -53,7 +62,7 @@ public class SnmpSimulator extends ProtocolSimulator<SnmpEvent, SnmpClient> {
     @Override
     protected Collection<SnmpClient> createClients() {
         SnmpClient udpClient = new SnmpClient();
-        udpClient.setPort(configuration.getUdpPort());
+        udpClient.setPort(properties.getUdpPort());
         return Arrays.asList(udpClient);
     }
 

@@ -6,6 +6,8 @@ import net.microfalx.lang.Identifiable;
 import net.microfalx.lang.Nameable;
 import net.microfalx.resource.Resource;
 
+import java.io.IOException;
+
 /**
  * Base class for protocol data sets used in the simulator.
  * <p>
@@ -18,7 +20,7 @@ public interface ProtocolDataSet<M, F extends Field<M>, ID> extends Identifiable
      *
      * @return a non-null
      */
-    Resource getResource();
+    Resource getResource() throws IOException;
 
     /**
      * Returns the metadata associated with this data set.

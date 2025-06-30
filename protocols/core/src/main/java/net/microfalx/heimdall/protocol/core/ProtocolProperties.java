@@ -15,6 +15,13 @@ import static java.time.Duration.ofSeconds;
 @Setter
 public class ProtocolProperties {
 
+    /**
+     * The size of a batch of events to be processed at once.
+     */
     private int batchSize = 100;
+
+    /**
+     * The interval at which batches of events are processed.
+     */
     private Duration batchInterval = ofSeconds(5);
 }
