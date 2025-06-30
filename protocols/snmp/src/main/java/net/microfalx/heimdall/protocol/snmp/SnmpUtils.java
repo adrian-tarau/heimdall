@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.protocol.snmp;
 
+import net.microfalx.lang.ArgumentUtils;
 import net.microfalx.lang.ObjectUtils;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.metrics.Metrics;
@@ -9,9 +10,7 @@ import org.snmp4j.agent.ManagedObject;
 import org.snmp4j.agent.mo.*;
 import org.snmp4j.agent.mo.snmp.RowCount;
 import org.snmp4j.agent.mo.snmp.dh.UsmDHParametersImpl;
-import org.snmp4j.smi.Address;
-import org.snmp4j.smi.OID;
-import org.snmp4j.smi.Variable;
+import org.snmp4j.smi.*;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -168,6 +167,30 @@ public class SnmpUtils {
         } else {
             return address.toString();
         }
+    }
+
+    /**
+     * Creates a new SNMP variable based on the specified type and value.
+     *
+     * @param type  the type of the variable as defined in SMIConstants
+     * @param value the value of the variable as a string
+     * @return a non-null instance
+     */
+    public static Variable createVariable(int type, String value) {
+        requireNonNull(value);
+        return switch (type) {
+            case SMIConstants.SYNTAX_INTEGER32 -> new Integer32(Integer.parseInt(value));
+            case SMIConstants.SYNTAX_OCTET_STRING -> new OctetString(value);
+            case SMIConstants.SYNTAX_NULL -> new Null();
+            case SMIConstants.SYNTAX_OBJECT_IDENTIFIER -> new OID(value);
+            case SMIConstants.SYNTAX_IPADDRESS -> new IpAddress(value);
+            case SMIConstants.SYNTAX_COUNTER32 -> new Counter32(Long.parseLong(value));
+            case SMIConstants.SYNTAX_GAUGE32 -> new Gauge32(Long.parseLong(value));
+            case SMIConstants.SYNTAX_TIMETICKS -> new TimeTicks(Long.parseLong(value));
+            case SMIConstants.SYNTAX_OPAQUE -> new Opaque(value.getBytes());
+            case SMIConstants.SYNTAX_COUNTER64 -> new Counter64(Long.parseLong(value));
+            default -> throw new IllegalArgumentException("Unsupported type: " + type);
+        };
     }
 
     private static char getScopeSeparator(boolean inclusion, boolean start) {

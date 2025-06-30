@@ -33,12 +33,10 @@ public class AgentSimulatorParser {
                 OID oid = new OID(data[0]);
                 String typeAsString = data[1];
                 int type;
-                char modifier = 0;
                 String value = "";
                 if (data.length == 3) value = data[2];
                 String functionType = "";
                 if (typeAsString.endsWith("x") || typeAsString.endsWith("e")) {
-                    modifier = typeAsString.charAt(typeAsString.length() - 1);
                     type = Integer.parseInt(typeAsString.substring(0, typeAsString.length() - 1));
                 } else if (typeAsString.contains(":")) {
                     functionType = typeAsString.split(":")[1];
@@ -47,48 +45,15 @@ public class AgentSimulatorParser {
                     type = Integer.parseInt(typeAsString);
                 }
                 AgentSimulatorRule.Function function = getFunction(type, functionType, value);
-                if (function == null) {
-                    value = getValue(type, modifier, value);
-                } else {
-                    value = null;
-                }
-                AgentSimulatorRule agentSimulatorRule = new AgentSimulatorRule(oid, type, value, function);
+                Variable variable = null;
+                if (function == null) variable = SnmpUtils.createVariable(type, value);
+                AgentSimulatorRule agentSimulatorRule = new AgentSimulatorRule(oid, type, variable, true, function);
                 rules.add(agentSimulatorRule);
             }
         }
         return rules;
     }
 
-    private String getValue(int type, char modifier, String value) {
-        switch (type) {
-            case 2:
-                return new Integer32(Integer.parseInt(value)).toString();
-            case 4:
-                if (modifier == 'x') {
-                    return new OctetString(value).toHexString();
-                } else {
-                    return new OctetString(value).toString();
-                }
-            case 5:
-                return new Null().toString();
-            case 6:
-                return new OID(value).toString();
-            case 64:
-                return new IpAddress(value).toString();
-            case 65:
-                return new Counter32(Long.parseLong(value)).toString();
-            case 66:
-                return new Gauge32(Long.parseLong(value)).toString();
-            case 67:
-                return new TimeTicks(Long.parseLong(value)).toString();
-            case 68:
-                return new Opaque(value.getBytes()).toString();
-            case 70:
-                return new Counter64(Long.parseLong(value)).toString();
-            default:
-                throw new IllegalArgumentException("Unsupported type: " + type);
-        }
-    }
 
     private AgentSimulatorRule.Function getFunction(int type, String functionType, String value) {
         if ("numeric".equals(functionType) && (type == 2 || type == 65 || type == 66 || type == 67 || type == 70)) {

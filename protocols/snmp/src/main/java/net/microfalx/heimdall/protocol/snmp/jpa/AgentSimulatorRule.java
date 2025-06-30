@@ -6,11 +6,9 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import net.microfalx.bootstrap.dataset.annotation.Filterable;
 import net.microfalx.bootstrap.jdbc.entity.surrogate.NamedAndTaggedAndTimestampedIdentityAware;
-import net.microfalx.lang.annotation.Description;
-import net.microfalx.lang.annotation.NaturalId;
-import net.microfalx.lang.annotation.Position;
-import net.microfalx.lang.annotation.Visible;
+import net.microfalx.lang.annotation.*;
 
 @Entity
 @Table(name = "protocol_snmp_agent_simulator_rule")
@@ -28,4 +26,11 @@ public class AgentSimulatorRule extends NamedAndTaggedAndTimestampedIdentityAwar
     @Position(100)
     @Description("A text file containing the SNMP agent simulator rule")
     private String content;
+
+    @Column(name = "enabled",nullable = false)
+    @Position(200)
+    @Description("Indicates whether the simulator rule is enabled or not")
+    @Width("90px")
+    @Filterable()
+    private boolean enabled=true;
 }
