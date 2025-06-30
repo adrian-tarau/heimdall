@@ -42,15 +42,15 @@ class SystemMessageBuilder {
             }
             newParagraph(builder);
         }
-        if (isNotEmpty(prompt.getContext())) {
-            String context = service.getPromptFragment(model, prompt, Prompt.Fragment.CONTEXT, prompt.getContext());
+        if (isNotEmpty(prompt.getExamples())) {
+            String context = service.getPromptFragment(model, prompt, Prompt.Fragment.EXAMPLES, prompt.getExamples());
             if (isNotEmpty(context)) {
                 LlmUtils.appendSentence(builder, context).append("\n");
             }
             newParagraph(builder);
         }
-        if (isNotEmpty(prompt.getExamples())) {
-            String context = service.getPromptFragment(model, prompt, Prompt.Fragment.EXAMPLES, prompt.getExamples());
+        if (isNotEmpty(prompt.getContext())) {
+            String context = service.getPromptFragment(model, prompt, Prompt.Fragment.CONTEXT, prompt.getContext());
             if (isNotEmpty(context)) {
                 LlmUtils.appendSentence(builder, context).append("\n");
             }

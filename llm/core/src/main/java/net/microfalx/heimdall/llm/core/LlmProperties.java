@@ -35,9 +35,15 @@ public class LlmProperties {
 
     /**
      * The maximum number of parallel requests each model can process simultaneously. By default, this
-     * is set to 4 (or 1, depending on memory availability),
+     * is set to 4 (or 1, depending on memory availability)
      */
     private int maximumConcurrentRequests = 4;
+
+    /**
+     * The maximum number of input events that can be processed in a single request. This is used to limit
+     * the size of the input to the LLM models.
+     */
+    private int maximumInputEvents = 100;
 
     /**
      * Indicates whether the LLM service has access to the internet.
@@ -58,6 +64,11 @@ public class LlmProperties {
      * The interval to auto-save chat messages
      */
     private Duration chatAutoSaveInterval = Duration.ofSeconds(30);
+
+    /**
+     * The duration of a chat request before it times out.
+     */
+    private Duration chatRequestTimeout = Duration.ofSeconds(60);
 
     /**
      * The default provider to use instead of the one selected.

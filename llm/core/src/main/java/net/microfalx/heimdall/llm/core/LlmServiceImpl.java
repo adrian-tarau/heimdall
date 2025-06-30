@@ -7,13 +7,16 @@ import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import dev.langchain4j.store.memory.chat.InMemoryChatMemoryStore;
 import jakarta.annotation.PreDestroy;
+import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import net.microfalx.bootstrap.core.async.ThreadPoolFactory;
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
+import net.microfalx.bootstrap.dataset.DataSet;
 import net.microfalx.bootstrap.dataset.DataSetExport;
 import net.microfalx.bootstrap.dataset.DataSetRequest;
 import net.microfalx.bootstrap.model.Field;
+import net.microfalx.bootstrap.model.Metadata;
 import net.microfalx.bootstrap.resource.ResourceService;
 import net.microfalx.bootstrap.search.IndexService;
 import net.microfalx.bootstrap.search.SearchService;
@@ -31,6 +34,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.File;
 import java.io.IOException;
@@ -343,18 +348,29 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
      * Returns any data set associated with the chat as a JSON string.
      *
      * @param chat the chat to get the data set from
-     * @return the data set as a JSON string, never null
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     void getDataSetAsJson(Chat chat, Map<String, Object> variables) {
         requireNonNull(chat);
-        Page page = null;
+
         DataSetRequest request = chat.getFeature(DataSetRequest.class);
+        TransactionTemplate transactionTemplate = getTransactionTemplate(request.getDataSet());
+        if (transactionTemplate != null) {
+            transactionTemplate.execute(status -> doGetDataSetAsJsonUnder(chat, variables));
+        } else {
+            doGetDataSetAsJsonUnder(chat, variables);
+        }
+    }
+
+    Object doGetDataSetAsJsonUnder(Chat chat, Map<String, Object> variables) {
+        DataSetRequest<?, ?, ?> request = chat.getFeature(DataSetRequest.class);
+        Page<?> page = null;
         if (request != null) {
             page = fireGetDataSet(chat, request);
         }
         update(chat, request, "SCHEMA", true, page, variables);
         update(chat, request, "DATASET", false, page, variables);
+        return null;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -362,9 +378,10 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
                         Page page, Map<String, Object> variables) {
         Resource resource;
         if (page != null) {
-            DataSetExport<Object, Field<Object>, Object> dataSetExport = DataSetExport.create(DataSetExport.Format.JSON)
+            DataSetExport<Object, Field<Object>, Object> export = DataSetExport.create(DataSetExport.Format.JSON)
                     .setIncludeMetadata(schema).setIncludeData(!schema);
-            resource = dataSetExport.export(dataSetRequest.getDataSet(), page);
+            export.initialize(getApplicationContext());
+            resource = export.export(dataSetRequest.getDataSet(), page);
         } else {
             LOGGER.warn("No data set found for chat {}", chat.getId());
             resource = Resource.text(JSON_ERROR);
@@ -455,6 +472,16 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         persistence.llmService = this;
         persistence.setApplicationContext(getApplicationContext());
         cache.setApplicationContext(getApplicationContext());
+    }
+
+    private <M, F extends Field<M>, ID> TransactionTemplate getTransactionTemplate(DataSet<M, F, ID> dataSet) {
+        Metadata<M, F, ID> metadata = dataSet.getMetadata();
+        PlatformTransactionManager transactionManager = getBean(PlatformTransactionManager.class);
+        if (transactionManager != null && metadata.hasAnnotation(Entity.class)) {
+            return new TransactionTemplate(transactionManager);
+        } else {
+            return null;
+        }
     }
 
     private void initResources() {

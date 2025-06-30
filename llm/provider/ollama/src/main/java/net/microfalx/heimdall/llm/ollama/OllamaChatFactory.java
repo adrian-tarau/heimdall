@@ -7,12 +7,12 @@ import net.microfalx.heimdall.llm.api.Chat;
 import net.microfalx.heimdall.llm.api.LlmNotFoundException;
 import net.microfalx.heimdall.llm.api.Model;
 import net.microfalx.heimdall.llm.api.Prompt;
+import net.microfalx.heimdall.llm.core.AbstractChatFactory;
 import net.microfalx.lang.StringUtils;
 
-import java.time.Duration;
 import java.util.ArrayList;
 
-public class OllamaChatFactory implements Chat.Factory {
+public class OllamaChatFactory extends AbstractChatFactory {
 
     @Override
     public Chat createChat(Prompt prompt, Model model) {
@@ -26,7 +26,7 @@ public class OllamaChatFactory implements Chat.Factory {
                 .stop(new ArrayList<>(model.getStopSequences()))
                 .topP(model.getTopP()).topK(model.getTopK())
                 .responseFormat(ResponseFormat.TEXT)
-                .timeout(Duration.ofSeconds(10))
+                .timeout(getProperties().getChatRequestTimeout())
                 .build();
         return new OllamaChat(prompt, model).setStreamingChatModel(chatModel);
     }

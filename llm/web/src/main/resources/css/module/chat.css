@@ -53,6 +53,10 @@
     margin: 5px 0 0 5px;
 }
 
+.llm-chat-info pre code {
+    white-space: break-spaces !important;
+}
+
 .llm-chat-messages {
     max-width: 900px !important;
     padding: 5px;

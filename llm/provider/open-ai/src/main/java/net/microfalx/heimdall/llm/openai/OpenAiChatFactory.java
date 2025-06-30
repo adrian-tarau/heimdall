@@ -31,6 +31,7 @@ public class OpenAiChatFactory extends AbstractChatFactory {
                 .responseFormat(model.getResponseFormat().name())
                 .stop(new ArrayList<>(model.getStopSequences())).strictTools(true)
                 .topP(model.getTopP())
+                .timeout(getProperties().getChatRequestTimeout())
                 .build();
         return new OpenAiChat(prompt, model).setStreamingChatModel(chatModel);
     }

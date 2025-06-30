@@ -31,8 +31,10 @@ public class DefaultLlmListener extends ApplicationContextSupport implements Llm
 
     @Override
     public <M, F extends Field<M>, ID> Page<M> getPage(Chat chat, DataSetRequest<M, F, ID> request) {
-        Integer maximumModelCount = ObjectUtils.defaultIfNull(chat.getPrompt().getMaximumInputEvents(), 500);
+        LlmProperties properties = getBean(LlmProperties.class);
+        Integer maximumModelCount = ObjectUtils.defaultIfNull(chat.getPrompt().getMaximumInputEvents(), properties.getMaximumInputEvents());
         Pageable pageable = Pageable.ofSize(maximumModelCount);
         return request.getDataSet().findAll(pageable, request.getFilter());
     }
+
 }
