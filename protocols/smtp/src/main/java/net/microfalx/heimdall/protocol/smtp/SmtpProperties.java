@@ -11,8 +11,21 @@ import org.springframework.context.annotation.Configuration;
 @Setter
 public class SmtpProperties {
 
+    /**
+     * The host name of the SMTP server.
+     */
     private int port = 2525;
+
+    /**
+     * Whether the SMTP server requires TLS.
+     */
     private boolean requireTLS;
+
+    /**
+     * Whether the SNMP simulator is enabled.
+     */
+    private boolean simulatorEnabled;
+
     private int maxMessageSize = 10_000_000;
     private int connectionTimeout = 5000;
     private int maxConnections = 20;

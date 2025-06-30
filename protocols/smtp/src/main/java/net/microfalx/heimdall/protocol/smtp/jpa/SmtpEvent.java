@@ -48,6 +48,7 @@ public class SmtpEvent extends Event {
     @OneToOne
     @JoinColumn(name = "message_id", nullable = false)
     @Visible(value = false)
+    @Description("The body of the email")
     private Part message;
 
     @Column(name = "attachment_count", nullable = false)

@@ -1,6 +1,5 @@
 package net.microfalx.heimdall.protocol.smtp;
 
-import jakarta.mail.internet.MimeMessage;
 import net.microfalx.heimdall.protocol.core.Body;
 import net.microfalx.heimdall.protocol.core.Event;
 import net.microfalx.heimdall.protocol.core.Part;
@@ -8,28 +7,22 @@ import net.microfalx.heimdall.protocol.core.ProtocolService;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpAttachment;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpAttachmentRepository;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpEventRepository;
-import net.microfalx.resource.Resource;
+import net.microfalx.heimdall.protocol.smtp.simulator.SmtpSimulator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Properties;
 
 import static net.microfalx.heimdall.protocol.core.ProtocolConstants.MAX_NAME_LENGTH;
-import static net.microfalx.lang.ArgumentUtils.requireNonNull;
-import static net.microfalx.lang.ExceptionUtils.rethrowException;
-import static net.microfalx.lang.StringUtils.isNotEmpty;
 
 @Service
 public final class SmtpService extends ProtocolService<SmtpEvent, net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent> {
 
     @Autowired
-    private SmtpProperties configuration;
+    private SmtpProperties properties;
 
     @Autowired
-    private SmtpGatewayProperties gatewayConfiguration;
+    private SmtpGateway gateway;
 
     @Autowired
     private SmtpEventRepository repository;
@@ -38,9 +31,10 @@ public final class SmtpService extends ProtocolService<SmtpEvent, net.microfalx.
     private SmtpSimulator smtpSimulator;
 
     @Autowired
-    private SmtpAttachmentRepository attachmentRepository;
+    private SmtpServer smtpServer;
 
-    private JavaMailSender mailSender;
+    @Autowired
+    private SmtpAttachmentRepository attachmentRepository;
 
     @Override
     protected Event.Type getEventType() {
@@ -52,19 +46,18 @@ public final class SmtpService extends ProtocolService<SmtpEvent, net.microfalx.
         return "/protocol/smtp";
     }
 
-    /**
-     * Forwards an email to real accounts.
-     *
-     * @param resource the resource containing the email MIME message
-     */
-    public void forward(Resource resource) {
-        requireNonNull(resource);
-        try {
-            JavaMailSenderImpl mailSender = createMailSender();
-            MimeMessage mimeMessage = mailSender.createMimeMessage(resource.getInputStream());
-            mailSender.send(mimeMessage);
-        } catch (Exception e) {
-            rethrowException(e);
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        super.afterPropertiesSet();
+        smtpServer.addConsumer(this::accept);
+    }
+
+    @Override
+    protected boolean isSimulatorEnabled(boolean enabled) {
+        if (super.isSimulatorEnabled(enabled)) {
+            return true;
+        } else {
+            return properties.isSimulatorEnabled();
         }
     }
 
@@ -96,9 +89,9 @@ public final class SmtpService extends ProtocolService<SmtpEvent, net.microfalx.
         updateReference(smtpEvent, jpaSmtpEvent.getId());
     }
 
-    private void updateAddresses(SmtpEvent smptEvent, net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent smtpEvent) {
-        smtpEvent.setFrom(lookupAddress(smptEvent.getSource()));
-        smtpEvent.setTo(lookupAddress(smptEvent.getTargets().iterator().next()));
+    private void updateAddresses(SmtpEvent smtpEvent, net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent jpaSmtpEvent) {
+        jpaSmtpEvent.setFrom(lookupAddress(smtpEvent.getSource()));
+        jpaSmtpEvent.setTo(lookupAddress(smtpEvent.getTargets().iterator().next()));
     }
 
     /**
@@ -111,21 +104,5 @@ public final class SmtpService extends ProtocolService<SmtpEvent, net.microfalx.
         return smtpSimulator;
     }
 
-    public JavaMailSenderImpl createMailSender() {
-        JavaMailSenderImpl sender = new JavaMailSenderImpl();
-        sender.setHost(gatewayConfiguration.getHost());
-        sender.setPort(gatewayConfiguration.getPort());
-        Properties props = sender.getJavaMailProperties();
-        if (isNotEmpty(gatewayConfiguration.getUserName())) {
-            props.put("mail.smtp.auth", "true");
-            sender.setUsername(gatewayConfiguration.getUserName());
-            sender.setPassword(gatewayConfiguration.getPassword());
-        } else {
-            props.put("mail.smtp.auth", "false");
-        }
-        props.put("mail.transport.protocol", "smtp");
-        props.put("mail.smtp.starttls.enable", gatewayConfiguration.isTls());
-        mailSender = sender;
-        return sender;
-    }
+
 }

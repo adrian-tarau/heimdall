@@ -3,36 +3,34 @@ package net.microfalx.heimdall.protocol.smtp;
 import jakarta.mail.BodyPart;
 import jakarta.mail.MessagingException;
 import jakarta.mail.Multipart;
-import jakarta.mail.Session;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
-import net.microfalx.heimdall.protocol.core.Address;
-import net.microfalx.heimdall.protocol.core.Attachment;
-import net.microfalx.heimdall.protocol.core.Body;
-import net.microfalx.heimdall.protocol.core.Part;
+import net.microfalx.heimdall.protocol.core.*;
 import net.microfalx.lang.StringUtils;
+import net.microfalx.metrics.Metrics;
 import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.MimeType;
 import net.microfalx.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.subethamail.smtp.MessageContext;
 import org.subethamail.smtp.RejectException;
 import org.subethamail.smtp.helper.BasicMessageListener;
 import org.subethamail.smtp.server.SMTPServer;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.function.Consumer;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.IOUtils.getInputStreamAsBytes;
 import static net.microfalx.lang.StringUtils.isNotEmpty;
+import static net.microfalx.lang.TextUtils.isBinaryContent;
 
 /**
  * A service which acts as an SMTP server.
@@ -46,38 +44,68 @@ public class SmtpServer implements InitializingBean, BasicMessageListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SmtpServer.class);
 
-    @Autowired
-    private SmtpProperties configuration;
+    private final SmtpProperties properties;
+    private final SmtpGateway gateway;
 
-    @Autowired
-    private SmtpService smtpService;
+    private final Metrics metrics = ProtocolUtils.getMetrics(Event.Type.SMTP).withGroup("Event");
 
-    private Session session;
+    private final Collection<Consumer<SmtpEvent>> consumers = new ArrayList<>();
+
+    public SmtpServer(SmtpProperties properties, SmtpGateway gateway) {
+        requireNonNull(properties);
+        requireNonNull(gateway);
+        this.properties = properties;
+        this.gateway = gateway;
+    }
+
+    public void addConsumer(Consumer<SmtpEvent> consumer) {
+        requireNonNull(consumer);
+        this.consumers.add(consumer);
+    }
 
     @Override
     public void messageArrived(MessageContext context, String from, String to, byte[] data) throws RejectException {
         if (LOGGER.isDebugEnabled()) LOGGER.debug("Received email from {} for : {}", from, to);
         try {
-            MimeMessage message = new MimeMessage(session, new ByteArrayInputStream(data));
-            String messageID = message.getMessageID();
-            if (StringUtils.isEmpty(messageID)) messageID = UUID.randomUUID().toString();
-            SmtpEvent smtpEvent = new SmtpEvent(messageID);
-            smtpEvent.setName(message.getSubject());
-            smtpEvent.setSource(extractAddress(Arrays.asList(message.getFrom()).iterator().next()));
-            Arrays.stream(message.getAllRecipients()).map(this::extractAddress).forEach(smtpEvent::addTarget);
-            smtpEvent.setSentAt(message.getSentDate().toInstant().atZone(ZoneId.systemDefault()));
-            smtpEvent.setCreatedAt(smtpEvent.getSentAt());
-            smtpEvent.setReceivedAt(ZonedDateTime.now());
-            smtpEvent.setResource(MemoryResource.create(data));
-            Body body = extractBody(message);
-            if (body != null) smtpEvent.setBody(body);
-            extractParts(message).forEach(smtpEvent::addPart);
-            smtpService.accept(smtpEvent);
+            SmtpEvent event = createEvent(Resource.bytes(data));
+            if (event != null) {
+                fireEvent(event);
+            } else {
+                metrics.increment("Invalid");
+            }
         } catch (Exception e) {
             String message = "Failed to process email from '" + from + "' to '" + to + "'";
             LOGGER.warn(message, e);
             throw new RejectException(message + ", root cause: " + e.getMessage());
         }
+    }
+
+    public SmtpEvent createEvent(Resource resource) throws MessagingException, IOException {
+        requireNonNull(resource);
+        MimeMessage message = new MimeMessage(gateway.getSession(), resource.getInputStream());
+        if (isMimeMessageValid(message)) {
+            return createEvent(message, resource);
+        } else {
+            metrics.increment("Invalid");
+            return null;
+        }
+    }
+
+    private SmtpEvent createEvent(MimeMessage message, Resource resource) throws MessagingException, IOException {
+        String messageID = message.getMessageID();
+        if (StringUtils.isEmpty(messageID)) messageID = UUID.randomUUID().toString();
+        SmtpEvent smtpEvent = new SmtpEvent(messageID);
+        smtpEvent.setName(message.getSubject());
+        smtpEvent.setSource(extractAddress(Arrays.asList(message.getFrom()).iterator().next()));
+        Arrays.stream(message.getAllRecipients()).map(this::extractAddress).forEach(smtpEvent::addTarget);
+        smtpEvent.setSentAt(message.getSentDate().toInstant().atZone(ZoneId.systemDefault()));
+        smtpEvent.setCreatedAt(smtpEvent.getSentAt());
+        smtpEvent.setReceivedAt(ZonedDateTime.now());
+        smtpEvent.setResource(resource);
+        Body body = extractBody(message);
+        if (body != null) smtpEvent.setBody(body);
+        extractParts(message).forEach(smtpEvent::addPart);
+        return smtpEvent;
     }
 
     @Override
@@ -87,27 +115,60 @@ public class SmtpServer implements InitializingBean, BasicMessageListener {
 
     public void initialize() {
         initializeServer();
-        initializeSession();
     }
 
     private void initializeServer() {
         SMTPServer server = SMTPServer
-                .port(configuration.getPort())
-                .connectionTimeout(configuration.getConnectionTimeout(), MILLISECONDS)
-                .requireTLS(configuration.isRequireTLS())
-                .maxMessageSize(configuration.getMaxMessageSize())
-                .maxConnections(configuration.getMaxConnections())
-                .maxRecipients(configuration.getMaxRecipients())
+                .port(properties.getPort())
+                .connectionTimeout(properties.getConnectionTimeout(), MILLISECONDS)
+                .requireTLS(properties.isRequireTLS())
+                .maxMessageSize(properties.getMaxMessageSize())
+                .maxConnections(properties.getMaxConnections())
+                .maxRecipients(properties.getMaxRecipients())
                 .requireAuth(false)
                 .messageHandler(this)
                 .build();
         server.start();
-        LOGGER.info("Listen on " + server.getPort() + ",TLS " + server.getRequireTLS());
+        LOGGER.info("Listen on {},TLS {}", server.getPort(), server.getRequireTLS());
     }
 
-    private void initializeSession() {
-        Properties properties = new Properties();
-        session = Session.getDefaultInstance(properties);
+    private boolean isMimeMessageValid(MimeMessage message) {
+        boolean valid = false;
+        try {
+            valid = isAddressValid(message.getFrom()) && isAddressValid(message.getAllRecipients());
+        } catch (Exception e) {
+            // if it fails, it is also invalid
+        }
+        return valid;
+    }
+
+    private boolean isAddressValid(jakarta.mail.Address... addresses) {
+        for (jakarta.mail.Address address : addresses) {
+            if (!isAddressValid(address)) return false;
+        }
+        return true;
+    }
+
+    private boolean isAddressValid(jakarta.mail.Address address) {
+        if (address == null) return false;
+        if (address instanceof InternetAddress internetAddress) {
+            return !(isBinaryContent(internetAddress.getAddress()) || isBinaryContent(internetAddress.getPersonal()));
+        }
+        return !isBinaryContent(address.toString());
+    }
+
+    private void fireEvent(SmtpEvent event) {
+        if (consumers.isEmpty()) {
+            LOGGER.warn("No consumer registered for SMTP event: {}", event.getName());
+        } else {
+            consumers.forEach(consumer -> {
+                try {
+                    consumer.accept(event);
+                } catch (Exception e) {
+                    LOGGER.atError().setCause(e).log("Failed to process SMTP event: {}", event.getName(), e);
+                }
+            });
+        }
     }
 
     private Address extractAddress(jakarta.mail.Address mimeAddress) {

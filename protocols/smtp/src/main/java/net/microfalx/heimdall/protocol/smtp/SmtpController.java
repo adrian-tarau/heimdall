@@ -35,7 +35,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Controller
 @RequestMapping("/protocol/smtp")
-@DataSet(model = SmtpEvent.class, viewTemplate = "smtp/event_view", viewClasses = "modal-xl")
+@DataSet(model = SmtpEvent.class, viewTemplate = "smtp/event_view", viewClasses = "modal-xl",tags = {"ai", "smtp"})
 @Help("protocol/smtp")
 public class SmtpController extends ProtocolController<SmtpEvent> {
 
@@ -49,6 +49,9 @@ public class SmtpController extends ProtocolController<SmtpEvent> {
 
     @Autowired
     private SmtpService smtpService;
+
+    @Autowired
+    private SmtpGateway smtpGateway;
 
     @Override
     protected void updateModel(net.microfalx.bootstrap.dataset.DataSet<SmtpEvent, Field<SmtpEvent>, Integer> dataSet, Model controllerModel, SmtpEvent dataSetModel, State state) {
@@ -86,7 +89,7 @@ public class SmtpController extends ProtocolController<SmtpEvent> {
         net.microfalx.heimdall.protocol.core.jpa.Part message = event.getMessage();
         Resource resource = ResourceFactory.resolve(message.getResource()).withMimeType(message.getMimeType());
         try {
-            smtpService.forward(resource);
+            smtpGateway.send(resource);
             return JsonResponse.success("Email successfully forwarded to recipients");
         } catch (Exception e) {
             LOGGER.warn("Failed to forward email with ID {}, root cause: {}", id, getRootCauseMessage(e));

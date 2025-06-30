@@ -4,6 +4,8 @@ import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
+import net.microfalx.bootstrap.test.annotation.DisableJpa;
+import net.microfalx.heimdall.protocol.core.simulator.ProtocolSimulatorProperties;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpAttachmentRepository;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpEventRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +22,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.MimeMessagePreparator;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 
 import java.io.IOException;
@@ -30,20 +33,29 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest()
 @SpringBootConfiguration
 @EnableAutoConfiguration()
+@DisableJpa
 @ComponentScan({"net.microfalx.bootstrap", "net.microfalx.heimdall"})
 @Sql(statements = {"delete from protocol_smtp_attachments", "delete from protocol_smtp_events"})
 public class SmtpServiceIntegrationTest {
 
+    @MockitoBean
+    private SmtpEventRepository smtpEventRepository;
+    @MockitoBean
+    private SmtpAttachmentRepository smtpAttachmentRepository;
+
     @Autowired
     private SmtpProperties smtpProperties;
+    @Autowired
+    private SmtpGatewayProperties smtpGatewayProperties;
+    @Autowired
+    private ProtocolSimulatorProperties protocolSimulatorProperties;
+
     @Autowired
     private SmtpServer smtpServer;
     @Autowired
     private SmtpService smtpService;
     @Autowired
-    private SmtpEventRepository smtpEventRepository;
-    @Autowired
-    private SmtpAttachmentRepository smtpAttachmentRepository;
+    private SmtpGateway smtpGateway;
 
     private JavaMailSender sender;
     private SmtpClient smtpClient = new SmtpClient();
@@ -51,6 +63,7 @@ public class SmtpServiceIntegrationTest {
     @BeforeEach
     void setup() {
         smtpClient.initializeMailSender();
+        initMailSender();
     }
 
     @Test

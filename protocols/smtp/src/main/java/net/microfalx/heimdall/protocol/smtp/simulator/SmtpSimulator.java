@@ -1,16 +1,20 @@
-package net.microfalx.heimdall.protocol.smtp;
+package net.microfalx.heimdall.protocol.smtp.simulator;
 
 import net.datafaker.Faker;
-import net.microfalx.heimdall.protocol.core.Address;
-import net.microfalx.heimdall.protocol.core.Attachment;
-import net.microfalx.heimdall.protocol.core.Body;
-import net.microfalx.heimdall.protocol.core.ProtocolClient;
+import net.microfalx.heimdall.protocol.core.*;
 import net.microfalx.heimdall.protocol.core.simulator.ProtocolSimulator;
 import net.microfalx.heimdall.protocol.core.simulator.ProtocolSimulatorProperties;
+import net.microfalx.heimdall.protocol.smtp.SmtpClient;
+import net.microfalx.heimdall.protocol.smtp.SmtpEvent;
+import net.microfalx.heimdall.protocol.smtp.SmtpProperties;
+import net.microfalx.heimdall.protocol.smtp.SmtpServer;
+import net.microfalx.metrics.Metrics;
 import net.microfalx.resource.ClassPathResource;
 import net.microfalx.resource.MimeType;
 import net.microfalx.resource.Resource;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
@@ -22,15 +26,29 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.GZIPOutputStream;
 
+import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.ExceptionUtils.getRootCauseMessage;
+
 @Component
 public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
 
-    private static final AtomicLong COUNTER = new AtomicLong();
-    private final SmtpProperties smtpProperties;
+    private static final Logger LOGGER = LoggerFactory.getLogger(SmtpSimulator.class);
 
-    public SmtpSimulator(ProtocolSimulatorProperties properties, SmtpProperties smtpProperties) {
+    private static final AtomicLong COUNTER = new AtomicLong();
+    private final SmtpProperties properties;
+    private final SmtpServer server;
+
+    private final Metrics metrics = ProtocolUtils.getMetrics(Event.Type.SMTP).withGroup("Simulator");
+
+    private volatile Iterator<MimeMessage> mimeMessages;
+
+    public SmtpSimulator(ProtocolSimulatorProperties properties, SmtpProperties smtpProperties,
+                         SmtpServer server) {
         super(properties);
-        this.smtpProperties = smtpProperties;
+        requireNonNull(smtpProperties);
+        requireNonNull(server);
+        this.properties = smtpProperties;
+        this.server = server;
     }
 
     /**
@@ -62,9 +80,18 @@ public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
     @Override
     protected Collection<SmtpClient> createClients() {
         SmtpClient smtpClient = new SmtpClient();
-        smtpClient.setPort(smtpProperties.getPort());
+        smtpClient.setPort(properties.getPort());
         smtpClient.setTransport(ProtocolClient.Transport.UDP);
         return Arrays.asList(smtpClient);
+    }
+
+    @Override
+    public boolean isEnabled() {
+        if (super.isEnabled()) {
+            return true;
+        } else {
+            return properties.isSimulatorEnabled();
+        }
     }
 
     /**
@@ -78,6 +105,33 @@ public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
      */
     @Override
     protected void simulate(SmtpClient client, Address sourceAddress, Address targetAddress, int index) throws IOException {
+        SmtpEvent smtpEvent;
+        if (shouldUseExternalDataSets()) {
+            smtpEvent = doSimulateWithDataSet();
+        } else {
+            smtpEvent = doSimulateWithRandomData(sourceAddress, targetAddress, index);
+        }
+        if (smtpEvent != null) client.send(smtpEvent);
+    }
+
+    private SmtpEvent doSimulateWithDataSet() {
+        if (mimeMessages == null || !mimeMessages.hasNext()) {
+            ApacheMBoxDataSet dataSet = (ApacheMBoxDataSet) new ApacheMBoxDataSet.Factory().createDataSet();
+            mimeMessages = dataSet.iterator();
+        }
+        if (mimeMessages.hasNext()) {
+            Resource resource = Resource.text(mimeMessages.next().getContent());
+            try {
+                return server.createEvent(resource);
+            } catch (Exception e) {
+                metrics.increment("Invalid MimeMessage");
+                LOGGER.debug("Failed to create MimeMessage from resource: {}, root cause {}", resource, getRootCauseMessage(e));
+            }
+        }
+        return null;
+    }
+
+    private SmtpEvent doSimulateWithRandomData(Address sourceAddress, Address targetAddress, int index) {
         SmtpEvent smtpEvent = new SmtpEvent();
         smtpEvent.setSource(sourceAddress);
         smtpEvent.addTarget(targetAddress);
@@ -87,7 +141,7 @@ public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
         smtpEvent.setReceivedAt(ZonedDateTime.now());
         smtpEvent.setCreatedAt(ZonedDateTime.now());
         createAttachments(smtpEvent);
-        client.send(smtpEvent);
+        return smtpEvent;
     }
 
     private Body createBody() {
