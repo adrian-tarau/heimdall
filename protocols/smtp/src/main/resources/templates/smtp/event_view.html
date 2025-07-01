@@ -14,6 +14,7 @@
             <div class="row">
                 <div class="col-md-8"><span class="fw-bold">To: </span><span class="fst-italic" th:text="${model.to.name}"></span>
                     <a class="icon-link" href="#" th:attr="onclick=|Application.fire('smtp.forward', '${modelId}')|" component:tooltip-text="Forward the email to initial recipients"><i class="fa-solid fa-share"></i></a>
+                    <a class="icon-link" href="#" th:attr="onclick=|Application.fire('smtp.download', '${modelId}')|" component:tooltip-text="Download the email"><i class="fa-solid fa-download"></i></a>
                 </div>
                 <div class="col-md-4"><span class="fw-bold">Sent at: </span><span class="fst-italic" th:text="${#formats.format(model.sentAt)}"></span></div>
             </div>

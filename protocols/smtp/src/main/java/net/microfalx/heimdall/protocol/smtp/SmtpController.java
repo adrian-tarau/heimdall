@@ -13,6 +13,7 @@ import net.microfalx.heimdall.protocol.core.ProtocolController;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpAttachment;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpEventRepository;
+import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.MimeType;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceFactory;
@@ -35,7 +36,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Controller
 @RequestMapping("/protocol/smtp")
-@DataSet(model = SmtpEvent.class, viewTemplate = "smtp/event_view", viewClasses = "modal-xl",tags = {"ai", "smtp"})
+@DataSet(model = SmtpEvent.class, canDownload = true, viewTemplate = "smtp/event_view", viewClasses = "modal-xl", tags = {"ai", "smtp"})
 @Help("protocol/smtp")
 public class SmtpController extends ProtocolController<SmtpEvent> {
 
@@ -96,5 +97,17 @@ public class SmtpController extends ProtocolController<SmtpEvent> {
             return JsonResponse.fail("Email failed to be forwarded to recipients");
         }
 
+    }
+
+    @Override
+    protected Resource download(net.microfalx.bootstrap.dataset.DataSet<SmtpEvent, Field<SmtpEvent>, Integer> dataSet, Model controllerModel, SmtpEvent dataSetModel) {
+        Resource resource = ResourceFactory.resolve(dataSetModel.getMessage().getResource());
+        String fileName = cleanupFileName(dataSetModel.getSubject()) + ".eml";
+        resource = resource.withAttribute(Resource.FILE_NAME_ATTR, fileName);
+        return resource;
+    }
+
+    private String cleanupFileName(String fileName) {
+        return fileName.replaceAll("[()\\[\\]{}<>\"']", "_");
     }
 }
