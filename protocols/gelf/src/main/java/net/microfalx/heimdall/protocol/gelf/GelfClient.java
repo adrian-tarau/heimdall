@@ -6,6 +6,7 @@ import biz.paluch.logging.gelf.intern.GelfSender;
 import biz.paluch.logging.gelf.intern.GelfSenderFactory;
 import net.microfalx.bootstrap.model.Attribute;
 import net.microfalx.heimdall.protocol.core.ProtocolClient;
+import net.microfalx.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,8 +41,12 @@ public class GelfClient extends ProtocolClient<GelfEvent> {
         return getTransport() == Transport.TCP ? 12200 : 12201;
     }
 
-    private void addAdditionalFields(MdcGelfMessageAssembler assembler) {
-        assembler.addField(new StaticMessageField("Application", "Heimdall"));
+    private void addAdditionalFields(MdcGelfMessageAssembler assembler, GelfEvent event) {
+        String application = StringUtils.defaultIfEmpty(event.getApplication(), "Heimdall");
+        assembler.addField(new StaticMessageField("Application", application));
+        if (StringUtils.isNotEmpty(event.getLogger())) {
+            assembler.addField(new StaticMessageField("LoggerName", event.getLogger()));
+        }
         try {
             assembler.addField(new StaticMessageField("Server", InetAddress.getLocalHost().getHostName()));
         } catch (UnknownHostException e) {
@@ -59,7 +64,7 @@ public class GelfClient extends ProtocolClient<GelfEvent> {
         assembler.setFilterStackTrace(true);
         assembler.setIncludeLocation(true);
         assembler.setTimestampPattern("yyyy-MM-dd HH:mm:ss,SSS");
-        addAdditionalFields(assembler);
+        addAdditionalFields(assembler, event);
     }
 
     protected GelfSender createGelfSender() throws IOException {

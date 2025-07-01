@@ -228,6 +228,6 @@ public class GelfServer implements InitializingBean, ProtocolServerHandler {
 
     private static final String[] APPLICATION_FIELDS = {"Application", "ApplicationName"};
     private static final String[] PROCESS_FIELDS = {"Process", "ProcessName", "Service", "ServiceName"};
-    private static final String[] LOGGER_FIELDS = {"LoggerName", "Category"};
+    private static final String[] LOGGER_FIELDS = {"Logger", "LoggerName", "Category"};
     private static final String[] THREAD_FIELDS = {"Thread", "ThreadName"};
 }

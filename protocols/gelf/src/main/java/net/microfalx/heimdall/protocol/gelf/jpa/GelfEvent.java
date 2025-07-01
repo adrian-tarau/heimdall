@@ -36,16 +36,16 @@ public class GelfEvent extends Event {
     @Name
     @Position(5)
     @Label("Message")
-    @Description("The short version of the log event")
+    @Description("The short version of the message associated with the log event")
     @Filterable
-    @Width("40%")
+    @Width("30%")
     private Part shortMessage;
 
     @JoinColumn(name = "long_message_id")
     @OneToOne
     @Position(6)
     @Visible(modes = Visible.Mode.VIEW)
-    @Description("The full version of th message")
+    @Description("The full version of the message associated with the log event")
     @Filterable
     private Part longMessage;
 

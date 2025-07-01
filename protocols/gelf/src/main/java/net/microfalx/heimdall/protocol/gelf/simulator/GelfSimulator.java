@@ -10,6 +10,7 @@ import net.microfalx.heimdall.protocol.core.simulator.ProtocolSimulator;
 import net.microfalx.heimdall.protocol.core.simulator.ProtocolSimulatorProperties;
 import net.microfalx.heimdall.protocol.gelf.GelfClient;
 import net.microfalx.heimdall.protocol.gelf.GelfEvent;
+import net.microfalx.heimdall.protocol.gelf.GelfProperties;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -21,11 +22,13 @@ import java.util.Iterator;
 @Component
 public class GelfSimulator extends ProtocolSimulator<GelfEvent, GelfClient> {
 
+    private final GelfProperties properties;
     private Collection<GelfDataSet> dataSets;
     private Iterator<GelfDataSet> nextDataSet;
 
-    public GelfSimulator(ProtocolSimulatorProperties properties) {
-        super(properties);
+    public GelfSimulator(ProtocolSimulatorProperties simulatorProperties, GelfProperties gelfProperties) {
+        super(simulatorProperties);
+        this.properties = gelfProperties;
     }
 
     @Override
@@ -42,6 +45,15 @@ public class GelfSimulator extends ProtocolSimulator<GelfEvent, GelfClient> {
     protected Collection<GelfClient> createClients() {
         GelfClient client = new GelfClient();
         return Arrays.asList(client);
+    }
+
+    @Override
+    public boolean isEnabled() {
+        if (super.isEnabled()) {
+            return true;
+        } else {
+            return properties.isSimulatorEnabled();
+        }
     }
 
     @Override

@@ -36,6 +36,15 @@ public final class GelfService extends ProtocolService<GelfEvent, net.microfalx.
     }
 
     @Override
+    protected boolean isSimulatorEnabled(boolean enabled) {
+        if (super.isSimulatorEnabled(enabled)) {
+            return true;
+        } else {
+            return properties.isSimulatorEnabled();
+        }
+    }
+
+    @Override
     protected void prepare(GelfEvent event) {
         lookupAddress(event.getSource());
     }

@@ -6,6 +6,8 @@ import net.microfalx.bootstrap.model.Field;
 import net.microfalx.heimdall.protocol.core.jpa.Part;
 import net.microfalx.lang.annotation.Provider;
 
+import java.util.Set;
+
 @Provider
 public class GelfEventDataSetExportCallback extends AbstractDataSetExportCallback<GelfEvent, Field<GelfEvent>, Long> {
 
@@ -29,7 +31,7 @@ public class GelfEventDataSetExportCallback extends AbstractDataSetExportCallbac
 
     @Override
     public boolean isExportable(DataSet<GelfEvent, Field<GelfEvent>, Long> dataSet, Field<GelfEvent> field, boolean exportable) {
-        return !"shortMessage".equalsIgnoreCase(field.getName());
+        return !(field.isId() || EXCLUDED_FIELDS.contains(field.getName()));
     }
 
     @Override
@@ -42,4 +44,6 @@ public class GelfEventDataSetExportCallback extends AbstractDataSetExportCallbac
             return super.getValue(dataSet, field, model, value);
         }
     }
+
+    private static final Set<String> EXCLUDED_FIELDS = Set.of("shortMessage", "fields", "version");
 }

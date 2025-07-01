@@ -2,7 +2,6 @@ package net.microfalx.heimdall.protocol.gelf.simulator.loghub;
 
 import net.microfalx.bootstrap.dsv.DsvRecord;
 import net.microfalx.heimdall.protocol.core.Address;
-import net.microfalx.heimdall.protocol.core.Body;
 import net.microfalx.heimdall.protocol.gelf.GelfEvent;
 import net.microfalx.heimdall.protocol.gelf.simulator.GelfDataSet;
 import net.microfalx.lang.UriUtils;
@@ -10,20 +9,16 @@ import net.microfalx.lang.annotation.Provider;
 import net.microfalx.resource.Resource;
 
 public class HDFSDataSet extends GelfDataSet {
+
     public HDFSDataSet(Resource resource) {
         super(resource);
+        setName("HDFS");
     }
 
     @Override
-    protected void update(GelfEvent event, Address sourceAddress, Address targetAddress) {
-        DsvRecord record = iterator().next();
-        event.setSource(sourceAddress);
-        event.addTarget(targetAddress);
-        event.setBody(Body.create(record.get("content")));
-        event.setLogger(record.get("component"));
-        event.setGelfSeverity(getSeverity(record.get("level")));
+    protected void update(GelfEvent event, Address sourceAddress, Address targetAddress, DsvRecord record) {
+        super.update(event, sourceAddress, targetAddress);
         event.add("pid", record.get("pid"));
-        event.add("correlationalId", getCorrelationalId(record.get("EventId"), record.get("EventTemplate")));
     }
 
     @Provider
@@ -31,7 +26,7 @@ public class HDFSDataSet extends GelfDataSet {
 
         public Factory() {
             super(Resource.url(UriUtils.parseUrl("https://raw.githubusercontent.com/logpai/loghub/refs/heads/master/HDFS/HDFS_2k.log_structured.csv")));
-            setName("LogHub HDFS Data Set");
+            setName("HDFS");
         }
 
         @Override
