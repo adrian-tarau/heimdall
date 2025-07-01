@@ -34,7 +34,7 @@ class SmtpSimulatorTest {
         simulatorProperties.setEnabled(true);
         SmtpGateway gateway = new SmtpGateway(gatewayProperties);
         SmtpServer server = new SmtpServer(smtpProperties, gateway);
-        simulator = new SmtpSimulator(simulatorProperties, smtpProperties, gateway, server);
+        simulator = new SmtpSimulator(simulatorProperties, smtpProperties, server);
     }
 
     @Test

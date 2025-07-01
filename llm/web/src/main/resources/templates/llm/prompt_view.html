@@ -1,0 +1,33 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="card(title, text)" class="card mb-2 p-1">
+    <div class="card-header" th:text="${title}">
+    </div>
+    <div class="card-body">
+        <p class="card-text dataset-text-mono" th:utext="${text}"></p>
+    </div>
+</div>
+
+<div th:fragment="fields">
+    <div class="container-fluid">
+        <div class="row border rounded bg-body-secondary mb-1 p-1 fs-6">
+            <div class="row">
+                <div class="col-md-8"><span class="fw-bold">Name: </span><span class="fst-italic" th:text="${model.name}"></span></div>
+                <div class="col-md-4"><span class="fw-bold">Tags: </span><span class="fst-italic" th:text="${model.tags}"></span></div>
+            </div>
+            <div class="row">
+                <div class="col-md-12"><span class="fw-bold">Description: </span><span class="fst-italic" th:text="${model.description}"></span></div>
+            </div>
+        </div>
+        <div class="row mb-1 p-1 fs-6">
+            <div th:replace="~{ llm/prompt_view :: card('Question', ${model.question})}" th:unless="${#strings.isEmpty(model.question)}"></div>
+            <div th:replace="~{ llm/prompt_view :: card('Role', ${model.role})}" th:unless="${#strings.isEmpty(model.role)}"></div>
+            <div th:replace="~{ llm/prompt_view :: card('Examples', ${model.examples})}" th:unless="${#strings.isEmpty(model.examples)}"></div>
+            <div th:replace="~{ llm/prompt_view :: card('Context', ${model.context})}" th:unless="${#strings.isEmpty(model.context)}"></div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

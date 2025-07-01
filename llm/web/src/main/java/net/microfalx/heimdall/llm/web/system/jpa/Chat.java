@@ -23,12 +23,14 @@ public class Chat extends NamedAndTaggedIdentityAware<Integer> {
     @Position(10)
     @Column(name = "user_id", nullable = false)
     @Description("The user that created the chat")
+    @Width("100px")
     private String user;
 
     @ManyToOne
     @Position(15)
     @JoinColumn(name = "model_id", nullable = false)
     @Description("The model used by this chat session")
+    @Width("100px")
     private Model model;
 
     @Column(name = "start_at", nullable = false)
@@ -51,11 +53,13 @@ public class Chat extends NamedAndTaggedIdentityAware<Integer> {
     @Column(name = "token_count", nullable = false)
     @Position(35)
     @Description("The token count of the chat")
+    @Width("100px")
     private int tokenCount;
 
     @Column(name = "duration", nullable = false)
     @Position(40)
     @Description("The duration of the chat")
     @Convert(converter = DurationConverter.class)
+    @Width("80px")
     private Duration duration;
 }

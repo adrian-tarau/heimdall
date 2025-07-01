@@ -45,24 +45,28 @@ public class Prompt extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
     @Label(value = "Maximum Input Events", group = "Settings")
     @Position(15)
     @Description("The maximum number of input events allowed for the prompt")
+    @Width("100px")
     private Integer maximumInputEvents;
 
     @Column(name = "maximum_output_tokens", nullable = false)
     @Label(value = "Maximum Output Tokens", group = "Settings")
     @Position(20)
     @Description("The maximum number of output tokens allowed for this prompt")
+    @Width("100px")
     private Integer maximumOutputTokens;
 
     @Column(name = "chain_of_thought")
     @Label(value = "Chain of Thought", group = "Settings")
     @Position(25)
     @Description("Indicates whether the prompt uses chain of thought reasoning")
+    @Width("100px")
     private boolean chainOfThought;
 
     @Column(name = "use_only_context")
     @Label(value = "Use only Context", group = "Settings")
     @Position(30)
     @Description("Indicates whether the prompt should use only the context without additional instructions")
+    @Width("100px")
     private boolean useOnlyContext;
 
     @Column(name = "examples", length = 10000)

@@ -35,13 +35,13 @@ public class Model extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
     @JoinColumn(name = "provider_id", nullable = false)
     @Description("The provider")
     @ReadOnly
+    @Width("150px")
     private Provider provider;
 
     @Position(15)
     @Column(name = "uri", length = 1000)
     @Description("The URI of the model")
     @Visible(value = false)
-
     private String uri;
 
     @Position(20)
@@ -54,12 +54,14 @@ public class Model extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
     @Position(21)
     @Column(name = "enabled", nullable = false)
     @Description("The default model use for inference")
+    @Width("80px")
     private boolean enabled;
 
     @Position(22)
     @Column(name = "default", nullable = false)
     @Description("The default model use for inference")
     @Label(value = "Default")
+    @Width("80px")
     private boolean _default;
 
     @Position(22)
@@ -74,6 +76,7 @@ public class Model extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
     @Description("A reference to the model name")
     @Visible(value = false)
     @ReadOnly
+    @Width("100px")
     private String modelName;
 
     @Position(30)
@@ -82,6 +85,7 @@ public class Model extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
     @Description("The sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output\n" +
             "more random, while lower values like 0.2 will make it more focused and deterministic")
     @Formattable(formatter = DefaultParamsFormatter.class)
+    @Width("80px")
     private Double temperature;
 
     @Position(40)
@@ -90,6 +94,7 @@ public class Model extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
     @Description("An alternative to sampling with temperature, called nucleus sampling, where the model considers\n" +
             "the results of the tokens with top_p probability mass")
     @Formattable(formatter = DefaultParamsFormatter.class)
+    @Width("80px")
     private Double topP;
 
     @Position(45)
@@ -100,6 +105,7 @@ public class Model extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
             The parameter limits the model’s output to the top-k most probable tokens at each step. This can help reduce
             incoherent or nonsensical output by restricting the model’s vocabulary""")
     @Formattable(formatter = DefaultParamsFormatter.class)
+    @Width("80px")
     private Integer topK;
 
     @Position(50)
