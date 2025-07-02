@@ -11,6 +11,7 @@ import dev.langchain4j.service.TokenStream;
 import dev.langchain4j.service.tool.ToolProvider;
 import dev.langchain4j.service.tool.ToolProviderRequest;
 import dev.langchain4j.service.tool.ToolProviderResult;
+import net.microfalx.bootstrap.dataset.DataSetRequest;
 import net.microfalx.bootstrap.security.SecurityContext;
 import net.microfalx.heimdall.llm.api.Chat;
 import net.microfalx.heimdall.llm.api.Message;
@@ -20,6 +21,7 @@ import net.microfalx.lang.NamedAndTaggedIdentifyAware;
 import net.microfalx.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -242,14 +244,7 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
     void streamCompleted(net.microfalx.heimdall.llm.api.TokenStream tokenStream) {
         inputTokenCount.addAndGet(tokenStream.getInputTokenCount());
         outputTokenCount.addAndGet(tokenStream.getOutputTokenCount());
-        StringBuilder builder = new StringBuilder();
-        addDefinitionList(builder, "Model", model.getName() + " (" + model.getProvider().getName()
-                + "), content length: " + model.getMaximumContextLength());
-        addDefinitionList(builder, "Tokens", "_Input_: " + inputTokenCount.get()
-                + ", _Output_: " + outputTokenCount.get() + ", _Total_: " + (inputTokenCount.get() + outputTokenCount.get()));
-        addDefinitionList(builder, "Parameters", "_Temperature_: " + formatNumber(model.getTemperature())
-                + ", _TopP_: " + model.getTopP() + ", _TopK_: " + model.getTopK());
-        setDescription(builder.toString());
+        updateDescription();
         changed.set(true);
     }
 
@@ -271,6 +266,28 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
             throw new IllegalStateException("No chat model has been set");
         }
         return aiService;
+    }
+
+    private void updateDescription() {
+        StringBuilder builder = new StringBuilder();
+        addDefinitionList(builder, "Model", model.getName() + " (" + model.getProvider().getName()
+                + "), content length: " + model.getMaximumContextLength());
+        addDefinitionList(builder, "Tokens", "_Input_: " + inputTokenCount.get()
+                + ", _Output_: " + outputTokenCount.get() + ", _Total_: " + (inputTokenCount.get() + outputTokenCount.get()));
+        addDefinitionList(builder, "Parameters", "_Temperature_: " + formatNumber(model.getTemperature())
+                + ", _TopP_: " + model.getTopP() + ", _TopK_: " + model.getTopK());
+        DataSetRequest<?, ?, ?> dataSetRequest = getFeature(DataSetRequest.class);
+        if (dataSetRequest != null) {
+            addDefinitionList(builder, "Data Set",
+                    "_Name_:" + dataSetRequest.getDataSet().getName()
+                            + ", _Filter_: " + dataSetRequest.getFilter().getDescription());
+        }
+        Page<?> page = getFeature(Page.class);
+        if (page != null) {
+            addDefinitionList(builder, "Data", "_Event Count_:" + page.getSize()
+                    + ", _Total Event Count_: " + page.getTotalElements());
+        }
+        setDescription(builder.toString());
     }
 
     private void addDefinitionList(StringBuilder builder, String term, String... descriptions) {
@@ -306,6 +323,7 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
         public String apply(Object o) {
             if (systemMessage == null) {
                 systemMessage = service.getSystemMessage(AbstractChat.this);
+                updateDescription();
             }
             return systemMessage;
         }

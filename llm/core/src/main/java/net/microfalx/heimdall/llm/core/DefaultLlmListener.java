@@ -1,8 +1,12 @@
 package net.microfalx.heimdall.llm.core;
 
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
+import net.microfalx.bootstrap.dataset.DataSet;
 import net.microfalx.bootstrap.dataset.DataSetRequest;
+import net.microfalx.bootstrap.dataset.DataSetUtils;
 import net.microfalx.bootstrap.model.Field;
+import net.microfalx.bootstrap.model.Metadata;
+import net.microfalx.bootstrap.model.Sort;
 import net.microfalx.heimdall.llm.api.Chat;
 import net.microfalx.heimdall.llm.api.LlmListener;
 import net.microfalx.heimdall.llm.api.LlmService;
@@ -32,9 +36,17 @@ public class DefaultLlmListener extends ApplicationContextSupport implements Llm
     @Override
     public <M, F extends Field<M>, ID> Page<M> getPage(Chat chat, DataSetRequest<M, F, ID> request) {
         LlmProperties properties = getBean(LlmProperties.class);
-        Integer maximumModelCount = ObjectUtils.defaultIfNull(chat.getPrompt().getMaximumInputEvents(), properties.getMaximumInputEvents());
-        Pageable pageable = Pageable.ofSize(maximumModelCount);
-        return request.getDataSet().findAll(pageable, request.getFilter());
+        int maximumModelCount = ObjectUtils.defaultIfNull(chat.getPrompt().getMaximumInputEvents(), properties.getMaximumInputEvents());
+        Pageable pageable = DataSetUtils.repage(request.getPageable(), maximumModelCount);
+        DataSet<M, F, ID> dataSet = request.getDataSet();
+        Metadata<M, F, ID> metadata = dataSet.getMetadata();
+        Page<M> page = dataSet.findAll(pageable, request.getFilter());
+        if (metadata.findTimestampField() != null) {
+            Sort sort = Sort.create(Sort.Direction.ASC, metadata.findTimestampField().getName());
+            page = DataSetUtils.resort(metadata, pageable, page, sort);
+        }
+        chat.addFeature(page);
+        return page;
     }
 
 }
