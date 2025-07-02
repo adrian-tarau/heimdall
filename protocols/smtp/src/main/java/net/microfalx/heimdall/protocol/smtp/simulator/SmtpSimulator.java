@@ -51,6 +51,11 @@ public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
         this.server = server;
     }
 
+    @Override
+    protected Event.Type getEventType() {
+        return Event.Type.SMTP;
+    }
+
     /**
      * Invoked to create a list of target addresses.
      *

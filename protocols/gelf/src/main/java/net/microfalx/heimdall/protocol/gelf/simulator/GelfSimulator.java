@@ -5,6 +5,7 @@ import com.cloudbees.syslog.Severity;
 import net.datafaker.Faker;
 import net.microfalx.heimdall.protocol.core.Address;
 import net.microfalx.heimdall.protocol.core.Body;
+import net.microfalx.heimdall.protocol.core.Event;
 import net.microfalx.heimdall.protocol.core.simulator.ProtocolDataSetFactory;
 import net.microfalx.heimdall.protocol.core.simulator.ProtocolSimulator;
 import net.microfalx.heimdall.protocol.core.simulator.ProtocolSimulatorProperties;
@@ -29,6 +30,11 @@ public class GelfSimulator extends ProtocolSimulator<GelfEvent, GelfClient> {
     public GelfSimulator(ProtocolSimulatorProperties simulatorProperties, GelfProperties gelfProperties) {
         super(simulatorProperties);
         this.properties = gelfProperties;
+    }
+
+    @Override
+    protected Event.Type getEventType() {
+        return Event.Type.GELF;
     }
 
     @Override

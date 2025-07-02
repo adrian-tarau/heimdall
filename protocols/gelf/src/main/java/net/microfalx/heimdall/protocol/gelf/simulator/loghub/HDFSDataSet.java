@@ -17,7 +17,6 @@ public class HDFSDataSet extends GelfDataSet {
 
     @Override
     protected void update(GelfEvent event, Address sourceAddress, Address targetAddress, DsvRecord record) {
-        super.update(event, sourceAddress, targetAddress);
         event.add("pid", record.get("pid"));
     }
 

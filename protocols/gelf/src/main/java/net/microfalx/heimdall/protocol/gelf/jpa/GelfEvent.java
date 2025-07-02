@@ -85,13 +85,13 @@ public class GelfEvent extends Event {
 
     @Column(name = "level", nullable = false)
     @Position(35)
-    @Filterable
+    @Filterable(value = true)
     @Description("Identify the importance of the log event")
     private Severity severity;
 
     @Column(name = "facility", nullable = false)
     @Position(36)
-    @Filterable
+    @Filterable(value = true)
     @Description("Determines which process of the machine created the log event")
     private Facility facility;
 

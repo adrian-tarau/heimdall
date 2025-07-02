@@ -24,6 +24,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.zip.GZIPOutputStream;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.ExceptionUtils.getRootCauseMessage;
 
 /**
  * Base class for all simulators.
@@ -51,6 +52,13 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
     public ProtocolSimulatorProperties getProperties() {
         return properties;
     }
+
+    /**
+     * Returns the event type supported by this simulator.
+     *
+     * @return a non-null instance
+     */
+    protected abstract Event.Type getEventType();
 
     /**
      * Returns whether the simulator is enabled.
@@ -89,6 +97,9 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
         if (lock.tryLock()) {
             try {
                 simulateUnderLock();
+            } catch (Exception e) {
+                LOGGER.atError().setCause(e).log("Failed to simulate events for {}, root cause: {}", getEventType(),
+                        getRootCauseMessage(e));
             } finally {
                 lock.unlock();
             }

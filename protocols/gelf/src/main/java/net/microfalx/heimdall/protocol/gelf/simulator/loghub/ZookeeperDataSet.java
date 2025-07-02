@@ -17,7 +17,6 @@ public class ZookeeperDataSet extends GelfDataSet {
 
     @Override
     public void update(GelfEvent event, Address sourceAddress, Address targetAddress, DsvRecord record) {
-        super.update(event, sourceAddress, targetAddress);
         event.setProcess(record.get("node"));
     }
 

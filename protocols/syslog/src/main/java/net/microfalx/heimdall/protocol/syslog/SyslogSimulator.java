@@ -4,6 +4,7 @@ import com.cloudbees.syslog.Facility;
 import com.cloudbees.syslog.Severity;
 import net.microfalx.heimdall.protocol.core.Address;
 import net.microfalx.heimdall.protocol.core.Body;
+import net.microfalx.heimdall.protocol.core.Event;
 import net.microfalx.heimdall.protocol.core.ProtocolClient;
 import net.microfalx.heimdall.protocol.core.simulator.ProtocolSimulator;
 import net.microfalx.heimdall.protocol.core.simulator.ProtocolSimulatorProperties;
@@ -22,6 +23,11 @@ public class SyslogSimulator extends ProtocolSimulator<SyslogMessage, SyslogClie
     public SyslogSimulator(ProtocolSimulatorProperties properties, SyslogProperties syslogProperties) {
         super(properties);
         this.properties = syslogProperties;
+    }
+
+    @Override
+    protected Event.Type getEventType() {
+        return Event.Type.SYSLOG;
     }
 
     /**

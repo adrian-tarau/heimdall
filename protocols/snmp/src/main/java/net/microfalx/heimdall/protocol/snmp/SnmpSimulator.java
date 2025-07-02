@@ -3,6 +3,7 @@ package net.microfalx.heimdall.protocol.snmp;
 import com.google.common.collect.Iterators;
 import net.microfalx.heimdall.protocol.core.Address;
 import net.microfalx.heimdall.protocol.core.Body;
+import net.microfalx.heimdall.protocol.core.Event;
 import net.microfalx.heimdall.protocol.core.simulator.ProtocolSimulator;
 import net.microfalx.heimdall.protocol.core.simulator.ProtocolSimulatorProperties;
 import net.microfalx.heimdall.protocol.snmp.mib.*;
@@ -29,6 +30,11 @@ public class SnmpSimulator extends ProtocolSimulator<SnmpEvent, SnmpClient> {
         super(properties);
         this.properties = snmpProperties;
         this.mibService = mibService;
+    }
+
+    @Override
+    protected Event.Type getEventType() {
+        return Event.Type.SNMP;
     }
 
     @Override
