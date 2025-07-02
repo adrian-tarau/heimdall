@@ -1,8 +1,6 @@
 package net.microfalx.heimdall.llm.core.jpa;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import net.microfalx.bootstrap.jdbc.entity.surrogate.NamedAndTaggedAndTimestampedIdentityAware;
@@ -19,6 +17,10 @@ public class Prompt extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
     @NaturalId
     @Column(name = "natural_id", nullable = false, length = 100, unique = true)
     private String naturalId;
+
+    @ManyToOne
+    @JoinColumn(name = "model_id")
+    private Model model;
 
     @Column(name = "role", length = 1000)
     private String role;

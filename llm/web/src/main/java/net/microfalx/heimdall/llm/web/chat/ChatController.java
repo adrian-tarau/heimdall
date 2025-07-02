@@ -54,9 +54,12 @@ public class ChatController extends PageController {
     private static final String END_OF_DATA = "$END_OF_DATA$";
     private static final Map<String, TokenStream> chatAnswer = new ConcurrentHashMap<>();
 
-    @Autowired private HelpService helpService;
-    @Autowired private LlmService llmService;
-    @Autowired private DataSetService dataSetService;
+    @Autowired
+    private HelpService helpService;
+    @Autowired
+    private LlmService llmService;
+    @Autowired
+    private DataSetService dataSetService;
 
     @GetMapping("")
     public String start(Model model) {
@@ -129,7 +132,13 @@ public class ChatController extends PageController {
 
     private String doStart(Model model, Prompt prompt, Mode mode, net.microfalx.heimdall.llm.api.Model chatModel,
                            DataSetRequest<?, ?, ?> request) {
-        if (chatModel == null) chatModel = llmService.getDefaultModel();
+        if (chatModel == null) {
+            if (prompt.getModel() != null) {
+                chatModel = prompt.getModel();
+            } else {
+                chatModel = llmService.getDefaultModel();
+            }
+        }
         net.microfalx.heimdall.llm.api.Chat chat = llmService.createChat(prompt, chatModel);
         chat.addFeature(request);
         updateModel(model, chat);

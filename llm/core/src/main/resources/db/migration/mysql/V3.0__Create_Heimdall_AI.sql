@@ -64,6 +64,7 @@ create table llm_chat
 create table llm_prompt(
     id                              int                 not null primary key auto_increment,
     natural_id                      varchar(100)        not null,
+    model_id                        int,
     name                            varchar(100)        not null,
     role                            mediumtext,
     maximum_input_events            int,
@@ -77,5 +78,6 @@ create table llm_prompt(
     modified_at                     datetime,
     tags                            varchar(500),
     description                     varchar(1000),
-    constraint nk$llm_prompt$natural_id unique key (natural_id)
+    constraint nk$llm_prompt$natural_id unique key (natural_id),
+    constraint fk$llm_prompt$model_id foreign key (model_id) references llm_model (id)
 ) ENGINE = InnoDB;

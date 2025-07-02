@@ -1,13 +1,12 @@
 package net.microfalx.heimdall.llm.web.system.jpa;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import net.microfalx.bootstrap.dataset.annotation.Component;
 import net.microfalx.bootstrap.dataset.annotation.Tabs;
 import net.microfalx.bootstrap.jdbc.entity.surrogate.NamedAndTaggedAndTimestampedIdentityAware;
+import net.microfalx.heimdall.llm.core.jpa.Model;
 import net.microfalx.lang.annotation.*;
 
 @Entity(name = "WebPrompt")
@@ -24,6 +23,13 @@ public class Prompt extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
     @Description("The natural id of the model")
     @Visible(false)
     private String naturalId;
+
+    @ManyToOne
+    @JoinColumn(name = "model_id")
+    @Position(6)
+    @Width("200px")
+    @Description("The model associated with this prompt")
+    private Model model;
 
     @Column(name = "question", length = 5000)
     @Position(6)

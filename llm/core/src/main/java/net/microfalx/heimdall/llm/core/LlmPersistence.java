@@ -129,6 +129,7 @@ class LlmPersistence extends JpaPersistence {
         jpaPrompt.setQuestion(prompt.getQuestion());
         jpaPrompt.setTags(setToString(prompt.getTags()));
         jpaPrompt.setDescription(prompt.getDescription());
+        jpaPrompt.setModel(jpaPrompt.getModel());
         updater.findByNaturalIdAndUpdate(jpaPrompt);
     }
 

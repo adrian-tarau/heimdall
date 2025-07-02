@@ -63,11 +63,15 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LlmService.class);
 
-    @Autowired private IndexService indexService;
-    @Autowired private SearchService searchService;
-    @Autowired private ResourceService resourceService;
+    @Autowired
+    private IndexService indexService;
+    @Autowired
+    private SearchService searchService;
+    @Autowired
+    private ResourceService resourceService;
 
-    @Autowired private LlmPersistence persistence;
+    @Autowired
+    private LlmPersistence persistence;
 
     @Autowired(required = false)
     @Getter(AccessLevel.PROTECTED)
@@ -114,7 +118,10 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
 
     @Override
     public Chat createChat(Prompt prompt) {
-        return createChat(prompt, getDefaultModel());
+        requireNonNull(prompt);
+        Model model = getDefaultModel();
+        if (prompt.getModel() != null) model = prompt.getModel();
+        return createChat(prompt, model);
     }
 
     @Override
@@ -250,7 +257,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     /**
      * Returns the final prompt text for the given model and prompt.
      *
-     * @param chat  the chat to use
+     * @param chat the chat to use
      * @return a non-null string
      */
     public String getSystemMessage(Chat chat) {

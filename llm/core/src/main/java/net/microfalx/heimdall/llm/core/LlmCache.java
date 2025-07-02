@@ -196,6 +196,7 @@ public class LlmCache extends ApplicationContextSupport {
                     .maximumOutputTokens(promptJpa.getMaximumOutputTokens())
                     .question(promptJpa.getQuestion())
                     .role(promptJpa.getRole())
+                    .model(getModel(promptJpa.getModel().getNaturalId()))
                     .useOnlyContext(promptJpa.isUseOnlyContext());
             builder.tags(CollectionUtils.setFromString(promptJpa.getTags()))
                     .name(promptJpa.getName()).description(promptJpa.getDescription())

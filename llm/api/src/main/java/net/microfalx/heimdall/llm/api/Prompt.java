@@ -31,6 +31,7 @@ public class Prompt extends NamedAndTaggedIdentifyAware<String> {
     private String examples;
     private String context;
     private String question;
+    private Model model;
 
     /**
      * Creates an empty prompt.
@@ -139,6 +140,15 @@ public class Prompt extends NamedAndTaggedIdentifyAware<String> {
     }
 
     /**
+     * Returns the model associated with this prompt.
+     *
+     * @return a non-null instance
+     */
+    public Model getModel() {
+        return model;
+    }
+
+    /**
      * Checks if the prompt is empty.
      * <p>
      * A prompt is considered empty if it has no role, examples, context, or question.
@@ -173,6 +183,7 @@ public class Prompt extends NamedAndTaggedIdentifyAware<String> {
         private Integer maximumOutputTokens;
         private boolean chainOfThought;
         private boolean useOnlyContext = true;
+        private Model model;
 
         public Builder role(String role) {
             this.role = role;
@@ -214,6 +225,12 @@ public class Prompt extends NamedAndTaggedIdentifyAware<String> {
             return this;
         }
 
+        public Builder model(Model model) {
+            requireNonNull(model);
+            this.model = model;
+            return this;
+        }
+
         public Builder fromResources(String module) {
             requireNonNull(module);
             if (StringUtils.isEmpty(role)) role = loadResource(module, "role.md");
@@ -241,6 +258,7 @@ public class Prompt extends NamedAndTaggedIdentifyAware<String> {
             prompt.maximumOutputTokens = maximumOutputTokens;
             prompt.chainOfThought = chainOfThought;
             prompt.useOnlyContext = useOnlyContext;
+            prompt.model=model;
             return prompt;
         }
 

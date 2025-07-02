@@ -23,8 +23,10 @@ import java.io.IOException;
 @Slf4j
 public class PromptController extends SystemDataSetController<Prompt, Integer> {
 
-    @Autowired private LlmService llmService;
-    @Autowired private HelpService helpService;
+    @Autowired
+    private LlmService llmService;
+    @Autowired
+    private HelpService helpService;
 
     @Override
     protected void updateModel(net.microfalx.bootstrap.dataset.DataSet<Prompt, Field<Prompt>, Integer> dataSet, Model controllerModel, Prompt dataSetModel, State state) {
@@ -37,7 +39,9 @@ public class PromptController extends SystemDataSetController<Prompt, Integer> {
 
     @Override
     protected boolean beforePersist(net.microfalx.bootstrap.dataset.DataSet<Prompt, Field<Prompt>, Integer> dataSet, Prompt model, State state) {
-        model.setNaturalId(StringUtils.toIdentifier(model.getName()));
+        if (state == State.ADD) {
+            model.setNaturalId(StringUtils.toIdentifier(model.getName()));
+        }
         return super.beforePersist(dataSet, model, state);
     }
 
