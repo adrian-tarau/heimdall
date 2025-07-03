@@ -26,7 +26,7 @@ public class DefaultLlmListener extends ApplicationContextSupport implements Llm
 
     private void registerPrompts(LlmService service) {
         Prompt prompt = (Prompt) Prompt.create("summary", "Summary")
-                .question("Summarize the current data")
+                .question("Summarize the current data").system(true)
                 .tag("summary")
                 .description("Creates a summary of the current data")
                 .build();

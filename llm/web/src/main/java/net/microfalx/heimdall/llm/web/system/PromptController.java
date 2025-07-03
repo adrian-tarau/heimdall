@@ -39,9 +39,8 @@ public class PromptController extends SystemDataSetController<Prompt, Integer> {
 
     @Override
     protected boolean beforePersist(net.microfalx.bootstrap.dataset.DataSet<Prompt, Field<Prompt>, Integer> dataSet, Prompt model, State state) {
-        if (state == State.ADD) {
-            model.setNaturalId(StringUtils.toIdentifier(model.getName()));
-        }
+        if (state == State.ADD) model.setNaturalId(StringUtils.toIdentifier(model.getName()));
+        if (model.isSystem()) return false;
         return super.beforePersist(dataSet, model, state);
     }
 

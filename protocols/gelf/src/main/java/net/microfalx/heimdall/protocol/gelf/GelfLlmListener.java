@@ -12,7 +12,7 @@ public class GelfLlmListener implements LlmListener {
 
     @Override
     public void onStart(LlmService service) {
-        service.registerPrompt(Prompt.create("summary", "Summary").fromResources(MODULE).build());
-        service.registerPrompt(Prompt.create("rca", "Root Cause Analysis").fromResources(MODULE).build());
+        service.registerPrompt(Prompt.create("summary", "Summary").system(true).fromResources(MODULE).build());
+        service.registerPrompt(Prompt.create("rca", "Root Cause Analysis").system(true).fromResources(MODULE).build());
     }
 }

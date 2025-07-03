@@ -45,4 +45,7 @@ public class Prompt extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
 
     @Column(name = "question", length = 5000)
     private String question;
+
+    @Column(name = "system",nullable = false)
+    private boolean system = false;
 }

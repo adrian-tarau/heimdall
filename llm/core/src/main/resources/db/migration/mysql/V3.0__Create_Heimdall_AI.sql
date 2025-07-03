@@ -74,6 +74,7 @@ create table llm_prompt(
     examples                        mediumtext,
     context                         mediumtext,
     question                        mediumtext,
+    `system`                        boolean default false not null,
     created_at                      datetime            not null,
     modified_at                     datetime,
     tags                            varchar(500),
