@@ -522,9 +522,9 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
 
     private void initTask() {
         ThreadPool threadPool = ThreadPool.get();
-        threadPool.execute(this::reload);
         threadPool.execute(this::fireStartEvent);
         threadPool.scheduleAtFixedRate(new MaintenanceTask(), Duration.ofSeconds(60));
+        reloadAsync();
     }
 
     private void fireStartEvent() {
@@ -535,6 +535,11 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
                 LOGGER.atError().setCause(e).log("Failed to notify listener {}", ClassUtils.getName(listener));
             }
         }
+        reloadAsync();
+    }
+
+    private void reloadAsync() {
+        ThreadPool.get().execute(this::reload);
     }
 
     private <M, F extends Field<M>, ID> Page<M> fireGetDataSet(Chat chat, DataSetRequest<M, F, ID> request) {

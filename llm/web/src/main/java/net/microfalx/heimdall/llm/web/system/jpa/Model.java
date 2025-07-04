@@ -34,8 +34,9 @@ public class Model extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
     @ManyToOne
     @JoinColumn(name = "provider_id", nullable = false)
     @Description("The provider")
-    @ReadOnly
-    @Width("150px")
+    @Name(position = 2, secondary = true)
+    @Glue(value = " ", before = "(", after = ")")
+    @Width("120px")
     private Provider provider;
 
     @Position(15)

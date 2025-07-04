@@ -6,7 +6,6 @@ import lombok.Setter;
 import net.microfalx.bootstrap.dataset.annotation.Component;
 import net.microfalx.bootstrap.dataset.annotation.Tabs;
 import net.microfalx.bootstrap.jdbc.entity.surrogate.NamedAndTaggedAndTimestampedIdentityAware;
-import net.microfalx.heimdall.llm.core.jpa.Model;
 import net.microfalx.lang.annotation.*;
 
 @Entity(name = "WebPrompt")
@@ -95,6 +94,6 @@ public class Prompt extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
     @Visible(modes = {Visible.Mode.EDIT, Visible.Mode.BROWSE})
     @ReadOnly
     @Position(45)
-    @Description("Indicates whether this is a system prompt")
+    @Description("Indicates whether this is a system prompt (cannot be modified by users")
     private boolean system = false;
 }

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import net.microfalx.bootstrap.jdbc.entity.surrogate.NamedAndTaggedAndTimestampedIdentityAware;
+import net.microfalx.bootstrap.jdbc.jpa.UpdateStrategy;
 import net.microfalx.lang.annotation.Name;
 import net.microfalx.lang.annotation.NaturalId;
 
@@ -20,6 +21,7 @@ public class Prompt extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
 
     @ManyToOne
     @JoinColumn(name = "model_id")
+    @UpdateStrategy
     private Model model;
 
     @Column(name = "role", length = 1000)

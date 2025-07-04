@@ -150,7 +150,7 @@ public class Prompt extends NamedAndTaggedIdentifyAware<String> {
     }
 
     /**
-     * Checks if this prompt is a system prompt.
+     * Returns whether this prompt is a system prompt (cannot be changed by users).
      *
      * @return {@code true} if this is a system prompt, {@code false} otherwise
      */

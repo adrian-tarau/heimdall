@@ -43,7 +43,7 @@ public class LlmProperties {
      * The maximum number of input events that can be processed in a single request. This is used to limit
      * the size of the input to the LLM models.
      */
-    private int maximumInputEvents = 100;
+    private int maximumInputEvents = 5000;
 
     /**
      * Indicates whether the LLM service has access to the internet.

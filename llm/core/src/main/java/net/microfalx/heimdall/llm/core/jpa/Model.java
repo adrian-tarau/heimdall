@@ -30,10 +30,10 @@ public class Model extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
     @Column(name = "api_key", nullable = false, length = 500)
     private String apiKey;
 
-    @Column(name = "enabled", columnDefinition = "boolean default false", nullable = false)
+    @Column(name = "enabled", nullable = false)
     private boolean enabled;
 
-    @Column(name = "default", columnDefinition = "boolean default false", nullable = false)
+    @Column(name = "default", nullable = false)
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     private boolean _default;

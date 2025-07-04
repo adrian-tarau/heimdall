@@ -188,21 +188,26 @@ public class LlmCache extends ApplicationContextSupport {
     private void loadPrompts() {
         List<net.microfalx.heimdall.llm.core.jpa.Prompt> promptJpas = getBean(PromptRepository.class).findAll();
         promptJpas.forEach(promptJpa -> {
-            Prompt.Builder builder = new Prompt.Builder()
-                    .chainOfThought(promptJpa.isChainOfThought())
-                    .context(promptJpa.getContext())
-                    .examples(promptJpa.getExamples())
-                    .maximumInputEvents(promptJpa.getMaximumInputEvents())
-                    .maximumOutputTokens(promptJpa.getMaximumOutputTokens())
-                    .question(promptJpa.getQuestion())
-                    .role(promptJpa.getRole())
-                    .model(getModel(promptJpa.getModel().getNaturalId()))
-                    .system(promptJpa.isSystem())
-                    .useOnlyContext(promptJpa.isUseOnlyContext());
-            builder.tags(CollectionUtils.setFromString(promptJpa.getTags()))
-                    .name(promptJpa.getName()).description(promptJpa.getDescription())
-                    .id(promptJpa.getNaturalId());
-            registerPrompt(builder.build());
+            registerPrompt(loadPrompt(promptJpa));
         });
+    }
+
+    private Prompt loadPrompt(net.microfalx.heimdall.llm.core.jpa.Prompt promptJpa) {
+        Prompt.Builder builder = new Prompt.Builder()
+                .chainOfThought(promptJpa.isChainOfThought())
+                .context(promptJpa.getContext())
+                .examples(promptJpa.getExamples())
+                .maximumInputEvents(promptJpa.getMaximumInputEvents())
+                .maximumOutputTokens(promptJpa.getMaximumOutputTokens())
+                .question(promptJpa.getQuestion())
+                .role(promptJpa.getRole()).system(promptJpa.isSystem());
+        if (promptJpa.getModel() != null) {
+            builder.model(getModel(promptJpa.getModel().getNaturalId()));
+        }
+        builder.useOnlyContext(promptJpa.isUseOnlyContext())
+                .tags(CollectionUtils.setFromString(promptJpa.getTags()))
+                .name(promptJpa.getName()).description(promptJpa.getDescription())
+                .id(promptJpa.getNaturalId());
+        return builder.build();
     }
 }
