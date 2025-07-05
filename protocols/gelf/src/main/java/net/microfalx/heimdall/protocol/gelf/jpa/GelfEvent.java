@@ -27,16 +27,17 @@ public class GelfEvent extends Event {
     @ManyToOne
     @NotNull
     @Position(1)
+    @Label("Host")
     @Description("The name of the host, source or application that sent the log event")
     @Width("160px")
-    private Address address;
+    private Address host;
 
     @JoinColumn(name = "short_message_id")
     @OneToOne
     @Name
     @Position(5)
     @Label("Message")
-    @Description("The short version of the message associated with the log event")
+    @Description("The short version of the message associated with the log event (the equivalent of the 'short_message' field in GELF)")
     @Filterable
     @Width("30%")
     private Part shortMessage;
@@ -45,7 +46,7 @@ public class GelfEvent extends Event {
     @OneToOne
     @Position(6)
     @Visible(modes = Visible.Mode.VIEW)
-    @Description("The full version of the message associated with the log event")
+    @Description("The full version of the message associated with the log event ((the equivalent of the 'full_message' field in GELF)")
     @Filterable
     private Part longMessage;
 
@@ -64,34 +65,34 @@ public class GelfEvent extends Event {
 
     @Column(name = "application_name", nullable = false)
     @Position(25)
-    @Description("Identify the application which sent the log event")
+    @Description("Identifies the application (a collection of processes working together to form a complex application) which sent the log event")
     @Width("100px")
     private String application;
 
     @Column(name = "process_name", nullable = false)
     @Position(26)
-    @Description("Identify the process/service which sent the log event")
+    @Description("Identifies the process/service which sent the log event")
     @Width("100px")
     private String process;
 
     @Column(name = "logger_name", nullable = false)
     @Position(27)
-    @Description("Identify the logger which logged of the log event")
+    @Description("Identifies the logger (class/package) which logged of the log event")
     @Width("15%")
     private String logger;
 
     @Column(name = "thread_name", nullable = false)
     @Position(28)
-    @Description("Identify the application thread which logged of the log event")
+    @Description("Identifies the process thread which logged of the log event")
     @Width("100px")
     private String thread;
 
     @Column(name = "level", nullable = false)
     @Position(35)
     @Filterable(value = true)
-    @Description("Identify the importance of the log event")
+    @Description("Identifies the importance of the log event (the level equal to the standard syslog levels)")
     @Width("100px")
-    private Severity severity;
+    private Severity level;
 
     @Column(name = "facility", nullable = false)
     @Position(36)

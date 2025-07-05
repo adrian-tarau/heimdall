@@ -30,14 +30,14 @@ public abstract class TimestampAware extends IdentityAware<Long> {
     @NotNull
     @Position(500)
     @Visible(modes = {Visible.Mode.VIEW})
-    @Description("The time for when the {name} was created")
+    @Description("The time when the {name} event was created")
     private LocalDateTime createdAt;
 
     @Column(name = "sent_at", nullable = false)
     @NotNull
     @Position(501)
     @Visible(modes = {Visible.Mode.VIEW})
-    @Description("The time for when the {name} was send")
+    @Description("The time when the {name} event was send")
     private LocalDateTime sentAt;
 
     @Column(name = "received_at", nullable = false)
@@ -45,7 +45,7 @@ public abstract class TimestampAware extends IdentityAware<Long> {
     @OrderBy(OrderBy.Direction.DESC)
     @Visible(modes = {Visible.Mode.BROWSE, Visible.Mode.VIEW})
     @Timestamp
-    @Description("The time for when the {name} was received")
+    @Description("The time when the {name} event was received")
     private LocalDateTime receivedAt;
 
 }
