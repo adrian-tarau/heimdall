@@ -33,6 +33,7 @@ public class Prompt extends NamedAndTaggedIdentifyAware<String> {
     private String context;
     private String question;
     private Model model;
+    private boolean thinking;
     private boolean system;
 
     /**
@@ -163,6 +164,18 @@ public class Prompt extends NamedAndTaggedIdentifyAware<String> {
     }
 
     /**
+     * Returns whether thinking is enabled for models which support thinking (tagged with 'thinking').
+     * <p>
+     * This is used to make the LLM explain it's internal thinking process and it might be useful to be enabled,
+     * at least during the development of the prompt.
+     *
+     * @return {@code true} if the model is thinking, {@code false} otherwise
+     */
+    public boolean isThinking() {
+        return thinking;
+    }
+
+    /**
      * Returns whether this prompt is a system prompt (cannot be changed by users).
      *
      * @return {@code true} if this is a system prompt, {@code false} otherwise
@@ -239,6 +252,7 @@ public class Prompt extends NamedAndTaggedIdentifyAware<String> {
         private boolean useOnlyContext = true;
         private Model model;
         private boolean system;
+        private boolean thinking;
 
         public Builder role(String role) {
             this.role = role;
@@ -291,6 +305,11 @@ public class Prompt extends NamedAndTaggedIdentifyAware<String> {
             return this;
         }
 
+        public Builder thinking(boolean thinking) {
+            this.thinking = thinking;
+            return this;
+        }
+
         public Builder system(boolean system) {
             this.system = system;
             return this;
@@ -326,6 +345,7 @@ public class Prompt extends NamedAndTaggedIdentifyAware<String> {
             prompt.chainOfThought = chainOfThought;
             prompt.useOnlyContext = useOnlyContext;
             prompt.model = model;
+            prompt.thinking = thinking;
             prompt.system=system;
             return prompt;
         }

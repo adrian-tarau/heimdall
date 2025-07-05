@@ -49,6 +49,7 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
     private Integer topK;
     private Double frequencyPenalty;
     private Double presencePenalty;
+    private boolean thinking;
     private int maximumContextLength;
     private Integer maximumOutputTokens;
     private Set<String> stopSequences;
@@ -218,6 +219,18 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
     }
 
     /**
+     * Returns whether thinking is enabled for models which support thinking (tagged with 'thinking').
+     * <p>
+     * This is used to make the LLM explain it's internal thinking process and it might be useful to be enabled,
+     * at least during the development of the prompt.
+     *
+     * @return {@code true} if the model is thinking, {@code false} otherwise
+     */
+    public boolean isThinking() {
+        return thinking;
+    }
+
+    /**
      * Returns the maximum context length in tokens that the model can handle.
      * <p>
      * This is the maximum number of tokens that can be processed in a single request, including both input and output.
@@ -272,6 +285,7 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
         private Integer topK;
         private Double frequencyPenalty;
         private Double presencePenalty;
+        private boolean thinking;
         private int maximumContextLength = 64 * 1028; // 64K tokens
         private Integer maximumOutputTokens;
         private final Set<String> stopSequences = new HashSet<>();
@@ -305,6 +319,11 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
 
         public Builder enabled(boolean enabled) {
             this.enabled = enabled;
+            return this;
+        }
+
+        public Builder thinking(boolean thinking) {
+            this.thinking = thinking;
             return this;
         }
 
@@ -410,6 +429,7 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
             model.enabled = enabled;
             model._default = _default;
             model.embedding = embedding;
+            model.thinking = thinking;
             model.modelName = modelName;
             model.temperature = temperature;
             model.topK = topK;
