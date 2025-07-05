@@ -6,7 +6,6 @@ import lombok.Setter;
 import net.microfalx.bootstrap.dataset.annotation.OrderBy;
 import net.microfalx.bootstrap.jdbc.entity.natural.NamedAndTaggedIdentityAware;
 import net.microfalx.bootstrap.jdbc.jpa.DurationConverter;
-import net.microfalx.heimdall.llm.core.jpa.Model;
 import net.microfalx.lang.annotation.*;
 
 import java.time.Duration;
@@ -18,20 +17,20 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ReadOnly
-public class Chat extends NamedAndTaggedIdentityAware<Integer> {
+public class Chat extends NamedAndTaggedIdentityAware<String> {
 
+    @ManyToOne
     @Position(10)
+    @JoinColumn(name = "model_id", nullable = false)
+    @Description("The model used by this chat session")
+    @Width("200px")
+    private Model model;
+
+    @Position(15)
     @Column(name = "user_id", nullable = false)
     @Description("The user that created the chat")
     @Width("100px")
     private String user;
-
-    @ManyToOne
-    @Position(15)
-    @JoinColumn(name = "model_id", nullable = false)
-    @Description("The model used by this chat session")
-    @Width("100px")
-    private Model model;
 
     @Column(name = "start_at", nullable = false)
     @Position(20)

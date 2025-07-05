@@ -29,19 +29,19 @@ public class PromptController extends SystemDataSetController<Prompt, Integer> {
     private HelpService helpService;
 
     @Override
-    protected void updateModel(net.microfalx.bootstrap.dataset.DataSet<Prompt, Field<Prompt>, Integer> dataSet, Model controllerModel, Prompt dataSetModel, State state) {
-        if (state != State.VIEW) return;
-        /*dataSetModel.setExamples(renderMarkdown(dataSetModel.getExamples()));
-        dataSetModel.setRole(renderMarkdown(dataSetModel.getRole()));
-        dataSetModel.setContext(renderMarkdown(dataSetModel.getContext()));
-        dataSetModel.setQuestion(renderMarkdown(dataSetModel.getQuestion()));*/
+    protected void beforePersist(net.microfalx.bootstrap.dataset.DataSet<Prompt, Field<Prompt>, Integer> dataSet, Prompt model, State state) {
+        if (state == State.ADD) model.setNaturalId(StringUtils.toIdentifier(model.getName()));
     }
 
     @Override
-    protected boolean beforePersist(net.microfalx.bootstrap.dataset.DataSet<Prompt, Field<Prompt>, Integer> dataSet, Prompt model, State state) {
-        if (state == State.ADD) model.setNaturalId(StringUtils.toIdentifier(model.getName()));
-        if (model.isSystem()) return false;
-        return super.beforePersist(dataSet, model, state);
+    protected void beforeEdit(net.microfalx.bootstrap.dataset.DataSet<Prompt, Field<Prompt>, Integer> dataSet, Model controllerModel, Prompt dataSetModel) {
+        super.beforeEdit(dataSet, controllerModel, dataSetModel);
+        if (dataSetModel.isSystem()) cancel("System prompts cannot be modified or deleted");
+    }
+
+    @Override
+    protected void beforeClone(net.microfalx.bootstrap.dataset.DataSet<Prompt, Field<Prompt>, Integer> dataSet, Model controllerModel, Prompt dataSetModel) {
+        dataSetModel.setSystem(false);
     }
 
     @Override

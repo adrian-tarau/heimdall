@@ -8,6 +8,7 @@ import java.security.Principal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Set;
 
 /**
  * An interface for representing a chat session with an AI model.
@@ -89,6 +90,13 @@ public interface Chat extends Identifiable<String>, Nameable, Descriptable {
      * @return a non-null instance
      */
     int getTokenCount();
+
+    /**
+     * Returns the tags associated with the chat session.
+     *
+     * @return a non-null set
+     */
+    Set<String> getTags();
 
     /**
      * Asks a question to the AI model and returns the answer.

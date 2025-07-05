@@ -35,10 +35,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static net.microfalx.heimdall.llm.core.LlmUtils.getChatThreadPool;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.ExceptionUtils.getRootCauseMessage;
 import static net.microfalx.lang.ExceptionUtils.rethrowException;
 import static net.microfalx.lang.StringUtils.EMPTY_STRING;
 import static net.microfalx.lang.StringUtils.isNotEmpty;
@@ -101,7 +103,7 @@ public class ChatController extends PageController {
         net.microfalx.heimdall.llm.api.Chat chat = llmService.getChat(chatId);
         updateModel(model, chat);
         model.addAttribute("title", "Model");
-        model.addAttribute("content", renderMarkdown(chat.getSystemMessage().getText()));
+        model.addAttribute("content", chat.getSystemMessage().getText());
         model.addAttribute("modalClasses", "modal-lg");
         return "llm/chat :: info";
     }
@@ -270,9 +272,13 @@ public class ChatController extends PageController {
         private final TokenStream stream;
         private final AtomicInteger index = new AtomicInteger(1);
         private final ObjectMapper objectMapper;
+        private final AtomicBoolean completed = new AtomicBoolean(false);
+        private volatile Throwable throwable;
 
         public ChatMessageTask(SseEmitter emitter, net.microfalx.heimdall.llm.api.Chat chat, TokenStream stream) {
             this.emitter = emitter;
+            this.emitter.onCompletion(this::onCompletion);
+            this.emitter.onError(this::onError);
             this.chat = chat;
             this.stream = stream;
             this.objectMapper = new ObjectMapper();
@@ -294,27 +300,43 @@ public class ChatController extends PageController {
             }
         }
 
+        private void onCompletion() {
+            completed.set(true);
+        }
+
+        private void onError(Throwable throwable) {
+            completed.set(true);
+            this.throwable = throwable;
+        }
+
         @Override
         public void run() {
             if (stream == null) {
                 emitter.completeWithError(new IllegalStateException("No message stream available for chat: " + chat.getId()));
             } else {
                 try {
-                    while (!stream.isComplete()) {
+                    while (!(stream.isComplete() || completed.get())) {
                         while (stream.hasNext()) {
                             String token = stream.next();
                             sendToken(token, false);
                         }
                         sleepMillis(20);
                     }
-                    sendToken(END_OF_DATA, true);
+                    if (stream.isComplete()) sendToken(END_OF_DATA, true);
                 } catch (IllegalStateException e) {
-                    LOGGER.warn("Communication error with client for chat: {}", chat.getId(), e);
+                    throwable = e;
                 } catch (Exception e) {
-                    LOGGER.error("Failed to process tokens for chat: {}", chat.getId(), e);
+                    throwable = e;
                     emitter.completeWithError(e);
                 } finally {
                     emitter.complete();
+                }
+            }
+            if (throwable != null) {
+                if (throwable instanceof IllegalStateException) {
+                    LOGGER.info("Communication error with client for chat '{}', reason: {}", chat.getId(), getRootCauseMessage(throwable));
+                } else {
+                    LOGGER.warn("Error while processing chat {}, root cause: {}", chat.getId(), getRootCauseMessage(throwable));
                 }
             }
         }

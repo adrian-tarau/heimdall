@@ -43,7 +43,7 @@ public class LlmProperties {
      * The maximum number of input events that can be processed in a single request. This is used to limit
      * the size of the input to the LLM models.
      */
-    private int maximumInputEvents = 5000;
+    private int maximumInputEvents = 500;
 
     /**
      * Indicates whether the LLM service has access to the internet.
@@ -145,4 +145,18 @@ public class LlmProperties {
      */
     private String defaultGuidanceMessage = "Answer the question as best you can. If you don't know the answer," +
             " just say that you don't know. Don't try to make up an answer.";
+
+    /**
+     * A question to summarize the conversation in a few words.
+     */
+    private String summaryWords = "Summarize the conversation in a few words." +
+            " The summary should be concise and to the point, capturing the essence of the conversation." +
+            " Do not include any personal opinions or interpretations, just the facts discussed in the conversation.";
+
+    /**
+     * A question to summarize the conversation in a short sentence.
+     */
+    private String summarySentence = "Summarize the conversation in a single sentence." +
+            " The summary should be concise and to the point, capturing the essence of the conversation." +
+            " Do not include any personal opinions or interpretations, just the facts discussed in the conversation.";
 }

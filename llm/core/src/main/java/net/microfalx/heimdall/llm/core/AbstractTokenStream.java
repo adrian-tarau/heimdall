@@ -4,6 +4,7 @@ import net.microfalx.heimdall.llm.api.FinishReason;
 import net.microfalx.heimdall.llm.api.Message;
 import net.microfalx.heimdall.llm.api.TokenStream;
 import net.microfalx.lang.NumberUtils;
+import net.microfalx.lang.ThreadUtils;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -24,6 +25,7 @@ public abstract class AbstractTokenStream implements TokenStream {
 
     @Override
     public final Message getMessage() {
+        waitForCompletion();
         if (message != null) {
             return message;
         } else {
@@ -53,5 +55,11 @@ public abstract class AbstractTokenStream implements TokenStream {
 
     protected final void raiseIfError() {
         if (throwable != null) rethrowException(throwable);
+    }
+
+    protected final void waitForCompletion() {
+        while (!completed.get()) {
+            ThreadUtils.sleepMillis(10);
+        }
     }
 }

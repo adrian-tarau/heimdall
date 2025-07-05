@@ -20,9 +20,8 @@ public class ProviderController extends SystemDataSetController<Provider, Intege
     private LlmService llmService;
 
     @Override
-    protected boolean beforePersist(net.microfalx.bootstrap.dataset.DataSet<Provider, Field<Provider>, Integer> dataSet, Provider model, State state) {
-        model.setNaturalId(StringUtils.toIdentifier(model.getName()));
-        return super.beforePersist(dataSet, model, state);
+    protected void beforePersist(net.microfalx.bootstrap.dataset.DataSet<Provider, Field<Provider>, Integer> dataSet, Provider model, State state) {
+        if (model.getNaturalId() == null) model.setNaturalId(StringUtils.toIdentifier(model.getName()));
     }
 
     @Override

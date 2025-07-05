@@ -52,6 +52,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.unmodifiableCollection;
+import static net.microfalx.heimdall.llm.core.LlmUtils.CREATE_CHAT_METRICS;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ExceptionUtils.rethrowException;
 import static net.microfalx.lang.FileUtils.validateDirectoryExists;
@@ -130,15 +131,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     }
 
     public net.microfalx.heimdall.llm.api.Chat createChat(Prompt prompt, Model model) {
-        requireNonNull(prompt);
-        requireNonNull(model);
-        if (model.isEmbedding()) throw new LlmException("Model '" + model.getId() + "' does not support chatting");
-        Chat.Factory chatFactory = model.getProvider().getChatFactory();
-        net.microfalx.heimdall.llm.api.Chat chat = chatFactory.createChat(prompt, model);
-        activeChats.put(toIdentifier(chat.getId()), chat);
-        if (chat instanceof AbstractChat abstractChat) abstractChat.initialize(this);
-        ThreadPool.get().execute(() -> persistence.execute(chat));
-        return chat;
+        return createChat(prompt, model, false);
     }
 
     @Override
@@ -169,6 +162,22 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     @Override
     public Embedding embed(String modelId, String text) {
         return createEmbedding(getModel(modelId), text);
+    }
+
+    @Override
+    public String summarize(String text, boolean shortMessage) {
+        if (StringUtils.isEmpty(text)) return EMPTY_STRING;
+        return LlmUtils.MISC_METRICS.time("Summarize", () -> {
+            Chat chat = createChat(Prompt.empty(), getDefaultModel(), true);
+            try {
+                String question = shortMessage ? properties.getSummaryWords() : properties.getSummarySentence();
+                question += "\n\nText to summarize:\n```\n" + text + "\n```";
+                TokenStream stream = chat.chat(question);
+                return stream.getMessage().getText();
+            } finally {
+                chat.close();
+            }
+        });
     }
 
     public Embedding createEmbedding(Model model, String text) {
@@ -214,12 +223,12 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
 
     @Override
     public Collection<net.microfalx.heimdall.llm.api.Chat> getActiveChats() {
-        return List.of();
+        return unmodifiableCollection(activeChats.values());
     }
 
     @Override
     public Iterable<net.microfalx.heimdall.llm.api.Chat> getHistoricalChats() {
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
@@ -236,7 +245,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
 
     @Override
     public Collection<Tool> getTools() {
-        return Collections.unmodifiableCollection(tools.values());
+        return unmodifiableCollection(tools.values());
     }
 
     @Override
@@ -263,8 +272,10 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     public String getSystemMessage(Chat chat) {
         SystemMessageBuilder builder = new SystemMessageBuilder(this, chat.getModel(), chat.getPrompt());
         Map<String, Object> variables = new HashMap<>();
-        getDataSetAsJson(chat, variables);
-        return PromptTemplate.from(builder.build()).apply(variables).text();
+        return LlmUtils.CREATE_SYSTEM_MESSAGE_METRICS.time(chat.getPrompt().getName(), () -> {
+            getDataSetAsJson(chat, variables);
+            return PromptTemplate.from(builder.build()).apply(variables).text();
+        });
     }
 
     @Override
@@ -359,17 +370,24 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     @SuppressWarnings({"unchecked", "rawtypes"})
     void getDataSetAsJson(Chat chat, Map<String, Object> variables) {
         requireNonNull(chat);
-
         DataSetRequest request = chat.getFeature(DataSetRequest.class);
-        TransactionTemplate transactionTemplate = getTransactionTemplate(request.getDataSet());
-        if (transactionTemplate != null) {
-            transactionTemplate.execute(status -> doGetDataSetAsJsonUnder(chat, variables));
+        if (request == null) {
+            LOGGER.warn("No data set request found for chat {}", chat.getId());
+            variables.put("DATASET", JSON_ERROR);
+            variables.put("SCHEMA", JSON_ERROR);
         } else {
-            doGetDataSetAsJsonUnder(chat, variables);
+            LlmUtils.MISC_METRICS.time("Get Data Set", (t) -> {
+                TransactionTemplate transactionTemplate = getTransactionTemplate(request.getDataSet());
+                if (transactionTemplate != null) {
+                    transactionTemplate.execute(status -> doGetDataSetAsJsonUnderTransaction(chat, variables));
+                } else {
+                    doGetDataSetAsJsonUnderTransaction(chat, variables);
+                }
+            });
         }
     }
 
-    Object doGetDataSetAsJsonUnder(Chat chat, Map<String, Object> variables) {
+    Object doGetDataSetAsJsonUnderTransaction(Chat chat, Map<String, Object> variables) {
         DataSetRequest<?, ?, ?> request = chat.getFeature(DataSetRequest.class);
         Page<?> page = null;
         if (request != null) {
@@ -433,10 +451,31 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         Resource directory = chatsResource.resolve(DIRECTORY_DATE_FORMATTER.format(LocalDateTime.now()), Resource.Type.DIRECTORY);
         Resource target = directory.resolve(String.format(FILE_NAME_FORMAT, getNextSequence()));
         if (!directory.exists()) directory.create();
-        List<ChatMessage> messages = chatStore.getMessages(chat.getId());
-        String json = ChatMessageSerializer.messagesToJson(messages);
-        IOUtils.appendStream(target.getWriter(), new StringReader(json));
-        return target;
+        return LlmUtils.MISC_METRICS.timeCallable("Serialize Chat Messages", () -> {
+            List<ChatMessage> messages = chatStore.getMessages(chat.getId());
+            String json = ChatMessageSerializer.messagesToJson(messages);
+            IOUtils.appendStream(target.getWriter(), new StringReader(json));
+            return target;
+        });
+
+    }
+
+    private net.microfalx.heimdall.llm.api.Chat createChat(Prompt prompt, Model model, boolean internal) {
+        requireNonNull(prompt);
+        requireNonNull(model);
+        if (model.isEmbedding()) throw new LlmException("Model '" + model.getId() + "' does not support chatting");
+        net.microfalx.heimdall.llm.api.Chat result = CREATE_CHAT_METRICS.time(model.getName(), () -> {
+            Chat.Factory chatFactory = model.getProvider().getChatFactory();
+            net.microfalx.heimdall.llm.api.Chat chat = chatFactory.createChat(prompt, model);
+            activeChats.put(toIdentifier(chat.getId()), chat);
+            if (chat instanceof AbstractChat abstractChat) {
+                abstractChat.internal.set(internal);
+                abstractChat.initialize(this);
+            }
+            return chat;
+        });
+        if (!internal) ThreadPool.get().execute(() -> persistence.execute(result));
+        return result;
     }
 
     private void initDirectories() {

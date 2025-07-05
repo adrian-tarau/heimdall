@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.FormatterUtils.formatNumber;
+import static net.microfalx.lang.StringUtils.isNotEmpty;
 
 /**
  * Base class for chat sessions.
@@ -68,6 +69,7 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
     private final AtomicInteger outputTokenCount = new AtomicInteger();
     private final Set<Object> features = new CopyOnWriteArraySet<>();
     final AtomicBoolean changed = new AtomicBoolean();
+    final AtomicBoolean internal = new AtomicBoolean(false);
 
     private static final Map<String, AtomicInteger> CHAT_COUNTERS = new ConcurrentHashMap<>();
 
@@ -78,6 +80,8 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
         setName(DEFAULT_NAME);
         this.prompt = prompt;
         this.model = model;
+        updateTags(prompt.getTags());
+        updateTags(model.getTags());
     }
 
     @Override
@@ -186,8 +190,7 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
     }
 
     public void updateName(String name) {
-        requireNonNull(name);
-        setName(name);
+        if (StringUtils.isNotEmpty(name)) setName(name);
     }
 
     public final AbstractChat setChatModel(ChatModel chatModel) {
@@ -220,7 +223,7 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
         } catch (IOException e) {
             LOGGER.atWarn().setCause(e).log("Failed to close chat session {}", getNameAndId());
         }
-        if (service != null) service.closeChat(this);
+        if (service != null && !internal.get()) service.closeChat(this);
     }
 
     void initialize(LlmServiceImpl service) {
@@ -239,6 +242,7 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
             streamChat = updateAiService(AiServices.builder(StreamChat.class)).build();
         }
         streamCompleted(new TokenStreamImpl(Collections.emptyIterator()));
+        if (isNotEmpty(prompt.getQuestion())) summarize(prompt.getQuestion());
     }
 
     void streamCompleted(net.microfalx.heimdall.llm.api.TokenStream tokenStream) {
@@ -251,6 +255,13 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
     private void initializePrincipal() {
         principal = SecurityContext.get().getPrincipal();
         setName(DEFAULT_NAME + String.format(" %03d", getNextChatIndex()));
+    }
+
+    private void summarize(String text) {
+        service.getChatPool().execute(() -> {
+            String summarize = service.summarize(text, true);
+            updateName(summarize);
+        });
     }
 
     private <T> AiServices<T> updateAiService(AiServices<T> aiService) {

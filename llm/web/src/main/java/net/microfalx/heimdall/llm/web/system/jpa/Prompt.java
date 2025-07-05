@@ -91,7 +91,7 @@ public class Prompt extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
     private String context;
 
     @Column(name = "system", nullable = false)
-    @Visible(modes = {Visible.Mode.EDIT, Visible.Mode.BROWSE})
+    @Visible(modes = {Visible.Mode.BROWSE})
     @ReadOnly
     @Position(45)
     @Description("Indicates whether this is a system prompt (cannot be modified by users")

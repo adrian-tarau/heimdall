@@ -77,6 +77,14 @@ public interface LlmService {
     Embedding embed(String modelId, String text);
 
     /**
+     * Summarizes the text content using the default model.
+     *
+     * @param text the text to summarize.
+     * @return the summary of the text.
+     */
+    String summarize(String text, boolean shortMessage);
+
+    /**
      * Returns the default model.
      *
      * @return a non-null instance
