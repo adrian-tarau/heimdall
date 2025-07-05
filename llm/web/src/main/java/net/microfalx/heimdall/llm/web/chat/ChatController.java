@@ -105,6 +105,7 @@ public class ChatController extends PageController {
         model.addAttribute("title", "Model");
         model.addAttribute("content", chat.getSystemMessage().getText());
         model.addAttribute("modalClasses", "modal-lg");
+        model.addAttribute("contentClasses", "llm-chat-info-smaller dataset-text-mono");
         return "llm/chat :: info";
     }
 

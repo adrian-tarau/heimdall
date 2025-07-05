@@ -3,6 +3,7 @@ package net.microfalx.heimdall.llm.core;
 import net.microfalx.heimdall.llm.api.Model;
 import net.microfalx.heimdall.llm.api.Prompt;
 
+import static net.microfalx.heimdall.llm.core.LlmUtils.appendSentence;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.StringUtils.*;
 
@@ -15,6 +16,8 @@ class SystemMessageBuilder {
     private final LlmProperties properties;
     private final Model model;
     private final Prompt prompt;
+
+    private int fragmentCount;
 
     SystemMessageBuilder(LlmServiceImpl service, Model model, Prompt prompt) {
         requireNonNull(service);
@@ -32,40 +35,44 @@ class SystemMessageBuilder {
      * @return a non-null string
      */
     String build() {
+        if (prompt.isEmpty()) return properties.getDefaultRole();
         StringBuilder builder = new StringBuilder();
         String role = defaultIfEmpty(prompt.getRole(), properties.getDefaultRole());
         if (isNotEmpty(role)) {
-            role = service.getPromptFragment(model, prompt, Prompt.Fragment.ROLE, role);
-            LlmUtils.appendSentence(builder, role);
+            appendFragment(builder, Prompt.Fragment.ROLE, role);
             if (isNotEmpty(properties.getDefaultGuidanceMessage())) {
-                LlmUtils.appendSentence(builder, properties.getDefaultGuidanceMessage());
+                appendSentence(builder, properties.getDefaultGuidanceMessage());
             }
-            newParagraph(builder);
         }
-        if (isNotEmpty(prompt.getExamples())) {
-            String context = service.getPromptFragment(model, prompt, Prompt.Fragment.EXAMPLES, prompt.getExamples());
-            if (isNotEmpty(context)) {
-                LlmUtils.appendSentence(builder, context).append("\n");
-            }
-            newParagraph(builder);
-        }
-        if (isNotEmpty(prompt.getContext())) {
-            String context = service.getPromptFragment(model, prompt, Prompt.Fragment.CONTEXT, prompt.getContext());
-            if (isNotEmpty(context)) {
-                LlmUtils.appendSentence(builder, context).append("\n");
-            }
-            newParagraph(builder);
-        }
+        appendFragment(builder, Prompt.Fragment.INSTRUCTIONS, prompt.getInstructions());
+        appendFragment(builder, Prompt.Fragment.EXAMPLES, prompt.getExamples());
+        appendFragment(builder, Prompt.Fragment.CONTEXT, prompt.getContext());
         String promptText = builder.toString().trim();
         if (isEmpty(promptText)) promptText = properties.getDefaultRole();
         return promptText;
     }
 
-    private void newParagraph(StringBuilder builder) {
-        if (!builder.isEmpty() && !builder.toString().endsWith("\n\n")) {
-            builder.append("\n\n");
-        }
+    private void appendFragment(StringBuilder builder, Prompt.Fragment fragment, String text) {
+        if (isEmpty(text)) return;
+        String title = service.getTitle(model, prompt, fragment, getDefaultTitle(fragment));
+        if (fragmentCount > 0) builder.append(EMPTY_LINE);
+        builder.append("# ").append(title).append(EMPTY_LINE);
+        text = service.getPromptFragment(model, prompt, fragment, text);
+        builder.append(text);
+        fragmentCount++;
     }
+
+    private String getDefaultTitle(Prompt.Fragment fragment) {
+        return switch (fragment) {
+            case ROLE -> "Identity";
+            case INSTRUCTIONS -> "Instructions";
+            case EXAMPLES -> "Examples";
+            case CONTEXT -> "Context";
+            default -> "Other";
+        };
+    }
+
+    private static final String EMPTY_LINE = "\n\n";
 
 
 }

@@ -426,6 +426,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
      * @param model    the model to use
      * @param prompt   the prompt to use
      * @param fragment the fragment to return
+     * @param text the original text of the fragment (if any)
      * @return the text of the fragment, never null
      */
     String getPromptFragment(Model model, Prompt prompt, Prompt.Fragment fragment, String text) {
@@ -434,10 +435,31 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         requireNonNull(fragment);
         String originalText = text;
         for (LlmListener listener : listeners) {
-            text = listener.augment(model, prompt, fragment, text);
+            text = listener.getFragment(model, prompt, fragment, text);
             if (isNotEmpty(text)) break;
         }
         return isEmpty(text) ? originalText : text;
+    }
+
+    /**
+     * Returns a fragment title.
+     *
+     * @param model    the model to use
+     * @param prompt   the prompt to use
+     * @param fragment the fragment to return
+     * @param title    the suggested title for the fragment
+     * @return the text of the fragment, never null
+     */
+    String getTitle(Model model, Prompt prompt, Prompt.Fragment fragment, String title) {
+        requireNonNull(model);
+        requireNonNull(prompt);
+        requireNonNull(fragment);
+        String originalTitle = title;
+        for (LlmListener listener : listeners) {
+            title = listener.getTitle(model, prompt, fragment, title);
+            if (isNotEmpty(title)) break;
+        }
+        return isEmpty(title) ? originalTitle : title;
     }
 
     /**

@@ -28,6 +28,7 @@ public class Prompt extends NamedAndTaggedIdentifyAware<String> {
     private Integer maximumOutputTokens;
     private boolean chainOfThought;
     private boolean useOnlyContext;
+    private String instructions;
     private String examples;
     private String context;
     private String question;
@@ -67,6 +68,18 @@ public class Prompt extends NamedAndTaggedIdentifyAware<String> {
      */
     public String getRole() {
         return role;
+    }
+
+    /**
+     * Returns the instructions associated with the prompt.
+     * <p>
+     * Instructions provide guidance to the model on how to generate the response you want.
+     * They can include rules, what the model should do, and what it should never do.
+     *
+     * @return a string containing instructions, or null if not set
+     */
+    public String getInstructions() {
+        return instructions;
     }
 
     /**
@@ -166,7 +179,7 @@ public class Prompt extends NamedAndTaggedIdentifyAware<String> {
      * @return {@code true} if the prompt is empty, {@code false} otherwise
      */
     public boolean isEmpty() {
-        return StringUtils.isEmpty(role) && StringUtils.isEmpty(examples) && StringUtils.isEmpty(context)
+        return StringUtils.isEmpty(role) && StringUtils.isEmpty(instructions) && StringUtils.isEmpty(examples) && StringUtils.isEmpty(context)
                 && StringUtils.isEmpty(question);
     }
 
@@ -174,9 +187,39 @@ public class Prompt extends NamedAndTaggedIdentifyAware<String> {
      * An enumeration representing the fragments of a prompt.
      */
     public enum Fragment {
+
+        /**
+         * The role (identity of the agent) of the prompt, defining its context or purpose.
+         */
         ROLE,
+
+        /**
+         * Provides guidance to the model on how to generate the response you want. What rules should
+         * it follow? What should the model do, and what should the model never do?
+         */
+        INSTRUCTIONS,
+
+        /**
+         * Provides examples of the expected input and output, used to guide the model in generating responses.
+         */
         EXAMPLES,
+
+        /**
+         * The context of the prompt, which may include dynamic content or variables.
+         * <p>
+         * The text withing the context supports variable substitution, which allows users to
+         * include dynamic content:
+         * <ul>
+         *     <li>{{SCHEMA}} - will be replaced with data extracted from the current context (dashboard)</li>
+         *     <li>{{DATASET}} - will be replaced with data extracted from the current context (dashboard)</li>
+         * </ul>
+         */
         CONTEXT,
+
+        /**
+         * The initial question or query that the prompt is designed to address. Can be empty to allow the user
+         * to provide their own question.
+         */
         QUESTION
     }
 
@@ -186,6 +229,7 @@ public class Prompt extends NamedAndTaggedIdentifyAware<String> {
     public static class Builder extends NamedAndTaggedIdentifyAware.Builder<String> {
 
         private String role;
+        private String instructions;
         private String examples;
         private String context;
         private String question;
@@ -198,6 +242,11 @@ public class Prompt extends NamedAndTaggedIdentifyAware<String> {
 
         public Builder role(String role) {
             this.role = role;
+            return this;
+        }
+
+        public Builder instructions(String instructions) {
+            this.instructions = instructions;
             return this;
         }
 
@@ -250,6 +299,7 @@ public class Prompt extends NamedAndTaggedIdentifyAware<String> {
         public Builder fromResources(String module) {
             requireNonNull(module);
             if (StringUtils.isEmpty(role)) role = loadResource(module, "role.md");
+            if (StringUtils.isEmpty(instructions)) instructions = loadResource(module, "instructions.md");
             if (StringUtils.isEmpty(examples)) examples = loadResource(module, "examples.md");
             if (StringUtils.isEmpty(context)) context = loadResource(module, "context.md");
             if (StringUtils.isEmpty(question)) question = loadResource(module, "question.md");
@@ -267,6 +317,7 @@ public class Prompt extends NamedAndTaggedIdentifyAware<String> {
         public Prompt build() {
             Prompt prompt = (Prompt) super.build();
             prompt.role = role;
+            prompt.instructions = instructions;
             prompt.examples = examples;
             prompt.context = context;
             prompt.question = question;

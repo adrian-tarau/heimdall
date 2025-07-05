@@ -40,9 +40,9 @@ public class Prompt extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
 
     @Column(name = "role", length = 1000)
     @Position(10)
-    @Label(value = "Question", group = "Fragments")
+    @Label(value = "Identity", group = "Fragments")
     @Component(Component.Type.TEXT_AREA)
-    @Description("Returns the role of the prompt.The role is used to define the context or purpose of the prompt in the chat completion.")
+    @Description("Returns the identity of the prompt.The identity is used to define the context or purpose of the prompt in the chat completion.")
     @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT, Visible.Mode.ADD})
     private String role;
 

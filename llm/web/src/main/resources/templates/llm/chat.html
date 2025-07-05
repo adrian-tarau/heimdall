@@ -54,9 +54,11 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body llm-chat">
-                <div class="llm-chat-info" th:utext="${content}"></div>
+                <div th:class="|llm-chat-info ${contentClasses}|" th:utext="${content}"></div>
             </div>
             <div class="modal-footer">
+                <button type="button" class="btn primary btn-sm dataset-btn-sm"
+                        th:attr="onclick=|Application.copyToClipboard('#info-modal .llm-chat-info')|">Copy</button>
                 <button type="button" class="btn btn-secondary btn-sm dataset-btn-sm"
                         th:attr="onclick=|Application.closeModal()|">Close</button>
             </div>

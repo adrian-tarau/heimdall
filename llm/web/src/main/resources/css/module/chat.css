@@ -53,6 +53,10 @@
     margin: 5px 0 0 5px;
 }
 
+.llm-chat-info-smaller {
+    font-size: smaller;
+}
+
 .llm-chat-info pre code {
     white-space: break-spaces !important;
 }
