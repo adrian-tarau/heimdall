@@ -446,7 +446,7 @@ public abstract class ProtocolService<E extends Event, M extends net.microfalx.h
      * @return a non-null instance
      */
     protected final Metrics getEventMetrics() {
-        if (eventMetrics == null) eventMetrics = getMetrics().withGroup("Event");
+        if (eventMetrics == null) eventMetrics = ProtocolUtils.getEventMetrics(getEventType());
         return eventMetrics;
     }
 

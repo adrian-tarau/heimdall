@@ -4,11 +4,14 @@ import com.cloudbees.syslog.Severity;
 import net.microfalx.bootstrap.dsv.DsvRecord;
 import net.microfalx.heimdall.protocol.core.Address;
 import net.microfalx.heimdall.protocol.core.Body;
+import net.microfalx.heimdall.protocol.core.Event;
+import net.microfalx.heimdall.protocol.core.ProtocolUtils;
 import net.microfalx.heimdall.protocol.core.simulator.DsvProtocolDataSet;
 import net.microfalx.heimdall.protocol.core.simulator.DsvProtocolDataSetFactory;
 import net.microfalx.heimdall.protocol.gelf.GelfEvent;
 import net.microfalx.lang.Hashing;
 import net.microfalx.lang.StringUtils;
+import net.microfalx.metrics.Metrics;
 import net.microfalx.resource.Resource;
 
 import static net.microfalx.lang.StringUtils.isNotEmpty;
@@ -20,6 +23,8 @@ public abstract class GelfDataSet extends DsvProtocolDataSet {
 
     protected static final String CORRELATION_ID = "correlationId";
 
+    protected final Metrics METRICS = ProtocolUtils.getMetrics(Event.Type.GELF).withGroup("Data Set");
+
     public GelfDataSet(Resource resource) {
         super(resource);
     }
@@ -30,6 +35,7 @@ public abstract class GelfDataSet extends DsvProtocolDataSet {
      * @param event the event
      */
     public final void update(GelfEvent event, Address sourceAddress, Address targetAddress) {
+        METRICS.count(getName());
         DsvRecord record = iterator().next();
         updateCommonFields(event, sourceAddress, targetAddress);
         updateCommonFieldsFromRecord(event, record);

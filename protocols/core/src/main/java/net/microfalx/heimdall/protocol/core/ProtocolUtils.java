@@ -16,10 +16,22 @@ public class ProtocolUtils {
     /**
      * Returns the {@link Metrics metrics} for the protocol.
      *
+     * @param type the event type
      * @return a non-null instance
      */
     public static Metrics getMetrics(Event.Type type) {
         requireNonNull(type);
         return ROOT.withGroup(type.name());
+    }
+
+    /**
+     * Returns the {@link Metrics metrics} for the protocol to count event specific stats.
+     *
+     * @param type the event type
+     * @return a non-null instance
+     */
+    public static Metrics getEventMetrics(Event.Type type) {
+        return getMetrics(type).withGroup("Event");
+
     }
 }

@@ -28,7 +28,7 @@ public class GelfEvent extends Event {
     @NotNull
     @Position(1)
     @Description("The name of the host, source or application that sent the log event")
-    @Width("200px")
+    @Width("160px")
     private Address address;
 
     @JoinColumn(name = "short_message_id")
@@ -65,34 +65,39 @@ public class GelfEvent extends Event {
     @Column(name = "application_name", nullable = false)
     @Position(25)
     @Description("Identify the application which sent the log event")
+    @Width("100px")
     private String application;
 
     @Column(name = "process_name", nullable = false)
     @Position(26)
     @Description("Identify the process/service which sent the log event")
+    @Width("100px")
     private String process;
 
     @Column(name = "logger_name", nullable = false)
     @Position(27)
     @Description("Identify the logger which logged of the log event")
-    @Width("20%")
+    @Width("15%")
     private String logger;
 
     @Column(name = "thread_name", nullable = false)
     @Position(28)
     @Description("Identify the application thread which logged of the log event")
+    @Width("100px")
     private String thread;
 
     @Column(name = "level", nullable = false)
     @Position(35)
     @Filterable(value = true)
     @Description("Identify the importance of the log event")
+    @Width("100px")
     private Severity severity;
 
     @Column(name = "facility", nullable = false)
     @Position(36)
     @Filterable(value = true)
     @Description("Determines which process of the machine created the log event")
+    @Visible(modes = Visible.Mode.VIEW)
     private Facility facility;
 
 }

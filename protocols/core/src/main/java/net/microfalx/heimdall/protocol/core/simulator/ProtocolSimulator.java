@@ -5,7 +5,9 @@ import net.datafaker.providers.base.Shakespeare;
 import net.microfalx.heimdall.protocol.core.Address;
 import net.microfalx.heimdall.protocol.core.Event;
 import net.microfalx.heimdall.protocol.core.ProtocolClient;
+import net.microfalx.heimdall.protocol.core.ProtocolUtils;
 import net.microfalx.lang.ThreadUtils;
+import net.microfalx.metrics.Metrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -44,9 +46,12 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
     private final Faker faker = new Faker();
     private final Lock lock = new ReentrantLock();
 
+    final Metrics METRICS;
+
     public ProtocolSimulator(ProtocolSimulatorProperties properties) {
         requireNonNull(properties);
         this.properties = properties;
+        METRICS = ProtocolUtils.getEventMetrics(getEventType());
     }
 
     public ProtocolSimulatorProperties getProperties() {
@@ -325,8 +330,10 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
             Address targetAddress = getRandomTargetAddress();
             C client = (C) getRandomClient();
             try {
+                METRICS.count("Simulated");
                 simulate(client, sourceAddress, targetAddress, i + 1);
             } catch (IOException e) {
+                METRICS.count("Simulation Failed");
                 LOGGER.atWarn().setCause(e).log("Failed to send simulated event to {}", client.getHostName());
             }
             waitForRate();
