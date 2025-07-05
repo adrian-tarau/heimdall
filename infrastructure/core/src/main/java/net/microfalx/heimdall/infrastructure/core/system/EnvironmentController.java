@@ -42,16 +42,14 @@ public class EnvironmentController extends SystemDataSetController<Environment, 
     }
 
     @Override
-    protected boolean beforePersist(net.microfalx.bootstrap.dataset.DataSet<Environment, Field<Environment>, Integer> dataSet, Environment model, State state) {
-        model.setNaturalId(StringUtils.toIdentifier(model.getName()));
+    protected void beforePersist(net.microfalx.bootstrap.dataset.DataSet<Environment, Field<Environment>, Integer> dataSet, Environment model, State state) {
+        if (model.getNaturalId() == null) model.setNaturalId(StringUtils.toIdentifier(model.getName()));
         model.setApiPath(defaultIfEmpty(model.getApiPath(), SLASH));
         model.setAppPath(defaultIfEmpty(model.getApiPath(), SLASH));
-        return super.beforePersist(dataSet, model, state);
     }
 
     @Override
     protected void afterPersist(net.microfalx.bootstrap.dataset.DataSet<Environment, Field<Environment>, Integer> dataSet, Environment model, State state) {
-        super.afterPersist(dataSet, model, state);
         infrastructureService.reload();
     }
 }

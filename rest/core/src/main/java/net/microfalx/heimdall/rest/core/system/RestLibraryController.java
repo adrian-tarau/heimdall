@@ -66,17 +66,16 @@ public class RestLibraryController extends AbstractLibraryController<RestLibrary
     }
 
     @Override
-    protected boolean beforeDelete(net.microfalx.bootstrap.dataset.DataSet<RestLibrary, Field<RestLibrary>, Integer> dataSet, Model controllerModel, RestLibrary dataSetModel) {
-        if (dataSetModel.isGlobal()) return cancel(controllerModel, "A global library cannot be deleted");
-        if (dataSetModel.getProject().getType() != Project.Type.NONE)
-            return cancel(controllerModel, "A library hosted in VCS cannot be deleted");
-        return super.beforeDelete(dataSet, controllerModel, dataSetModel);
+    protected void beforeDelete(net.microfalx.bootstrap.dataset.DataSet<RestLibrary, Field<RestLibrary>, Integer> dataSet, Model controllerModel, RestLibrary dataSetModel) {
+        if (dataSetModel.isGlobal()) cancel("A global library cannot be deleted");
+        if (dataSetModel.getProject().getType() != Project.Type.NONE) {
+            cancel("A library hosted in VCS cannot be deleted");
+        }
     }
 
     @Override
-    protected boolean beforeEdit(net.microfalx.bootstrap.dataset.DataSet<RestLibrary, Field<RestLibrary>, Integer> dataSet, Model controllerModel, RestLibrary dataSetModel) {
-        if (dataSetModel.isGlobal()) return cancel(controllerModel, "A global library cannot be updated");
-        return super.beforeEdit(dataSet, controllerModel, dataSetModel);
+    protected void beforeEdit(net.microfalx.bootstrap.dataset.DataSet<RestLibrary, Field<RestLibrary>, Integer> dataSet, Model controllerModel, RestLibrary dataSetModel) {
+        if (dataSetModel.isGlobal()) cancel("A global library cannot be updated");
     }
 
     @Override

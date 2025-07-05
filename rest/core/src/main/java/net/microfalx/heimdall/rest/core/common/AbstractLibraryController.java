@@ -129,25 +129,22 @@ public abstract class AbstractLibraryController<T extends AbstractLibrary> exten
     }
 
     @Override
-    protected boolean beforeEdit(DataSet<T, Field<T>, Integer> dataSet, Model controllerModel, T dataSetModel) {
+    protected void beforeEdit(DataSet<T, Field<T>, Integer> dataSet, Model controllerModel, T dataSetModel) {
         if (dataSetModel.getProject().getType() != Project.Type.NONE) {
             setReadOnlyExcept("name", "description", "tags", "override");
         }
-        return super.beforeEdit(dataSet, controllerModel, dataSetModel);
     }
 
     @Override
-    protected boolean beforePersist(DataSet<T, Field<T>, Integer> dataSet, T model, State state) {
+    protected void beforePersist(DataSet<T, Field<T>, Integer> dataSet, T model, State state) {
         Resource resolve = ResourceFactory.resolve(model.getResource());
         if (state == State.ADD) {
             model.setNaturalId(getNaturalId(model.getType(), resolve, model.getProject() != null ? model.getProject().getNaturalId() : null));
         }
-        return super.beforePersist(dataSet, model, state);
     }
 
     @Override
     protected void afterPersist(DataSet<T, Field<T>, Integer> dataSet, T model, State state) {
-        super.afterPersist(dataSet, model, state);
         executor.execute(restService::reload);
     }
 

@@ -20,9 +20,8 @@ public class ServerController extends SystemDataSetController<Server, Integer> {
     private InfrastructureService infrastructureService;
 
     @Override
-    protected boolean beforePersist(net.microfalx.bootstrap.dataset.DataSet<Server, Field<Server>, Integer> dataSet, Server model, State state) {
+    protected void beforePersist(net.microfalx.bootstrap.dataset.DataSet<Server, Field<Server>, Integer> dataSet, Server model, State state) {
         if (model.getNaturalId() == null) model.setNaturalId(Server.toNaturalId(model));
-        return super.beforePersist(dataSet, model, state);
     }
 
     @Override

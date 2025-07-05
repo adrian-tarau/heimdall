@@ -21,9 +21,8 @@ public class ClusterController extends SystemDataSetController<Cluster, Integer>
     private InfrastructureService infrastructureService;
 
     @Override
-    protected boolean beforePersist(net.microfalx.bootstrap.dataset.DataSet<Cluster, Field<Cluster>, Integer> dataSet, Cluster model, State state) {
-        model.setNaturalId(StringUtils.toIdentifier(model.getName()));
-        return super.beforePersist(dataSet, model, state);
+    protected void beforePersist(net.microfalx.bootstrap.dataset.DataSet<Cluster, Field<Cluster>, Integer> dataSet, Cluster model, State state) {
+        if (model.getNaturalId() == null) model.setNaturalId(StringUtils.toIdentifier(model.getName()));
     }
 
     @Override

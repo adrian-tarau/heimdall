@@ -22,9 +22,8 @@ public class DnsController extends SystemDataSetController<Dns, Integer> {
     private InfrastructureService infrastructureService;
 
     @Override
-    protected boolean beforePersist(net.microfalx.bootstrap.dataset.DataSet<Dns, Field<Dns>, Integer> dataSet, Dns model, State state) {
+    protected void beforePersist(net.microfalx.bootstrap.dataset.DataSet<Dns, Field<Dns>, Integer> dataSet, Dns model, State state) {
         model.setValid(isHostname(model.getHostname()) && isHostname(model.getDomain()));
-        return super.beforePersist(dataSet, model, state);
     }
 
     @Override
