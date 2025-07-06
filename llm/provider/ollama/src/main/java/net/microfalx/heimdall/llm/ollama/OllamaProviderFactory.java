@@ -55,13 +55,19 @@ public class OllamaProviderFactory extends AbstractProviderFactory {
         builder.model((Model.Builder) Model.create("deepseek_r1_7b",
                 "DeepSeek-R1 (7b)", "deepseek-r1:7b").maximumContextLength(128_000)
                 .tag("deepseek").tag("tools").tag("thinking"));
-        builder.model((Model.Builder) Model.create("deepseek_r1_7b",
-                "DeepSeek-R1 (7b)", "deepseek-r1:7b").maximumContextLength(128_000)
+        builder.model((Model.Builder) Model.create("deepseek_r1_8b",
+                        "DeepSeek-R1 (8b)", "deepseek-r1:8b").maximumContextLength(128_000)
                 .tag("deepseek").tag("tools").tag("thinking"));
         builder.model((Model.Builder) Model.create("deepseek_r1_14b",
                 "DeepSeek-R1 (14b)", "deepseek-r1:14b").maximumContextLength(128_000)
                 .tag("deepseek").tag("tools").tag("thinking"));
 
+        builder.model((Model.Builder) Model.create("llama3_2_1b",
+                        "Llama 3.2 (1b)", "llama3.2:1b").maximumContextLength(128_000)
+                .tag("meta").tag("llama").tag("tools"));
+        builder.model((Model.Builder) Model.create("llama3_2_3b",
+                        "Llama 3.2 (3b)", "llama3.2:3b").maximumContextLength(128_000)
+                .tag("meta").tag("llama").tag("tools"));
         builder.model((Model.Builder) Model.create("llama3_1_8b",
                 "Llama 3.1 (8b)", "llama3.1:8b").maximumContextLength(128_000)
                 .tag("meta").tag("llama").tag("tools"));
@@ -69,11 +75,6 @@ public class OllamaProviderFactory extends AbstractProviderFactory {
                 "Llama 3.1 (70b)", "llama3.1:70b").maximumContextLength(128_000)
                 .tag("meta").tag("llama").tag("tools"));
 
-        builder.model((Model.Builder) Model.create("llama3_2_1b",
-                "Llama 3.2 (1b)", "llama3.2:1b").maximumContextLength(128_000)
-                .tag("meta").tag("llama").tag("tools"));
-        builder.model((Model.Builder) Model.create("llama3_2_3b",
-                "Llama 3.2 (3b)", "llama3.2:3b").maximumContextLength(128_000)
-                .tag("meta").tag("llama").tag("tools"));
+
     }
 }
