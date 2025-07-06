@@ -74,7 +74,7 @@ public class GelfServiceTest extends AbstractBootstrapServiceTestCase {
         gelfService.accept(gelfEvent);
         Mockito.verify(gelfEventRepository).save(smtpCapture.capture());
         net.microfalx.heimdall.protocol.gelf.jpa.GelfEvent gelfEvent = smtpCapture.getValue();
-        assertEquals(this.gelfEvent.getSeverity().getLevel(), gelfEvent.getSeverity());
+        assertEquals(this.gelfEvent.getSeverity().getLevel(), gelfEvent.getLevel());
         assertEquals(this.gelfEvent.getVersion(), "1.1");
         assertEquals(this.gelfEvent.getParts().stream().toList().get(0).getResource().loadAsString(),
                 gelfEvent.getShortMessage().getResource());

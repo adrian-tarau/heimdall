@@ -23,7 +23,8 @@
         </div>
         <div class="row mb-1 p-1 fs-6">
             <div th:replace="~{ llm/prompt_view :: card('Question', ${model.question})}" th:unless="${#strings.isEmpty(model.question)}"></div>
-            <div th:replace="~{ llm/prompt_view :: card('Role', ${model.role})}" th:unless="${#strings.isEmpty(model.role)}"></div>
+            <div th:replace="~{ llm/prompt_view :: card('Identity', ${model.role})}" th:unless="${#strings.isEmpty(model.role)}"></div>
+            <div th:replace="~{ llm/prompt_view :: card('Instructions', ${model.instructions})}" th:unless="${#strings.isEmpty(model.instructions)}"></div>
             <div th:replace="~{ llm/prompt_view :: card('Examples', ${model.examples})}" th:unless="${#strings.isEmpty(model.examples)}"></div>
             <div th:replace="~{ llm/prompt_view :: card('Context', ${model.context})}" th:unless="${#strings.isEmpty(model.context)}"></div>
         </div>
