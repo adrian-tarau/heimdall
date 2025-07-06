@@ -39,15 +39,18 @@ public class Provider extends NamedAndTaggedAndTimestampedIdentityAware<Integer>
     @Position(20)
     @Column(name = "author", nullable = false, length = 100)
     @Description("The author of the provider")
+    @Width("400px")
     private String author;
 
     @Position(100)
     @Column(name = "license", length = 1000)
     @Description("The license of the provider")
+    @Width("100px")
     private String license;
 
     @Position(200)
     @Column(name = "version", length = 50)
     @Description("The version of the provider")
+    @Width("100px")
     private String version;
 }

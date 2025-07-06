@@ -57,7 +57,7 @@ public class RestScenario extends NamedAndTaggedAndTimestampedIdentityAware<Inte
     @Formattable(unit = Formattable.Unit.MILLI_SECOND)
     private Integer startTime;
 
-    @Column(name = "gracefulStop")
+    @Column(name = "graceful_stop")
     @Description("The grace stop of the scenario")
     @Position(21)
     @Formattable(unit = Formattable.Unit.MILLI_SECOND)
