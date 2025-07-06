@@ -127,8 +127,17 @@ public class Model extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
     @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT, Visible.Mode.ADD})
     private Double presencePenalty;
 
+    @Column(name = "thinking", nullable = false)
+    @Position(56)
+    @Description("""
+            Whether the model should think step by step before answering. This is useful for complex tasks
+            where the model needs to reason through the problem before providing an answer.
+            """)
+    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT, Visible.Mode.ADD})
+    private boolean thinking;
+
     @Position(58)
-    @Column(name = "maximum_context_length",nullable = false)
+    @Column(name = "maximum_context_length", nullable = false)
     @Label("Context Length")
     @Description("The maximum context length of the model in tokens. This is the maximum number of tokens that can be " +
             "processed by the model in a single request")

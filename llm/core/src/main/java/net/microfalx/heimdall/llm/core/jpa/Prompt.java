@@ -39,6 +39,10 @@ public class Prompt extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
     @Column(name = "use_only_context")
     private boolean useOnlyContext;
 
+    @Lob
+    @Column(name = "instructions")
+    private String instructions;
+
     @Column(name = "examples", length = 10000)
     private String examples;
 
@@ -48,6 +52,9 @@ public class Prompt extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
     @Column(name = "question", length = 5000)
     private String question;
 
-    @Column(name = "system",nullable = false)
+    @Column(name = "thinking", nullable = false)
+    private boolean thinking;
+
+    @Column(name = "system", nullable = false)
     private boolean system = false;
 }

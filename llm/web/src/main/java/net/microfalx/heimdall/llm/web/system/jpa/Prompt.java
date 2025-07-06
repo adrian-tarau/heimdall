@@ -74,6 +74,13 @@ public class Prompt extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
     @Width("100px")
     private boolean useOnlyContext;
 
+    @Lob
+    @Column(name = "instructions")
+    @Position(32)
+    @Description("Instructions for the prompt, which can include additional context or guidelines for the model")
+    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT, Visible.Mode.ADD})
+    private String instructions;
+
     @Column(name = "examples", length = 10000)
     @Position(35)
     @Label(value = "Examples", group = "Fragments")
@@ -89,6 +96,12 @@ public class Prompt extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
     @Component(Component.Type.TEXT_AREA)
     @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT, Visible.Mode.ADD})
     private String context;
+
+    @Column(name = "thinking", nullable = false)
+    @Position(42)
+    @Description("Indicates whether the prompt is used for thinking or reasoning. This is typically used in chain of thought prompts")
+    @Visible(modes = {Visible.Mode.VIEW, Visible.Mode.EDIT, Visible.Mode.ADD})
+    private boolean thinking;
 
     @Column(name = "system", nullable = false)
     @Visible(modes = {Visible.Mode.BROWSE})

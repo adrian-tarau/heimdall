@@ -152,7 +152,7 @@ public class LlmCache extends ApplicationContextSupport {
                 .topP(defaultIfNull(modelJpa.getTopP(), properties.getDefaultTopP()))
                 .responseFormat(modelJpa.getResponseFormat()).setDefault(modelJpa.isDefault())
                 .maximumContextLength(modelJpa.getMaximumContextLength())
-                .enabled(modelJpa.isEnabled()).embedding(modelJpa.isEmbedding());
+                .enabled(modelJpa.isEnabled()).embedding(modelJpa.isEmbedding()).thinking(modelJpa.isThinking());
         builder.tags(setFromString(modelJpa.getTags())).name(modelJpa.getName())
                 .description(modelJpa.getDescription());
         return builder;
@@ -200,7 +200,9 @@ public class LlmCache extends ApplicationContextSupport {
                 .maximumInputEvents(promptJpa.getMaximumInputEvents())
                 .maximumOutputTokens(promptJpa.getMaximumOutputTokens())
                 .question(promptJpa.getQuestion())
-                .role(promptJpa.getRole()).system(promptJpa.isSystem());
+                .role(promptJpa.getRole()).system(promptJpa.isSystem())
+                .instructions(promptJpa.getInstructions())
+                .thinking(promptJpa.isThinking());
         if (promptJpa.getModel() != null) {
             builder.model(getModel(promptJpa.getModel().getNaturalId()));
         }

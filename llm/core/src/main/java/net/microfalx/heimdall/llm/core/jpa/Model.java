@@ -59,6 +59,9 @@ public class Model extends NamedAndTaggedAndTimestampedIdentityAware<Integer> {
     @Column(name = "presence_penalty")
     private Double presencePenalty;
 
+    @Column(name = "thinking", nullable = false)
+    boolean thinking;
+
     @Column(name = "maximum_context_length", nullable = false)
     private int maximumContextLength;
 

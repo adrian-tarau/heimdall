@@ -87,6 +87,7 @@ class LlmPersistence extends JpaPersistence {
         jpaModel.setDescription(model.getDescription());
         jpaModel.setTags(CollectionUtils.setToString(model.getTags()));
         jpaModel.setMaximumContextLength(model.getMaximumContextLength());
+        jpaModel.setThinking(model.isThinking());
         return updater.findByNaturalIdAndUpdate(jpaModel);
     }
 
@@ -130,6 +131,8 @@ class LlmPersistence extends JpaPersistence {
         jpaPrompt.setTags(setToString(prompt.getTags()));
         jpaPrompt.setSystem(prompt.isSystem());
         jpaPrompt.setDescription(prompt.getDescription());
+        jpaPrompt.setSystem(prompt.isSystem());
+        jpaPrompt.setInstructions(prompt.getInstructions());
         if (prompt.getModel() != null) jpaPrompt.setModel(execute(prompt.getModel()));
         updater.findByNaturalIdAndUpdate(jpaPrompt);
     }
