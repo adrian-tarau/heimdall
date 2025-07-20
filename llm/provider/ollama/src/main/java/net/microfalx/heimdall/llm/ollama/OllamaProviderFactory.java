@@ -52,6 +52,9 @@ public class OllamaProviderFactory extends AbstractProviderFactory {
                 "Qwen3 (14b)", "qwen3:14b").maximumContextLength(40_000)
                 .tag("alibaba").tag("qwen").tag("tools").tag("thinking"));
 
+        builder.model((Model.Builder) Model.create("deepseek_r1_1_5b",
+                        "DeepSeek-R1 (1.5b)", "deepseek-r1:1.5b").maximumContextLength(128_000)
+                .tag("deepseek").tag("tools").tag("thinking"));
         builder.model((Model.Builder) Model.create("deepseek_r1_7b",
                 "DeepSeek-R1 (7b)", "deepseek-r1:7b").maximumContextLength(128_000)
                 .tag("deepseek").tag("tools").tag("thinking"));

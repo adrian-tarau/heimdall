@@ -127,9 +127,7 @@ public class ApacheMBoxDataSet extends MBoxDataSet {
         }
     }
 
-    public static final String[] MAIL_BOXES = {"kafka-dev", "maven-dev"};
-
-    public static final String[] MAIL_BOXES2 = {
+    public static final String[] MAIL_BOXES = {
             "kafka-users", "maven-users",
             "kafka-dev", "maven-dev", "poi-dev",
             "pulsar-users", "solr-users",
