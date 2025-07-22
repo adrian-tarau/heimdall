@@ -29,13 +29,17 @@ public class OllamaProviderFactory extends AbstractProviderFactory {
 
     private void registerModels(net.microfalx.heimdall.llm.api.Provider.Builder builder) {
 
-        builder.model((Model.Builder) Model.create("gemma3_1b","Gemma3 (1b)"
+        // Google Gemma
+        builder.model((Model.Builder) Model.create("gemma3_1b","Gemma 3 (1b)"
                 , "gemma3:1b").maximumContextLength(32_000).tag("google").tag("gemma"));
-        builder.model((Model.Builder) Model.create("gemma3_4b", "Gemma3 (4b)",
+        builder.model((Model.Builder) Model.create("gemma3_4b", "Gemma 3 (4b)",
                 "gemma3:4b").maximumContextLength(128_000).tag("google").tag("gemma"));
         builder.model((Model.Builder) Model.create("gemma3_12b", "Gemma 3 (12b)",
                 "gemma3:12b").maximumContextLength(128_000).tag("google").tag("gemma"));
+        builder.model((Model.Builder) Model.create("gemma3_27b", "Gemma 3 (27b)",
+                "gemma3:27b").maximumContextLength(128_000).tag("google").tag("gemma"));
 
+        // AlliBaba Qwen
         builder.model((Model.Builder) Model.create("qwen3_0.6b",
                 "Qwen3 (0.6b)", "qwen3:0.6b").maximumContextLength(40_000)
                 .tag("alibaba").tag("qwen").tag("tools").tag("thinking"));
@@ -51,7 +55,11 @@ public class OllamaProviderFactory extends AbstractProviderFactory {
         builder.model((Model.Builder) Model.create("qwen3_14b",
                 "Qwen3 (14b)", "qwen3:14b").maximumContextLength(40_000)
                 .tag("alibaba").tag("qwen").tag("tools").tag("thinking"));
+        builder.model((Model.Builder) Model.create("qwen3_30b",
+                        "Qwen3 (30b)", "qwen3:30b").maximumContextLength(40_000)
+                .tag("alibaba").tag("qwen").tag("tools").tag("thinking"));
 
+        // DeepSeek R1
         builder.model((Model.Builder) Model.create("deepseek_r1_1_5b",
                         "DeepSeek-R1 (1.5b)", "deepseek-r1:1.5b").maximumContextLength(128_000)
                 .tag("deepseek").tag("tools").tag("thinking"));
@@ -64,6 +72,17 @@ public class OllamaProviderFactory extends AbstractProviderFactory {
         builder.model((Model.Builder) Model.create("deepseek_r1_14b",
                 "DeepSeek-R1 (14b)", "deepseek-r1:14b").maximumContextLength(128_000)
                 .tag("deepseek").tag("tools").tag("thinking"));
+        builder.model((Model.Builder) Model.create("deepseek_r1_32b",
+                        "DeepSeek-R1 (32b)", "deepseek-r1:32b").maximumContextLength(128_000)
+                .tag("deepseek").tag("tools").tag("thinking"));
+
+        // Meta Llama 3
+        builder.model((Model.Builder) Model.create("llama3_1_8b",
+                        "Llama 3.1 (8b)", "llama3.1:8b").maximumContextLength(128_000)
+                .tag("meta").tag("llama").tag("tools"));
+        builder.model((Model.Builder) Model.create("llama3_1_70b",
+                        "Llama 3.1 (70b)", "llama3.1:70b").maximumContextLength(128_000)
+                .tag("meta").tag("llama").tag("tools"));
 
         builder.model((Model.Builder) Model.create("llama3_2_1b",
                         "Llama 3.2 (1b)", "llama3.2:1b").maximumContextLength(128_000)
@@ -71,13 +90,15 @@ public class OllamaProviderFactory extends AbstractProviderFactory {
         builder.model((Model.Builder) Model.create("llama3_2_3b",
                         "Llama 3.2 (3b)", "llama3.2:3b").maximumContextLength(128_000)
                 .tag("meta").tag("llama").tag("tools"));
-        builder.model((Model.Builder) Model.create("llama3_1_8b",
-                "Llama 3.1 (8b)", "llama3.1:8b").maximumContextLength(128_000)
-                .tag("meta").tag("llama").tag("tools"));
-        builder.model((Model.Builder) Model.create("llama3_1_70b",
-                "Llama 3.1 (70b)", "llama3.1:70b").maximumContextLength(128_000)
+
+        builder.model((Model.Builder) Model.create("llama3_3_70b",
+                        "Llama 3.3 (70b)", "llama3.3:70b").maximumContextLength(128_000)
                 .tag("meta").tag("llama").tag("tools"));
 
+        // Meta Llama 4
+        builder.model((Model.Builder) Model.create("llama4_16_17b",
+                        "Llama 4 (16x17b)", "llama4:16x17b").maximumContextLength(10_000_000)
+                .tag("meta").tag("llama").tag("tools"));
 
     }
 }
