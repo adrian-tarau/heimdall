@@ -1,6 +1,5 @@
 package net.microfalx.heimdall.protocol.snmp;
 
-import net.microfalx.lang.ArgumentUtils;
 import net.microfalx.lang.ObjectUtils;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.metrics.Metrics;
@@ -191,6 +190,16 @@ public class SnmpUtils {
             case SMIConstants.SYNTAX_COUNTER64 -> new Counter64(Long.parseLong(value));
             default -> throw new IllegalArgumentException("Unsupported type: " + type);
         };
+    }
+
+    /**
+     * Returns whether the given variable is an integer type.
+     *
+     * @param variable the variable to check
+     * @return {@code true} if the variable is an integer type, {@code false} otherwise
+     */
+    public static boolean isInteger(Variable variable) {
+        return variable instanceof Integer32 || variable instanceof UnsignedInteger32;
     }
 
     private static char getScopeSeparator(boolean inclusion, boolean start) {

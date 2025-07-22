@@ -5,6 +5,7 @@ import net.microfalx.heimdall.protocol.core.Body;
 import net.microfalx.heimdall.protocol.core.Event;
 import net.microfalx.heimdall.protocol.core.ProtocolService;
 import net.microfalx.heimdall.protocol.snmp.jpa.SnmpEventRepository;
+import net.microfalx.heimdall.protocol.snmp.mib.MibService;
 import net.microfalx.lang.IOUtils;
 import net.microfalx.metrics.Metrics;
 import net.microfalx.resource.MimeType;
@@ -15,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.snmp4j.*;
 import org.snmp4j.event.AuthenticationFailureEvent;
 import org.snmp4j.event.AuthenticationFailureListener;
+import org.snmp4j.event.CounterEvent;
+import org.snmp4j.event.CounterListener;
 import org.snmp4j.mp.MPv1;
 import org.snmp4j.mp.MPv2c;
 import org.snmp4j.mp.MPv3;
@@ -22,10 +25,7 @@ import org.snmp4j.mp.SnmpConstants;
 import org.snmp4j.security.SecurityModel;
 import org.snmp4j.security.SecurityProtocols;
 import org.snmp4j.security.nonstandard.PrivAES256With3DESKeyExtension;
-import org.snmp4j.smi.Address;
-import org.snmp4j.smi.OctetString;
-import org.snmp4j.smi.TcpAddress;
-import org.snmp4j.smi.UdpAddress;
+import org.snmp4j.smi.*;
 import org.snmp4j.transport.DefaultTcpTransportMapping;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
 import org.snmp4j.transport.TransportListener;
@@ -40,11 +40,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static net.microfalx.heimdall.protocol.snmp.SnmpUtils.describeAddress;
+import static net.microfalx.lang.StringUtils.isNotEmpty;
 
 @Service
 public final class SnmpService extends ProtocolService<SnmpEvent, net.microfalx.heimdall.protocol.snmp.jpa.SnmpEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SnmpService.class);
+
+    private static final Metrics DISPATCHER_METRICS = SnmpUtils.METRICS.withGroup("Dispatcher");
+
+    @Autowired private MibService mibService;
 
     @Autowired
     private SnmpSimulator simulator;
@@ -152,6 +157,7 @@ public final class SnmpService extends ProtocolService<SnmpEvent, net.microfalx.
 
         dispatcher.addTransportMapping(udpTransport);
         dispatcher.addTransportMapping(tcpTransport);
+        dispatcher.addCounterListener(new CounterListenerImpl());
         udpTransport.addTransportListener(dispatcher);
         tcpTransport.addTransportListener(dispatcher);
 
@@ -190,8 +196,24 @@ public final class SnmpService extends ProtocolService<SnmpEvent, net.microfalx.
         IOUtils.closeQuietly(tcpTransport);
     }
 
+    private String getOidName(OID oid) {
+        String name = mibService.findName(oid.toDottedString(), false, true);
+        return isNotEmpty(name) ? name : oid.toDottedString();
+    }
+
     static {
         SnmpLogger.init();
+    }
+
+    class CounterListenerImpl implements CounterListener {
+
+        private static final Metrics DISPATCHER_COUNTER_METRICS = DISPATCHER_METRICS.withGroup("Counter");
+
+        @Override
+        public void incrementCounter(CounterEvent event) {
+            String oidName = getOidName(event.getOid());
+            DISPATCHER_COUNTER_METRICS.count(oidName);
+        }
     }
 
     private static class AuthenticationFailureListenerImpl implements AuthenticationFailureListener {

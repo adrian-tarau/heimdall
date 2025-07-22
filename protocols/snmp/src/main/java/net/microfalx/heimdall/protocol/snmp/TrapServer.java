@@ -5,6 +5,8 @@ import net.microfalx.heimdall.protocol.core.Body;
 import net.microfalx.heimdall.protocol.snmp.mib.MibModule;
 import net.microfalx.heimdall.protocol.snmp.mib.MibService;
 import net.microfalx.heimdall.protocol.snmp.mib.MibVariable;
+import net.microfalx.lang.ExceptionUtils;
+import net.microfalx.metrics.Metrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.CommandResponder;
@@ -35,6 +37,9 @@ public class TrapServer implements CommandResponder, InitializingBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TrapServer.class);
 
+    private static final Metrics TRAP_METRICS = SnmpUtils.METRICS.withGroup("Trap");
+    private static final Metrics TRAP_FAILURE_METRICS = TRAP_METRICS.withGroup("Failure");
+
     @Autowired
     private SnmpService snmpService;
 
@@ -49,13 +54,18 @@ public class TrapServer implements CommandResponder, InitializingBean {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Received trap from {}, PDU: {}", describeAddress(event.getPeerAddress()), pdu);
         }
-        SnmpEvent snmpEvent = new SnmpEvent();
-        for (VariableBinding variable : pdu.getVariableBindings()) {
-            updateBindings(snmpEvent, variable);
+        try {
+            SnmpEvent snmpEvent = new SnmpEvent();
+            for (VariableBinding variable : pdu.getVariableBindings()) {
+                updateBindings(snmpEvent, variable);
+            }
+            updateCommonAttributes(snmpEvent, pdu);
+            updateAddresses(snmpEvent, event);
+            snmpService.accept(snmpEvent);
+        } catch (Exception e) {
+            LOGGER.atError().setCause(e).log("Failed to process SNMP trap from {}, PDU size: {}", describeAddress(event.getPeerAddress()), pdu.getBERLength());
+            TRAP_FAILURE_METRICS.count(ExceptionUtils.getRootCauseName(e));
         }
-        updateCommonAttributes(snmpEvent, pdu);
-        updateAddresses(snmpEvent, event);
-        snmpService.accept(snmpEvent);
     }
 
     @Override
@@ -102,7 +112,7 @@ public class TrapServer implements CommandResponder, InitializingBean {
     }
 
     private void updateSentAt(SnmpEvent event, VariableBinding sentAt) {
-        if (sentAt != null) {
+        if (sentAt != null && SnmpUtils.isInteger(sentAt.getVariable())) {
             long tick = sentAt.getVariable().toLong();
             ZonedDateTime sentAtDt = ZonedDateTime.ofInstant(Instant.ofEpochMilli(tick * 1000), ZoneId.systemDefault());
             event.setCreatedAt(sentAtDt);
