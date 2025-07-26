@@ -65,7 +65,7 @@ public class ChatController extends PageController {
 
     @GetMapping("")
     public String start(Model model) {
-        return doStart(model, Prompt.empty(), Mode.DASHBOARD, null, null);
+        return doStart(model, llmService.getDefaultPrompt(), Mode.DASHBOARD, null, null);
     }
 
     @GetMapping("prompt/{id}")
@@ -84,7 +84,7 @@ public class ChatController extends PageController {
                              @RequestParam(value = "dataSet", required = false) String dataSetId) {
         net.microfalx.heimdall.llm.api.Model chatModel = llmService.getModel(promptId);
         model.addAttribute("title", chatModel.getName());
-        Prompt prompt = isNotEmpty(promptId) ? llmService.getPrompt(promptId) : Prompt.empty();
+        Prompt prompt = isNotEmpty(promptId) ? llmService.getPrompt(promptId) : llmService.getDefaultPrompt();
         DataSetRequest<?, ?, ?> request = getDataSetRequest(dataSetId);
         return doStart(model, prompt, Mode.DIALOG, chatModel, request);
     }
@@ -178,7 +178,7 @@ public class ChatController extends PageController {
     private void updateModel(Model model, net.microfalx.heimdall.llm.api.Chat chat) {
         requireNonNull(chat);
         updateHelp(model);
-        Collection<Chat> chats = llmService.getChats(SecurityContext.get().getPrincipal());
+        Collection<Chat> chats = llmService.getChats(SecurityContext.get().getPrincipal(), false);
         model.addAttribute("chat", chat);
         model.addAttribute("chats", chats);
         model.addAttribute("chatTools", new ChatTools(chat));

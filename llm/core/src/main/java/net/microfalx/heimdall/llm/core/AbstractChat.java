@@ -1,13 +1,16 @@
 package net.microfalx.heimdall.llm.core;
 
+import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.TokenWindowChatMemory;
+import dev.langchain4j.model.TokenCountEstimator;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.model.embedding.onnx.HuggingFaceTokenCountEstimator;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.Result;
 import dev.langchain4j.service.TokenStream;
+import dev.langchain4j.service.tool.ToolExecutor;
 import dev.langchain4j.service.tool.ToolProvider;
 import dev.langchain4j.service.tool.ToolProviderRequest;
 import dev.langchain4j.service.tool.ToolProviderResult;
@@ -37,6 +40,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
 import static net.microfalx.lang.FormatterUtils.formatNumber;
 import static net.microfalx.lang.StringUtils.isNotEmpty;
 
@@ -60,6 +64,9 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
     private SimpleChat chat;
     private StreamChat streamChat;
     private LlmServiceImpl service;
+
+    private boolean disableTools;
+    private Set<String> disabledTools = new CopyOnWriteArraySet<>();
 
     private volatile Principal principal;
     private volatile String systemMessage;
@@ -189,6 +196,27 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
         return null;
     }
 
+    @Override
+    public boolean hasTool(String name) {
+        requireNotEmpty(name);
+        if (disableTools) {
+            return false;
+        } else {
+            return disabledTools.contains(name.toLowerCase());
+        }
+    }
+
+    @Override
+    public void disableTool(String name) {
+        requireNotEmpty(name);
+        disabledTools.add(name.toLowerCase());
+    }
+
+    @Override
+    public void disableTools() {
+        this.disableTools = true;
+    }
+
     public void updateName(String name) {
         if (StringUtils.isNotEmpty(name)) setName(name);
     }
@@ -231,7 +259,7 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
         validate();
         initializePrincipal();
         this.service = service;
-        HuggingFaceTokenCountEstimator tokenCountEstimator = new HuggingFaceTokenCountEstimator();
+        TokenCountEstimator tokenCountEstimator = new CustomHuggingFaceTokenCountEstimator();
         this.chatMemory = TokenWindowChatMemory.builder().id(getId())
                 .maxTokens(model.getMaximumContextLength(), tokenCountEstimator)
                 .chatMemoryStore(service.getChatStore())
@@ -268,7 +296,8 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
         aiService.chatMemory(chatMemory)
                 .systemMessageProvider(new SystemMessageProvider())
                 .contentRetriever(service.getContentRetriever())
-                .toolProvider(new ToolProviderImpl());
+                .toolProvider(new ToolProviderImpl())
+                .maxSequentialToolsInvocations(1);
         if (streamingChatModel != null) {
             aiService.streamingChatModel(streamingChatModel);
         } else if (chatModel != null) {
@@ -344,8 +373,18 @@ public abstract class AbstractChat extends NamedAndTaggedIdentifyAware<String> i
 
         @Override
         public ToolProviderResult provideTools(ToolProviderRequest request) {
-            ToolProviderResult result = new ToolProviderResult(Collections.emptyMap());
-            return result;
+            Map<ToolSpecification, ToolExecutor> tools = new HashMap<>();
+            if (!disableTools) tools = new ToolsBuilder(service, AbstractChat.this).getTools();
+            return new ToolProviderResult(tools);
+        }
+    }
+
+    private static class CustomHuggingFaceTokenCountEstimator extends HuggingFaceTokenCountEstimator {
+
+        @Override
+        public int estimateTokenCountInText(String text) {
+            if (StringUtils.isEmpty(text)) return 0;
+            return super.estimateTokenCountInText(text);
         }
     }
 }

@@ -134,6 +134,26 @@ public interface Chat extends Identifiable<String>, Nameable, Descriptable {
     <F> F getFeature(Class<F> featureType);
 
     /**
+     * Returns whether a tool with a given name is registered and enabled in the chat session.
+     *
+     * @param name the name of the tool to check
+     * @return {@code true} if the tool is registered and enabled, {@code false} otherwise
+     */
+    boolean hasTool(String name);
+
+    /**
+     * Disables a tool by its name. If the tool is not found, it will be ignored.
+     *
+     * @param name the name of the tool to disable
+     */
+    void disableTool(String name);
+
+    /**
+     * Disables all tools associated with this chat session.
+     */
+    void disableTools();
+
+    /**
      * Completes the chat session and records the chat in the history.
      */
     void close();

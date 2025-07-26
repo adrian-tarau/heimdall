@@ -7,11 +7,11 @@ import net.microfalx.bootstrap.dataset.DataSetUtils;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.model.Metadata;
 import net.microfalx.bootstrap.model.Sort;
-import net.microfalx.heimdall.llm.api.Chat;
-import net.microfalx.heimdall.llm.api.LlmListener;
-import net.microfalx.heimdall.llm.api.LlmService;
-import net.microfalx.heimdall.llm.api.Prompt;
+import net.microfalx.heimdall.llm.api.*;
+import net.microfalx.heimdall.llm.core.tools.HelpTool;
+import net.microfalx.heimdall.llm.core.tools.SearchTool;
 import net.microfalx.lang.ObjectUtils;
+import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.annotation.Provider;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,15 +22,25 @@ public class DefaultLlmListener extends ApplicationContextSupport implements Llm
     @Override
     public void onStart(LlmService service) {
         registerPrompts(service);
+        registerTools(service);
     }
 
     private void registerPrompts(LlmService service) {
-        Prompt prompt = (Prompt) Prompt.create("summary", "Summary")
-                .question("Summarize the current data").system(true)
-                .tag("summary")
-                .description("Creates a summary of the current data")
-                .build();
-        service.registerPrompt(prompt);
+        service.registerPrompt((Prompt) Prompt.create("default", "Default")
+                .system(true).fromResources(StringUtils.EMPTY_STRING).tag(Model.DEFAULT_TAG).build());
+    }
+
+    private void registerTools(LlmService llmService) {
+        llmService.registerTool((Tool) Tool.builder("search")
+                .executor(new SearchTool())
+                .parameter((Tool.Parameter) Tool.Parameter.builder("type").description("The type of event").build())
+                .description("Searches for events, alerts, and other information")
+                .build());
+        llmService.registerTool((Tool) Tool.builder("help")
+                .executor(new HelpTool())
+                .parameter((Tool.Parameter) Tool.Parameter.builder("query").description("A full text search query, supports AND and OR operator").build())
+                .description("Searches the integrated help pages")
+                .build());
     }
 
     @Override

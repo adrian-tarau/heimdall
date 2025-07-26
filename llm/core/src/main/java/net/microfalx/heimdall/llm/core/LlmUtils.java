@@ -17,9 +17,11 @@ public class LlmUtils {
     private static final char DOT = '.';
     private static final char GRAVE = '`';
     static Metrics ROOT_METRICS = Metrics.of("LLM");
-    static Metrics CREATE_CHAT_METRICS = Metrics.of("Create Chat");
+    static Metrics CREATE_CHAT_METRICS = ROOT_METRICS.withGroup("Create Chat");
+    static Metrics TOOL_METRICS = ROOT_METRICS.withGroup("Tool");
+    static Metrics TOOL_EXECUTION_METRICS = TOOL_METRICS.withGroup("Execution");
     static Metrics CREATE_SYSTEM_MESSAGE_METRICS = Metrics.of("Create System Message");
-    static Metrics MISC_METRICS = Metrics.of("Misc");
+    static Metrics MISC_METRICS = ROOT_METRICS.withGroup("Misc");
 
     static final ThreadLocal<ThreadPool> THREAD_POOL = ThreadLocal.withInitial(ThreadPool::get);
 

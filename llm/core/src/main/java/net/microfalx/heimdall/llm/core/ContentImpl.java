@@ -13,6 +13,7 @@ import net.microfalx.resource.Resource;
 import java.net.URL;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.StringUtils.emptyIfNull;
 
 @ToString
 public class ContentImpl implements Content {
@@ -26,7 +27,7 @@ public class ContentImpl implements Content {
     }
 
     static Content from(String text) {
-        requireNonNull(text);
+        text = emptyIfNull(text);
         return new ContentImpl(Content.Type.TEXT, Resource.text(text));
     }
 

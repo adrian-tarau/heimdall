@@ -7,22 +7,21 @@ import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.store.memory.chat.ChatMemoryStore;
 import dev.langchain4j.store.memory.chat.InMemoryChatMemoryStore;
 import jakarta.annotation.PreDestroy;
-import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import net.microfalx.bootstrap.core.async.ThreadPoolFactory;
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
-import net.microfalx.bootstrap.dataset.DataSet;
 import net.microfalx.bootstrap.dataset.DataSetExport;
 import net.microfalx.bootstrap.dataset.DataSetRequest;
+import net.microfalx.bootstrap.dataset.DataSetService;
 import net.microfalx.bootstrap.model.Field;
-import net.microfalx.bootstrap.model.Metadata;
 import net.microfalx.bootstrap.resource.ResourceService;
 import net.microfalx.bootstrap.search.IndexService;
 import net.microfalx.bootstrap.search.SearchService;
 import net.microfalx.heimdall.llm.api.*;
 import net.microfalx.heimdall.llm.lucene.LuceneEmbeddingStore;
 import net.microfalx.lang.*;
+import net.microfalx.resource.ClassPathResource;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceFactory;
 import net.microfalx.resource.rocksdb.RocksDbResource;
@@ -34,8 +33,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,6 +51,7 @@ import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.unmodifiableCollection;
 import static net.microfalx.heimdall.llm.core.LlmUtils.CREATE_CHAT_METRICS;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
 import static net.microfalx.lang.ExceptionUtils.rethrowException;
 import static net.microfalx.lang.FileUtils.validateDirectoryExists;
 import static net.microfalx.lang.StringUtils.*;
@@ -70,6 +68,8 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     private SearchService searchService;
     @Autowired
     private ResourceService resourceService;
+    @Autowired
+    private DataSetService dataSetService;
 
     @Autowired
     private LlmPersistence persistence;
@@ -84,6 +84,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     private ChatMemoryStore chatStore;
     private volatile LlmCache cache = new LlmCache(this, null);
     private final Map<String, Tool> tools = new ConcurrentHashMap<>();
+    private final Map<String, Object> variables = new ConcurrentHashMap<>();
 
     private final Collection<LlmListener> listeners = new CopyOnWriteArrayList<>();
     private final Collection<Provider.Factory> providerFactories = new CopyOnWriteArrayList<>();
@@ -92,6 +93,8 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
 
     private volatile Model defaultModel;
     private volatile Model defaultEmbeddingModel;
+
+    private String defaultPromptId;
 
     private ThreadPool chatPool;
     private ThreadPool embeddingPool;
@@ -114,7 +117,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
 
     @Override
     public Chat createChat() {
-        return createChat(Prompt.empty());
+        return createChat(getDefaultPrompt());
     }
 
     @Override
@@ -127,7 +130,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
 
     @Override
     public Chat createChat(Model model) {
-        return createChat(Prompt.empty(), model);
+        return createChat(getDefaultPrompt(), model);
     }
 
     public net.microfalx.heimdall.llm.api.Chat createChat(Prompt prompt, Model model) {
@@ -135,12 +138,14 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
     }
 
     @Override
-    public Collection<Chat> getChats(Principal principal) {
+    public Collection<Chat> getChats(Principal principal, boolean active) {
         requireNonNull(principal);
         Collection<Chat> chats = new ArrayList<>();
-        activeChats.values().forEach(chat -> {
-            if (principal.equals(chat.getUser())) chats.add(chat);
-        });
+        if (active) {
+            activeChats.values().forEach(chat -> {
+                if (principal.equals(chat.getUser())) chats.add(chat);
+            });
+        }
         return chats;
     }
 
@@ -169,6 +174,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         if (StringUtils.isEmpty(text)) return EMPTY_STRING;
         return LlmUtils.MISC_METRICS.time("Summarize", () -> {
             Chat chat = createChat(Prompt.empty(), getDefaultModel(), true);
+            chat.disableTools();
             try {
                 String question = shortMessage ? properties.getSummaryWords() : properties.getSummarySentence();
                 question += "\n\nText to summarize:\n```\n" + text + "\n```";
@@ -263,6 +269,34 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         tools.put(toIdentifier(tool.getId()), tool);
     }
 
+    @Override
+    public void registerVariable(String name) {
+        requireNotEmpty(name);
+        try {
+            String content = ClassPathResource.file("llm/variables/" + toIdentifier(name) + ".md").loadAsString();
+            registerVariable(name, content);
+        } catch (IOException e) {
+            ExceptionUtils.rethrowException(e);
+        }
+    }
+
+    @Override
+    public void registerVariable(String name, Object value) {
+        requireNotEmpty(name);
+        requireNonNull(value);
+        variables.put(name, value);
+    }
+
+    @Override
+    public Resource applyTemplate(Resource resource, Map<String, Object> variables) throws IOException {
+        ArgumentUtils.requireNonNull(resource);
+        variables = ObjectUtils.defaultIfNull(variables, Collections.emptyMap());
+        Map<String, Object> currentVariables = new HashMap<>(this.variables);
+        currentVariables.putAll(variables);
+        String renderedTemplate = PromptTemplate.from(resource.loadAsString()).apply(currentVariables).text();
+        return Resource.text(renderedTemplate);
+    }
+
     /**
      * Returns the final prompt text for the given model and prompt.
      *
@@ -271,10 +305,11 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
      */
     public String getSystemMessage(Chat chat) {
         SystemMessageBuilder builder = new SystemMessageBuilder(this, chat.getModel(), chat.getPrompt());
-        Map<String, Object> variables = new HashMap<>();
+        Map<String, Object> currentVariables = new HashMap<>(this.variables);
+        updateToolsVariable(chat, currentVariables);
         return LlmUtils.CREATE_SYSTEM_MESSAGE_METRICS.time(chat.getPrompt().getName(), () -> {
-            getDataSetAsJson(chat, variables);
-            return PromptTemplate.from(builder.build()).apply(variables).text();
+            getDataSetAsJson(chat, currentVariables);
+            return PromptTemplate.from(builder.build()).apply(currentVariables).text();
         });
     }
 
@@ -287,6 +322,11 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         this.defaultModel = null;
         this.defaultEmbeddingModel = null;
         this.cache = cache;
+    }
+
+    @Override
+    public Prompt getDefaultPrompt() {
+        return StringUtils.isNotEmpty(defaultPromptId) ? getPrompt(defaultPromptId) : Prompt.empty();
     }
 
     @Override
@@ -320,6 +360,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         requireNonNull(prompt);
         cache.registerPrompt(prompt);
         persistence.execute(prompt);
+        if (prompt.getTags().contains(Model.DEFAULT_TAG)) defaultPromptId = prompt.getId();
     }
 
     @Override
@@ -377,12 +418,7 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
             variables.put("SCHEMA", JSON_ERROR);
         } else {
             LlmUtils.MISC_METRICS.time("Get Data Set", (t) -> {
-                TransactionTemplate transactionTemplate = getTransactionTemplate(request.getDataSet());
-                if (transactionTemplate != null) {
-                    transactionTemplate.execute(status -> doGetDataSetAsJsonUnderTransaction(chat, variables));
-                } else {
-                    doGetDataSetAsJsonUnderTransaction(chat, variables);
-                }
+                dataSetService.doWithDataSet(request.getDataSet(), dataSet -> doGetDataSetAsJsonUnderTransaction(chat, variables));
             });
         }
     }
@@ -542,16 +578,6 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
         cache.setApplicationContext(getApplicationContext());
     }
 
-    private <M, F extends Field<M>, ID> TransactionTemplate getTransactionTemplate(DataSet<M, F, ID> dataSet) {
-        Metadata<M, F, ID> metadata = dataSet.getMetadata();
-        PlatformTransactionManager transactionManager = getBean(PlatformTransactionManager.class);
-        if (transactionManager != null && metadata.hasAnnotation(Entity.class)) {
-            return new TransactionTemplate(transactionManager);
-        } else {
-            return null;
-        }
-    }
-
     private void initResources() {
         chatsResource = getSharedResource().resolve("chats", Resource.Type.DIRECTORY);
         if (chatsResource.isLocal()) {
@@ -613,6 +639,11 @@ public class LlmServiceImpl extends ApplicationContextSupport implements LlmServ
             }
         }
         return null;
+    }
+
+    private void updateToolsVariable(Chat chat, Map<String, Object> variables) {
+        ToolsBuilder builder = new ToolsBuilder(this, chat);
+        variables.put("TOOLS", builder.getVariable());
     }
 
     private Resource getSharedResource() {

@@ -59,6 +59,11 @@ public interface Message extends Identifiable<String> {
         SYSTEM,
 
         /**
+         * A message that provides context or instructions.
+         */
+        TOOL,
+
+        /**
          * A custom message type that does not fit into the standard categories.
          */
         CUSTOM

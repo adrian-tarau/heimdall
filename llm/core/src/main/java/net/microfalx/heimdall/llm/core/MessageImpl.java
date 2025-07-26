@@ -1,9 +1,6 @@
 package net.microfalx.heimdall.llm.core;
 
-import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.data.message.ChatMessage;
-import dev.langchain4j.data.message.SystemMessage;
-import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.data.message.*;
 import lombok.Getter;
 import lombok.ToString;
 import net.microfalx.heimdall.llm.api.Content;
@@ -71,9 +68,13 @@ public class MessageImpl implements Message {
         if (message instanceof SystemMessage systemMessage) {
             return List.of(ContentImpl.from(systemMessage.text()));
         } else if (message instanceof UserMessage userMessage) {
-            return userMessage.contents().stream().map(c -> (Content) ContentImpl.from(c)).toList();
+            return userMessage.contents().stream().map(ContentImpl::from).toList();
         } else if (message instanceof AiMessage aiMessage) {
             return List.of(ContentImpl.from(aiMessage.text()));
+        } else if (message instanceof ToolExecutionResultMessage toolExecutionResultMessage) {
+            return List.of(ContentImpl.from(toolExecutionResultMessage.text()));
+        } else if (message == null) {
+            return emptyList();
         } else {
             throw new IllegalArgumentException();
         }
@@ -82,6 +83,7 @@ public class MessageImpl implements Message {
     private static Message.Type getType(ChatMessage message) {
         return switch (message) {
             case SystemMessage m -> Type.SYSTEM;
+            case ToolExecutionResultMessage m -> Type.TOOL;
             case UserMessage m -> Type.USER;
             case AiMessage m -> Type.MODEL;
             case null, default -> Type.CUSTOM;

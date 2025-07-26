@@ -1,9 +1,12 @@
 package net.microfalx.heimdall.llm.api;
 
+import net.microfalx.resource.Resource;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * A service which manages the AI models and providers.
@@ -47,9 +50,10 @@ public interface LlmService {
      * Returns the chat sessions for a given user.
      *
      * @param principal the user principal
+     * @param active {@code true} to return only active chats, {@code false} to return previous chats
      * @return a non-null instance
      */
-    Collection<Chat> getChats(Principal principal);
+    Collection<Chat> getChats(Principal principal, boolean active);
 
     /**
      * Returns a chat session with a given identifier.
@@ -165,9 +169,45 @@ public interface LlmService {
     void registerTool(Tool tool);
 
     /**
+     * Registers a variable that can be used in prompts.
+     * <p>
+     * The content of the variable will be loaded from a classpath resource available at ~/llm/variables/{name}.md.
+     *
+     * @param name the name of the variable
+     */
+    void registerVariable(String name);
+
+    /**
+     * Registers a variable that can be used in prompts.
+     *
+     * @param name  the name of the variable
+     * @param value the value of the variable
+     */
+    void registerVariable(String name, Object value);
+
+    /**
+     * Applies a template to a resource, replacing variables with their values.
+     * <p>
+     * All registers variables will be available for replacement.
+     *
+     * @param resource  the resource to apply the template to
+     * @param variables the variables to replace in the template
+     * @return the rendered template
+     * @see #registerVariable(String, Object)
+     */
+    Resource applyTemplate(Resource resource, Map<String, Object> variables) throws IOException;
+
+    /**
      * Reloads the models.
      */
     void reload();
+
+    /**
+     * Returns the default prompt, to be used when no prompt is specified.
+     *
+     * @return a non-null instance
+     */
+    Prompt getDefaultPrompt();
 
     /**
      * Returns registered prompts.

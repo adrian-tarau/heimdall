@@ -37,6 +37,10 @@ import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 @ToString(callSuper = true)
 public class Model extends NamedAndTaggedIdentifyAware<String> {
 
+    public static final String DEFAULT_TAG = "default";
+    public static final String TOOLS_TAG = "tools";
+    public static final String THINKING_TAG = "thinking";
+
     private URI uri;
     private String apyKey;
     private boolean enabled;
@@ -327,7 +331,7 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
             return this;
         }
 
-        public Builder asEnabled() {
+        public Builder asDisabled() {
             this.enabled = true;
             return this;
         }
@@ -407,6 +411,16 @@ public class Model extends NamedAndTaggedIdentifyAware<String> {
 
         public Builder forEmbedding() {
             this.embedding = true;
+            return this;
+        }
+
+        public Builder hasTools() {
+            tag(TOOLS_TAG);
+            return this;
+        }
+
+        public Builder canThink() {
+            tag(THINKING_TAG);
             return this;
         }
 

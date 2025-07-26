@@ -7,7 +7,7 @@
         <div class="card mb-4 llm-dashboard">
             <div class="card-header border-0 pb-0" th:if="${chat.name}">
                 <div class="d-flex justify-content-between">
-                    <h3 id="dashboard-title" class="card-title fs-3" th:text="${chat.name}"></h3>
+                    <h3 id="dashboard-title" class="card-title fs-3">Ask AI</h3>
                     <div>
                         <span th:replace="~{ fragments/llm/chat :: info}"></span>
                         <span th:replace="~{ fragments/page :: help}"></span>
