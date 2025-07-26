@@ -1,6 +1,6 @@
 package net.microfalx.heimdall.protocol.gelf;
 
-import net.microfalx.heimdall.llm.api.LlmService;
+import net.microfalx.bootstrap.ai.api.AiService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,18 +12,18 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class GelfLlmListenerTest {
+class GelfAiListenerTest {
 
     @Mock
-    private LlmService llmService;
+    private AiService aiService;
 
     @InjectMocks
-    private GelfLlmListener listener;
+    private GelfAiListener listener;
 
     @Test
     void start() {
-        listener.onStart(llmService);
-        verify(llmService, times(2)).registerPrompt(any());
+        listener.onStart(aiService);
+        verify(aiService, times(2)).registerPrompt(any());
     }
 
 }

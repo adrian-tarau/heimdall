@@ -39,12 +39,12 @@
 
         <dependency>
             <groupId>net.microfalx.bootstrap</groupId>
-            <artifactId>bootstrap-model</artifactId>
+            <artifactId>bootstrap-data-model</artifactId>
         </dependency>
 
         <dependency>
             <groupId>net.microfalx.bootstrap</groupId>
-            <artifactId>bootstrap-metrics</artifactId>
+            <artifactId>bootstrap-base-metrics</artifactId>
         </dependency>
 
     </dependencies>

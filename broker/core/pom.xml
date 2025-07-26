@@ -51,17 +51,17 @@
 
         <dependency>
             <groupId>net.microfalx.bootstrap</groupId>
-            <artifactId>bootstrap-broker</artifactId>
+            <artifactId>bootstrap-data-broker</artifactId>
         </dependency>
 
         <dependency>
             <groupId>net.microfalx.bootstrap</groupId>
-            <artifactId>bootstrap-web</artifactId>
+            <artifactId>bootstrap-extension-web</artifactId>
         </dependency>
 
         <dependency>
             <groupId>net.microfalx.bootstrap</groupId>
-            <artifactId>bootstrap-template</artifactId>
+            <artifactId>bootstrap-extension-template</artifactId>
         </dependency>
 
         <dependency>

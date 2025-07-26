@@ -53,7 +53,6 @@
         <module>core</module>
         <module>infrastructure</module>
         <module>protocols</module>
-        <module>llm</module>
         <module>database</module>
         <module>broker</module>
         <module>rest</module>
@@ -124,7 +123,7 @@
 
         <dependency>
             <groupId>net.microfalx.bootstrap</groupId>
-            <artifactId>bootstrap-core</artifactId>
+            <artifactId>bootstrap-base-core</artifactId>
         </dependency>
 
         <!-- Tests -->

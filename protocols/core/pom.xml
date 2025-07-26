@@ -44,19 +44,18 @@
         </dependency>
 
         <dependency>
-            <groupId>net.microfalx.heimdall</groupId>
-            <artifactId>heimdall-llm-api</artifactId>
-            <version>${project.version}</version>
+            <groupId>net.microfalx.bootstrap</groupId>
+            <artifactId>bootstrap-ai-api</artifactId>
         </dependency>
 
         <dependency>
             <groupId>net.microfalx.bootstrap</groupId>
-            <artifactId>bootstrap-web</artifactId>
+            <artifactId>bootstrap-extension-web</artifactId>
         </dependency>
 
         <dependency>
             <groupId>net.microfalx.bootstrap</groupId>
-            <artifactId>bootstrap-dsv</artifactId>
+            <artifactId>bootstrap-data-dsv</artifactId>
         </dependency>
 
         <dependency>
