@@ -135,9 +135,18 @@
         </dependency>
 
         <dependency>
-            <groupId>net.microfalx.heimdall</groupId>
-            <artifactId>heimdall-llm-web</artifactId>
-            <version>${project.version}</version>
+            <groupId>net.microfalx.bootstrap</groupId>
+            <artifactId>bootstrap-ai-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.microfalx.bootstrap</groupId>
+            <artifactId>bootstrap-ai-provider-github</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.microfalx.bootstrap</groupId>
+            <artifactId>bootstrap-ai-provider-openai</artifactId>
         </dependency>
 
         <dependency>
