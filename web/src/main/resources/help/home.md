@@ -2,7 +2,8 @@
 
 _Heimdall_ is a monitoring/testing tool for developers, used to validate or troubleshoot services. The tool provides fake services which are used by applications to mimic a real interaction with a remote service.
 
-However, all services provided by _Heimdall_ will be partially or completely faked. For example, the _SMTP_ server will act like a real SMTP server, but it will not forward the email to real accounts - it will accept an email, store it, make it available for introspection, but it will not be forwarded to users.
+### Protocols
+All services provided by _Heimdall_ will be partially or completely faked. For example, the _SMTP_ server will act like a real SMTP server, but it will not forward the email to real accounts - it will accept an email, store it, make it available for introspection, but it will not be forwarded to users.
 
 The following services are faked and available to be used:
 
@@ -19,7 +20,19 @@ The following services are faked and available to be used:
   * UDP `12201`:
   * TCP `12200`:
 
-If _Heimdall_ runs in containers, check on which port the above ports (services) are configured. 
+If _Heimdall_ runs in containers, check on which port the above  services are configured (what is available to clients). 
+
+### Events
+Heimdall integrates with Apache Kafka and Pulsar brokers. Events can be pulled from topics, viewed and searched.
+
+### Load Testing
+For testing the performance of services, Heimdall integrates the following load-testing tools:
+
+- Apache JMeter
+- Grafana K6
+- Gatling
+
+Heimdall utilizes these tools' reporting capabilities for individual simulations, but it also integrates the results from these simulations to provide trends and reporting capabilities that surpass their individual functionalities.
 
 ### Workspace
 
