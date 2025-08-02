@@ -39,12 +39,12 @@
 
         <dependency>
             <groupId>net.microfalx.bootstrap</groupId>
-            <artifactId>bootstrap-core</artifactId>
+            <artifactId>bootstrap-base-core</artifactId>
         </dependency>
 
         <dependency>
             <groupId>net.microfalx.bootstrap</groupId>
-            <artifactId>bootstrap-jdbc</artifactId>
+            <artifactId>bootstrap-data-jdbc</artifactId>
         </dependency>
 
         <dependency>

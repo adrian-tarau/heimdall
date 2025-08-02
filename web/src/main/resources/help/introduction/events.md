@@ -1,0 +1,1 @@
+Heimdall integrates with Apache Kafka and Pulsar brokers. Events can be pulled from topics, viewed and searched.

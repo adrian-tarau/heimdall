@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <help xmlns="https://net.microfalx/xsd/help-1.0.xsd">
 
+    <toc id="introduction" order="1" name="Introduction" inline="true">
+        <toc id="protocols" order="1" name="Protocols"/>
+        <toc id="events" order="2" name="Events"/>
+        <toc id="load_testing" order="3" name="Load Testing"/>
+    </toc>
+
 </help>
