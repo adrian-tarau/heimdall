@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<help xmlns="https://net.microfalx/xsd/help-1.0.xsd">
+    <toc id="infrastructure" order="10" name="Infrastructure">
+        <toc id="environment" order="5" path="infrastructure" name="Environment"/>
+        <toc id="cluster" order="5" path="infrastructure" name="Cluster"/>
+        <toc id="server" order="5" path="infrastructure" name="Server"/>
+        <toc id="service" order="5" path="infrastructure" name="Service"/>
+    </toc>
+</help>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<help xmlns="https://net.microfalx/xsd/help-1.0.xsd">
+
+    <toc id="broker" order="10" name="Broker">
+        <toc id="session" order="5" path="broker" name="Session"/>
+        <toc id="event" order="5" path="broker" name="Event"/>
+        <toc id="consumer" order="5" path="broker" name="Consumer"/>
+        <toc id="producer" order="5" path="broker" name="Producer"/>
+    </toc>
+
+</help>

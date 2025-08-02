@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<help xmlns="https://net.microfalx/xsd/help-1.0.xsd">
+
+    <toc id="rest" order="10" name="Rest">
+        <toc id="simulation" order="5" path="rest" name="Simulation"/>
+        <toc id="scenario" order="5" path="rest" name="Scenario"/>
+        <toc id="schedule" order="5" path="rest" name="Schedule"/>
+        <toc id="history" order="5" path="rest" name="History"/>
+    </toc>
+
+</help>

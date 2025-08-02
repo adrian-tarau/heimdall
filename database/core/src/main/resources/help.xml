@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<help xmlns="https://net.microfalx/xsd/help-1.0.xsd">
+
+    <toc id="database" order="10" name="Database">
+        <toc id="snapshot" order="5" path="database" name="Snapshot"/>
+        <toc id="node" order="5" path="database" name="Node"/>
+        <toc id="user" order="5" path="database" name="User"/>
+        <toc id="session" order="5" path="database" name="Session"/>
+        <toc id="transaction" order="5" path="database" name="Transaction"/>
+        <toc id="statement" order="5" path="database" name="Statement"/>
+    </toc>
+
+</help>
