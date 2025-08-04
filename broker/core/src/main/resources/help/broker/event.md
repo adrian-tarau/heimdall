@@ -1,0 +1,1 @@
+A event or message that is handled, published, or routed by a message broker
