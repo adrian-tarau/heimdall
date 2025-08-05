@@ -1,16 +1,10 @@
-A environment is the underlying infrastructure that
-supports the application environment. It includes the physical or virtual hardware, networking, storage, services and other resources that are required to host and run the application.
+The **Environments** dashboard provides a comprehensive view of the logical environments used within your infrastructure. Environments typically represent distinct operational stages or application lifecycle phases, such as Development, Testing, QA, Staging, and Production.
 
-Under Environments, you’ll find an overview of all operational environments managed by Heimdall, such as Development, Staging, and Production. Each environment shows:
+Within this dashboard, users can quickly identify the state, availability, and overall health of each environment. This high-level view enables quick assessment of environment readiness, resource utilization, and potential bottlenecks. Each environment entry provides the following key information:
 
-- Environment Name (e.g., Development, Production)
+* **Name and Description:** Clearly identifies the environment’s purpose (e.g., "Staging Environment" or "QA Integration Testing") along with a brief description for context.
+* **Status:** Real-time indication of the overall health status of the environment, highlighting issues such as outages, degraded performance, or maintenance mode.
+* **Clusters and Servers:** A summary count of associated server clusters and individual servers hosting applications and services within that environment.
+* **Services Running:** A quick indicator of the total number of active services in each environment.
 
-- Status Indicators (e.g., Healthy, Warning, Critical)
-
-- Resource Usage Summary (CPU, Memory, Storage utilization)
-
-- Recent Events or Alerts
-
-- Related Clusters and Services
-
-Use this dashboard to quickly understand the health and resource consumption of your various deployment environments.
+This dashboard helps users rapidly verify environment readiness before testing sessions, identify resource allocation problems early, and maintain high standards of infrastructure organization and management.

@@ -1,16 +1,10 @@
-Clusters are groups of [servers](admin/infrastructure/server) that are managed together 
-and participate in workload management. The Clusters dashboard displays all clusters managed by your application, providing an aggregated view of their status and usage. Each cluster provides details including:
+The **Clusters** dashboard provides detailed visibility into logical groupings of servers within each environment. Clusters are typically used to organize servers based on shared purposes, configurations, or scalability needs, such as hosting application backends, mock services, or specialized workloads.
 
-- Cluster Name and ID
+This dashboard allows users to quickly evaluate cluster health, load distribution, and service availability, enabling easier troubleshooting and proactive management. Each cluster is presented with the following information:
 
-- Operational Status (Healthy, Degraded, Down)
+* **Name and Description:** A clear identifier for the cluster, typically reflecting its purpose or role (e.g., “Backend API Cluster,” “Mock Services Cluster”).
+* **Status:** An instant overview of cluster health, highlighting operational issues, degraded performance, or optimal conditions.
+* **Server Count:** The number of active servers in the cluster, allowing users to quickly assess resource availability and redundancy.
+* **Load and Capacity Metrics:** Summarized metrics reflecting current usage and available resources, helping engineers proactively manage scaling or performance concerns.
 
-- Number of Nodes and Resources Allocated
-
--  Resource Usage Metrics (CPU, Memory, Disk, Network)
-
-- Cluster Type (Kubernetes, Database clusters, etc.)
-
-- Recent Alerts or Notifications
-
-This area helps you quickly identify cluster performance, stability, and potential capacity issues.
+This dashboard assists users in maintaining clear visibility and management of clusters, helping ensure reliability and responsiveness of both real and mocked services provided by Heimdall.
