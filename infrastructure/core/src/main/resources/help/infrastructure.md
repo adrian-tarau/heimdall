@@ -1,0 +1,3 @@
+The Infrastructure section in Heimdall provides visibility into the underlying setup used to deploy and manage the services involved in testing and monitoring activities. Understanding the infrastructure is crucial for effectively validating service interactions, troubleshooting issues, and ensuring accurate testing scenarios. Within this section, you'll gain detailed insights into various infrastructure elements, such as Environments, Clusters, Servers, and Services.
+
+Heimdall aggregates and presents infrastructure data clearly, enabling software and QA engineers to easily review and comprehend the current state and composition of their testing landscape.

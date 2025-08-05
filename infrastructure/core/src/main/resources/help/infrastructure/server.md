@@ -21,3 +21,15 @@ running servers on it. This often implies that it is more
 powerful and reliable than standard personal computers, but
 alternatively, large computing clusters may be composed of 
 many relatively simple, replaceable server components.
+
+The Servers dashboard offers granular insights into individual servers that comprise your infrastructure. Each server listed includes information such as:
+
+- Hostname or IP Address
+- Server Type (Virtual Machine, Physical, Container)
+- Operational Status and Uptime
+- Hardware or Virtual Specifications (CPU cores, RAM, Disk space)
+- OS Information and Version
+ - Performance Metrics (CPU utilization, Memory usage, Disk IO, Network throughput)
+ - Related Services Running
+
+Use this view to track server-level performance, resource utilization, and quickly identify problematic or under-performing nodes.
