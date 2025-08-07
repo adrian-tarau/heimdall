@@ -2,12 +2,12 @@
 <help xmlns="https://net.microfalx/xsd/help-1.0.xsd">
 
     <toc id="database" order="10" name="Database">
-        <toc id="snapshot" path="database" name="Snapshot"/>
-        <toc id="node" path="database" name="Node"/>
-        <toc id="user" path="database" name="User"/>
-        <toc id="session" path="database" name="Session"/>
-        <toc id="transaction" path="database" name="Transaction"/>
-        <toc id="statement" path="database" name="Statement"/>
+        <toc id="snapshot" path="database" name="Snapshots"/>
+        <toc id="node" path="database" name="Nodes"/>
+        <toc id="user" path="database" name="Users"/>
+        <toc id="session" path="database" name="Sessions"/>
+        <toc id="transaction" path="database" name="Transactions"/>
+        <toc id="statement" path="database" name="Statements"/>
     </toc>
 
 </help>
