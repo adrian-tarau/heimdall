@@ -4,7 +4,6 @@ stress-testing a specific endpoint with a controlled load.
 
 **What you can configure before launch**
 
-* **Scenario selection**: Choose a saved Scenario as the base, or start with an ad‑hoc configuration.
 * **Execution engine**: JMeter or K6.
 * **Target environment**: Pick the real environment (e.g., dev, staging, prod) the traffic will hit.
 * **Load profile**:
