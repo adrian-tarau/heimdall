@@ -1,20 +1,11 @@
-The **Schedule** subsection allows you to automate the execution of REST-based tests by defining when and
-how often a scenario should run. This is particularly useful for continuous performance monitoring,
-regression detection, and validating service stability over time without requiring manual intervention.
+The **Schedule** dashboard displays all schedules that have been registered for simulations. A schedule defines when a particular simulation will be executed automatically, typically as part of ongoing performance or regression testing.
 
-A schedule typically includes:
+This dashboard allows you to:
 
-* **Linked Scenario** – The predefined scenario that will be executed according to the schedule.
-* **Execution Frequency** – Options such as hourly, daily, weekly, or custom intervals.
-* **Start Time & End Time** – The time range during which the schedule is active.
+* **View registered schedules** – See which scenarios are linked to schedules, along with their configured execution frequency (e.g., hourly, daily, weekly).
+* **Check next run times** – Review when each scheduled test is set to run next.
+* **Review last run status** – See whether the most recent scheduled execution passed or failed, along with key performance indicators from that run.
+* **Filter by simulation, scenario, or schedule name** – Narrow down the list to quickly find relevant schedules.
+* **Manually trigger a schedule** – Start a scheduled execution immediately without waiting for the next planned time, useful for urgent verification or troubleshooting.
 
-From the Schedule dashboard, you can:
-
-* **Create New Schedules** by linking them to existing scenarios.
-* **Edit or Pause Schedules** when adjustments or temporary suspensions are needed.
-* **View Upcoming Runs** in a calendar or list format.
-* **Check Past Scheduled Runs** directly from the schedule view for quick verification.
-
-Using scheduled executions helps teams **maintain long-term visibility into performance trends** and
-**catch issues early**, especially in environments where service usage or infrastructure changes occur regularly.
- When combined with History, it becomes easy to correlate system changes with test result variations.
+This subsection is especially useful for keeping track of which scenarios are tested regularly, ensuring coverage, and triggering additional runs when needed.

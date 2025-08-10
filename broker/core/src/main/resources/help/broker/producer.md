@@ -1,23 +1,18 @@
-The **Producer** view displays information about the components or services that send messages to the broker.
-In a distributed architecture, producers are responsible for publishing data that will be routed to one or
-more consumers. Monitoring producer behavior is essential for ensuring that messages are being generated at
-the expected rate, with the correct content, and without delivery failures.
+The **Producer** dashboard tracks the activity of message producers specifically used to test the **stability** and **availability** of the monitored brokers. Unlike application producers that serve business logic, these producers in Heimdall are designed to simulate a **realistic publishing workload** for performance and reliability testing. By doing so, they help generate consistent, measurable traffic that can be analyzed to assess broker health under controlled load.
 
-In Heimdall, the Producer dashboard includes:
+In Heimdall, the Producer dashboard provides:
 
-* **Producer List** – Shows all active and recently active producers, along with identifiers such as producer name
- and target topic/queue.
-* **Status Indicators** – Highlights whether each producer is connected, idle, or disconnected.
-* **Message Throughput** – Tracks the rate of published messages over time, allowing detection of underproduction,
- bursts, or stalls.
-* **Error** – Displays failed publish attempts, broker rejections, or protocol errors.
+* **Producer List** – Displays all test producers currently active or recently active, along with identifiers such as producer name, target broker, and topic/queue.
+* **Status Indicators** – Shows whether each producer is actively publishing, idle, or disconnected.
+* **Message Throughput** – Tracks the rate of published messages over time, helping measure broker responsiveness and detect anomalies such as throttling or slow acknowledgments.
+* **Latency & Acknowledgment Times** – Measures the time from message publish to broker acknowledgment, highlighting any delays or instability.
+* **Message Size & Payload Patterns** – Reports the average size of messages being sent to ensure the simulated workload matches realistic traffic.
+* **Error Metrics** – Captures failed publish attempts, broker rejections, or timeout occurrences.
 
 **Typical use cases:**
 
-* **Integration verification** – Ensure that test producers in Heimdall are sending messages in the correct format
- and sequence to the broker.
-* **Performance testing** – Monitor how quickly and consistently producers can generate load for consumers.
-* **Failure analysis** – Identify if publishing stops unexpectedly due to application crashes, misconfigurations,
- or broker-side issues.
+* **Broker performance benchmarking** – Establish baseline metrics for broker throughput and latency under simulated workloads.
+* **Stability testing** – Run extended publishing sessions to identify broker degradation over time.
+* **Failure detection** – Detect sudden spikes in publish errors or acknowledgment delays that may indicate broker issues.
 
-By tracking producer activity, engineers can verify that the message pipeline is being fed correctly and detect problems before they propagate downstream to consumers.
+By monitoring this dashboard, QA and software engineers can validate whether brokers can handle expected workloads reliably and consistently, while also detecting early signs of performance degradation.

@@ -1,20 +1,16 @@
-The **Scenario** subsection is where you define and manage the reusable configurations used for REST-based testing in Heimdall. A scenario describes **what to test**, **how to test it**, and **under what conditions**, serving as the blueprint for both scheduled and on-demand executions.
+The **Scenario** subsection provides **aggregated performance metrics for a single scenario** within a simulation. Since a simulation may contain multiple scenarios (e.g., different API endpoints or workflows), this view lets you isolate results for a specific scenario and understand its individual performance.
 
-Each scenario can include:
+**Typical aggregated metrics include:**
 
-* **Scenario Name & Description** – A meaningful label and optional notes to identify the purpose of the test.
-* **Test Tool** – Choice between **JMeter** and **K6**, depending on the preferred execution engine.
+* **Average & Percentile Latencies** – Scenario-specific P50/P90/P95/P99 values.
+* **Error Breakdown** – Distribution of error types or HTTP status codes for this scenario.
+* **Throughput** – Requests per second for the scenario, averaged across all simulation runs.
+* **Success Rate** – Percentage of successful requests.
+* **Trend Analysis** – Historical graph of latency and error rate changes for this scenario.
+* **Execution Frequency** – How often this scenario has been run as part of its parent simulation.
 
-Scenarios are designed to be **reusable**. Once defined, they can be run directly as a **simulation** or
-linked to the **Schedule** section for automated execution.
+The Scenario dashboard is valuable for:
 
-From the Scenario dashboard, users can:
-
-* **Create New Scenarios** from scratch.
-* **Edit Existing Scenarios** to adjust parameters.
-* **Organize Scenarios** into categories or tags for easier retrieval.
-* **Validate Scenarios** before execution to ensure correct configuration and prevent test failures caused by
-setup issues.
-
-By maintaining a library of scenarios, teams can ensure **consistency in testing**, quickly re-run known workloads
-after code changes, and maintain a reliable performance baseline for REST services.
+* **Bottleneck isolation** – Pinpointing which part of a test script is slowing down or failing.
+* **Targeted troubleshooting** – Focusing investigation on a single workflow or API call.
+* **Performance optimization** – Tracking the impact of changes to a specific scenario.
