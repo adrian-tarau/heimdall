@@ -76,7 +76,7 @@ public class BrokerEvent extends IdentityAware<Integer> {
     @Column(name = "received_at")
     @NotNull
     @Position(501)
-    @Description("The timestamp when the {name} was last time modified")
+    @Description("The timestamp when the {name} was received")
     @net.microfalx.bootstrap.dataset.annotation.OrderBy(OrderBy.Direction.DESC)
     @Timestamp
     private LocalDateTime receivedAt;

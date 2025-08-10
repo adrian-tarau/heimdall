@@ -1,4 +1,4 @@
-The **Simulation** dashboard displays **aggregated performance metrics** for all recorded runs of a specific registered simulation. A simulation in Heimdall represents a complete load-testing script — usually executed against REST APIs — that may contain one or more scenarios.
+The **Simulations** dashboard displays **aggregated performance metrics** for all recorded runs of a specific registered simulation. A simulation in Heimdall represents a complete load-testing script — usually executed against RESTful service — that may contain one or more scenarios.
 
 This dashboard allows you to track how a simulation has behaved over time, identify trends, and compare results from different runs.
 

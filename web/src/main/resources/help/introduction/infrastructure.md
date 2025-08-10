@@ -1,0 +1,3 @@
+_Heimdall_ also provides detailed visibility into the underlying components necessary to support the monitored and mocked services. It allows software and QA engineers, as well as administrators, to clearly visualize and understand how various parts of their testing and monitoring infrastructure are organized and interconnected.
+
+Users can quickly verify the state, health, and relationships among environments, server clusters, individual servers, and running services. The dashboards are carefully organized to offer meaningful insights that help users diagnose issues faster, plan infrastructure adjustments, or verify configuration consistency.

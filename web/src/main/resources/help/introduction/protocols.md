@@ -16,3 +16,5 @@ The following services are faked and available to be used:
     * TCP `12200`:
 
 If _Heimdall_ runs in containers, check on which port the above  services are configured (what is available to clients).
+
+The events/alerts sent to the above services can be inspected under dashboards available under _Protocols_ section of the _Heimdall_. 

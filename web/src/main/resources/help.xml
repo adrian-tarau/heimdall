@@ -3,8 +3,10 @@
 
     <toc id="introduction" order="1" name="Introduction">
         <toc id="protocols" order="1" name="Protocols"/>
-        <toc id="events" order="2" name="Events"/>
-        <toc id="load_testing" order="3" name="Load Testing"/>
+        <toc id="broker" order="2" name="Brokers"/>
+        <toc id="rest" order="3" name="REST API"/>
+        <toc id="infrastructure" order="4" name="Infrastructure"/>
+        <toc id="database" order="5" name="Databases"/>
     </toc>
 
 </help>
