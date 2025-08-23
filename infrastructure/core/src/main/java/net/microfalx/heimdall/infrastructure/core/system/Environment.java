@@ -30,6 +30,7 @@ public class Environment extends NamedAndTaggedAndTimestampedIdentityAware<Integ
     @Description("The base URL for the web application server")
     @Label(group = "URI", value = "Base")
     @Filterable
+    @Width("30%")
     private String baseUri;
 
     @Column(name = "app_path", nullable = false)
@@ -37,6 +38,7 @@ public class Environment extends NamedAndTaggedAndTimestampedIdentityAware<Integ
     @Description("The path of the web application (user interface, appended to the base URI)")
     @Label(group = "URI", value = "Application")
     @Filterable
+    @Width("90")
     private String appPath;
 
     @Column(name = "api_path", nullable = false)
@@ -44,6 +46,7 @@ public class Environment extends NamedAndTaggedAndTimestampedIdentityAware<Integ
     @Description("The path of the Rest API (appended to the base URI)")
     @Label(group = "URI", value = "Rest API")
     @Filterable
+    @Width("90")
     private String apiPath;
 
     @Column(name = "attributes", nullable = false)

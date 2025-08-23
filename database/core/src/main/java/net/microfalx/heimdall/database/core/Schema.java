@@ -29,14 +29,14 @@ public class Schema extends NamedAndTimestampedIdentityAware<Integer> {
     @Column(name = "type")
     @Position(10)
     @Enumerated(EnumType.STRING)
-    @Width(min = "50")
+    @Width("80")
     @Description("The type of database")
     @NotNull
     private net.microfalx.bootstrap.jdbc.support.Database.Type type;
 
     @Column(name = "url", length = 2000)
     @Position(20)
-    @Width(min = "300")
+    @Width("30%")
     @Description("The JDBC URL of the database")
     @NotEmpty
     @Tab(label = "Connection")
@@ -46,6 +46,7 @@ public class Schema extends NamedAndTimestampedIdentityAware<Integer> {
     @Position(30)
     @Description("The user name used to connect to the database")
     @Label("User Name")
+    @Width("80")
     @NotEmpty
     @Tab(label = "Connection")
     private String username;
