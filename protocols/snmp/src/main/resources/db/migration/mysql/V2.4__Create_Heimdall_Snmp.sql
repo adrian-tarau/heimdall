@@ -35,6 +35,8 @@ create table protocol_snmp_mibs
     description    varchar(1000)
 ) ENGINE = InnoDB;
 
+create index protocol_snmp_mibs$module_id on protocol_snmp_mibs (module_id);
+
 create table protocol_snmp_agent_simulator_rule
 (
     id              integer                             not null auto_increment primary key,
