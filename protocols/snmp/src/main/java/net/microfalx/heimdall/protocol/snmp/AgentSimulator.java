@@ -10,13 +10,11 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
-import static net.microfalx.lang.ExceptionUtils.rethrowException;
 import static net.microfalx.lang.StringUtils.toIdentifier;
 
 @Component
@@ -70,8 +68,8 @@ public class AgentSimulator implements InitializingBean {
             ruleRepository.save(rule);
             load(resource, rule.isEnabled(), this.rules);
             registerStaticRules();
-        } catch (IOException e) {
-            rethrowException(e);
+        } catch (Exception e) {
+            throw new AgentException("Failed to persist agent simulator rules from resource '" + resource.getName() + "'", e);
         }
     }
 
@@ -120,9 +118,8 @@ public class AgentSimulator implements InitializingBean {
                     rules.staticRules.put(rule.getId(), rule);
                 }
             }
-        } catch (IOException e) {
-            LOGGER.error("Failed to load agent simulator rules from resource: {}", resource.getName(), e);
-            rethrowException(e);
+        } catch (Exception e) {
+            LOGGER.atError().setCause(e).log("Failed to load agent simulator rules from resource: {}", resource.getName(), e);
         }
     }
 

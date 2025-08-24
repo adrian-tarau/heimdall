@@ -25,6 +25,7 @@ public class AgentSimulatorRule extends NamedAndTaggedAndTimestampedIdentityAwar
     @Column(name = "content", nullable = false)
     @Position(100)
     @Description("A text file containing the SNMP agent simulator rule")
+    @Visible(false)
     private String content;
 
     @Column(name = "enabled",nullable = false)

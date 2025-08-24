@@ -88,8 +88,9 @@ public class AgentServer implements InitializingBean {
             if (replace) {
                 server.unregister(managedObject, CONTEXT_STRING);
                 this.register(managedObject, false);
+            } else {
+                throw new SnmpException("Managed object: " + managedObject + " is already registered", e);
             }
-            throw new SnmpException("Managed object: " + managedObject + " is already registered", e);
         }
     }
 
