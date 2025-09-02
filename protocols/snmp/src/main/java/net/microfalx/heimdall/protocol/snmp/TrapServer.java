@@ -1,16 +1,19 @@
 package net.microfalx.heimdall.protocol.snmp;
 
+import jakarta.annotation.PreDestroy;
 import net.microfalx.bootstrap.model.Attribute;
 import net.microfalx.heimdall.protocol.core.Body;
 import net.microfalx.heimdall.protocol.snmp.mib.MibModule;
 import net.microfalx.heimdall.protocol.snmp.mib.MibService;
 import net.microfalx.heimdall.protocol.snmp.mib.MibVariable;
+import net.microfalx.lang.EnumUtils;
 import net.microfalx.lang.ExceptionUtils;
 import net.microfalx.metrics.Metrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.CommandResponder;
 import org.snmp4j.CommandResponderEvent;
+import org.snmp4j.MessageDispatcher;
 import org.snmp4j.PDU;
 import org.snmp4j.smi.*;
 import org.springframework.beans.factory.InitializingBean;
@@ -37,14 +40,14 @@ public class TrapServer implements CommandResponder, InitializingBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TrapServer.class);
 
-    private static final Metrics TRAP_METRICS = SnmpUtils.METRICS.withGroup("Trap");
-    private static final Metrics TRAP_FAILURE_METRICS = TRAP_METRICS.withGroup("Failure");
+    private static final Metrics TRAP_METRICS = SnmpUtils.METRICS.withGroup(EnumUtils.toLabel(SnmpMode.TRAP)).withGroup("Trap");
+    private static final Metrics TRAP_FAILURE_METRICS = TRAP_METRICS.withGroup(EnumUtils.toLabel(SnmpMode.TRAP)).withGroup("Failure");
 
-    @Autowired
-    private SnmpService snmpService;
+    @Autowired private SnmpService snmpService;
+    @Autowired(required = false) private SnmpProperties properties;
+    @Autowired private MibService mibService;
 
-    @Autowired
-    private MibService mibService;
+    private MessageDispatcher messageDispatcher;
 
     @Override
     public <A extends Address> void processPdu(CommandResponderEvent<A> event) {
@@ -70,11 +73,17 @@ public class TrapServer implements CommandResponder, InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        snmpService.getDispatcher().addCommandResponder(this);
+        messageDispatcher = snmpService.createDispatcher(SnmpMode.TRAP);
+        messageDispatcher.addCommandResponder(this);
+    }
+
+    @PreDestroy
+    public void destroy() {
+        messageDispatcher.stop();
     }
 
     private void updateCommonAttributes(SnmpEvent event, PDU pdu) {
-        event.setCommunity("public");
+        event.setCommunity(properties.getTrapComunityString());
         Collection<VariableBinding> variableBindings = getFilteredBindings(pdu);
         MibModule module = null;
         for (VariableBinding variableBinding : variableBindings) {

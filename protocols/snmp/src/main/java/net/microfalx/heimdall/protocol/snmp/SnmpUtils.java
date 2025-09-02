@@ -41,6 +41,26 @@ public class SnmpUtils {
     }
 
     /**
+     * Returns the base OID of a given OID.
+     * @param oid the ODI
+     * @return the base
+     */
+    public static OID getBaseOid(OID oid) {
+        requireNonNull(oid);
+        OID clone = new OID(oid);
+        int value = clone.removeLast();
+        if (value == 0) {
+            // scalar
+            return clone;
+        } else {
+            // table
+            OID clone2 = new OID(oid);
+            value = clone2.removeLast();
+            return value > 1 ? clone2 : clone;
+        }
+    }
+
+    /**
      * Describes the scope of a Managed Object (MO) in a human-readable format.
      *
      * @param scope the scope to describe

@@ -1,6 +1,9 @@
 package net.microfalx.heimdall.protocol.core;
 
 import io.azam.ulidj.ULID;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import net.microfalx.bootstrap.model.AbstractAttributes;
 import net.microfalx.bootstrap.model.Attribute;
 import net.microfalx.resource.Resource;
@@ -9,11 +12,14 @@ import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
 
+import static java.util.Collections.unmodifiableCollection;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
+@Getter
+@Setter
+@ToString
 public abstract class AbstractEvent extends AbstractAttributes<Attribute> implements Event {
 
     private String id = ULID.random();
@@ -41,19 +47,9 @@ public abstract class AbstractEvent extends AbstractAttributes<Attribute> implem
         this.type = type;
     }
 
-    @Override
-    public String getId() {
-        return id;
-    }
-
     protected void setId(String id) {
         requireNonNull(id);
         this.id = id;
-    }
-
-    @Override
-    public final String getName() {
-        return name;
     }
 
     public void setName(String name) {
@@ -98,7 +94,7 @@ public abstract class AbstractEvent extends AbstractAttributes<Attribute> implem
      */
     @Override
     public Collection<Address> getTargets() {
-        return Collections.unmodifiableCollection(targets);
+        return unmodifiableCollection(targets);
     }
 
     /**
@@ -112,7 +108,7 @@ public abstract class AbstractEvent extends AbstractAttributes<Attribute> implem
     }
 
     @Override
-    public Optional<Resource> getResource() {
+    public final Optional<Resource> getResource() {
         return Optional.ofNullable(resource);
     }
 
@@ -173,50 +169,8 @@ public abstract class AbstractEvent extends AbstractAttributes<Attribute> implem
     }
 
     @Override
-    public ZonedDateTime getReceivedAt() {
-        return receivedAt;
-    }
-
-    public void setReceivedAt(ZonedDateTime receivedAt) {
-        this.receivedAt = receivedAt;
-    }
-
-    @Override
-    public ZonedDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(ZonedDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    @Override
-    public ZonedDateTime getSentAt() {
-        return sentAt;
-    }
-
-    public void setSentAt(ZonedDateTime sentAt) {
-        this.sentAt = sentAt;
-    }
-
-    @Override
     public Collection<Part> getParts() {
-        return Collections.unmodifiableCollection(parts);
-    }
-
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + "{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", source=" + source +
-                ", targets=" + targets +
-                ", type=" + type +
-                ", receivedAt=" + receivedAt +
-                ", createdAt=" + createdAt +
-                ", sentAt=" + sentAt +
-                ", parts=" + parts +
-                '}';
+        return unmodifiableCollection(parts);
     }
 
     /**

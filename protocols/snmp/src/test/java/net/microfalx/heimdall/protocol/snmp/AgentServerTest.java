@@ -112,7 +112,7 @@ class AgentServerTest extends AbstractSnmpServiceTestCase {
     private CommunityTarget<Address> createCommunityTarget() {
         CommunityTarget<Address> target = new CommunityTarget<>();
         target.setCommunity(new OctetString(properties.getAgentComunityString()));
-        target.setAddress(GenericAddress.parse("udp:localhost/" + properties.getUdpPort()));
+        target.setAddress(GenericAddress.parse("udp:localhost/" + properties.getAgentUdpPort()));
         target.setRetries(1);
         target.setTimeout(5_000);
         target.setVersion(SnmpConstants.version2c);

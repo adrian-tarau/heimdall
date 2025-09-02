@@ -1,6 +1,8 @@
 package net.microfalx.heimdall.protocol.snmp;
 
+import jakarta.annotation.PreDestroy;
 import net.microfalx.heimdall.protocol.snmp.mib.MibService;
+import net.microfalx.lang.EnumUtils;
 import net.microfalx.lang.IOUtils;
 import net.microfalx.lang.JvmUtils;
 import net.microfalx.metrics.Metrics;
@@ -50,14 +52,13 @@ public class AgentServer implements InitializingBean {
     private static final Metrics AGENT_METRICS = SnmpUtils.METRICS.withGroup("Agent");
 
     @Autowired(required = false) private SnmpProperties properties = new SnmpProperties();
-
     @Autowired private SnmpService snmpService;
-
     @Autowired private MibService mibService;
 
     private final OctetString engineID = new OctetString(MPv3.createLocalEngineID());
     private AgentConfigManager agent;
     private MOServer server;
+    private MessageDispatcher messageDispatcher;
 
     private File bootCounterFile;
     private File agentConfigFile;
@@ -107,6 +108,11 @@ public class AgentServer implements InitializingBean {
         start();
     }
 
+    @PreDestroy
+    public void destroy() {
+        messageDispatcher.stop();
+    }
+
     private void initConfigFiles() {
         File snmpDirectory = JvmUtils.getCacheDirectory("snmp");
         bootCounterFile = new File(snmpDirectory, "boot_counter.cfg");
@@ -132,8 +138,9 @@ public class AgentServer implements InitializingBean {
     }
 
     private void initAgent() {
+        messageDispatcher = snmpService.createDispatcher(SnmpMode.AGENT);
         MOServer[] moServers = {server};
-        agent = new Agent(engineID, snmpService.getDispatcher(), null, moServers, snmpService.getWorkerPool(), null, new DefaultMOPersistenceProvider(moServers, agentConfigFile.getAbsolutePath()), new EngineBootsCounterFile(bootCounterFile));
+        agent = new Agent(engineID, messageDispatcher, null, moServers, snmpService.getWorkerPool(), null, new DefaultMOPersistenceProvider(moServers, agentConfigFile.getAbsolutePath()), new EngineBootsCounterFile(bootCounterFile));
         agent.initialize();
     }
 
@@ -152,6 +159,7 @@ public class AgentServer implements InitializingBean {
         } catch (DuplicateRegistrationException e) {
             // no duplicates here
         }
+        snmpService.getSimulator().setAgentServer(this);
     }
 
     private void initCommunity() {
@@ -187,7 +195,7 @@ public class AgentServer implements InitializingBean {
 
     class CounterListenerImpl implements CounterListener {
 
-        private static final Metrics COUNTER_METRICS = AGENT_METRICS.withGroup("Counter");
+        private static final Metrics COUNTER_METRICS = AGENT_METRICS.withGroup(EnumUtils.toLabel(SnmpMode.AGENT)).withGroup("Counter");
 
         @Override
         public void incrementCounter(CounterEvent event) {

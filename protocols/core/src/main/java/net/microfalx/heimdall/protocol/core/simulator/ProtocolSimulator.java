@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -45,6 +46,7 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
     private final List<ProtocolClient<E>> clients = new ArrayList<>();
     private final Faker faker = new Faker();
     private final Lock lock = new ReentrantLock();
+    private final AtomicBoolean initialized = new AtomicBoolean(false);
 
     final Metrics METRICS;
 
@@ -113,10 +115,7 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        if (!isEnabled()) return;
-        initializeAddresses();
-        initializeClient();
-        initializeData();
+        // empty by default
     }
 
     /**
@@ -166,7 +165,7 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
      * @return a non-null instance
      */
     protected final Address getRandomTargetAddress() {
-        return targetAddresses.get(ThreadLocalRandom.current().nextInt(targetAddresses.size()));
+        return targetAddresses.get(random.nextInt(targetAddresses.size()));
     }
 
     /**
@@ -175,7 +174,7 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
      * @return a non-null instance
      */
     protected final Address getRandomSourceAddress() {
-        return sourceAddresses.get(ThreadLocalRandom.current().nextInt(sourceAddresses.size()));
+        return sourceAddresses.get(random.nextInt(sourceAddresses.size()));
     }
 
     /**
@@ -184,7 +183,7 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
      * @return a non-null instance
      */
     protected final ProtocolClient<E> getRandomClient() {
-        return clients.get(ThreadLocalRandom.current().nextInt(clients.size()));
+        return clients.get(random.nextInt(clients.size()));
     }
 
     /**
@@ -324,7 +323,8 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
     }
 
     private void simulateUnderLock() {
-        int eventCount = properties.getMinimumEventCount() + ThreadLocalRandom.current().nextInt(properties.getMaximumEventCount());
+        initialize();
+        int eventCount = properties.getMinimumEventCount() + random.nextInt(properties.getMaximumEventCount());
         for (int i = 0; i < eventCount; i++) {
             Address sourceAddress = getRandomSourceAddress();
             Address targetAddress = getRandomTargetAddress();
@@ -337,6 +337,18 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
                 LOGGER.atWarn().setCause(e).log("Failed to send simulated event to {}", client.getHostName());
             }
             waitForRate();
+        }
+    }
+
+    private void initialize() {
+        if (initialized.compareAndSet(false, true)) {
+            initializeAddresses();
+            initializeClient();
+            try {
+                initializeData();
+            } catch (IOException e) {
+                LOGGER.atError().setCause(e).log("Failed to initialize data for simulator {}", getEventType());
+            }
         }
     }
 

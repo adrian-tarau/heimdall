@@ -5,6 +5,7 @@ import biz.paluch.logging.gelf.intern.ErrorReporter;
 import biz.paluch.logging.gelf.intern.GelfSender;
 import biz.paluch.logging.gelf.intern.GelfSenderFactory;
 import net.microfalx.bootstrap.model.Attribute;
+import net.microfalx.heimdall.protocol.core.Event;
 import net.microfalx.heimdall.protocol.core.ProtocolClient;
 import net.microfalx.lang.StringUtils;
 import org.slf4j.Logger;
@@ -39,6 +40,11 @@ public class GelfClient extends ProtocolClient<GelfEvent> {
     @Override
     protected int getDefaultPort() {
         return getTransport() == Transport.TCP ? 12200 : 12201;
+    }
+
+    @Override
+    protected Event.Type getEventType() {
+        return Event.Type.GELF;
     }
 
     private void addAdditionalFields(MdcGelfMessageAssembler assembler, GelfEvent event) {

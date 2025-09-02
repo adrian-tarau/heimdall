@@ -20,12 +20,22 @@ public class SnmpProperties {
     /**
      * The UDP port on which the SNMP agent listens.
      */
-    private int udpPort = 2161;
+    private int agentUdpPort = 2161;
+
+    /**
+     * The UDP port on which the SNMP trap listens.
+     */
+    private int trapUdpPort = 2162;
 
     /**
      * The TCP port on which the SNMP agent listens.
      */
-    private int tcpPort = 2165;
+    private int agentTcpPort = 2165;
+
+    /**
+     * The TCP port on which the SNMP trap listens.
+     */
+    private int trapTcpPort = 2166;
 
     /**
      * Whether the SNMP simulator is enabled.
@@ -37,6 +47,7 @@ public class SnmpProperties {
      */
     private Duration simulatorInterval = Duration.ofSeconds(10);
 
+    private String trapComunityString = "heimdall";
     private String agentComunityString = "heimdall";
     private String agentUserName = "heimdall";
     private String authenticationProtocol = "SHA";

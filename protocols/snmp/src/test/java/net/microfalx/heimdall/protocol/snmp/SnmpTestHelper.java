@@ -20,7 +20,7 @@ class SnmpTestHelper {
 
     private ProtocolClient.Transport transport = ProtocolClient.Transport.UDP;
     private final SnmpProperties configuration;
-    private Map<String, Object> attributes= new HashMap<>();
+    private final Map<String, Object> attributes= new HashMap<>();
 
     SnmpTestHelper(SnmpProperties configuration) {
         this.configuration = configuration;
@@ -39,14 +39,14 @@ class SnmpTestHelper {
     }
 
     void sendTrap(boolean large) throws IOException {
-        SnmpClient client = new SnmpClient();
+        SnmpClient client = new SnmpClient(SnmpMode.TRAP);
         client.setTransport(transport);
         SnmpEvent trap = new SnmpEvent();
         trap.setSource(Address.create(Address.Type.HOSTNAME, "localhost"));
         trap.addTarget(Address.create(Address.Type.HOSTNAME,"localhost"));
         trap.setBody(Body.create("Test Message"));
         attributes.forEach(trap::add);
-        client.setPort(transport == ProtocolClient.Transport.TCP ? configuration.getTcpPort() : configuration.getUdpPort());
+        client.setPort(transport == ProtocolClient.Transport.TCP ? configuration.getTrapTcpPort() : configuration.getTrapUdpPort());
         if (large) {
             trap.setBody(Body.create(new Faker().text().text(16000, 16000)));
         } else {

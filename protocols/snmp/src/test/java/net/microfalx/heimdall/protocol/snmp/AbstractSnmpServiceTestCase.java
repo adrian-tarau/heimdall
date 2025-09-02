@@ -40,8 +40,10 @@ public abstract class AbstractSnmpServiceTestCase {
     @BeforeEach
     void setup() throws Exception {
         helper = new SnmpTestHelper(properties);
-        properties.setTcpPort(helper.getNextPort());
-        properties.setUdpPort(helper.getNextPort());
+        properties.setAgentUdpPort(helper.getNextPort());
+        properties.setAgentTcpPort(helper.getNextPort());
+        properties.setTrapUdpPort(helper.getNextPort());
+        properties.setTrapTcpPort(helper.getNextPort());
         initMocks();
         snmpService.afterPropertiesSet();
     }

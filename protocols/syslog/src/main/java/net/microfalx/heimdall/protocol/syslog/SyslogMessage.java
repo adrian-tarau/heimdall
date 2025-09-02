@@ -1,25 +1,25 @@
 package net.microfalx.heimdall.protocol.syslog;
 
 import com.cloudbees.syslog.Facility;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import net.microfalx.heimdall.protocol.core.AbstractEvent;
 import net.microfalx.heimdall.protocol.core.Severity;
 
+@Getter
+@Setter
+@ToString
 public class SyslogMessage extends AbstractEvent {
 
     private Facility facility;
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     private com.cloudbees.syslog.Severity severity;
 
     public SyslogMessage() {
         super(Type.SYSLOG);
-    }
-
-    public Facility getFacility() {
-        return facility;
-    }
-
-    public SyslogMessage setFacility(Facility facility) {
-        this.facility = facility;
-        return this;
     }
 
     public com.cloudbees.syslog.Severity getSyslogSeverity() {

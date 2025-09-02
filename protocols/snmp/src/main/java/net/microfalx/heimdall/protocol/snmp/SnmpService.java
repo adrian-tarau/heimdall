@@ -6,6 +6,7 @@ import net.microfalx.heimdall.protocol.core.Event;
 import net.microfalx.heimdall.protocol.core.ProtocolService;
 import net.microfalx.heimdall.protocol.snmp.jpa.SnmpEventRepository;
 import net.microfalx.heimdall.protocol.snmp.mib.MibService;
+import net.microfalx.lang.EnumUtils;
 import net.microfalx.lang.IOUtils;
 import net.microfalx.metrics.Metrics;
 import net.microfalx.resource.MimeType;
@@ -36,10 +37,13 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static net.microfalx.heimdall.protocol.snmp.SnmpUtils.describeAddress;
+import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.StringUtils.isNotEmpty;
 
 @Service
@@ -50,27 +54,15 @@ public final class SnmpService extends ProtocolService<SnmpEvent, net.microfalx.
     private static final Metrics DISPATCHER_METRICS = SnmpUtils.METRICS.withGroup("Dispatcher");
 
     @Autowired private MibService mibService;
+    @Autowired private SnmpSimulator simulator;
+    @Autowired private SnmpProperties properties;
+    @Autowired private SnmpEventRepository repository;
 
-    @Autowired
-    private SnmpSimulator simulator;
-
-    @Autowired
-    private SnmpProperties properties;
-
-    @Autowired
-    private SnmpEventRepository repository;
-
-    private MessageDispatcher dispatcher;
-    private TransportMapping<UdpAddress> udpTransport;
-    private TransportMapping<TcpAddress> tcpTransport;
     private WorkerPool workerPool;
+    private final Collection<TransportMapping<?>> transportMappings = new CopyOnWriteArrayList<>();
 
-    MessageDispatcher getDispatcher() {
-        return dispatcher;
-    }
-
-    WorkerPool getWorkerPool() {
-        return workerPool;
+    public MibService getMibService() {
+        return mibService;
     }
 
     @Override
@@ -132,9 +124,8 @@ public final class SnmpService extends ProtocolService<SnmpEvent, net.microfalx.
     public void afterPropertiesSet() throws Exception {
         super.afterPropertiesSet();
         initWorkerPool();
-        initTransport();
-        initDispatcher();
         initSecurity();
+        simulator.setSnmpService(this);
     }
 
     @PreDestroy
@@ -146,22 +137,22 @@ public final class SnmpService extends ProtocolService<SnmpEvent, net.microfalx.
         workerPool = new SnmpWorkerPool(getThreadPool());
     }
 
-    private void initDispatcher() {
+    WorkerPool getWorkerPool() {
+        return workerPool;
+    }
+
+    MessageDispatcher createDispatcher(SnmpMode mode) {
         MessageDispatcherImpl dispatcher = new MessageDispatcherImpl();
         dispatcher.addMessageProcessingModel(new MPv1());
         dispatcher.addMessageProcessingModel(new MPv2c());
         dispatcher.addMessageProcessingModel(new MPv3());
 
-        dispatcher.addCommandResponder(new CommandResponderImpl());
+        dispatcher.addCommandResponder(new CommandResponderImpl(mode));
         dispatcher.addAuthenticationFailureListener(new AuthenticationFailureListenerImpl());
 
-        dispatcher.addTransportMapping(udpTransport);
-        dispatcher.addTransportMapping(tcpTransport);
+        initTransport(dispatcher, mode);
         dispatcher.addCounterListener(new CounterListenerImpl());
-        udpTransport.addTransportListener(dispatcher);
-        tcpTransport.addTransportListener(dispatcher);
-
-        this.dispatcher = new MultiThreadedMessageDispatcher(getWorkerPool(), dispatcher);
+        return new MultiThreadedMessageDispatcher(getWorkerPool(), dispatcher);
     }
 
     private void initSecurity() {
@@ -170,30 +161,35 @@ public final class SnmpService extends ProtocolService<SnmpEvent, net.microfalx.
         SecurityProtocols.getInstance().addPrivacyProtocol(new PrivAES256With3DESKeyExtension());
     }
 
-    private void initTransport() {
+    private void initTransport(MessageDispatcher dispatcher, SnmpMode mode) {
         try {
-            udpTransport = new DefaultUdpTransportMapping(new UdpAddress("0.0.0.0/" + properties.getUdpPort()));
-            initTransport(udpTransport);
+            UdpAddress address = new UdpAddress("0.0.0.0/" + (mode == SnmpMode.AGENT ? properties.getAgentUdpPort() : properties.getTrapUdpPort()));
+            TransportMapping<UdpAddress> udpTransport = new DefaultUdpTransportMapping(address);
+            initTransport(dispatcher, udpTransport, mode);
         } catch (IOException e) {
             LOGGER.atError().setCause(e).log("Failed to create UDP transport");
         }
         try {
-            tcpTransport = new DefaultTcpTransportMapping(new TcpAddress("0.0.0.0/" + properties.getTcpPort()));
-            tcpTransport.addTransportListener(new TransportListenerImpl());
-            tcpTransport.listen();
+            TcpAddress address = new TcpAddress("0.0.0.0/" + (mode == SnmpMode.AGENT ? properties.getAgentTcpPort() : properties.getTrapTcpPort()));
+            TransportMapping<TcpAddress> tcpTransport = new DefaultTcpTransportMapping(address);
+            initTransport(dispatcher, tcpTransport, mode);
         } catch (IOException e) {
             LOGGER.atError().setCause(e).log("Failed to create TCP transport");
         }
     }
 
-    private <A extends Address> void initTransport(TransportMapping<A> transportMapping) throws IOException {
-        transportMapping.addTransportListener(new TransportListenerImpl());
-        udpTransport.listen();
+    private <A extends Address> void initTransport(MessageDispatcher dispatcher, TransportMapping<A> transportMapping, SnmpMode mode) throws IOException {
+        transportMapping.addTransportListener(new TransportListenerImpl(mode));
+        dispatcher.addTransportMapping(transportMapping);
+        transportMapping.addTransportListener(dispatcher);
+        transportMapping.listen();
+        transportMappings.add(transportMapping);
     }
 
     private void destroyTransport() {
-        IOUtils.closeQuietly(udpTransport);
-        IOUtils.closeQuietly(tcpTransport);
+        for (TransportMapping<?> transportMapping : transportMappings) {
+            IOUtils.closeQuietly(transportMapping);
+        }
     }
 
     private String getOidName(OID oid) {
@@ -229,42 +225,60 @@ public final class SnmpService extends ProtocolService<SnmpEvent, net.microfalx.
 
     private static class CommandResponderImpl implements CommandResponder {
 
-        private static final Metrics EVENT_METRICS = SnmpUtils.METRICS.withGroup("Event");
-        private static final Metrics EVENT_SECURITY_NAME_METRICS = EVENT_METRICS.withGroup("Security Name");
-        private static final Metrics EVENT_SECURITY_MODEL_METRICS = EVENT_METRICS.withGroup("Security Model");
+        private final Metrics eventSecurityNameMetrics;
+        private final Metrics eventSecurityModelMetrics;
 
-        private static final Metrics PDU_METRICS = SnmpUtils.METRICS.withGroup("PDU");
-        private static final Metrics PDU_TYPE_METRICS = PDU_METRICS.withGroup("Type");
+        private final Metrics pduTypeMetrics;
+
+        private CommandResponderImpl(SnmpMode mode) {
+            requireNonNull(mode);
+
+            Metrics eventMetrics = SnmpUtils.METRICS.withGroup(EnumUtils.toLabel(mode)).withGroup("Event");
+            eventSecurityNameMetrics = eventMetrics.withGroup("Security Name");
+            eventSecurityModelMetrics = eventMetrics.withGroup("Security Model");
+
+            Metrics pduMetrics = SnmpUtils.METRICS.withGroup("PDU");
+            pduTypeMetrics = pduMetrics.withGroup("Type");
+        }
 
         @Override
         public <A extends Address> void processPdu(CommandResponderEvent<A> event) {
             OctetString securityName = new OctetString(event.getSecurityName());
-            EVENT_SECURITY_NAME_METRICS.count(securityName.toString());
+            eventSecurityNameMetrics.count(securityName.toString());
             String securityModel = securityModelNames.getOrDefault(event.getSecurityModel(), "UNKNOWN");
-            EVENT_SECURITY_MODEL_METRICS.count(securityModel);
+            eventSecurityModelMetrics.count(securityModel);
             PDU pdu = event.getPDU();
             if (pdu == null) return;
             String pduType = PDU_TYPE_NAMES.getOrDefault(pdu.getType(), "UNKNOWN");
-            PDU_TYPE_METRICS.count(pduType);
+            this.pduTypeMetrics.count(pduType);
         }
     }
 
     private static class TransportListenerImpl implements TransportListener {
 
-        private static final Metrics TRANSPORT_METRICS = SnmpUtils.METRICS.withGroup("Transport");
-        private static final Metrics TRANSPORT_SOURCE_ADDRESS_METRICS = TRANSPORT_METRICS.withGroup("Source Address");
-        private static final Metrics TRANSPORT_INCOMMING_ADDRESS_METRICS = TRANSPORT_METRICS.withGroup("Incoming Address");
-        private static final Metrics TRANSPORT_BYTES_METRICS = TRANSPORT_METRICS.withGroup("Incoming Bytes");
+        private final Metrics transportMetrics;
+        private final Metrics sourceAddressMetrics;
+        private final Metrics incomingAddressMetrics;
+        private final Metrics bytesMetrics;
+
+        private TransportListenerImpl(SnmpMode mode) {
+            requireNonNull(mode);
+
+            transportMetrics = SnmpUtils.METRICS.withGroup(EnumUtils.toLabel(mode)).withGroup("Transport");
+            sourceAddressMetrics = transportMetrics.withGroup("Source Address");
+            incomingAddressMetrics = transportMetrics.withGroup("Incoming Address");
+            bytesMetrics = transportMetrics.withGroup("Incoming Bytes");
+        }
 
         @Override
         public <A extends Address> void processMessage(TransportMapping<? super A> sourceTransport, A incomingAddress,
                                                        ByteBuffer wholeMessage, TransportStateReference tmStateReference) {
             String listeningAddress = describeAddress(sourceTransport.getListenAddress());
             String incomingAddressString = describeAddress(incomingAddress);
-            TRANSPORT_METRICS.count("Received");
-            TRANSPORT_SOURCE_ADDRESS_METRICS.count(listeningAddress);
-            TRANSPORT_INCOMMING_ADDRESS_METRICS.count(incomingAddressString);
-            TRANSPORT_BYTES_METRICS.count(incomingAddressString, wholeMessage.remaining());
+            transportMetrics.count("Received");
+            sourceAddressMetrics.count(listeningAddress);
+            this.incomingAddressMetrics.count(incomingAddressString);
+            bytesMetrics.count(incomingAddressString, wholeMessage.remaining());
         }
     }
 

@@ -33,6 +33,11 @@ public class SmtpClient extends ProtocolClient<SmtpEvent> {
         return 25;
     }
 
+    @Override
+    protected Event.Type getEventType() {
+        return Event.Type.SMTP;
+    }
+
     /**
      * Subclasses will implement this method to send an event.
      *

@@ -1,5 +1,7 @@
 package net.microfalx.heimdall.protocol.core;
 
+import net.microfalx.metrics.Metrics;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ProtocolException;
@@ -15,8 +17,20 @@ import static net.microfalx.lang.ExceptionUtils.rethrowExceptionAndReturn;
 public abstract class ProtocolClient<E extends Event> {
 
     private String hostName = "localhost";
-    private int port = 0;
+    private int port = -1;
     private Transport transport = Transport.UDP;
+
+    protected final Metrics METRICS;
+    protected final Metrics SUCCESS_BY_TARGET;
+    protected final Metrics FAILED_BY_STATUS;
+    protected final Metrics FAILED_BY_TARGET;
+
+    public ProtocolClient() {
+        METRICS = ProtocolUtils.getEventMetrics(getEventType()).withGroup("Client");
+        FAILED_BY_STATUS = METRICS.withGroup("Failed By Status");
+        SUCCESS_BY_TARGET = METRICS.withGroup("Success By Target");
+        FAILED_BY_TARGET = METRICS.withGroup("Failed By Target");
+    }
 
     /**
      * Returns the hostname used by the client.
@@ -108,6 +122,13 @@ public abstract class ProtocolClient<E extends Event> {
         if (event.getParts().isEmpty()) throw new ProtocolException("At least one part is required");
         doSend(event);
     }
+
+    /**
+     * Returns the event type supported by this client.
+     *
+     * @return a non-null instance
+     */
+    protected abstract Event.Type getEventType();
 
     /**
      * Returns the default port.
