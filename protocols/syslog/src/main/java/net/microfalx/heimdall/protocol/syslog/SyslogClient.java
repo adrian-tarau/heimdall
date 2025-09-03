@@ -7,6 +7,7 @@ import com.cloudbees.syslog.sender.AbstractSyslogMessageSender;
 import com.cloudbees.syslog.sender.SyslogMessageSender;
 import com.cloudbees.syslog.sender.TcpSyslogMessageSender;
 import com.cloudbees.syslog.sender.UdpSyslogMessageSender;
+import net.microfalx.heimdall.protocol.core.Event;
 import net.microfalx.heimdall.protocol.core.ProtocolClient;
 
 import java.io.IOException;
@@ -20,6 +21,11 @@ public class SyslogClient extends ProtocolClient<SyslogMessage> {
     @Override
     protected int getDefaultPort() {
         return 514;
+    }
+
+    @Override
+    protected Event.Type getEventType() {
+        return Event.Type.SYSLOG;
     }
 
     /**
