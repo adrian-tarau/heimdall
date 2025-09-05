@@ -14,7 +14,7 @@ import java.time.Duration;
 public class DatabaseProperties {
 
     /**
-     * Indicates whether the broker service is enabled.
+     * Indicates whether the database service is enabled.
      * <p>
      * When enabled, all registered consumers and producers will be started.
      */

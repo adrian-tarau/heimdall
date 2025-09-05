@@ -118,6 +118,7 @@ public class AgentServer implements InitializingBean {
         bootCounterFile = new File(snmpDirectory, "boot_counter.cfg");
         agentConfigFile = new File(snmpDirectory, "agent_config.cfg");
         try {
+            IOUtils.initializeFile(agentConfigFile);
             IOUtils.initializeFile(bootCounterFile);
         } catch (IOException e) {
             LOGGER.warn("Failed to initialize SNMP configuration files, root cause: {}", getRootCauseMessage(e));
