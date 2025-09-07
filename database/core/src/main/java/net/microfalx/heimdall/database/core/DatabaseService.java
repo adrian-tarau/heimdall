@@ -1,10 +1,9 @@
 package net.microfalx.heimdall.database.core;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import net.microfalx.bootstrap.jdbc.support.*;
 import net.microfalx.bootstrap.jdbc.support.Snapshot;
 import net.microfalx.bootstrap.resource.ResourceService;
+import net.microfalx.jdbcpool.ConnectionPool;
 import net.microfalx.lang.ObjectUtils;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.resource.MemoryResource;
@@ -36,14 +35,14 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.time.Duration.ofMillis;
 import static java.time.Duration.ofMinutes;
-import static net.microfalx.bootstrap.jdbc.support.DatabaseUtils.AVAILABILITY_INTERVAL;
-import static net.microfalx.bootstrap.jdbc.support.DatabaseUtils.CONNECT_TIMEOUT;
 import static net.microfalx.heimdall.database.core.Statement.getStatementId;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
 import static net.microfalx.lang.StringUtils.toIdentifier;
 import static net.microfalx.lang.TimeUtils.FIVE_MINUTE;
+import static net.microfalx.lang.TimeUtils.FIVE_SECONDS;
 
 @Service("heimdallDatabaseService")
 public class DatabaseService implements InitializingBean {
@@ -356,18 +355,11 @@ public class DatabaseService implements InitializingBean {
     }
 
     private DataSource create(String id, String name, String url, String userName, String password) {
-        HikariConfig config = new HikariConfig();
-        config.setJdbcUrl(url);
-        config.setUsername(userName);
-        config.setPassword(password);
-        config.setMinimumIdle(0);
-        config.setMaximumPoolSize(10);
-        config.setConnectionTimeout(CONNECT_TIMEOUT.toMillis());
-        config.setIdleTimeout(AVAILABILITY_INTERVAL.multipliedBy(2).toMillis());
-        config.setIdleTimeout(FIVE_MINUTE);
-        config.setInitializationFailTimeout(-1);
-        HikariDataSource hikariDataSource = new HikariDataSource(config);
-        return DataSource.create(id, name, hikariDataSource).withUri(URI.create(url))
+        ConnectionPool connectionPool = (ConnectionPool) ConnectionPool.create().uri(url)
+                .userName(userName).password(password)
+                .inactiveTimeout(ofMillis(FIVE_MINUTE)).connectionTimeout(ofMillis(FIVE_SECONDS))
+                .maximum(10).id(id).name(name).build();
+        return DataSource.create(id, name, connectionPool.getDataSource()).withUri(URI.create(url))
                 .withUserName(userName)
                 .withPassword(password);
     }
