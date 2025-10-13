@@ -487,11 +487,11 @@ public class RestServiceImpl implements RestService, InitializingBean {
     private void initProjectResources() {
         Resource persisted = resourceService.getPersisted("rest");
         projectResource = persisted.resolve("project", Resource.Type.DIRECTORY);
-        LOGGER.info("Rest projects are stored in: {}", projectResource);
+        LOGGER.info("Rest projects are stored in: {}", projectResource.toURI());
         simulatorResource = persisted.resolve("project", Resource.Type.DIRECTORY);
-        LOGGER.info("Rest simulators are stored in: {}", simulatorResource);
+        LOGGER.info("Rest simulators are stored in: {}", simulatorResource.toURI());
         simulationsResource = persisted.resolve("project", Resource.Type.DIRECTORY);
-        LOGGER.info("Rest simulations are stored in: {}", simulationsResource);
+        LOGGER.info("Rest simulations are stored in: {}", simulationsResource.toURI());
     }
 
     private Simulator createSimulator(Simulation simulation) {
