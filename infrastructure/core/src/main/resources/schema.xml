@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<schema xmlns="https://net.microfalx/xsd/schema-1.0.xsd" id="infrastructure" name="Infrastructure">
+    <definition name="DNS" type="mysql" path="01_infrastructure_dns.sql">
+        <table>infrastructure_dns</table>
+    </definition>
+    <definition name="Cluster" type="mysql" path="02_infrastructure_cluster.sql">
+        <table>infrastructure_cluster</table>
+    </definition>
+    <definition name="Service" type="mysql" path="03_infrastructure_service.sql">
+        <table>infrastructure_service</table>
+    </definition>
+    <definition name="Server" type="mysql" path="04_infrastructure_server.sql">
+        <table>infrastructure_server</table>
+        <table>infrastructure_server_to_service</table>
+    </definition>
+    <definition name="Environment" type="mysql" path="03_infrastructure_environment.sql">
+        <table>infrastructure_environment</table>
+        <table>infrastructure_environment_to_cluster</table>
+        <table>infrastructure_environment_to_server</table>
+    </definition>
+</schema>

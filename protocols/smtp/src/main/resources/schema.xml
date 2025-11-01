@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<schema xmlns="https://net.microfalx/xsd/schema-1.0.xsd" id="protocol_smtp" name="Protocol SMTP">
+    <depends-on>protocol</depends-on>
+    <definition name="Events" type="mysql" path="01_protocol_smtp_events.sql">
+        <table>protocol_smtp_events</table>
+    </definition>
+    <definition name="Attachments" type="mysql" path="02_protocol_smtp_attachments.sql">
+        <table>protocol_smtp_attachments</table>
+    </definition>
+</schema>

@@ -1,0 +1,26 @@
+create table infrastructure_service
+(
+    id                 integer                                   not null auto_increment primary key,
+    natural_id         varchar(500)                              not null,
+    name               varchar(100)                              not null,
+    `type`             ENUM ('ICMP', 'HTTP','SSH', 'TCP','UDP')  not null,
+    port               integer                                   not null,
+    path               varchar(500)                              null,
+    liveness_path      varchar(500)                              null,
+    readiness_path     varchar(500)                              null,
+    metrics_path       varchar(500)                              null,
+    auth_type          ENUM ('NONE', 'BASIC','BEARER','API_KEY') not null,
+    username           varchar(100),
+    password           varchar(100),
+    token              varchar(5000),
+    tags               varchar(500),
+    tls                boolean default false                     not null,
+    discoverable       boolean default false                     not null,
+    connection_timeout int     default 5000                      not null,
+    read_timeout       int     default 5000                      not null,
+    write_timeout      int     default 5000                      not null,
+    created_at         datetime                                  not null,
+    modified_at        datetime,
+    description        varchar(1000),
+    constraint nk$infrastructure_service$natural_id unique key (natural_id)
+) ENGINE = InnoDB;
