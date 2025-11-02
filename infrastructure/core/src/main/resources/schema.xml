@@ -13,7 +13,7 @@
         <table>infrastructure_server</table>
         <table>infrastructure_server_to_service</table>
     </definition>
-    <definition name="Environment" type="mysql" path="03_infrastructure_environment.sql">
+    <definition name="Environment" type="mysql" path="05_infrastructure_environment.sql">
         <table>infrastructure_environment</table>
         <table>infrastructure_environment_to_cluster</table>
         <table>infrastructure_environment_to_server</table>
