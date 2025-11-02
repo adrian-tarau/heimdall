@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<schema xmlns="https://net.microfalx/xsd/schema-1.0.xsd" id="rest" name="Rest" order="0">
+    <depends-on>infrastructure</depends-on>
+    <definition name="Project" type="mysql" path="01_rest_project.sql">
+        <table>rest_project</table>
+    </definition>
+    <definition name="Library" type="mysql" path="02_rest_library.sql">
+        <table>rest_library</table>
+        <table>rest_library_history</table>
+    </definition>
+    <definition name="Simulation" type="mysql" path="03_rest_simulation.sql">
+        <table>rest_simulation</table>
+        <table>rest_simulation_history</table>
+    </definition>
+    <definition name="Scenario" type="mysql" path="04_rest_scenario.sql">
+        <table>rest_scenario</table>
+    </definition>
+    <definition name="Step" type="mysql" path="05_rest_step.sql">
+        <table>rest_step</table>
+    </definition>
+    <definition name="Schedule" type="mysql" path="06_rest_schedule.sql">
+        <table>rest_schedule</table>
+    </definition>
+    <definition name="Result" type="mysql" path="07_rest_result.sql">
+        <table>rest_result</table>
+        <table>rest_output</table>
+    </definition>
+</schema>

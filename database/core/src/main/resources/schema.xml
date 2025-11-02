@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<schema xmlns="https://net.microfalx/xsd/schema-1.0.xsd" id="database" name="Database" order="0">
+    <definition name="Schemas" type="mysql" path="01_database_schemas.sql">
+        <table>database_schemas</table>
+    </definition>
+    <definition name="Users" type="mysql" path="02_database_users.sql">
+        <table>database_users</table>
+    </definition>
+    <definition name="Statements" type="mysql" path="03_database_statements.sql">
+        <table>database_statements</table>
+    </definition>
+    <definition name="Snapshots" type="mysql" path="04_database_snapshots.sql">
+        <table>database_snapshots</table>
+    </definition>
+</schema>

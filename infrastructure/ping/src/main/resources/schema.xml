@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<schema xmlns="https://net.microfalx/xsd/schema-1.0.xsd" id="infrastructure_ping" name="Infrastructure Ping">
+    <depends-on>infrastructure</depends-on>
+    <definition name="Ping" type="mysql" path="01_infrastructure_ping.sql">
+        <table>infrastructure_ping</table>
+        <table>infrastructure_ping_result</table>
+    </definition>
+</schema>
