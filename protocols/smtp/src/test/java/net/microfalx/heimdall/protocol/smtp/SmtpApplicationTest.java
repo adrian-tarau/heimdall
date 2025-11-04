@@ -1,5 +1,7 @@
 package net.microfalx.heimdall.protocol.smtp;
 
+import net.microfalx.bootstrap.mail.MailProperties;
+import net.microfalx.bootstrap.mail.MailService;
 import net.microfalx.bootstrap.test.AbstractBootstrapApplicationTestCase;
 import net.microfalx.bootstrap.test.annotation.DisableJpa;
 import net.microfalx.heimdall.protocol.core.ProtocolProperties;
@@ -16,8 +18,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @TestPropertySource(properties = "heimdall.protocol.simulator.enabled=true")
-@ContextConfiguration(classes = {ProtocolProperties.class, ProtocolSimulatorProperties.class, SmtpProperties.class, SmtpGatewayProperties.class,
-        SmtpGateway.class, SmtpSimulator.class, SmtpServer.class, SmtpService.class})
+@ContextConfiguration(classes = {ProtocolProperties.class, ProtocolSimulatorProperties.class, SmtpProperties.class,
+        MailProperties.class, MailService.class, SmtpSimulator.class, SmtpServer.class, SmtpService.class})
 @DisableJpa
 public class SmtpApplicationTest extends AbstractBootstrapApplicationTestCase {
 

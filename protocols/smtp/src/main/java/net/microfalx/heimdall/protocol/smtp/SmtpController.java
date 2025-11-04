@@ -6,6 +6,7 @@ import net.microfalx.bootstrap.content.ContentService;
 import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
+import net.microfalx.bootstrap.mail.MailService;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.web.util.JsonResponse;
 import net.microfalx.heimdall.protocol.core.Part;
@@ -13,7 +14,6 @@ import net.microfalx.heimdall.protocol.core.ProtocolController;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpAttachment;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpEventRepository;
-import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.MimeType;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceFactory;
@@ -52,7 +52,7 @@ public class SmtpController extends ProtocolController<SmtpEvent> {
     private SmtpService smtpService;
 
     @Autowired
-    private SmtpGateway smtpGateway;
+    private MailService mailService;
 
     @Override
     protected void updateModel(net.microfalx.bootstrap.dataset.DataSet<SmtpEvent, Field<SmtpEvent>, Integer> dataSet, Model controllerModel, SmtpEvent dataSetModel, State state) {
@@ -90,7 +90,7 @@ public class SmtpController extends ProtocolController<SmtpEvent> {
         net.microfalx.heimdall.protocol.core.jpa.Part message = event.getMessage();
         Resource resource = ResourceFactory.resolve(message.getResource()).withMimeType(message.getMimeType());
         try {
-            smtpGateway.send(resource);
+            mailService.send(resource);
             return JsonResponse.success("Email successfully forwarded to recipients");
         } catch (Exception e) {
             LOGGER.warn("Failed to forward email with ID {}, root cause: {}", id, getRootCauseMessage(e));

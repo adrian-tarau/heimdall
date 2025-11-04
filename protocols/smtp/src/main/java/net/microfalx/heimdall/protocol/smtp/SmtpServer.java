@@ -5,6 +5,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.Multipart;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
+import net.microfalx.bootstrap.mail.MailService;
 import net.microfalx.heimdall.protocol.core.*;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.metrics.Metrics;
@@ -14,6 +15,7 @@ import net.microfalx.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.subethamail.smtp.MessageContext;
 import org.subethamail.smtp.RejectException;
@@ -45,17 +47,17 @@ public class SmtpServer implements InitializingBean, BasicMessageListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(SmtpServer.class);
 
     private final SmtpProperties properties;
-    private final SmtpGateway gateway;
+    private final MailService mailService;
 
     private final Metrics metrics = ProtocolUtils.getMetrics(Event.Type.SMTP).withGroup("Event");
 
     private final Collection<Consumer<SmtpEvent>> consumers = new ArrayList<>();
 
-    public SmtpServer(SmtpProperties properties, SmtpGateway gateway) {
+    public SmtpServer(SmtpProperties properties, MailService mailService) {
         requireNonNull(properties);
-        requireNonNull(gateway);
+        requireNonNull(mailService);
         this.properties = properties;
-        this.gateway = gateway;
+        this.mailService = mailService;
     }
 
     public void addConsumer(Consumer<SmtpEvent> consumer) {
@@ -82,7 +84,7 @@ public class SmtpServer implements InitializingBean, BasicMessageListener {
 
     public SmtpEvent createEvent(Resource resource) throws MessagingException, IOException {
         requireNonNull(resource);
-        MimeMessage message = new MimeMessage(gateway.getSession(), resource.getInputStream());
+        MimeMessage message = new MimeMessage(mailService.getSession(), resource.getInputStream());
         if (isMimeMessageValid(message)) {
             return createEvent(message, resource);
         } else {

@@ -1,5 +1,7 @@
 package net.microfalx.heimdall.protocol.smtp.simulator;
 
+import net.microfalx.bootstrap.mail.MailProperties;
+import net.microfalx.bootstrap.mail.MailService;
 import net.microfalx.heimdall.protocol.core.Address;
 import net.microfalx.heimdall.protocol.core.simulator.ProtocolSimulatorProperties;
 import net.microfalx.heimdall.protocol.smtp.*;
@@ -18,22 +20,30 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class SmtpSimulatorTest {
 
-    @Mock private SmtpClient client;
-    @Mock private Address sourceAddress;
-    @Mock private Address targetAddress;
-    @Mock private SmtpService service;
+    @Mock
+    private SmtpClient client;
+    @Mock
+    private Address sourceAddress;
+    @Mock
+    private Address targetAddress;
+    @Mock
+    private SmtpService service;
+    @Mock
+    private MailService mailService;
 
-    @Spy private ProtocolSimulatorProperties simulatorProperties = new ProtocolSimulatorProperties();
-    @Spy private SmtpProperties smtpProperties = new SmtpProperties();
-    @Spy private SmtpGatewayProperties gatewayProperties = new SmtpGatewayProperties();
+    @Spy
+    private ProtocolSimulatorProperties simulatorProperties = new ProtocolSimulatorProperties();
+    @Spy
+    private SmtpProperties smtpProperties = new SmtpProperties();
+    @Spy
+    private MailProperties mailProperties = new MailProperties();
 
     private SmtpSimulator simulator;
 
     @BeforeEach
     void setup() throws Exception {
         simulatorProperties.setEnabled(true);
-        SmtpGateway gateway = new SmtpGateway(gatewayProperties);
-        SmtpServer server = new SmtpServer(smtpProperties, gateway);
+        SmtpServer server = new SmtpServer(smtpProperties, mailService);
         simulator = new SmtpSimulator(simulatorProperties, smtpProperties, server);
     }
 

@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.protocol.smtp;
 
+import net.microfalx.bootstrap.mail.MailService;
 import net.microfalx.heimdall.protocol.core.Body;
 import net.microfalx.heimdall.protocol.core.Event;
 import net.microfalx.heimdall.protocol.core.Part;
@@ -22,7 +23,7 @@ public final class SmtpService extends ProtocolService<SmtpEvent, net.microfalx.
     private SmtpProperties properties;
 
     @Autowired
-    private SmtpGateway gateway;
+    private MailService mailService;
 
     @Autowired
     private SmtpEventRepository repository;
