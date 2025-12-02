@@ -12,6 +12,7 @@ import net.microfalx.lang.StringUtils;
 import net.microfalx.resource.MimeType;
 
 import java.io.IOException;
+import java.time.ZonedDateTime;
 
 import static net.microfalx.heimdall.protocol.core.Address.create;
 
@@ -21,9 +22,13 @@ public class SyslogMapper extends AbstractRestApiMapper<SyslogEvent, SyslogDTO> 
     protected SyslogDTO doToDto(SyslogEvent syslogEvent) {
         SyslogDTO syslogDTO = new SyslogDTO();
         syslogDTO.setId(syslogEvent.getId());
-        syslogDTO.setFacility(syslogDTO.getFacility());
-        syslogDTO.setAddress(create(syslogEvent.getAddress().getType(), syslogEvent.getAddress().getValue(), syslogEvent.getAddress().getName()));
+        syslogDTO.setName(syslogEvent.getMessage().getName());
+        syslogDTO.setFacility(syslogEvent.getFacility());
+        syslogDTO.setSeverity(syslogEvent.getSeverity());
+        syslogDTO.setSource(create(syslogEvent.getAddress().getType(), syslogEvent.getAddress().getValue(), syslogEvent.getAddress().getName()));
         syslogDTO.setMessage(Body.create(syslogEvent.getMessage().getResource()));
+        syslogDTO.setReceivedAt(syslogEvent.getReceivedAt());
+        syslogDTO.setSentAt(syslogEvent.getSentAt());
         return syslogDTO;
     }
 
@@ -34,11 +39,11 @@ public class SyslogMapper extends AbstractRestApiMapper<SyslogEvent, SyslogDTO> 
             syslogEvent.setId(syslogDTO.getId());
 
             Address address = new Address();
-            address.setValue(syslogDTO.getAddress().getValue());
+            address.setValue(syslogDTO.getSource().getValue());
             address.setId((int) syslogDTO.getId());
             address.setDescription(StringUtils.EMPTY_STRING);
-            address.setName(syslogDTO.getAddress().getName());
-            address.setType(syslogDTO.getAddress().getType());
+            address.setName(syslogDTO.getSource().getName());
+            address.setType(syslogDTO.getSource().getType());
             syslogEvent.setAddress(address);
 
             syslogEvent.setFacility(syslogDTO.getFacility());
