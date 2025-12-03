@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <navigations xmlns="https://net.microfalx/xsd/navigation-1.0.xsd">
     <menu id="primary">
-        <menu id="brokers" text="Brokers" position="20" icon="fa-regular fa-message">
+        <menu id="brokers" text="Brokers" position="25" icon="fa-regular fa-message">
             <item id="session" text="Sessions" action="/broker/session" icon="fa-solid fa-timeline"/>
             <item id="event" text="Events" action="/broker/event" icon="fa-solid fa-envelope-open"/>
             <item id="consumer" text="Consumers" action="/system/broker/consumer" icon="fa-solid fa-arrow-right-to-bracket"/>
