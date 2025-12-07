@@ -31,6 +31,6 @@ public class GelfDTO {
     private String logger;
     private String thread;
     private LocalDateTime receivedAt;
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private final LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime sentAt;
 }

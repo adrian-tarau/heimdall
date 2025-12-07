@@ -27,6 +27,6 @@ public class SyslogDTO{
     private com.cloudbees.syslog.Severity severity = Severity.INFORMATIONAL;
     private Part message;
     private LocalDateTime receivedAt;
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private final LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime sentAt;
 }
