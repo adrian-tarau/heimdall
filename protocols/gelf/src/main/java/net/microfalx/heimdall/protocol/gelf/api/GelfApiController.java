@@ -1,4 +1,4 @@
-package net.microfalx.heimdall.protocol.syslog.api;
+package net.microfalx.heimdall.protocol.gelf.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -9,21 +9,20 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.restapi.RestApiDataSetController;
 import net.microfalx.bootstrap.restapi.RestApiMapper;
-import net.microfalx.heimdall.protocol.syslog.jpa.SyslogEvent;
+import net.microfalx.heimdall.protocol.gelf.GelfEvent;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/syslogs")
-@DataSet(model = SyslogEvent.class, timeFilter = false)
-@Tag(name = "Syslogs", description = "Syslog Management API")
-public class SyslogApiController extends RestApiDataSetController<SyslogEvent, SyslogDTO, Long> {
-
-    @Operation(summary = "List syslog events", description = "Returns a list of syslog events with search and paging.")
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SyslogDTO.class)))
+@RequestMapping("/api/v1/gelfs")
+@DataSet(model = GelfEvent.class, timeFilter = false)
+@Tag(name = "Gelfs", description = "Gelf Management API")
+public class GelfApiController extends RestApiDataSetController<net.microfalx.heimdall.protocol.gelf.jpa.GelfEvent, GelfDTO, Long> {
+    @Operation(summary = "List gelf events", description = "Returns a list of gelf events with search and paging.")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GelfDTO.class)))
     @GetMapping
-    public List<SyslogDTO> list(
+    public List<GelfDTO> list(
             @Parameter(description = "The query used to filter by various model fields", name = "query", example = "username")
             @RequestParam(name = "query", required = false) String query,
 
@@ -39,15 +38,16 @@ public class SyslogApiController extends RestApiDataSetController<SyslogEvent, S
         return doList(null, query, sort, page, pageSize);
     }
 
-    @Operation(summary = "Get syslog event", description = "Returns a single syslog event by its unique identifier.")
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SyslogDTO.class)))
+    @Operation(summary = "Get gelf event", description = "Returns a single gelf event by its unique identifier.")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GelfDTO.class)))
     @GetMapping("/{id}")
-    public SyslogDTO get(@Parameter(description = "The syslog event identifier", example = "42") @PathVariable Long id) {
+    public GelfDTO get(@Parameter(description = "The user identifier", example = "42") @PathVariable Long id) {
         return doFind(id);
     }
 
+
     @Override
-    protected Class<? extends RestApiMapper<SyslogEvent, SyslogDTO>> getMapperClass() {
-        return SyslogMapper.class;
+    protected Class<? extends RestApiMapper<net.microfalx.heimdall.protocol.gelf.jpa.GelfEvent, GelfDTO>> getMapperClass() {
+        return GelfMapper.class;
     }
 }
