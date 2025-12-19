@@ -7,10 +7,13 @@ import net.microfalx.heimdall.protocol.core.Body;
 import net.microfalx.heimdall.protocol.core.jpa.Part;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpAttachment;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent;
+import net.microfalx.lang.StringUtils;
 import net.microfalx.resource.MimeType;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -22,8 +25,18 @@ class SmtpAttachmentMapperTest {
     private final RestApiMapper<SmtpAttachment, SmtpAttachmentDTO> smtpAttachmentMapper = new SmtpAttachmentMapper();
 
     @Test
-    void doToDto() {
-
+    void doToDto() throws IOException {
+        SmtpAttachment smtpAttachment = new SmtpAttachment();
+        smtpAttachment.setId(1L);
+        Part part = createAttachment();
+        smtpAttachment.setPart(part);
+        smtpAttachment.setSmtpEvent(null);
+        SmtpAttachmentDTO smtpAttachmentDTO = smtpAttachmentMapper.toDto(smtpAttachment);
+        assertEquals(smtpAttachment.getId(), smtpAttachmentDTO.getId());
+        assertEquals(smtpAttachment.getPart().getResource(), smtpAttachmentDTO.getAttachment().getResource().loadAsString());
+        assertEquals(smtpAttachment.getPart().getLength(), smtpAttachmentDTO.getAttachment().getResource().length());
+        assertEquals(smtpAttachment.getPart().getType(), smtpAttachmentDTO.getAttachment().getType());
+        assertEquals(smtpAttachment.getPart().getMimeType(), MimeType.get(smtpAttachmentDTO.getAttachment().getMimeType()));
     }
 
     @Test
@@ -53,5 +66,18 @@ class SmtpAttachmentMapperTest {
         assertEquals((int) smtpAttachmentDTO.getId(), part.getId());
         assertEquals(smtpAttachmentDTO.getSmtpDTO().getCreatedAt(), part.getCreatedAt());
         assertNotNull(smtpAttachment.getSmtpEvent());
+    }
+
+    private Part createAttachment() {
+        Part part = new Part();
+        part.setResource(URI.create(StringUtils.EMPTY_STRING).toString());
+        part.setLength(part.getResource().length());
+        part.setName("test attachment");
+        part.setType(net.microfalx.heimdall.protocol.core.Part.Type.ATTACHMENT);
+        part.setMimeType(MimeType.TEXT_PLAIN);
+        part.setFileName("attachment.txt");
+        part.setId(1);
+        part.setCreatedAt(LocalDateTime.now());
+        return part;
     }
 }
