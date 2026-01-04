@@ -8,14 +8,13 @@
             <item id="running" text="Running" action="/rest/simulation/running" icon="fa-solid fa-gears"/>
             <item id="history" text="History" action="/rest/simulation/result" icon="fa-solid fa-vial-circle-check"/>
         </menu>
-        <menu id="rest_admin" text="REST API" position="100" parent="system" action="/system/rest"
-              roles="admin" icon="fa-solid fa-plug">
-            <item id="project" text="Projects" action="/system/rest/project" icon="fa-solid fa-diagram-project"/>
-            <item id="simulation" text="Simulations" action="/system/rest/simulation" icon="fa-solid fa-vials"/>
-            <item id="scenario" text="Scenarios" action="/system/rest/scenario" icon="fa-solid fa-vials"/>
-            <item id="library" text="Libraries" action="/system/rest/library" icon="fa-solid fa-book"/>
-            <item id="schedule" text="Schedules" action="/system/rest/schedule" icon="fa-solid fa-clock"/>
-            <item id="result" text="Results" action="/system/rest/result" icon="fa-solid fa-square-poll-vertical"/>
-        </menu>
+
+        <item id="project" text="Projects" parent="rest_admin" action="/system/rest/project" icon="fa-solid fa-diagram-project"/>
+        <item id="simulation" text="Simulations" parent="rest_admin" action="/system/rest/simulation" icon="fa-solid fa-vials"/>
+        <item id="scenario" text="Scenarios" parent="rest_admin" action="/system/rest/scenario" icon="fa-solid fa-vials"/>
+        <item id="library" text="Libraries" parent="rest_admin" action="/system/rest/library" icon="fa-solid fa-book"/>
+        <item id="schedule" text="Schedules" parent="rest_admin" action="/system/rest/schedule" icon="fa-solid fa-clock"/>
+        <item id="result" text="Results" parent="rest_admin" action="/system/rest/result" icon="fa-solid fa-square-poll-vertical"/>
+
     </menu>
 </navigations>
