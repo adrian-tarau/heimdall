@@ -2,12 +2,12 @@ package net.microfalx.heimdall.rest.core.overview;
 
 import net.microfalx.bootstrap.content.ContentService;
 import net.microfalx.bootstrap.dataset.DataSetNotFoundException;
+import net.microfalx.bootstrap.dataset.DataSetService;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.web.dataset.DataSetController;
 import net.microfalx.heimdall.rest.api.RestService;
 import net.microfalx.heimdall.rest.api.Simulator;
 import net.microfalx.heimdall.rest.core.common.SimulationControllerHelper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,11 +21,14 @@ import java.io.IOException;
 @DataSet(model = SimulationRunning.class, timeFilter = false)
 public class SimulationRunningController extends DataSetController<SimulationRunning, String> {
 
-    @Autowired
-    protected RestService restService;
+    protected final RestService restService;
+    protected final ContentService contentService;
 
-    @Autowired
-    protected ContentService contentService;
+    public SimulationRunningController(DataSetService dataSetService, RestService restService, ContentService contentService) {
+        super(dataSetService);
+        this.restService = restService;
+        this.contentService = contentService;
+    }
 
     @GetMapping("/log/{id}")
     public String viewLog(@PathVariable("id") String id, Model model) throws IOException {

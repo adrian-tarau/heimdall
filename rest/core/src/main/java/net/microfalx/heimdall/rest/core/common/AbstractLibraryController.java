@@ -3,6 +3,7 @@ package net.microfalx.heimdall.rest.core.common;
 import net.microfalx.bootstrap.content.ContentService;
 import net.microfalx.bootstrap.dataset.DataSet;
 import net.microfalx.bootstrap.dataset.DataSetException;
+import net.microfalx.bootstrap.dataset.DataSetService;
 import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.web.component.Item;
@@ -17,7 +18,6 @@ import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -36,14 +36,16 @@ import static net.microfalx.lang.ArgumentUtils.requireNonNull;
  */
 public abstract class AbstractLibraryController<T extends AbstractLibrary> extends DataSetController<T, Integer> {
 
-    @Autowired
-    protected RestService restService;
+    protected final RestService restService;
+    protected final ContentService contentService;
+    private final TaskExecutor executor;
 
-    @Autowired
-    protected ContentService contentService;
-
-    @Autowired
-    private TaskExecutor executor;
+    public AbstractLibraryController(DataSetService dataSetService, RestService restService, ContentService contentService, TaskExecutor executor) {
+        super(dataSetService);
+        this.restService = restService;
+        this.contentService = contentService;
+        this.executor = executor;
+    }
 
     /**
      * Returns a library by its identifier.

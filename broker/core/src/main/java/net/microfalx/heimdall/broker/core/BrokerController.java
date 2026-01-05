@@ -1,11 +1,11 @@
 package net.microfalx.heimdall.broker.core;
 
+import net.microfalx.bootstrap.dataset.DataSetService;
 import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.web.dataset.SystemDataSetController;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,14 +21,14 @@ import java.util.Properties;
 @Help("system/broker/manage")
 public class BrokerController extends SystemDataSetController<Broker, Integer> {
 
-    @Autowired
-    private BrokerRepository brokerRepository;
+    private final BrokerService brokerService;
+    private final TaskExecutor taskExecutor;
 
-    @Autowired
-    private BrokerService brokerService;
-
-    @Autowired
-    private TaskExecutor taskExecutor;
+    public BrokerController(DataSetService dataSetService, BrokerService brokerService, TaskExecutor taskExecutor) {
+        super(dataSetService);
+        this.brokerService = brokerService;
+        this.taskExecutor = taskExecutor;
+    }
 
     @Override
     protected void afterPersist(net.microfalx.bootstrap.dataset.DataSet<Broker, Field<Broker>, Integer> dataSet, Broker model, State state) {

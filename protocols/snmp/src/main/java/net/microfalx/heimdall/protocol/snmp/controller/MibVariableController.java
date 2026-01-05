@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.protocol.snmp.controller;
 
+import net.microfalx.bootstrap.dataset.DataSetService;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.web.dataset.SystemDataSetController;
@@ -12,4 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @DataSet(model = MibVariable.class)
 @Help("protocol/snmp/variable")
 public class MibVariableController extends SystemDataSetController<MibVariable, String> {
+
+    public MibVariableController(DataSetService dataSetService) {
+        super(dataSetService);
+    }
 }

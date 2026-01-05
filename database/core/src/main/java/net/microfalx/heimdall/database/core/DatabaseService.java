@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.database.core;
 
+import net.microfalx.bootstrap.core.async.ThreadPoolFactory;
 import net.microfalx.bootstrap.jdbc.support.*;
 import net.microfalx.bootstrap.jdbc.support.Snapshot;
 import net.microfalx.bootstrap.resource.ResourceService;
@@ -10,6 +11,7 @@ import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceFactory;
 import net.microfalx.resource.rocksdb.RocksDbResource;
+import net.microfalx.threadpool.ThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -84,6 +86,8 @@ public class DatabaseService implements InitializingBean {
     @Autowired
     private TaskScheduler taskScheduler;
 
+    private ThreadPool threadPool;
+
     private final Map<String, Schema> schemaCache = new ConcurrentHashMap<>();
     private final Map<Integer, String> schemaIdCache = new ConcurrentHashMap<>();
     private final Map<String, User> userCache = new ConcurrentHashMap<>();
@@ -91,6 +95,10 @@ public class DatabaseService implements InitializingBean {
     private Resource snapshotsResource;
     private Resource statementsResource;
     private volatile LocalDateTime statementCollectionThreshold = LocalDateTime.now().minusMinutes(1);
+
+    ThreadPool getThreadPool() {
+        return threadPool;
+    }
 
     DatabaseProperties getProperties() {
         return properties;
@@ -271,6 +279,7 @@ public class DatabaseService implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        initThreadPools();
         reload();
         scheduleTasks();
         initResources();
@@ -297,6 +306,10 @@ public class DatabaseService implements InitializingBean {
         for (Schema schema : schemaRepository.findAll()) {
             reload(schema);
         }
+    }
+
+    private void initThreadPools() {
+        threadPool = ThreadPoolFactory.create("Database").create();
     }
 
     private void scheduleTasks() {

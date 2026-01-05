@@ -1,16 +1,19 @@
 package net.microfalx.heimdall.rest.core.system;
 
 import net.microfalx.bootstrap.content.Content;
+import net.microfalx.bootstrap.content.ContentService;
+import net.microfalx.bootstrap.dataset.DataSetService;
 import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.heimdall.rest.api.Library;
 import net.microfalx.heimdall.rest.api.Project;
+import net.microfalx.heimdall.rest.api.RestService;
 import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.heimdall.rest.core.common.AbstractLibraryController;
 import net.microfalx.resource.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,11 +31,14 @@ import static net.microfalx.lang.ExceptionUtils.rethrowException;
 @Help("rest/system/library")
 public class RestLibraryController extends AbstractLibraryController<RestLibrary> {
 
-    @Autowired
-    private RestLibraryRepository repository;
+    private final RestLibraryRepository repository;
+    private final RestLibraryHistoryRepository restLibraryHistoryRepository;
 
-    @Autowired
-    private RestLibraryHistoryRepository restLibraryHistoryRepository;
+    public RestLibraryController(DataSetService dataSetService, RestService restService, ContentService contentService, TaskExecutor executor, RestLibraryRepository repository, RestLibraryHistoryRepository restLibraryHistoryRepository) {
+        super(dataSetService, restService, contentService, executor);
+        this.repository = repository;
+        this.restLibraryHistoryRepository = restLibraryHistoryRepository;
+    }
 
     @Override
     protected RestLibrary getLibrary(int id) {

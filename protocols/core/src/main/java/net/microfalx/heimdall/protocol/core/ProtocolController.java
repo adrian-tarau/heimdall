@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.protocol.core;
 
+import net.microfalx.bootstrap.dataset.DataSetService;
 import net.microfalx.bootstrap.web.dataset.DataSetController;
 import net.microfalx.heimdall.protocol.core.jpa.Event;
 import net.microfalx.heimdall.protocol.core.jpa.PartRepository;
@@ -8,7 +9,6 @@ import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.NullResource;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,8 +27,12 @@ import java.util.Optional;
  */
 public abstract class ProtocolController<E extends Event> extends DataSetController<E, Integer> {
 
-    @Autowired
-    private PartRepository partRepository;
+    private final PartRepository partRepository;
+
+    public ProtocolController(DataSetService dataSetService, PartRepository partRepository) {
+        super(dataSetService);
+        this.partRepository = partRepository;
+    }
 
     @GetMapping(value = "part/{partId}/view")
     @ResponseBody()

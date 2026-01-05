@@ -1,14 +1,13 @@
 package net.microfalx.heimdall.rest.core.common;
 
 import net.microfalx.bootstrap.content.ContentService;
+import net.microfalx.bootstrap.dataset.DataSetService;
 import net.microfalx.bootstrap.web.dataset.DataSetController;
 import net.microfalx.bootstrap.web.util.CodeEditor;
 import net.microfalx.bootstrap.web.util.JsonResponse;
 import net.microfalx.heimdall.rest.api.RestService;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,14 +24,14 @@ import java.io.IOException;
  */
 public abstract class AbstractLibraryHistoryController<T extends AbstractLibraryHistory, L extends AbstractLibrary> extends DataSetController<T, Integer> {
 
-    @Autowired
-    protected RestService restService;
+    protected final RestService restService;
+    protected final ContentService contentService;
 
-    @Autowired
-    protected ContentService contentService;
-
-    @Autowired
-    private TaskExecutor executor;
+    public AbstractLibraryHistoryController(DataSetService dataSetService, RestService restService, ContentService contentService) {
+        super(dataSetService);
+        this.restService = restService;
+        this.contentService = contentService;
+    }
 
     /**
      * Returns a library by its identifier.

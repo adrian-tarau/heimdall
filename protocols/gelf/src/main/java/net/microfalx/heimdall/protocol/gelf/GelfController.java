@@ -1,14 +1,14 @@
 package net.microfalx.heimdall.protocol.gelf;
 
+import net.microfalx.bootstrap.dataset.DataSetService;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.model.Attribute;
 import net.microfalx.bootstrap.model.Attributes;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.heimdall.protocol.core.ProtocolController;
+import net.microfalx.heimdall.protocol.core.jpa.PartRepository;
 import net.microfalx.heimdall.protocol.gelf.jpa.GelfEvent;
-import net.microfalx.heimdall.protocol.gelf.jpa.GelfEventRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,11 +21,12 @@ import static net.microfalx.bootstrap.model.AttributeUtils.shouldDisplayAsBadge;
 @Help("protocol/gelf")
 public class GelfController extends ProtocolController<GelfEvent> {
 
-    @Autowired
-    private GelfEventRepository gelfRepository;
+    private final GelfService gelfService;
 
-    @Autowired
-    private GelfService gelfService;
+    public GelfController(DataSetService dataSetService, PartRepository partRepository, GelfService gelfService) {
+        super(dataSetService, partRepository);
+        this.gelfService = gelfService;
+    }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override

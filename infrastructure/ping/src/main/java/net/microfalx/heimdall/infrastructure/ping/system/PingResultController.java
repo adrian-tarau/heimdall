@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.infrastructure.ping.system;
 
+import net.microfalx.bootstrap.dataset.DataSetService;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.web.dataset.SystemDataSetController;
@@ -11,4 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @DataSet(model = PingResult.class)
 @Help("infrastructure/ping_result")
 public class PingResultController extends SystemDataSetController<PingResult, Integer> {
+
+    public PingResultController(DataSetService dataSetService) {
+        super(dataSetService);
+    }
 }

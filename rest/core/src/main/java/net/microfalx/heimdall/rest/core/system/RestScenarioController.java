@@ -1,12 +1,12 @@
 package net.microfalx.heimdall.rest.core.system;
 
+import net.microfalx.bootstrap.dataset.DataSetService;
 import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.web.dataset.DataSetController;
 import net.microfalx.heimdall.rest.api.RestService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -16,8 +16,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Help("rest/system/scenario")
 public class RestScenarioController extends DataSetController<RestScenario, Integer> {
 
-    @Autowired
-    private RestService restService;
+    private final RestService restService;
+
+    public RestScenarioController(DataSetService dataSetService, RestService restService) {
+        super(dataSetService);
+        this.restService = restService;
+    }
 
     @Override
     protected void afterPersist(net.microfalx.bootstrap.dataset.DataSet<RestScenario, Field<RestScenario>, Integer> dataSet, RestScenario model, State state) {

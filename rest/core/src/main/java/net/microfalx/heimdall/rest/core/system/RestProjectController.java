@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.rest.core.system;
 
+import net.microfalx.bootstrap.dataset.DataSetService;
 import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
@@ -13,7 +14,6 @@ import net.microfalx.heimdall.rest.api.Project;
 import net.microfalx.heimdall.rest.api.RestService;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.threadpool.ThreadPool;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,11 +30,14 @@ import static net.microfalx.lang.UriUtils.parseUri;
 @Help("rest/system/project")
 public class RestProjectController extends DataSetController<RestProject, Integer> {
 
-    @Autowired
-    private RestService restService;
+    private final RestService restService;
+    private final ThreadPool threadPool;
 
-    @Autowired
-    private ThreadPool threadPool;
+    public RestProjectController(DataSetService dataSetService, RestService restService, ThreadPool threadPool) {
+        super(dataSetService);
+        this.restService = restService;
+        this.threadPool = threadPool;
+    }
 
     @PostMapping("sync")
     @ResponseBody

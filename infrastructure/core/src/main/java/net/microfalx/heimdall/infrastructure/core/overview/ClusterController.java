@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.infrastructure.core.overview;
 
+import net.microfalx.bootstrap.dataset.DataSetService;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.web.dataset.DataSetController;
@@ -11,4 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @DataSet(model = Cluster.class, timeFilter = false)
 @Help("infrastructure/cluster")
 public class ClusterController extends DataSetController<Cluster, String> {
+
+    public ClusterController(DataSetService dataSetService) {
+        super(dataSetService);
+    }
 }

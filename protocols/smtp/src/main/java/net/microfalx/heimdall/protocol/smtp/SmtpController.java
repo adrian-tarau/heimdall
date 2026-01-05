@@ -3,6 +3,7 @@ package net.microfalx.heimdall.protocol.smtp;
 import net.microfalx.bootstrap.content.Content;
 import net.microfalx.bootstrap.content.ContentLocator;
 import net.microfalx.bootstrap.content.ContentService;
+import net.microfalx.bootstrap.dataset.DataSetService;
 import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
@@ -11,6 +12,7 @@ import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.web.util.JsonResponse;
 import net.microfalx.heimdall.protocol.core.Part;
 import net.microfalx.heimdall.protocol.core.ProtocolController;
+import net.microfalx.heimdall.protocol.core.jpa.PartRepository;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpAttachment;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpEvent;
 import net.microfalx.heimdall.protocol.smtp.jpa.SmtpEventRepository;
@@ -19,7 +21,6 @@ import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,17 +43,16 @@ public class SmtpController extends ProtocolController<SmtpEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SmtpServer.class);
 
-    @Autowired
-    private SmtpEventRepository smtpRepository;
+    private final SmtpEventRepository smtpRepository;
+    private final ContentService contentService;
+    private final MailService mailService;
 
-    @Autowired
-    private ContentService contentService;
-
-    @Autowired
-    private SmtpService smtpService;
-
-    @Autowired
-    private MailService mailService;
+    public SmtpController(DataSetService dataSetService, PartRepository partRepository, SmtpEventRepository smtpRepository, ContentService contentService, MailService mailService) {
+        super(dataSetService, partRepository);
+        this.smtpRepository = smtpRepository;
+        this.contentService = contentService;
+        this.mailService = mailService;
+    }
 
     @Override
     protected void updateModel(net.microfalx.bootstrap.dataset.DataSet<SmtpEvent, Field<SmtpEvent>, Integer> dataSet, Model controllerModel, SmtpEvent dataSetModel, State state) {

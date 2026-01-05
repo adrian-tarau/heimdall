@@ -1,11 +1,10 @@
 package net.microfalx.heimdall.protocol.core;
 
+import net.microfalx.bootstrap.dataset.DataSetService;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.web.dataset.SystemDataSetController;
 import net.microfalx.heimdall.protocol.core.jpa.Address;
-import net.microfalx.heimdall.protocol.core.jpa.AddressRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Help("protocol/address")
 public class AddressController extends SystemDataSetController<Address, Integer> {
 
-    @Autowired
-    private AddressRepository addressRepository;
+    public AddressController(DataSetService dataSetService) {
+        super(dataSetService);
+    }
 }

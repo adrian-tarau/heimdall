@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.protocol.snmp.controller;
 
+import net.microfalx.bootstrap.dataset.DataSetService;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.model.Field;
@@ -16,6 +17,10 @@ import static net.microfalx.heimdall.protocol.snmp.controller.MibControllerUtili
 @DataSet(model = MibModule.class,viewTemplate = "snmp/module_view", viewClasses = "modal-xl")
 @Help("protocol/snmp/module")
 public class MibModuleController extends SystemDataSetController<MibModule, String> {
+
+    public MibModuleController(DataSetService dataSetService) {
+        super(dataSetService);
+    }
 
     @Override
     protected void beforeView(net.microfalx.bootstrap.dataset.DataSet<MibModule, Field<MibModule>, String> dataSet, Model controllerModel, MibModule module) {

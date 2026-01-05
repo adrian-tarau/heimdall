@@ -1,9 +1,9 @@
 package net.microfalx.heimdall.rest.core.common;
 
 import net.microfalx.bootstrap.content.ContentService;
+import net.microfalx.bootstrap.dataset.DataSetService;
 import net.microfalx.bootstrap.web.dataset.DataSetController;
 import net.microfalx.heimdall.rest.api.RestService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,11 +17,14 @@ import java.io.IOException;
  */
 public abstract class AbstractResultController<R extends AbstractResult> extends DataSetController<R, Long> {
 
-    @Autowired
-    protected RestService restService;
+    protected final RestService restService;
+    protected final ContentService contentService;
 
-    @Autowired
-    protected ContentService contentService;
+    public AbstractResultController(DataSetService dataSetService, RestService restService, ContentService contentService) {
+        super(dataSetService);
+        this.restService = restService;
+        this.contentService = contentService;
+    }
 
     @GetMapping("/log/{id}")
     public String viewLog(@PathVariable("id") int id, Model model) throws IOException {

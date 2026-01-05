@@ -1,6 +1,7 @@
 package net.microfalx.heimdall.rest.core.common;
 
 import lombok.extern.slf4j.Slf4j;
+import net.microfalx.bootstrap.dataset.DataSetService;
 import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.web.component.Item;
@@ -12,7 +13,6 @@ import net.microfalx.bootstrap.web.util.JsonResponse;
 import net.microfalx.heimdall.rest.api.RestService;
 import net.microfalx.heimdall.rest.api.Schedule;
 import net.microfalx.heimdall.rest.api.SimulationContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.support.CronTrigger;
@@ -37,11 +37,14 @@ import static net.microfalx.lang.TimeUtils.parseDuration;
 @Slf4j
 public abstract class AbstractScheduleController<T extends AbstractSchedule> extends DataSetController<T, Integer> {
 
-    @Autowired
-    protected RestService restService;
+    protected final RestService restService;
+    private final TaskExecutor executor;
 
-    @Autowired
-    private TaskExecutor executor;
+    public AbstractScheduleController(DataSetService dataSetService, RestService restService, TaskExecutor executor) {
+        super(dataSetService);
+        this.restService = restService;
+        this.executor = executor;
+    }
 
     @PostMapping("run/{id}")
     @ResponseBody

@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.rest.core.overview;
 
+import net.microfalx.bootstrap.dataset.DataSetService;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.web.dataset.DataSetController;
 import org.springframework.stereotype.Controller;
@@ -9,4 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @DataSet(model = Scenario.class, range = {"last week", "today"})
 @RequestMapping("/rest/scenario")
 public class ScenarioController extends DataSetController<Scenario,Integer> {
+
+    public ScenarioController(DataSetService dataSetService) {
+        super(dataSetService);
+    }
 }

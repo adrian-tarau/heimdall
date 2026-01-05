@@ -1,6 +1,8 @@
 package net.microfalx.heimdall.broker.core;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import net.microfalx.bootstrap.dataset.DataSetService;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.model.Field;
@@ -9,9 +11,6 @@ import net.microfalx.lang.ObjectUtils;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceFactory;
 import net.microfalx.resource.archive.ArchiveResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,12 +22,12 @@ import java.util.*;
 @RequestMapping("/broker/session")
 @DataSet(model = BrokerSession.class, viewTemplate = "broker/view_session", viewClasses = "modal-xl", defaultQuery = "status != 'Canceled'")
 @Help("/broker/session")
+@Slf4j
 public class BrokerSessionController extends DataSetController<BrokerSession, Integer> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BrokerSessionController.class);
-
-    @Autowired
-    private BrokerSessionRepository sessionRepository;
+    public BrokerSessionController(DataSetService dataSetService) {
+        super(dataSetService);
+    }
 
     @Override
     protected void beforeView(net.microfalx.bootstrap.dataset.DataSet<BrokerSession, Field<BrokerSession>, Integer> dataSet, Model controllerModel, BrokerSession dataSetModel) {

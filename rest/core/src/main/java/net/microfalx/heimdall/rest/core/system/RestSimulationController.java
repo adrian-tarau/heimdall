@@ -1,15 +1,18 @@
 package net.microfalx.heimdall.rest.core.system;
 
 import net.microfalx.bootstrap.content.Content;
+import net.microfalx.bootstrap.content.ContentService;
+import net.microfalx.bootstrap.dataset.DataSetService;
 import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.heimdall.rest.api.Project;
+import net.microfalx.heimdall.rest.api.RestService;
 import net.microfalx.heimdall.rest.api.Simulation;
 import net.microfalx.heimdall.rest.core.common.AbstractLibraryController;
 import net.microfalx.resource.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,11 +30,14 @@ import static net.microfalx.lang.ExceptionUtils.rethrowException;
 @Help("rest/system/simulation")
 public class RestSimulationController extends AbstractLibraryController<RestSimulation> {
 
-    @Autowired
-    private RestSimulationRepository repository;
+    private final RestSimulationRepository repository;
+    private final RestSimulationHistoryRepository restSimulationHistoryRepository;
 
-    @Autowired
-    private RestSimulationHistoryRepository restSimulationHistoryRepository;
+    public RestSimulationController(DataSetService dataSetService, RestService restService, ContentService contentService, TaskExecutor executor, RestSimulationRepository repository, RestSimulationHistoryRepository restSimulationHistoryRepository) {
+        super(dataSetService, restService, contentService, executor);
+        this.repository = repository;
+        this.restSimulationHistoryRepository = restSimulationHistoryRepository;
+    }
 
     @Override
     protected RestSimulation getLibrary(int id) {

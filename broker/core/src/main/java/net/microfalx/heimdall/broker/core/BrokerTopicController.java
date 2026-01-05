@@ -1,11 +1,11 @@
 package net.microfalx.heimdall.broker.core;
 
+import net.microfalx.bootstrap.dataset.DataSetService;
 import net.microfalx.bootstrap.dataset.State;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
 import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.web.dataset.SystemDataSetController;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,11 +16,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Help("system/broker/topic")
 public class BrokerTopicController extends SystemDataSetController<BrokerTopic, Integer> {
 
-    @Autowired
-    private BrokerTopicRepository topicRepository;
+    private final BrokerService brokerService;
 
-    @Autowired
-    private BrokerService brokerService;
+    public BrokerTopicController(DataSetService dataSetService, BrokerService brokerService) {
+        super(dataSetService);
+        this.brokerService = brokerService;
+    }
 
     @Override
     protected void updateFields(net.microfalx.bootstrap.dataset.DataSet<BrokerTopic, Field<BrokerTopic>, Integer> dataSet, BrokerTopic model, State state) {

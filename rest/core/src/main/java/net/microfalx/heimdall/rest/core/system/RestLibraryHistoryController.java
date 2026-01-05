@@ -1,8 +1,10 @@
 package net.microfalx.heimdall.rest.core.system;
 
+import net.microfalx.bootstrap.content.ContentService;
+import net.microfalx.bootstrap.dataset.DataSetService;
 import net.microfalx.bootstrap.dataset.annotation.DataSet;
+import net.microfalx.heimdall.rest.api.RestService;
 import net.microfalx.heimdall.rest.core.common.AbstractLibraryHistoryController;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -11,11 +13,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/system/rest/library/history")
 public class RestLibraryHistoryController extends AbstractLibraryHistoryController<RestLibraryHistory, RestLibrary> {
 
-    @Autowired
-    private RestLibraryRepository restLibraryRepository;
+    private final RestLibraryRepository restLibraryRepository;
+    private final RestLibraryHistoryRepository restLibraryHistoryRepository;
 
-    @Autowired
-    private RestLibraryHistoryRepository restLibraryHistoryRepository;
+    public RestLibraryHistoryController(DataSetService dataSetService, RestService restService, ContentService contentService, RestLibraryRepository restLibraryRepository, RestLibraryHistoryRepository restLibraryHistoryRepository) {
+        super(dataSetService, restService, contentService);
+        this.restLibraryRepository = restLibraryRepository;
+        this.restLibraryHistoryRepository = restLibraryHistoryRepository;
+    }
 
     @Override
     protected String getTitle() {
