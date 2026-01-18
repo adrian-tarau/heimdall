@@ -10,9 +10,13 @@ import net.microfalx.bootstrap.search.Attribute;
 import net.microfalx.bootstrap.search.Document;
 import net.microfalx.bootstrap.search.IndexService;
 import net.microfalx.bootstrap.search.SearchUtils;
+import net.microfalx.bootstrap.support.report.Issue;
 import net.microfalx.bootstrap.template.Template;
 import net.microfalx.bootstrap.template.TemplateContext;
-import net.microfalx.lang.*;
+import net.microfalx.lang.IOUtils;
+import net.microfalx.lang.ObjectUtils;
+import net.microfalx.lang.StringUtils;
+import net.microfalx.lang.TimeUtils;
 import net.microfalx.metrics.Metrics;
 import net.microfalx.resource.FileResource;
 import net.microfalx.resource.MemoryResource;
@@ -41,6 +45,7 @@ import java.util.zip.ZipOutputStream;
 import static java.time.Duration.ofSeconds;
 import static net.microfalx.bootstrap.search.Document.SOURCE_FIELD;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.ExceptionUtils.getRootCauseMessage;
 import static net.microfalx.lang.ExceptionUtils.rethrowException;
 import static net.microfalx.lang.StringUtils.*;
 
@@ -146,8 +151,10 @@ class BrokerSessionTask extends AbstractRunnable {
                 if (!getConsumer().isClosed()) {
                     BrokerUtils.METRICS.withGroup("Failure").count(topic.getName());
                     brokerService.releaseConsumer(this.realTopic);
+                    Issue.create(Issue.Type.DATA_INTEGRITY, "Poll Events", topic.getName()).withDescription("Failed to consume events", e)
+                            .withModule("Broker").register();
                     LOGGER.error("Failed to collect events from " + BrokerUtils.describe(this.realTopic), e);
-                    persistSession(BrokerSession.Status.FAILED, new BrokerTopicSnapshot(), null, ExceptionUtils.getRootCauseMessage(e));
+                    persistSession(BrokerSession.Status.FAILED, new BrokerTopicSnapshot(), null, getRootCauseMessage(e));
                 }
             }
             BrokerUtils.METRICS.withGroup("Sessions").count(topic.getName());

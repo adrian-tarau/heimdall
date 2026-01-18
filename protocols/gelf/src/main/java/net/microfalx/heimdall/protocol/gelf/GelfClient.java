@@ -5,6 +5,7 @@ import biz.paluch.logging.gelf.intern.ErrorReporter;
 import biz.paluch.logging.gelf.intern.GelfSender;
 import biz.paluch.logging.gelf.intern.GelfSenderFactory;
 import net.microfalx.bootstrap.model.Attribute;
+import net.microfalx.bootstrap.support.report.Issue;
 import net.microfalx.heimdall.protocol.core.Event;
 import net.microfalx.heimdall.protocol.core.ProtocolClient;
 import net.microfalx.lang.StringUtils;
@@ -134,6 +135,8 @@ public class GelfClient extends ProtocolClient<GelfEvent> {
 
         @Override
         public void reportError(String message, Exception e) {
+            Issue.create(Issue.Type.AVAILABILITY, "GELF Client").withDescription("Failed to send event: " + message, e)
+                    .withModule("GELF").register();
             LOGGER.error(message, e);
         }
     }

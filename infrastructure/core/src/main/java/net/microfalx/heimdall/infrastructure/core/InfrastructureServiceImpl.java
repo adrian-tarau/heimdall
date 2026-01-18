@@ -1,6 +1,7 @@
 package net.microfalx.heimdall.infrastructure.core;
 
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
+import net.microfalx.bootstrap.support.report.Issue;
 import net.microfalx.bootstrap.web.application.ApplicationProperties;
 import net.microfalx.heimdall.infrastructure.api.*;
 import net.microfalx.heimdall.infrastructure.core.system.DnsRepository;
@@ -285,12 +286,14 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
 
     private Status fireGetStatus(net.microfalx.heimdall.infrastructure.api.Service service, Server server) {
         Status status = Status.NA;
+        String name = server.getName() + " / " + service.getName();
         for (InfrastructureListener listener : listeners) {
             try {
                 Status newStatus = listener.getStatus(service, server);
                 if (newStatus != null && newStatus.isBefore(status)) status = newStatus;
             } catch (Exception e) {
-                LOGGER.error("Failed to update status for service '" + service.getName() + "' running on server '" + server.getName() + "'", e);
+                Issue.create(Issue.Type.DATA_INTEGRITY, "Get Status", name).withDescription("Failed to get status for service " + name, e)
+                        .withModule("Infrastructure").register();
             }
         }
         return status;
@@ -298,12 +301,14 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
 
     private Health fireGetHealth(net.microfalx.heimdall.infrastructure.api.Service service, Server server) {
         Health health = Health.NA;
+        String name = server.getName() + " / " + service.getName();
         for (InfrastructureListener listener : listeners) {
             try {
                 Health newHealth = listener.getHealth(service, server);
                 if (newHealth != null && newHealth.isBefore(health)) health = newHealth;
             } catch (Exception e) {
-                LOGGER.error("Failed to update health for service '" + service.getName() + "' running on server '" + server.getName() + "'", e);
+                Issue.create(Issue.Type.DATA_INTEGRITY, "Get Health", name).withDescription("Failed to get health for service " + name, e)
+                        .withModule("Infrastructure").register();
             }
         }
         return health;

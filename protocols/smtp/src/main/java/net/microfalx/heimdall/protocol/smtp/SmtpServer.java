@@ -6,6 +6,7 @@ import jakarta.mail.Multipart;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import net.microfalx.bootstrap.mail.MailService;
+import net.microfalx.bootstrap.support.report.Issue;
 import net.microfalx.heimdall.protocol.core.*;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.metrics.Metrics;
@@ -15,7 +16,6 @@ import net.microfalx.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.subethamail.smtp.MessageContext;
 import org.subethamail.smtp.RejectException;
@@ -77,7 +77,8 @@ public class SmtpServer implements InitializingBean, BasicMessageListener {
             }
         } catch (Exception e) {
             String message = "Failed to process email from '" + from + "' to '" + to + "'";
-            LOGGER.warn(message, e);
+            Issue.create(Issue.Type.DATA_INTEGRITY, "SMTP Server")
+                    .withDescription(e, message).withModule("SNMP").register();
             throw new RejectException(message + ", root cause: " + e.getMessage());
         }
     }

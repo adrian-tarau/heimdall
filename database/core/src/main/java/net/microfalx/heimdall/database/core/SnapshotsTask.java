@@ -1,6 +1,7 @@
 package net.microfalx.heimdall.database.core;
 
 import net.microfalx.bootstrap.jdbc.support.Session;
+import net.microfalx.bootstrap.support.report.Issue;
 import net.microfalx.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +52,8 @@ class SnapshotsTask implements Runnable {
                 databaseService.getDatabaseSnapshotRepository().saveAndFlush(databaseSnapshot);
             }
         } catch (Exception e) {
-            LOGGER.error("Failed to persist database snapshot for database '" + snapshot.getDatabase().getName() + "'", e);
+            Issue.create(Issue.Type.DATA_INTEGRITY, "Persist Snapshots").withDescription("Failed to persist database snapshots", e)
+                    .withModule("Database").register();
         }
     }
 
@@ -61,7 +63,8 @@ class SnapshotsTask implements Runnable {
             try {
                 databaseService.persistStatement(schema, session.getStatement());
             } catch (Exception e) {
-                LOGGER.error(e.getMessage(), e);
+                Issue.create(Issue.Type.DATA_INTEGRITY, "Persist Statements").withDescription("Failed to persist database statements", e)
+                        .withModule("Database").register();
             }
         }
     }

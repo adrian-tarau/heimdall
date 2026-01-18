@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.protocol.snmp.mib;
 
+import net.microfalx.bootstrap.support.report.Issue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.smi.OID;
@@ -83,7 +84,9 @@ class MibMetadataExtractor {
             extractSent();
             extractSeverity();
         } catch (Exception e) {
-            LOGGER.error("Failed to detect base OIDs for " + module.getName() + ", root cause: " + e.getMessage());
+            Issue.create(Issue.Type.CONFIGURATION, "MIB", module.getName())
+                    .withDescription(e, "Failed to detect base OIDs for ''{0}''", module.getName())
+                    .withModule("SNMP").register();
         }
     }
 

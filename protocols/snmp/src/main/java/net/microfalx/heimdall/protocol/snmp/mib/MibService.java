@@ -7,6 +7,7 @@ import net.microfalx.bootstrap.model.MetadataService;
 import net.microfalx.bootstrap.resource.ResourceService;
 import net.microfalx.bootstrap.search.Document;
 import net.microfalx.bootstrap.search.IndexService;
+import net.microfalx.bootstrap.support.report.Issue;
 import net.microfalx.heimdall.protocol.snmp.jpa.SnmpMib;
 import net.microfalx.heimdall.protocol.snmp.jpa.SnmpMibRepository;
 import net.microfalx.resource.ClassPathResource;
@@ -287,7 +288,9 @@ public class MibService implements InitializingBean {
                 if (resource.exists()) externalResources.add(resource);
                 fetchedCount++;
             } catch (Exception e) {
-                LOGGER.error("Failed to fetch module '{}' from external registries", importedModule, e);
+                Issue.create(Issue.Type.CONFIGURATION, "Mib: " + importedModule)
+                        .withDescription(e, "Failed to fetch module ''{0}'' from external registries", importedModule)
+                        .withModule("SNMP").register();
             }
         }
         doRegisterMibs(externalResources, MibType.IMPORT);
@@ -310,7 +313,9 @@ public class MibService implements InitializingBean {
                 persistMib(module);
                 registeredModules.add(module.getIdToken().toLowerCase());
             } catch (Exception e) {
-                LOGGER.atError().setCause(e).log("Failed to register MIB from {}", resource.toURI());
+                Issue.create(Issue.Type.DATA_INTEGRITY, "MIB")
+                        .withDescription(e, "Failed to register MIB from ''{0}''", resource.toURI()).withModule("SNMP").register();
+                LOGGER.info("Failed to register MIB from {}", resource.toURI());
             }
         }
     }
