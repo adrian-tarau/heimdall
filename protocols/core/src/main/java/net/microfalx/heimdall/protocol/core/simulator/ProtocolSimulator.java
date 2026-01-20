@@ -2,10 +2,12 @@ package net.microfalx.heimdall.protocol.core.simulator;
 
 import net.datafaker.Faker;
 import net.datafaker.providers.base.Shakespeare;
+import net.microfalx.bootstrap.support.report.Issue;
 import net.microfalx.heimdall.protocol.core.Address;
 import net.microfalx.heimdall.protocol.core.Event;
 import net.microfalx.heimdall.protocol.core.ProtocolClient;
 import net.microfalx.heimdall.protocol.core.ProtocolUtils;
+import net.microfalx.lang.EnumUtils;
 import net.microfalx.lang.ThreadUtils;
 import net.microfalx.metrics.Metrics;
 import org.slf4j.Logger;
@@ -322,6 +324,7 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
         return data;
     }
 
+    @SuppressWarnings("unchecked")
     private void simulateUnderLock() {
         initialize();
         int eventCount = properties.getMinimumEventCount() + random.nextInt(properties.getMaximumEventCount());
@@ -334,7 +337,9 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
                 simulate(client, sourceAddress, targetAddress, i + 1);
             } catch (IOException e) {
                 METRICS.count("Simulation Failed");
-                LOGGER.atWarn().setCause(e).log("Failed to send simulated event to {}", client.getHostName());
+                Issue.create(Issue.Type.STABILITY, "Simulator", EnumUtils.toLabel(getEventType()))
+                        .withDescription(e, "Failed to send simulated event to {}", client.getHostName())
+                        .withSeverity(Issue.Severity.LOW).register();
             }
             waitForRate();
         }

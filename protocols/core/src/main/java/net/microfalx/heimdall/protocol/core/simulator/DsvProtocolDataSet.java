@@ -4,7 +4,6 @@ import net.microfalx.bootstrap.dsv.DsvDataSet;
 import net.microfalx.bootstrap.dsv.DsvField;
 import net.microfalx.bootstrap.dsv.DsvRecord;
 import net.microfalx.bootstrap.model.Metadata;
-import net.microfalx.lang.ExceptionUtils;
 import net.microfalx.resource.Resource;
 
 import java.io.IOException;
@@ -32,7 +31,7 @@ public class DsvProtocolDataSet extends AbstractProtocolDataSet<DsvRecord, DsvFi
 
     @Override
     public Iterator<DsvRecord> iterator() {
-        if (iterator == null) {
+        if (iterator == null || !iterator.hasNext()) {
             try {
                 DsvDataSet dsvDataSet = getDsvDataSet();
                 iterator = dsvDataSet.findAll().iterator();
