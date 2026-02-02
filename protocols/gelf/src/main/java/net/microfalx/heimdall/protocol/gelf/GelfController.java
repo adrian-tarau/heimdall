@@ -9,6 +9,7 @@ import net.microfalx.bootstrap.model.Field;
 import net.microfalx.heimdall.protocol.core.ProtocolController;
 import net.microfalx.heimdall.protocol.core.jpa.PartRepository;
 import net.microfalx.heimdall.protocol.gelf.jpa.GelfEvent;
+import net.microfalx.heimdall.protocol.gelf.jpa.GelfEventRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,10 +22,12 @@ import static net.microfalx.bootstrap.model.AttributeUtils.shouldDisplayAsBadge;
 @Help("protocol/gelf")
 public class GelfController extends ProtocolController<GelfEvent> {
 
+    private final GelfEventRepository gelfEventRepository;
     private final GelfService gelfService;
 
-    public GelfController(DataSetService dataSetService, PartRepository partRepository, GelfService gelfService) {
+    public GelfController(DataSetService dataSetService, PartRepository partRepository, GelfEventRepository gelfEventRepository, GelfService gelfService) {
         super(dataSetService, partRepository);
+        this.gelfEventRepository = gelfEventRepository;
         this.gelfService = gelfService;
     }
 

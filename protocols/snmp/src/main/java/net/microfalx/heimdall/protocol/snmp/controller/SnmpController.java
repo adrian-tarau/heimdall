@@ -9,6 +9,7 @@ import net.microfalx.heimdall.protocol.core.ProtocolController;
 import net.microfalx.heimdall.protocol.core.jpa.PartRepository;
 import net.microfalx.heimdall.protocol.snmp.SnmpService;
 import net.microfalx.heimdall.protocol.snmp.jpa.SnmpEvent;
+import net.microfalx.heimdall.protocol.snmp.jpa.SnmpEventRepository;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceFactory;
 import org.springframework.stereotype.Controller;
@@ -23,10 +24,12 @@ import java.io.IOException;
 @Help("protocol/snmp")
 public class SnmpController extends ProtocolController<SnmpEvent> {
 
+    private final SnmpEventRepository snmpEventRepository;
     private final SnmpService snmpService;
 
-    public SnmpController(DataSetService dataSetService, PartRepository partRepository, SnmpService snmpService) {
+    public SnmpController(DataSetService dataSetService, PartRepository partRepository, SnmpEventRepository snmpEventRepository, SnmpService snmpService) {
         super(dataSetService, partRepository);
+        this.snmpEventRepository = snmpEventRepository;
         this.snmpService = snmpService;
     }
 

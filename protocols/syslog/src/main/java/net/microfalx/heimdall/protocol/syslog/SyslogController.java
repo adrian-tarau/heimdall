@@ -6,6 +6,7 @@ import net.microfalx.bootstrap.help.annotation.Help;
 import net.microfalx.heimdall.protocol.core.ProtocolController;
 import net.microfalx.heimdall.protocol.core.jpa.PartRepository;
 import net.microfalx.heimdall.protocol.syslog.jpa.SyslogEvent;
+import net.microfalx.heimdall.protocol.syslog.jpa.SyslogEventRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -15,7 +16,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Help("protocol/syslog")
 public class SyslogController extends ProtocolController<SyslogEvent> {
 
-    public SyslogController(DataSetService dataSetService, PartRepository partRepository) {
+    private SyslogEventRepository syslogEventRepository;
+
+    public SyslogController(DataSetService dataSetService, PartRepository partRepository, SyslogEventRepository syslogEventRepository) {
         super(dataSetService, partRepository);
+        this.syslogEventRepository = syslogEventRepository;
     }
 }
