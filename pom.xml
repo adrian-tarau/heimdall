@@ -73,7 +73,7 @@
         <bootstrap.version>0.8.5-SNAPSHOT</bootstrap.version>
         <apache.jmeter.version>5.6.3</apache.jmeter.version>
 
-        <spring.boot.version>3.5.4</spring.boot.version>
+        <spring.boot.version>3.5.10</spring.boot.version>
     </properties>
 
     <developers>
