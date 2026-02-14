@@ -45,7 +45,7 @@ import java.util.zip.ZipOutputStream;
 import static java.time.Duration.ofSeconds;
 import static net.microfalx.bootstrap.search.Document.SOURCE_FIELD;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
-import static net.microfalx.lang.ExceptionUtils.getRootCauseMessage;
+import static net.microfalx.lang.ExceptionUtils.getRootCauseDescription;
 import static net.microfalx.lang.ExceptionUtils.rethrowException;
 import static net.microfalx.lang.StringUtils.*;
 
@@ -154,7 +154,7 @@ class BrokerSessionTask extends AbstractRunnable {
                     Issue.create(Issue.Type.DATA_INTEGRITY, "Poll Events", topic.getName()).withDescription("Failed to consume events", e)
                             .withModule("Broker").register();
                     LOGGER.error("Failed to collect events from " + BrokerUtils.describe(this.realTopic), e);
-                    persistSession(BrokerSession.Status.FAILED, new BrokerTopicSnapshot(), null, getRootCauseMessage(e));
+                    persistSession(BrokerSession.Status.FAILED, new BrokerTopicSnapshot(), null, getRootCauseDescription(e));
                 }
             }
             BrokerUtils.METRICS.withGroup("Sessions").count(topic.getName());

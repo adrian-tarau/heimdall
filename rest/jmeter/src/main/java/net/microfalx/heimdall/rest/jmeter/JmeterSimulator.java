@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
-import static net.microfalx.lang.ExceptionUtils.getRootCauseMessage;
+import static net.microfalx.lang.ExceptionUtils.getRootCauseDescription;
 import static net.microfalx.resource.ResourceUtils.toFile;
 import static org.apache.commons.io.FileUtils.deleteDirectory;
 
@@ -80,12 +80,12 @@ public class JmeterSimulator extends AbstractSimulator {
         try {
             ArchiveUtils.archive(this.htmlReport, reportZip);
         } catch (Exception e) {
-            LOGGER.error("Failed to archive report directory, root cause: '{}'", getRootCauseMessage(e));
+            LOGGER.error("Failed to archive report directory, root cause: '{}'", getRootCauseDescription(e));
         }
         try {
             deleteDirectory(toFile(htmlReport));
         } catch (IOException e) {
-            LOGGER.error("Failed to remove report directory, root cause: '{}'", getRootCauseMessage(e));
+            LOGGER.error("Failed to remove report directory, root cause: '{}'", getRootCauseDescription(e));
         }
         return reportZip;
     }

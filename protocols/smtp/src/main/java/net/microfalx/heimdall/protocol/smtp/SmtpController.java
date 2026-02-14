@@ -32,7 +32,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static net.microfalx.lang.ExceptionUtils.getRootCauseMessage;
+import static net.microfalx.lang.ExceptionUtils.getRootCauseDescription;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Controller
@@ -93,7 +93,7 @@ public class SmtpController extends ProtocolController<SmtpEvent> {
             mailService.send(resource);
             return JsonResponse.success("Email successfully forwarded to recipients");
         } catch (Exception e) {
-            LOGGER.warn("Failed to forward email with ID {}, root cause: {}", id, getRootCauseMessage(e));
+            LOGGER.warn("Failed to forward email with ID {}, root cause: {}", id, getRootCauseDescription(e));
             return JsonResponse.fail("Email failed to be forwarded to recipients");
         }
 

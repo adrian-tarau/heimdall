@@ -5,7 +5,6 @@ import net.microfalx.heimdall.infrastructure.api.InfrastructureService;
 import net.microfalx.heimdall.infrastructure.api.Server;
 import net.microfalx.heimdall.infrastructure.api.Service;
 import net.microfalx.heimdall.infrastructure.ping.system.Ping;
-import net.microfalx.lang.ExceptionUtils;
 import net.microfalx.threadpool.AbstractRunnable;
 import net.microfalx.threadpool.ThreadPool;
 import org.slf4j.Logger;
@@ -16,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
+import static net.microfalx.lang.ExceptionUtils.getRootCauseDescription;
 import static net.microfalx.lang.FormatterUtils.formatDuration;
 import static net.microfalx.lang.StringUtils.joinNames;
 import static net.microfalx.lang.TimeUtils.millisSince;
@@ -60,7 +60,7 @@ class PingScheduler extends AbstractRunnable {
             try {
                 schedule(ping);
             } catch (InfrastructureNotFoundException e) {
-                LOGGER.error("Failed to schedule '" + ping.getName() + "', root cause: " + ExceptionUtils.getRootCauseMessage(e));
+                LOGGER.error("Failed to schedule '" + ping.getName() + "', root cause: " + getRootCauseDescription(e));
             } catch (Exception e) {
                 LOGGER.error("Failed to schedule '" + ping.getName() + "'", e);
             }

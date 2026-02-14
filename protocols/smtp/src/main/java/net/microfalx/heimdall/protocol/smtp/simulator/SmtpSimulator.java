@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.GZIPOutputStream;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
-import static net.microfalx.lang.ExceptionUtils.getRootCauseMessage;
+import static net.microfalx.lang.ExceptionUtils.getRootCauseDescription;
 
 @Component
 public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
@@ -130,7 +130,7 @@ public class SmtpSimulator extends ProtocolSimulator<SmtpEvent, SmtpClient> {
                 return server.createEvent(resource);
             } catch (Exception e) {
                 metrics.increment("Invalid MimeMessage");
-                LOGGER.debug("Failed to create MimeMessage from resource: {}, root cause {}", resource, getRootCauseMessage(e));
+                LOGGER.debug("Failed to create MimeMessage from resource: {}, root cause {}", resource, getRootCauseDescription(e));
             }
         }
         return null;

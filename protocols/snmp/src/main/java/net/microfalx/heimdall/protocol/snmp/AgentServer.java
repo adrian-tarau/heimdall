@@ -41,7 +41,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
-import static net.microfalx.lang.ExceptionUtils.getRootCauseMessage;
+import static net.microfalx.lang.ExceptionUtils.getRootCauseDescription;
 import static net.microfalx.lang.StringUtils.isNotEmpty;
 
 @Component
@@ -121,7 +121,7 @@ public class AgentServer implements InitializingBean {
             IOUtils.initializeFile(agentConfigFile);
             IOUtils.initializeFile(bootCounterFile);
         } catch (IOException e) {
-            LOGGER.warn("Failed to initialize SNMP configuration files, root cause: {}", getRootCauseMessage(e));
+            LOGGER.warn("Failed to initialize SNMP configuration files, root cause: {}", getRootCauseDescription(e));
         }
     }
 

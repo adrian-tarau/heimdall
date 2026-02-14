@@ -35,7 +35,8 @@ import static net.microfalx.heimdall.rest.api.RestConstants.LOG_ATTR;
 import static net.microfalx.heimdall.rest.api.RestConstants.REPORT_ATTR;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ArgumentUtils.requireNotEmpty;
-import static net.microfalx.lang.ExceptionUtils.getRootCauseMessage;
+import static net.microfalx.lang.ExceptionUtils.getRootCauseDescription;
+import static net.microfalx.lang.ExceptionUtils.getStackTrace;
 import static net.microfalx.lang.FormatterUtils.formatBytes;
 import static net.microfalx.lang.FormatterUtils.formatDuration;
 import static net.microfalx.lang.JvmUtils.isWindows;
@@ -147,7 +148,7 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
                 finalLogs.append(getHeader("Simulator Errors")).append(LINE_SEPARATOR).append(error);
             }
         } catch (IOException e) {
-            finalLogs.append("\n\nFailed to retrieve logs: ").append(getRootCauseMessage(e));
+            finalLogs.append("\n\nFailed to retrieve logs: ").append(getRootCauseDescription(e));
         }
         return MemoryResource.create(finalLogs.toString()).withAttribute(LOG_ATTR, Boolean.TRUE);
     }
@@ -402,9 +403,9 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
      * @param args      the arguments
      */
     protected final void appendError(Throwable throwable, String format, Object... args) {
-        errorMessage = getRootCauseMessage(throwable);
+        errorMessage = getRootCauseDescription(throwable);
         log(format, args);
-        appendLog(", stack trace\n" + TextUtils.insertSpaces(ExceptionUtils.getStackTrace(throwable), 5));
+        appendLog(", stack trace\n" + TextUtils.insertSpaces(getStackTrace(throwable), 5));
     }
 
     /**
@@ -654,7 +655,7 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
             File directory = toFile(getSessionWorkspace());
             org.apache.commons.io.FileUtils.deleteDirectory(directory);
         } catch (Exception e) {
-            log("Failed to cleanup workspace, root cause: {0}", getRootCauseMessage(e));
+            log("Failed to cleanup workspace, root cause: {0}", getRootCauseDescription(e));
         }
     }
 
@@ -662,7 +663,7 @@ public abstract class AbstractSimulator implements Simulator, Comparable<Abstrac
         try {
             return getLogs().loadAsString();
         } catch (IOException e) {
-            return "#Error: " + getRootCauseMessage(e);
+            return "#Error: " + getRootCauseDescription(e);
         }
     }
 

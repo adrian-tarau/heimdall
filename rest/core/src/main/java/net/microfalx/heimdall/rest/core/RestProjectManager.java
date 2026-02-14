@@ -2,7 +2,6 @@ package net.microfalx.heimdall.rest.core;
 
 import lombok.extern.slf4j.Slf4j;
 import net.microfalx.heimdall.rest.api.*;
-import net.microfalx.lang.ExceptionUtils;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.UriUtils;
 import net.microfalx.resource.FileResource;
@@ -25,7 +24,7 @@ import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static net.microfalx.heimdall.rest.api.RestConstants.SCRIPT_ATTR;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
-import static net.microfalx.lang.ExceptionUtils.getRootCauseMessage;
+import static net.microfalx.lang.ExceptionUtils.getRootCauseDescription;
 import static net.microfalx.lang.ExceptionUtils.rethrowException;
 import static net.microfalx.lang.FileUtils.validateDirectoryExists;
 import static net.microfalx.lang.StringUtils.*;
@@ -142,7 +141,7 @@ public class RestProjectManager {
             try {
                 if (process != null) process.destroy();
             } catch (Exception e) {
-                LOGGER.warn("Failed to destroy the process: {}", getRootCauseMessage(e));
+                LOGGER.warn("Failed to destroy the process: {}", getRootCauseDescription(e));
             }
             if (error.exists()) error.delete();
             if (output.exists()) output.delete();
@@ -155,7 +154,7 @@ public class RestProjectManager {
             builder.append(Resource.file(output).loadAsString()).append('\n');
             builder.append(Resource.file(error).loadAsString()).append('\n');
         } catch (IOException e) {
-            builder.append("Error: ").append(ExceptionUtils.getRootCauseMessage(e));
+            builder.append("Error: ").append(getRootCauseDescription(e));
         }
         return builder.toString();
     }
@@ -260,7 +259,7 @@ public class RestProjectManager {
                 try {
                     discover(project, resource, discoveryType);
                 } catch (SimulationException e) {
-                    LOGGER.warn("Invalid script type for '" + resourcePath + "', root cause: " + getRootCauseMessage(e));
+                    LOGGER.warn("Invalid script type for '" + resourcePath + "', root cause: " + getRootCauseDescription(e));
                 }
             }
         }

@@ -13,7 +13,7 @@ import java.time.ZonedDateTime;
 import java.util.Base64;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
-import static net.microfalx.lang.ExceptionUtils.getRootCauseMessage;
+import static net.microfalx.lang.ExceptionUtils.getRootCauseDescription;
 import static org.apache.commons.lang3.StringUtils.abbreviate;
 
 /**
@@ -100,7 +100,7 @@ class PingExecutor implements net.microfalx.heimdall.infrastructure.api.Ping {
             doPing();
         } catch (Exception e) {
             status = Status.L7STS;
-            errorMessage = getRootCauseMessage(e);
+            errorMessage = getRootCauseDescription(e);
         } finally {
             duration = Duration.ofNanos(System.nanoTime() - startTime);
             end = ZonedDateTime.now();

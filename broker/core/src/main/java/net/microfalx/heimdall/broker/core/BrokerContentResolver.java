@@ -4,7 +4,6 @@ import net.microfalx.bootstrap.content.Content;
 import net.microfalx.bootstrap.content.ContentLocator;
 import net.microfalx.bootstrap.content.ContentResolver;
 import net.microfalx.bootstrap.model.Attributes;
-import net.microfalx.lang.ExceptionUtils;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.annotation.Provider;
 import net.microfalx.resource.MemoryResource;
@@ -13,6 +12,8 @@ import net.microfalx.resource.ResourceFactory;
 import net.microfalx.resource.archive.ArchiveResource;
 
 import java.io.IOException;
+
+import static net.microfalx.lang.ExceptionUtils.getRootCauseDescription;
 
 @Provider
 public class BrokerContentResolver implements ContentResolver {
@@ -30,7 +31,7 @@ public class BrokerContentResolver implements ContentResolver {
                 eventResource = MemoryResource.create(event.getValue()).copyPropertiesFrom(resource);
                 eventResource = eventResource.withMimeType(eventResource.detectMimeType());
             } catch (Exception e) {
-                eventResource = MemoryResource.create("#Error: " + ExceptionUtils.getRootCauseMessage(e));
+                eventResource = MemoryResource.create("#Error: " + getRootCauseDescription(e));
             }
             Content content = Content.create(locator, eventResource);
             return content.withAttributes(attributes);

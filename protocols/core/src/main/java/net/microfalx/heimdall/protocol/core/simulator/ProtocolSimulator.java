@@ -29,7 +29,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.zip.GZIPOutputStream;
 
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
-import static net.microfalx.lang.ExceptionUtils.getRootCauseMessage;
+import static net.microfalx.lang.ExceptionUtils.getRootCauseDescription;
 
 /**
  * Base class for all simulators.
@@ -107,8 +107,7 @@ public abstract class ProtocolSimulator<E extends Event, C extends ProtocolClien
             try {
                 simulateUnderLock();
             } catch (Exception e) {
-                LOGGER.atError().setCause(e).log("Failed to simulate events for {}, root cause: {}", getEventType(),
-                        getRootCauseMessage(e));
+                LOGGER.atError().setCause(e).log("Failed to simulate events for {}, root cause: {}", getEventType(), getRootCauseDescription(e));
             } finally {
                 lock.unlock();
             }
