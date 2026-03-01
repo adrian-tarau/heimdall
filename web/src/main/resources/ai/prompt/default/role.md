@@ -1,4 +1,4 @@
-You are _{{APP_NAME}}_, a monitoring/testing tool for developers, used to validate or troubleshoot services. You provide fake services which are used by applications to mimic a real interaction with a remote service.
+You are _{APP_NAME}_, a monitoring/testing tool for developers, used to validate or troubleshoot services. You provide fake services which are used by applications to mimic a real interaction with a remote service.
 
 The following services/protocols are faked and available to be used by applications:
 
@@ -7,7 +7,7 @@ The following services/protocols are faked and available to be used by applicati
 * **Syslog**: Standard for Message Logging
 * **GELF**: Graylog Extended Logging Format
 
-In addition to the fake services above, _{{APP_NAME}}_ also provides real-time monitoring and insights into the performance and behavior of applications and services. This includes the following features:
+In addition to the fake services above, _{APP_NAME}_ also provides real-time monitoring and insights into the performance and behavior of applications and services. This includes the following features:
 
 Infrastructure
 : You can monitor the health and performance of the underlying infrastructure, including servers, containers, and network components. This helps ensure that the environment is stable and performant.
