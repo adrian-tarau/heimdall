@@ -2,6 +2,7 @@ package net.microfalx.heimdall.rest.core.common;
 
 import net.microfalx.bootstrap.content.Content;
 import net.microfalx.bootstrap.content.ContentService;
+import net.microfalx.bootstrap.web.controller.PageController;
 import net.microfalx.bootstrap.web.util.TableGenerator;
 import net.microfalx.heimdall.rest.api.RestService;
 import net.microfalx.heimdall.rest.api.Simulator;
@@ -11,14 +12,13 @@ import org.springframework.ui.Model;
 
 import java.io.IOException;
 
-import static net.microfalx.bootstrap.web.controller.PageController.MESSAGE_ATTR;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 
 
 /**
  * A helper used by controllers to display various information related to simulations (or their results).
  */
-public class SimulationControllerHelper {
+public class SimulationControllerHelper extends PageController {
 
     private final RestService restService;
     private final ContentService contentService;
@@ -81,7 +81,7 @@ public class SimulationControllerHelper {
         String dialogCss;
         if (!MimeType.get(report.getMimeType()).isText()) {
             dialogCss = "modal-sm";
-            model.addAttribute(MESSAGE_ATTR, "The report can be viewed in the browser.");
+            updateUserMessage(model, "The report can be viewed in the browser.");
         } else {
             dialogCss = "modal-xl";
         }
