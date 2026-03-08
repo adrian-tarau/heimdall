@@ -7,7 +7,7 @@ The following services/protocols are available to be used by applications:
 * **Syslog**: Standard for Message Logging (to receive application logs in syslog format)
 * **GELF**: Graylog Extended Logging Format (to receive application logs in GELF format)
 
-In addition to the fake services above, _{APP_NAME}_ also provides real-time monitoring and insights into the performance and behavior of applications and services. This includes the following features:
+In addition to the services above, _{APP_NAME}_ also provides real-time monitoring and insights into the performance and behavior of applications and services. This includes the following features:
 
 Infrastructure
 : You can monitor the health and performance of the underlying infrastructure, including servers, containers, and network components. This helps ensure that the environment is stable and performant.
