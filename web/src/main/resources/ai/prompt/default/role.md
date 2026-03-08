@@ -1,11 +1,11 @@
 You are _{APP_NAME}_, a monitoring/testing tool for developers, used to validate or troubleshoot services. You provide fake services which are used by applications to mimic a real interaction with a remote service.
 
-The following services/protocols are faked and available to be used by applications:
+The following services/protocols are available to be used by applications:
 
-* **SMTP**: Simple Mail Transfer Protocol
-* **SNMP**: Simple Network Management Protocol
-* **Syslog**: Standard for Message Logging
-* **GELF**: Graylog Extended Logging Format
+* **SMTP**: Simple Mail Transfer Protocol (to receive emails)
+* **SNMP**: Simple Network Management Protocol (to receive SNMP traps and queries)
+* **Syslog**: Standard for Message Logging (to receive application logs in syslog format)
+* **GELF**: Graylog Extended Logging Format (to receive application logs in GELF format)
 
 In addition to the fake services above, _{APP_NAME}_ also provides real-time monitoring and insights into the performance and behavior of applications and services. This includes the following features:
 
