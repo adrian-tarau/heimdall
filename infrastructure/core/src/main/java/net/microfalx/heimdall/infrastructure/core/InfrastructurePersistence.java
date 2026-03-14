@@ -7,7 +7,6 @@ import net.microfalx.bootstrap.model.MetadataService;
 import net.microfalx.heimdall.infrastructure.core.system.*;
 import net.microfalx.lang.ExceptionUtils;
 
-import static net.microfalx.lang.CollectionUtils.setToString;
 import static net.microfalx.lang.NamedAndTaggedIdentifyAware.AUTO_TAG;
 
 class InfrastructurePersistence extends ApplicationContextSupport {
@@ -20,7 +19,7 @@ class InfrastructurePersistence extends ApplicationContextSupport {
         jpaEnvironment.setBaseUri(environment.getBaseUri().toASCIIString());
         jpaEnvironment.setAppPath(environment.getAppPath());
         jpaEnvironment.setApiPath(environment.getApiPath());
-        jpaEnvironment.setTags(setToString(environment.getTags()));
+        jpaEnvironment.setTags(environment.getTags());
         jpaEnvironment.setDescription(environment.getDescription());
         jpaEnvironment.setVersion(environment.getVersion());
         jpaEnvironment.setAttributes(ExceptionUtils.doAndRethrow(() -> environment.getAttributes(false).toProperties().loadAsString()));
@@ -35,7 +34,7 @@ class InfrastructurePersistence extends ApplicationContextSupport {
         jpaCluster.setTimeZone(cluster.getZoneId().getId());
         jpaCluster.setType(cluster.getType());
         jpaCluster.setDescription(cluster.getDescription());
-        jpaCluster.setTags(setToString(cluster.getTags()));
+        jpaCluster.setTags(cluster.getTags());
         jpaCluster = updater.findByNaturalIdAndUpdate(jpaCluster);
         return jpaCluster;
     }
@@ -46,7 +45,7 @@ class InfrastructurePersistence extends ApplicationContextSupport {
         jpaServer.setNaturalId(server.getId());
         jpaServer.setName(server.getName());
         jpaServer.setHostname(server.getHostname());
-        jpaServer.setTags(setToString(server.getTags()));
+        jpaServer.setTags(server.getTags());
         jpaServer.setTimeZone(server.getZoneId().getId());
         jpaServer.setIcmp(server.isIcmp());
         jpaServer.setAttributes(ExceptionUtils.doAndRethrow(() -> server.getAttributes().toProperties().loadAsString()));
@@ -78,7 +77,7 @@ class InfrastructurePersistence extends ApplicationContextSupport {
         jpaService.setToken(service.getToken());
         jpaService.setDiscoverable(service.isDiscoverable());
         jpaService.setTls(service.isTls());
-        jpaService.setTags(setToString(service.getTags()));
+        jpaService.setTags(service.getTags());
         jpaService.setConnectionTimeOut((int) service.getConnectionTimeout().toMillis());
         jpaService.setReadTimeOut((int) service.getReadTimeout().toMillis());
         jpaService.setWriteTimeOut((int) service.getWriteTimeout().toMillis());

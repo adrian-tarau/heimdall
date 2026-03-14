@@ -10,7 +10,6 @@ import net.microfalx.heimdall.rest.api.Project;
 import net.microfalx.heimdall.rest.api.Scenario;
 import net.microfalx.heimdall.rest.api.SimulationException;
 import net.microfalx.heimdall.rest.core.system.*;
-import net.microfalx.lang.CollectionUtils;
 import net.microfalx.lang.UriUtils;
 import net.microfalx.resource.Resource;
 import net.microfalx.resource.ResourceFactory;
@@ -31,7 +30,7 @@ public class RestPersistence extends ApplicationContextSupport {
         jpaProject.setUserName(project.getUserName());
         jpaProject.setPassword(project.getPassword());
         jpaProject.setToken(project.getToken());
-        jpaProject.setTags(CollectionUtils.setToString(project.getTags()));
+        jpaProject.setTags(project.getTags());
         if (project.getType() != Project.Type.NONE) {
             jpaProject.setLibraryPath(project.getLibraryPath());
             jpaProject.setSimulationPath(project.getSimulationPath());
@@ -65,7 +64,7 @@ public class RestPersistence extends ApplicationContextSupport {
         }
         jpaLibrary.setGlobal(library.isGlobal());
         jpaLibrary.setVersion(version);
-        jpaLibrary.setTags(CollectionUtils.setToString(library.getTags()));
+        jpaLibrary.setTags(library.getTags());
         jpaLibrary.setDescription(library.getDescription());
         updater.findByNaturalIdAndUpdate(jpaLibrary);
     }
@@ -121,7 +120,7 @@ public class RestPersistence extends ApplicationContextSupport {
             updater.setUpdatable("override", true);
             jpaSimulation.setOverride(simulation.getOverride());
         }
-        jpaSimulation.setTags(CollectionUtils.setToString(simulation.getTags()));
+        jpaSimulation.setTags(simulation.getTags());
         jpaSimulation.setDescription(simulation.getDescription());
         return updater.findByNaturalIdAndUpdate(jpaSimulation);
     }

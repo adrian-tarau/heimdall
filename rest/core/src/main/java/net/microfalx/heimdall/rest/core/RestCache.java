@@ -20,7 +20,6 @@ import java.util.Map;
 import static java.time.Duration.ofMillis;
 import static java.time.Duration.ofSeconds;
 import static java.util.Collections.unmodifiableCollection;
-import static net.microfalx.lang.CollectionUtils.setFromString;
 import static net.microfalx.lang.StringUtils.isNotEmpty;
 import static net.microfalx.lang.TimeUtils.parseDuration;
 import static net.microfalx.lang.UriUtils.parseUri;
@@ -151,7 +150,7 @@ class RestCache extends ApplicationContextSupport {
                         .token(restProject.getToken()).type(restProject.getType())
                         .libraryPath(restProject.getLibraryPath()).simulationPath(restProject.getSimulationPath());
             }
-            builder.tags(setFromString(restProject.getTags()))
+            builder.tags(restProject.getTags())
                     .name(restProject.getName()).description(restProject.getDescription())
                     .id(restProject.getNaturalId());
             Project project = builder.build();
@@ -169,7 +168,7 @@ class RestCache extends ApplicationContextSupport {
             builder.type(restLibrary.getType())
                     .resource(resource).path(restLibrary.getPath()).override(restLibrary.isOverride())
                     .global(restLibrary.isGlobal())
-                    .tags(setFromString(restLibrary.getTags()))
+                    .tags(restLibrary.getTags())
                     .name(restLibrary.getName()).description(restLibrary.getDescription()).build();
             Library library = builder.build();
             registerLibrary(library, restLibrary.getId());
@@ -186,7 +185,7 @@ class RestCache extends ApplicationContextSupport {
             builder.timeout(ofSeconds(restSimulation.getTimeout()));
             builder.resource(resource).path(restSimulation.getPath())
                     .override(restSimulation.isOverride())
-                    .type(restSimulation.getType()).tag(restSimulation.getTags())
+                    .type(restSimulation.getType()).tags(restSimulation.getTags())
                     .name(restSimulation.getName()).description(restSimulation.getDescription()).build();
             Simulation simulation = builder.build();
             registerSimulation(simulation, restSimulation.getId());

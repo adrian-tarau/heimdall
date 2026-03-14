@@ -17,7 +17,6 @@ import java.util.*;
 
 import static java.time.Duration.ofMillis;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
-import static net.microfalx.lang.CollectionUtils.setFromString;
 import static net.microfalx.lang.StringUtils.isNotEmpty;
 import static net.microfalx.lang.StringUtils.toIdentifier;
 
@@ -171,7 +170,7 @@ class InfrastructureCache extends ApplicationContextSupport {
                     .readTimeout(ofMillis(serviceJpa.getReadTimeOut())).writeTimeout(ofMillis(serviceJpa.getWriteTimeOut()));
             builder.livenessPath(serviceJpa.getLivenessPath()).readinessPath(serviceJpa.getReadinessPath())
                     .metricsPath(serviceJpa.getMetricsPath());
-            builder.tags(setFromString(serviceJpa.getTags())).name(serviceJpa.getName()).description(serviceJpa.getDescription());
+            builder.tags(serviceJpa.getTags()).name(serviceJpa.getName()).description(serviceJpa.getDescription());
             registerService(builder.build());
         }
     }
@@ -185,7 +184,7 @@ class InfrastructureCache extends ApplicationContextSupport {
                     .icmp(serversJpa.isIcmp()).hostname(serversJpa.getHostname());
             if (clusterJpa != null) builder.zoneId(ZoneId.of(clusterJpa.getTimeZone()));
             builder.attributes(ExceptionUtils.doAndRethrow(() -> AttributeUtils.decodeProperties(MemoryResource.create(serversJpa.getAttributes()))));
-            builder.zoneId(ZoneId.of(serversJpa.getTimeZone())).tags(setFromString(serversJpa.getTags()))
+            builder.zoneId(ZoneId.of(serversJpa.getTimeZone())).tags(serversJpa.getTags())
                     .name(serversJpa.getName()).description(serversJpa.getDescription());
             Server server = builder.build();
             registerServer(server);
@@ -200,7 +199,7 @@ class InfrastructureCache extends ApplicationContextSupport {
         List<net.microfalx.heimdall.infrastructure.core.system.Cluster> clusterJpas = getBean(ClusterRepository.class).findAll();
         for (net.microfalx.heimdall.infrastructure.core.system.Cluster clusterJpa : clusterJpas) {
             Cluster.Builder builder = new Cluster.Builder(clusterJpa.getNaturalId()).zoneId(ZoneId.of(clusterJpa.getTimeZone()));
-            builder.tags(setFromString(clusterJpa.getTags())).name(clusterJpa.getName()).description(clusterJpa.getDescription());
+            builder.tags(clusterJpa.getTags()).name(clusterJpa.getName()).description(clusterJpa.getDescription());
             Set<Server> servers = serversByCluster.getOrDefault(clusterJpa.getId(), Collections.emptySet());
             builder.servers(servers);
             registerCluster(builder.build());
@@ -212,7 +211,7 @@ class InfrastructureCache extends ApplicationContextSupport {
                 = getBean(EnvironmentRepository.class).findAll();
         environmentsJpas.forEach(e -> {
             Environment.Builder builder = new Environment.Builder(e.getNaturalId());
-            builder.tags(setFromString(e.getTags())).name(e.getName()).description(e.getDescription());
+            builder.tags(e.getTags()).name(e.getName()).description(e.getDescription());
             builder.baseUri(e.getBaseUri()).apiPath(e.getApiPath()).appPath(e.getAppPath())
                     .version(e.getVersion());
             registerEnvironment(builder.build());

@@ -7,7 +7,6 @@ import net.microfalx.bootstrap.model.MetadataService;
 import net.microfalx.heimdall.infrastructure.api.Dns;
 import net.microfalx.heimdall.infrastructure.api.Server;
 import net.microfalx.heimdall.infrastructure.core.system.DnsRepository;
-import net.microfalx.lang.CollectionUtils;
 import net.microfalx.lang.StringUtils;
 import net.microfalx.lang.TimeUtils;
 import net.microfalx.threadpool.ThreadPool;
@@ -77,8 +76,7 @@ public class InfrastructureDns extends ApplicationContextSupport {
             for (net.microfalx.heimdall.infrastructure.core.system.Dns dnsJpa : dnsJpas) {
                 Dns.Builder builder = new Dns.Builder(dnsJpa.getNaturalId());
                 builder.domain(dnsJpa.getDomain()).hostname(dnsJpa.getHostname()).ip(dnsJpa.getIp()).valid(dnsJpa.isValid());
-                builder.tags(CollectionUtils.setFromString(dnsJpa.getTags()))
-                        .name(dnsJpa.getName()).description(dnsJpa.getDescription());
+                builder.tags(dnsJpa.getTags()).name(dnsJpa.getName()).description(dnsJpa.getDescription());
                 Dns dns = builder.build();
                 dnss.put(dns.getId(), dns);
             }
@@ -136,7 +134,7 @@ public class InfrastructureDns extends ApplicationContextSupport {
         jpaDns.setHostname(dns.getHostname());
         jpaDns.setDomain(dns.getDomain());
         jpaDns.setIp(dns.getIp());
-        jpaDns.setTags(CollectionUtils.setToString(dns.getTags()));
+        jpaDns.setTags(dns.getTags());
         jpaDns.setValid(dns.isValid());
         entityUpdater.findByNaturalIdOrCreate(jpaDns);
     }
