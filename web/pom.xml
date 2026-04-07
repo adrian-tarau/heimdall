@@ -136,6 +136,16 @@
 
         <dependency>
             <groupId>net.microfalx.bootstrap</groupId>
+            <artifactId>bootstrap-extension-support</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.microfalx.bootstrap</groupId>
+            <artifactId>bootstrap-extension-system</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.microfalx.bootstrap</groupId>
             <artifactId>bootstrap-base-support</artifactId>
         </dependency>
 
