@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller("heimdallDatabaseTransactionController")
 @RequestMapping("database/transaction")
-public class TransactionController extends net.microfalx.bootstrap.web.controller.admin.database.TransactionController {
+public class TransactionController extends net.microfalx.bootstrap.system.database.TransactionController {
 
     public TransactionController(DataSetService dataSetService) {
         super(dataSetService);

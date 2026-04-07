@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller("heimdallDatabaseNodeController")
 @RequestMapping("/database/node")
-public class NodeController extends net.microfalx.bootstrap.web.controller.admin.database.NodeController {
+public class NodeController extends net.microfalx.bootstrap.system.database.NodeController {
 
     public NodeController(DataSetService dataSetService) {
         super(dataSetService);

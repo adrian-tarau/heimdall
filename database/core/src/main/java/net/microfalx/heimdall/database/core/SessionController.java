@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller("heimdallDatabaseSessionController")
 @RequestMapping("/database/session")
-public class SessionController extends net.microfalx.bootstrap.web.controller.admin.database.SessionController {
+public class SessionController extends net.microfalx.bootstrap.system.database.SessionController {
 
     public SessionController(DataSetService dataSetService) {
         super(dataSetService);

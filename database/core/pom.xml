@@ -43,6 +43,7 @@
             <version>${project.version}</version>
         </dependency>
 
+
         <dependency>
             <groupId>net.microfalx.heimdall</groupId>
             <artifactId>heimdall-infrastructure-api</artifactId>
@@ -52,6 +53,11 @@
         <dependency>
             <groupId>net.microfalx.bootstrap</groupId>
             <artifactId>bootstrap-extension-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.microfalx.bootstrap</groupId>
+            <artifactId>bootstrap-extension-system</artifactId>
         </dependency>
 
         <dependency>
