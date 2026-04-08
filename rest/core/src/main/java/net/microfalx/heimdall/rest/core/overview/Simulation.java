@@ -3,6 +3,7 @@ package net.microfalx.heimdall.rest.core.overview;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.microfalx.bootstrap.dataset.annotation.Formattable;
 import net.microfalx.bootstrap.dataset.annotation.OrderBy;
 import net.microfalx.bootstrap.dataset.model.IdentityAware;
 import net.microfalx.heimdall.infrastructure.api.Environment;
@@ -37,12 +38,14 @@ public class Simulation extends IdentityAware<String> {
     @OrderBy(OrderBy.Direction.DESC)
     @CreatedDate
     @CreatedAt
+    @Formattable(elapsed = true)
     private LocalDateTime firstExecutionAt;
 
     @Position(501)
     @Description("The timestamp of the last simulation")
     @LastModifiedDate
     @ModifiedAt
+    @Formattable(elapsed = true)
     private LocalDateTime lastExecutionAt;
 
     @Position(502)

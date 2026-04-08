@@ -35,6 +35,7 @@ public class SimulationRunning extends NamedIdentityAware<String> {
     @OrderBy(OrderBy.Direction.DESC)
     @CreatedDate
     @CreatedAt
+    @Formattable(elapsed = true)
     private LocalDateTime startedAt;
 
     @Position(111)

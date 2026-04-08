@@ -53,11 +53,14 @@ public abstract class AbstractResult extends IdentityAware<Long> {
     @Position(20)
     @Timestamp
     @CreatedAt
+    @Formattable(elapsed = true)
     @net.microfalx.bootstrap.dataset.annotation.OrderBy(OrderBy.Direction.DESC)
     private LocalDateTime startedAt;
 
     @Column(name = "ended_at", nullable = false)
     @Description("The end time of the simulation")
+    @Visible(value = false)
+    @Formattable(elapsed = true)
     @Position(25)
     private LocalDateTime endedAt;
 
