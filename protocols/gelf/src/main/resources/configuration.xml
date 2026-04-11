@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<configuration xmlns="https://net.microfalx/xsd/configuration-1.0.xsd">
+
+    <group key="heimdall.protocol.gelf" name="GELF" section="Heimdall" description="Configuration for the GELF protocol">
+        <item key="udpPort" name="UDP Port" data-type="integer" default="12201" description="The UDP port on which the GELF agent listens"/>
+        <item key="tcpPort" name="TCP Port" data-type="integer" default="12200" description="The TCP port on which the GELF agent listens"/>
+
+        <item key="simulatorEnabled" name="Simulator Enabled" data-type="boolean" default="false" description="Whether the SNMP simulator is enabled."/>
+    </group>
+
+</configuration>

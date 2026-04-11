@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 public class SmtpProperties {
 
     /**
-     * The host name of the SMTP server.
+     * The port where the SMTP server listens.
      */
     private int port = 2525;
 
