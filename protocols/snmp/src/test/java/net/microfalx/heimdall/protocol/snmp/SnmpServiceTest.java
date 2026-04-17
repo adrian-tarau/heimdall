@@ -1,6 +1,6 @@
 package net.microfalx.heimdall.protocol.snmp;
 
-import net.microfalx.bootstrap.test.AbstractBootstrapServiceTestCase;
+import net.microfalx.bootstrap.test.AbstractBootstrapServiceIntegrationTestCase;
 import net.microfalx.heimdall.protocol.core.Address;
 import net.microfalx.heimdall.protocol.core.Body;
 import net.microfalx.heimdall.protocol.core.jpa.AddressRepository;
@@ -26,7 +26,7 @@ import java.time.ZonedDateTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ContextConfiguration(classes = {ProtocolSimulatorProperties.class, SnmpProperties.class, SnmpService.class})
-public class SnmpServiceTest extends AbstractBootstrapServiceTestCase {
+public class SnmpServiceTest extends AbstractBootstrapServiceIntegrationTestCase {
 
     @MockBean
     private AddressRepository addressRepository;

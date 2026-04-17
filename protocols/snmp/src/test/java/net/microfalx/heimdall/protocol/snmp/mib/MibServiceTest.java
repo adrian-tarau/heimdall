@@ -1,6 +1,6 @@
 package net.microfalx.heimdall.protocol.snmp.mib;
 
-import net.microfalx.bootstrap.test.AbstractBootstrapServiceTestCase;
+import net.microfalx.bootstrap.test.AbstractBootstrapServiceIntegrationTestCase;
 import net.microfalx.heimdall.protocol.snmp.jpa.SnmpMib;
 import net.microfalx.heimdall.protocol.snmp.jpa.SnmpMibRepository;
 import net.microfalx.resource.ClassPathResource;
@@ -28,7 +28,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 @ContextConfiguration(classes = {MibService.class})
-class MibServiceTest extends AbstractBootstrapServiceTestCase {
+class MibServiceTest extends AbstractBootstrapServiceIntegrationTestCase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MibService.class);
 
