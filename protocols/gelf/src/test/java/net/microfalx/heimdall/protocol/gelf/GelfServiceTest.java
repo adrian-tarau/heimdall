@@ -2,7 +2,7 @@ package net.microfalx.heimdall.protocol.gelf;
 
 import com.cloudbees.syslog.Facility;
 import com.cloudbees.syslog.Severity;
-import net.microfalx.bootstrap.test.AbstractBootstrapServiceIntegrationTestCase;
+import net.microfalx.bootstrap.test.ServiceIntegrationTestCase;
 import net.microfalx.heimdall.protocol.core.Address;
 import net.microfalx.heimdall.protocol.core.Body;
 import net.microfalx.heimdall.protocol.core.jpa.AddressRepository;
@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ContextConfiguration(classes = {ProtocolSimulatorProperties.class, GelfService.class, GelfProperties.class})
-public class GelfServiceTest extends AbstractBootstrapServiceIntegrationTestCase {
+public class GelfServiceTest extends ServiceIntegrationTestCase {
 
     @MockBean
     private PartRepository partRepository;
