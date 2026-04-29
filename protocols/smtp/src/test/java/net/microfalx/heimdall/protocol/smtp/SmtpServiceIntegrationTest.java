@@ -4,7 +4,7 @@ import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
-import net.microfalx.bootstrap.mail.MailProperties;
+import net.microfalx.bootstrap.mail.MailConfiguration;
 import net.microfalx.bootstrap.mail.MailService;
 import net.microfalx.bootstrap.test.annotation.DisableJpa;
 import net.microfalx.heimdall.protocol.core.simulator.ProtocolSimulatorProperties;
@@ -48,7 +48,7 @@ public class SmtpServiceIntegrationTest {
     @Autowired
     private SmtpProperties smtpProperties;
     @Autowired
-    private MailProperties mailProperties;
+    private MailConfiguration mailConfiguration;
     @Autowired
     private ProtocolSimulatorProperties protocolSimulatorProperties;
 

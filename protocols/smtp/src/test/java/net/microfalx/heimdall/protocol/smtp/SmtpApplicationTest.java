@@ -1,6 +1,6 @@
 package net.microfalx.heimdall.protocol.smtp;
 
-import net.microfalx.bootstrap.mail.MailProperties;
+import net.microfalx.bootstrap.mail.MailConfiguration;
 import net.microfalx.bootstrap.mail.MailService;
 import net.microfalx.bootstrap.test.ApplicationIntegrationTestCase;
 import net.microfalx.bootstrap.test.annotation.DisableJpa;
@@ -19,7 +19,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 @TestPropertySource(properties = "heimdall.protocol.simulator.enabled=true")
 @ContextConfiguration(classes = {ProtocolProperties.class, ProtocolSimulatorProperties.class, SmtpProperties.class,
-        MailProperties.class, MailService.class, SmtpSimulator.class, SmtpServer.class, SmtpService.class})
+        MailConfiguration.class, MailService.class, SmtpSimulator.class, SmtpServer.class, SmtpService.class})
 @DisableJpa
 public class SmtpApplicationTest extends ApplicationIntegrationTestCase {
 

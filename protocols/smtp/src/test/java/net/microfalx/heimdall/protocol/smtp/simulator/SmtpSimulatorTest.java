@@ -1,6 +1,6 @@
 package net.microfalx.heimdall.protocol.smtp.simulator;
 
-import net.microfalx.bootstrap.mail.MailProperties;
+import net.microfalx.bootstrap.mail.MailConfiguration;
 import net.microfalx.bootstrap.mail.MailService;
 import net.microfalx.heimdall.protocol.core.Address;
 import net.microfalx.heimdall.protocol.core.simulator.ProtocolSimulatorProperties;
@@ -35,8 +35,8 @@ class SmtpSimulatorTest {
     private ProtocolSimulatorProperties simulatorProperties = new ProtocolSimulatorProperties();
     @Spy
     private SmtpProperties smtpProperties = new SmtpProperties();
-    @Spy
-    private MailProperties mailProperties = new MailProperties();
+    @Mock
+    private MailConfiguration mailConfiguration;
 
     private SmtpSimulator simulator;
 
