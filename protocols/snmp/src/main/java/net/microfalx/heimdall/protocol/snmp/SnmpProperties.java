@@ -18,6 +18,11 @@ import java.time.Duration;
 public class SnmpProperties {
 
     /**
+     * A flag used to enable SNMP trap listener.
+     */
+    private boolean trapEnabled = true;
+
+    /**
      * The UDP port on which the SNMP agent listens.
      */
     private int agentUdpPort = 2161;
@@ -47,6 +52,10 @@ public class SnmpProperties {
      */
     private Duration simulatorInterval = Duration.ofSeconds(10);
 
+    /**
+     * A flag used to enable the SNMP agent
+     */
+    private boolean agentEnabled = true;
     private String trapComunityString = "heimdall";
     private String agentComunityString = "heimdall";
     private String agentUserName = "heimdall";

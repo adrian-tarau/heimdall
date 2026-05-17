@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 
+import static java.util.Collections.emptyIterator;
 import static net.microfalx.lang.ArgumentUtils.requireNonNull;
 import static net.microfalx.lang.ExceptionUtils.getRootCauseDescription;
 import static net.microfalx.lang.StringUtils.isNotEmpty;
@@ -73,7 +74,11 @@ public class AgentServer implements InitializingBean {
      * @return a non-null instance
      */
     public Iterator<Map.Entry<MOScope, ManagedObject<?>>> getManagedObjects() {
-        return server.iterator();
+        if (properties.isAgentEnabled()) {
+            return server.iterator();
+        } else {
+            return emptyIterator();
+        }
     }
 
     /**
@@ -82,6 +87,7 @@ public class AgentServer implements InitializingBean {
      * @param managedObject the managed object to register
      */
     public void register(ManagedObject<?> managedObject, boolean replace) {
+        if (!properties.isAgentEnabled()) return;
         requireNonNull(managedObject);
         try {
             server.register(managedObject, CONTEXT_STRING);
@@ -97,6 +103,7 @@ public class AgentServer implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        if (!properties.isAgentEnabled()) return;
         initConfigFiles();
         initMo();
         initAgent();
@@ -110,6 +117,7 @@ public class AgentServer implements InitializingBean {
 
     @PreDestroy
     public void destroy() {
+        if (!properties.isAgentEnabled()) return;
         messageDispatcher.stop();
     }
 

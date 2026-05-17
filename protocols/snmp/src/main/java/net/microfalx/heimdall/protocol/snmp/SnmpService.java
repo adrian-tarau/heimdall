@@ -95,8 +95,7 @@ public final class SnmpService extends ProtocolService<SnmpEvent, net.microfalx.
     }
 
     protected void persist(SnmpEvent event) {
-        net.microfalx.heimdall.protocol.snmp.jpa.SnmpEvent snmpEvent = new net.
-                microfalx.heimdall.protocol.snmp.jpa.SnmpEvent();
+        net.microfalx.heimdall.protocol.snmp.jpa.SnmpEvent snmpEvent = new net.microfalx.heimdall.protocol.snmp.jpa.SnmpEvent();
         snmpEvent.setAgentAddress(lookupAddress(event.getSource()));
         snmpEvent.setCreatedAt(event.getCreatedAt().toLocalDateTime());
         snmpEvent.setSentAt(event.getSentAt().toLocalDateTime());

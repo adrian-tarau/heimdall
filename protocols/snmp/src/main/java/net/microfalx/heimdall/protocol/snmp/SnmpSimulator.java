@@ -55,7 +55,7 @@ public class SnmpSimulator extends ProtocolSimulator<SnmpEvent, SnmpClient> {
 
     @Override
     public boolean isEnabled() {
-        if (snmpService == null || agentServer == null) return false;
+        if (snmpService == null) return false;
         if (super.isEnabled()) {
             return true;
         } else {
@@ -94,16 +94,22 @@ public class SnmpSimulator extends ProtocolSimulator<SnmpEvent, SnmpClient> {
 
     @Override
     protected Collection<SnmpClient> createClients() {
-        SnmpClient agentUdpClient = new SnmpClient(SnmpMode.AGENT);
-        agentUdpClient.setPort(properties.getAgentUdpPort());
-        SnmpClient agentTcpClient = new SnmpClient(SnmpMode.AGENT);
-        agentTcpClient.setPort(properties.getAgentTcpPort());
-
+        Collection<SnmpClient> clients = new ArrayList<>();
+        if (agentServer != null) {
+            SnmpClient agentUdpClient = new SnmpClient(SnmpMode.AGENT);
+            agentUdpClient.setPort(properties.getAgentUdpPort());
+            clients.add(agentUdpClient);
+            SnmpClient agentTcpClient = new SnmpClient(SnmpMode.AGENT);
+            agentTcpClient.setPort(properties.getAgentTcpPort());
+            clients.add(agentTcpClient);
+        }
         SnmpClient trapUdpClient = new SnmpClient(SnmpMode.TRAP);
         trapUdpClient.setPort(properties.getTrapUdpPort());
+        clients.add(trapUdpClient);
         SnmpClient trapTcpClient = new SnmpClient(SnmpMode.TRAP);
         trapTcpClient.setPort(properties.getTrapTcpPort());
-        return Arrays.asList(agentTcpClient, agentTcpClient, trapTcpClient, trapUdpClient);
+        clients.add(trapTcpClient);
+        return clients;
     }
 
     @Override
