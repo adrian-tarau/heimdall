@@ -7,22 +7,17 @@ import net.microfalx.heimdall.protocol.core.Address;
 import net.microfalx.heimdall.protocol.core.Body;
 import net.microfalx.heimdall.protocol.core.jpa.Part;
 import net.microfalx.heimdall.protocol.syslog.jpa.SyslogEvent;
-import net.microfalx.resource.MemoryResource;
 import net.microfalx.resource.MimeType;
-import org.apache.kafka.common.message.ReadShareGroupStateSummaryRequestData;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class SyslogMapperTest {
 
-    private final RestApiMapper<SyslogEvent,SyslogDTO> syslogMapper = new SyslogMapper();
+    private final RestApiMapper<SyslogEvent, SyslogDTO> syslogMapper = new SyslogMapper();
 
     @Test
     void toDto() throws IOException {
@@ -64,7 +59,7 @@ class SyslogMapperTest {
 
         assertEquals(syslogEvent.getMessage().getMimeType().getValue(), syslogDTO.getMessage().getMimeType());
         assertEquals(syslogEvent.getMessage().getFileName(), syslogDTO.getMessage().getFileName());
-        assertEquals(syslogEvent.getMessage().getLength(),syslogDTO.getMessage().getResource().length());
+        assertEquals(syslogEvent.getMessage().getLength(), syslogDTO.getMessage().getResource().length());
         assertEquals(syslogEvent.getMessage().getResource(), syslogDTO.getMessage().getResource().loadAsString());
     }
 
