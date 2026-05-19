@@ -70,10 +70,10 @@
     <inceptionYear>2023</inceptionYear>
 
     <properties>
-        <bootstrap.version>0.8.5-SNAPSHOT</bootstrap.version>
+        <bootstrap.version>1.0.0-SNAPSHOT</bootstrap.version>
         <apache.jmeter.version>5.6.3</apache.jmeter.version>
 
-        <spring.boot.version>3.5.10</spring.boot.version>
+        <spring.boot.version>3.5.14</spring.boot.version>
     </properties>
 
     <developers>
