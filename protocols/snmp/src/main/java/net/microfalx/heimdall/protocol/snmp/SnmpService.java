@@ -30,7 +30,6 @@ import org.snmp4j.smi.*;
 import org.snmp4j.transport.DefaultTcpTransportMapping;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
 import org.snmp4j.transport.TransportListener;
-import org.snmp4j.util.MultiThreadedMessageDispatcher;
 import org.snmp4j.util.WorkerPool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -151,7 +150,8 @@ public final class SnmpService extends ProtocolService<SnmpEvent, net.microfalx.
 
         initTransport(dispatcher, mode);
         dispatcher.addCounterListener(new CounterListenerImpl());
-        return new MultiThreadedMessageDispatcher(getWorkerPool(), dispatcher);
+        return dispatcher;
+        //return new MultiThreadedMessageDispatcher(getWorkerPool(), dispatcher);
     }
 
     private void initSecurity() {
