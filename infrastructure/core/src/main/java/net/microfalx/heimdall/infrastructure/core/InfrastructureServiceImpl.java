@@ -1,8 +1,8 @@
 package net.microfalx.heimdall.infrastructure.core;
 
+import net.microfalx.bootstrap.application.Application;
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
 import net.microfalx.bootstrap.support.report.Issue;
-import net.microfalx.bootstrap.web.application.ApplicationProperties;
 import net.microfalx.heimdall.infrastructure.api.*;
 import net.microfalx.heimdall.infrastructure.core.system.DnsRepository;
 import net.microfalx.heimdall.infrastructure.core.util.HealthSummary;
@@ -44,7 +44,7 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
     private InfrastructureHealth health;
 
     @Autowired
-    private ApplicationProperties applicationProperties;
+    private Application application;
 
     @Autowired
     private DnsRepository dnsRepository;
@@ -217,8 +217,8 @@ public class InfrastructureServiceImpl extends ApplicationContextSupport impleme
         return health;
     }
 
-    public ApplicationProperties getApplicationProperties() {
-        return applicationProperties;
+    public Application getApplication() {
+        return application;
     }
 
     @SuppressWarnings("unchecked")
