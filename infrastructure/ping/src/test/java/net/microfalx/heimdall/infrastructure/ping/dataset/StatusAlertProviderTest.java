@@ -1,6 +1,6 @@
 package net.microfalx.heimdall.infrastructure.ping.dataset;
 
-import net.microfalx.bootstrap.core.async.AsynchronousConfig;
+import net.microfalx.bootstrap.core.async.AsynchronousConfiguration;
 import net.microfalx.bootstrap.core.i18n.I18nProperties;
 import net.microfalx.bootstrap.core.i18n.I18nService;
 import net.microfalx.bootstrap.dataset.Alert;
@@ -22,7 +22,7 @@ import org.springframework.test.context.ContextConfiguration;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ContextConfiguration(classes = {MessageSource.class, I18nService.class})
-@Import({I18nProperties.class, AsynchronousConfig.class})
+@Import({I18nProperties.class, AsynchronousConfiguration.class})
 @OverrideAutoConfiguration(enabled = false)
 @ImportAutoConfiguration
 @SpringBootTest
