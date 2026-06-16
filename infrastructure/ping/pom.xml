@@ -25,12 +25,12 @@
 
     <groupId>net.microfalx.heimdall</groupId>
     <artifactId>heimdall-infrastructure-ping</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2-beta</version>
 
     <parent>
         <groupId>net.microfalx.heimdall</groupId>
         <artifactId>heimdall-infrastructure</artifactId>
-        <version>1.0.1</version>
+        <version>1.0.2-beta</version>
     </parent>
 
     <name>Heimdall :: Infrastructure :: Ping</name>
