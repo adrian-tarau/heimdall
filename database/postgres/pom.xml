@@ -25,12 +25,12 @@
 
     <groupId>net.microfalx.heimdall</groupId>
     <artifactId>heimdall-database-postgres</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
 
     <parent>
         <groupId>net.microfalx.heimdall</groupId>
         <artifactId>heimdall-database</artifactId>
-        <version>1.0.1-SNAPSHOT</version>
+        <version>1.0.1</version>
     </parent>
 
     <name>Heimdall :: Database :: Postgres</name>

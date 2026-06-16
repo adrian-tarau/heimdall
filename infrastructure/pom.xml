@@ -26,12 +26,12 @@
     <groupId>net.microfalx.heimdall</groupId>
     <artifactId>heimdall-infrastructure</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
 
     <parent>
         <groupId>net.microfalx.heimdall</groupId>
         <artifactId>heimdall</artifactId>
-        <version>1.0.1-SNAPSHOT</version>
+        <version>1.0.1</version>
     </parent>
 
     <name>Heimdall :: Infrastructure</name>
