@@ -25,12 +25,12 @@
 
     <groupId>net.microfalx.heimdall</groupId>
     <artifactId>heimdall-rest-k6</artifactId>
-    <version>1.0.2-beta</version>
+    <version>1.0.2-SNAPSHOT</version>
 
     <parent>
         <groupId>net.microfalx.heimdall</groupId>
         <artifactId>heimdall-rest</artifactId>
-        <version>1.0.2-beta</version>
+        <version>1.0.2-SNAPSHOT</version>
     </parent>
 
     <name>Heimdall :: Rest :: K6</name>

@@ -25,12 +25,12 @@
 
     <groupId>net.microfalx.heimdall</groupId>
     <artifactId>heimdall-infrastructure-api</artifactId>
-    <version>1.0.2-beta</version>
+    <version>1.0.2-SNAPSHOT</version>
 
     <parent>
         <groupId>net.microfalx.heimdall</groupId>
         <artifactId>heimdall-infrastructure</artifactId>
-        <version>1.0.2-beta</version>
+        <version>1.0.2-SNAPSHOT</version>
     </parent>
 
     <name>Heimdall :: Infrastructure :: API</name>

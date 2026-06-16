@@ -25,12 +25,12 @@
 
     <groupId>net.microfalx.heimdall</groupId>
     <artifactId>heimdall-database-core</artifactId>
-    <version>1.0.2-beta</version>
+    <version>1.0.2-SNAPSHOT</version>
 
     <parent>
         <groupId>net.microfalx.heimdall</groupId>
         <artifactId>heimdall-database</artifactId>
-        <version>1.0.2-beta</version>
+        <version>1.0.2-SNAPSHOT</version>
     </parent>
 
     <name>Heimdall :: Database :: Core</name>
