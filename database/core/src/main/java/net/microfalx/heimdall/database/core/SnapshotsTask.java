@@ -1,7 +1,7 @@
 package net.microfalx.heimdall.database.core;
 
+import net.microfalx.argus.api.Issue;
 import net.microfalx.bootstrap.jdbc.support.Session;
-import net.microfalx.bootstrap.support.report.Issue;
 import net.microfalx.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

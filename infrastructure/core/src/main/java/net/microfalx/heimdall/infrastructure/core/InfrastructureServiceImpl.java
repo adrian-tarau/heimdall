@@ -1,8 +1,8 @@
 package net.microfalx.heimdall.infrastructure.core;
 
+import net.microfalx.argus.api.Issue;
 import net.microfalx.bootstrap.application.Application;
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
-import net.microfalx.bootstrap.support.report.Issue;
 import net.microfalx.heimdall.infrastructure.api.*;
 import net.microfalx.heimdall.infrastructure.core.system.DnsRepository;
 import net.microfalx.heimdall.infrastructure.core.util.HealthSummary;

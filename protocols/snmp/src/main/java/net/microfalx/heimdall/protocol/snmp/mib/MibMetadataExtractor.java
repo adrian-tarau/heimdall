@@ -1,6 +1,6 @@
 package net.microfalx.heimdall.protocol.snmp.mib;
 
-import net.microfalx.bootstrap.support.report.Issue;
+import net.microfalx.argus.api.Issue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.smi.OID;

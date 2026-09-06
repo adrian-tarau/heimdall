@@ -2,7 +2,7 @@ package net.microfalx.heimdall.protocol.core.simulator;
 
 import net.datafaker.Faker;
 import net.datafaker.providers.base.Shakespeare;
-import net.microfalx.bootstrap.support.report.Issue;
+import net.microfalx.argus.api.Issue;
 import net.microfalx.heimdall.protocol.core.Address;
 import net.microfalx.heimdall.protocol.core.Event;
 import net.microfalx.heimdall.protocol.core.ProtocolClient;

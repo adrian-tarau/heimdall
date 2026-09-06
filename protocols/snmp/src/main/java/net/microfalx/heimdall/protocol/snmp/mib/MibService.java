@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.protocol.snmp.mib;
 
+import net.microfalx.argus.api.Issue;
 import net.microfalx.bootstrap.core.async.ThreadPoolFactory;
 import net.microfalx.bootstrap.model.Field;
 import net.microfalx.bootstrap.model.Metadata;
@@ -7,7 +8,6 @@ import net.microfalx.bootstrap.model.MetadataService;
 import net.microfalx.bootstrap.resource.ResourceService;
 import net.microfalx.bootstrap.search.Document;
 import net.microfalx.bootstrap.search.IndexService;
-import net.microfalx.bootstrap.support.report.Issue;
 import net.microfalx.heimdall.protocol.snmp.jpa.SnmpMib;
 import net.microfalx.heimdall.protocol.snmp.jpa.SnmpMibRepository;
 import net.microfalx.resource.ClassPathResource;

@@ -1,5 +1,6 @@
 package net.microfalx.heimdall.broker.core;
 
+import net.microfalx.argus.api.Issue;
 import net.microfalx.bootstrap.broker.BrokerConsumer;
 import net.microfalx.bootstrap.broker.BrokerUtils;
 import net.microfalx.bootstrap.broker.Event;
@@ -10,7 +11,6 @@ import net.microfalx.bootstrap.search.Attribute;
 import net.microfalx.bootstrap.search.Document;
 import net.microfalx.bootstrap.search.IndexService;
 import net.microfalx.bootstrap.search.SearchUtils;
-import net.microfalx.bootstrap.support.report.Issue;
 import net.microfalx.bootstrap.template.Template;
 import net.microfalx.bootstrap.template.TemplateContext;
 import net.microfalx.lang.IOUtils;
