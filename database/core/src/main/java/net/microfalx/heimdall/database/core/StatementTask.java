@@ -2,11 +2,10 @@ package net.microfalx.heimdall.database.core;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.LoadingCache;
-import net.microfalx.bootstrap.jdbc.support.Database;
-import net.microfalx.bootstrap.jdbc.support.DatabaseUtils;
-import net.microfalx.bootstrap.jdbc.support.Statement;
+import net.microfalx.database.Database;
+import net.microfalx.database.Statement;
 import net.microfalx.lang.ExceptionUtils;
-import net.microfalx.metrics.statistics.SimpleStatisticalSummary;
+import net.microfalx.metrics.statistics.SimpleFloatStatisticalSummary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -15,6 +14,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static net.microfalx.database.DatabaseUtils.METRICS;
 
 /**
  * A background task which collects statements metric and stores them.
@@ -50,7 +51,7 @@ public class StatementTask implements Runnable {
     }
 
     private void collectStatements() {
-        statementsByDatabase = databaseService.getDatabaseService().getStatements(threshold.minusMinutes(INTERVAL_MINUTES), threshold)
+        statementsByDatabase = net.microfalx.database.DatabaseService.getInstance().getStatements(threshold.minusMinutes(INTERVAL_MINUTES), threshold)
                 .stream().collect(Collectors.groupingBy(statement -> statement.getNode().getDatabase()));
     }
 
@@ -71,9 +72,9 @@ public class StatementTask implements Runnable {
         for (Statement statement : statements) {
             int key = databaseService.persistStatement(schema, statement);
             try {
-                DatabaseUtils.METRICS.time("Statement Stats - Updated", (t) -> updateStats(statement, key));
+                METRICS.time("Statement Stats - Updated", (t) -> updateStats(statement, key));
             } catch (Exception e) {
-                DatabaseUtils.METRICS.count("Statement Stats - Failed");
+                METRICS.count("Statement Stats - Failed");
                 LOGGER.debug("Failed to update statistics for statement {}, root cause: {}", key, ExceptionUtils.getStackTrace(e));
             }
         }
@@ -88,9 +89,9 @@ public class StatementTask implements Runnable {
         Statement.Statistics statistics = statement.getStatistics();
         if (statistics.getN() == 0) return;
         net.microfalx.heimdall.database.core.StatementStatistics statementStatistics = cachedStatistics.getUnchecked(key);
-        SimpleStatisticalSummary statisticalSummary = new SimpleStatisticalSummary();
+        SimpleFloatStatisticalSummary statisticalSummary = new SimpleFloatStatisticalSummary();
         if (statementStatistics.getExecutionCount() > 0) {
-            statisticalSummary.setN(statementStatistics.getExecutionCount())
+            statisticalSummary.setN((int) statementStatistics.getExecutionCount())
                     .setSum(statementStatistics.getTotalDuration())
                     .setMin(statementStatistics.getMinDuration())
                     .setMax(statementStatistics.getMaxDuration());

@@ -1,7 +1,7 @@
 package net.microfalx.heimdall.database.core;
 
 import net.microfalx.argus.api.Issue;
-import net.microfalx.bootstrap.jdbc.support.Session;
+import net.microfalx.database.Session;
 import net.microfalx.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +19,7 @@ class SnapshotsTask implements Runnable {
 
     private final DatabaseService databaseService;
 
-    private Collection<net.microfalx.bootstrap.jdbc.support.Snapshot> snapshots;
+    private Collection<net.microfalx.database.Snapshot> snapshots;
 
     SnapshotsTask(DatabaseService databaseService) {
         this.databaseService = databaseService;
@@ -33,11 +33,11 @@ class SnapshotsTask implements Runnable {
     }
 
     private void takeSnapshots() {
-        snapshots = databaseService.getDatabaseService().getSnapshots();
+        snapshots = net.microfalx.database.DatabaseService.getInstance().getSnapshots();
     }
 
     private void persistSnapshots() {
-        for (net.microfalx.bootstrap.jdbc.support.Snapshot snapshot : snapshots) {
+        for (net.microfalx.database.Snapshot snapshot : snapshots) {
             Schema schema = databaseService.findSchema(snapshot.getDatabase());
             if (schema == null) continue;
             persistStatements(schema, snapshot);
@@ -45,7 +45,7 @@ class SnapshotsTask implements Runnable {
         }
     }
 
-    private void persistSnapshot(Schema schema, net.microfalx.bootstrap.jdbc.support.Snapshot snapshot) {
+    private void persistSnapshot(Schema schema, net.microfalx.database.Snapshot snapshot) {
         try {
             Snapshot databaseSnapshot = convert(schema, snapshot);
             if (databaseSnapshot != null) {
@@ -57,7 +57,7 @@ class SnapshotsTask implements Runnable {
         }
     }
 
-    private void persistStatements(Schema schema, net.microfalx.bootstrap.jdbc.support.Snapshot snapshot) {
+    private void persistStatements(Schema schema, net.microfalx.database.Snapshot snapshot) {
         List<Session> sessions = snapshot.getSessions().stream().filter(session -> session.getStatement() != null).toList();
         for (Session session : sessions) {
             try {
@@ -69,7 +69,7 @@ class SnapshotsTask implements Runnable {
         }
     }
 
-    private Snapshot convert(Schema schema, net.microfalx.bootstrap.jdbc.support.Snapshot snapshot) throws IOException {
+    private Snapshot convert(Schema schema, net.microfalx.database.Snapshot snapshot) throws IOException {
         Resource resource = databaseService.writeSnapshot(snapshot);
         return schema != null ? Snapshot.from(schema, snapshot, resource) : null;
     }

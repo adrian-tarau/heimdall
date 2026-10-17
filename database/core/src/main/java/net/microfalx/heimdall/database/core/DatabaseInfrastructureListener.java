@@ -1,9 +1,9 @@
 package net.microfalx.heimdall.database.core;
 
 import net.microfalx.bootstrap.core.utils.ApplicationContextSupport;
-import net.microfalx.bootstrap.jdbc.support.Database;
 import net.microfalx.bootstrap.jdbc.support.DatabaseService;
-import net.microfalx.bootstrap.jdbc.support.Node;
+import net.microfalx.database.Database;
+import net.microfalx.database.Node;
 import net.microfalx.heimdall.infrastructure.api.Cluster;
 import net.microfalx.heimdall.infrastructure.api.InfrastructureListener;
 import net.microfalx.heimdall.infrastructure.api.InfrastructureService;

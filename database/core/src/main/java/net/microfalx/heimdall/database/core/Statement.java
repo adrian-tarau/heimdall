@@ -39,7 +39,7 @@ public class Statement extends IdentityAware<Integer> {
     @Width(min = "50")
     @Label(value = "Type", group = "Database")
     @Description("The type of database")
-    private net.microfalx.bootstrap.jdbc.support.Database.Type databaseType;
+    private net.microfalx.database.Database.Type databaseType;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -58,7 +58,7 @@ public class Statement extends IdentityAware<Integer> {
     @Position(10)
     @Enumerated(EnumType.STRING)
     @Description("The statement type")
-    private net.microfalx.bootstrap.jdbc.support.Statement.Type type;
+    private net.microfalx.database.Statement.Type type;
 
     @Transient
     @Position(10)
@@ -125,13 +125,13 @@ public class Statement extends IdentityAware<Integer> {
     @Description("The timestamp when the {name} was updated last time (executed)")
     private LocalDateTime modifiedAt;
 
-    public static String getStatementId(net.microfalx.bootstrap.jdbc.support.Statement statement, String userName) {
+    public static String getStatementId(net.microfalx.database.Statement statement, String userName) {
         requireNonNull(statement);
         requireNonNull(userName);
         return toIdentifier(userName + "_" + statement.getId());
     }
 
-    public static Statement from(Schema schema, User user, net.microfalx.bootstrap.jdbc.support.Statement statement,
+    public static Statement from(Schema schema, User user, net.microfalx.database.Statement statement,
                                  Resource resource) throws IOException {
         Statement dbStatement = new Statement();
         dbStatement.setStatementId(getStatementId(statement, user.getName()));

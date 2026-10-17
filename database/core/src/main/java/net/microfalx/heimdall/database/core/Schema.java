@@ -11,8 +11,8 @@ import net.microfalx.bootstrap.dataset.annotation.*;
 import net.microfalx.bootstrap.dataset.lookup.TimeZoneLookup;
 import net.microfalx.bootstrap.jdbc.entity.surrogate.NamedAndTimestampedIdentityAware;
 import net.microfalx.bootstrap.jdbc.jpa.EncryptAttributeConverter;
-import net.microfalx.bootstrap.jdbc.support.Node;
 import net.microfalx.bootstrap.model.Field;
+import net.microfalx.database.Node;
 import net.microfalx.lang.annotation.*;
 
 import java.time.ZoneId;
@@ -32,7 +32,7 @@ public class Schema extends NamedAndTimestampedIdentityAware<Integer> {
     @Width("80")
     @Description("The type of database")
     @NotNull
-    private net.microfalx.bootstrap.jdbc.support.Database.Type type;
+    private net.microfalx.database.Database.Type type;
 
     @Column(name = "url", length = 2000)
     @Position(20)

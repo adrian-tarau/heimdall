@@ -33,7 +33,7 @@ public class Snapshot extends IdentityAware<Long> {
     @Width(min = "50")
     @Label(value = "Type", group = "Database")
     @Description("The type of database")
-    private net.microfalx.bootstrap.jdbc.support.Database.Type databaseType;
+    private net.microfalx.database.Database.Type databaseType;
 
     @Column(name = "session_active_count")
     @Position(10)
@@ -106,7 +106,7 @@ public class Snapshot extends IdentityAware<Long> {
     @Visible(false)
     private String resource;
 
-    public static Snapshot from(Schema schema, net.microfalx.bootstrap.jdbc.support.Snapshot snapshot, Resource resource) {
+    public static Snapshot from(Schema schema, net.microfalx.database.Snapshot snapshot, Resource resource) {
         Snapshot ds = new Snapshot();
         ds.setSchema(schema);
         ds.setDatabaseType(schema.getType());

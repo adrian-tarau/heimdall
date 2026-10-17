@@ -1,9 +1,9 @@
 package net.microfalx.heimdall.database.core;
 
 import net.microfalx.bootstrap.core.async.ThreadPoolFactory;
-import net.microfalx.bootstrap.jdbc.support.*;
-import net.microfalx.bootstrap.jdbc.support.Snapshot;
 import net.microfalx.bootstrap.resource.ResourceService;
+import net.microfalx.database.*;
+import net.microfalx.database.Snapshot;
 import net.microfalx.jdbcpool.ConnectionPool;
 import net.microfalx.lang.ObjectUtils;
 import net.microfalx.lang.StringUtils;
@@ -57,9 +57,6 @@ public class DatabaseService implements InitializingBean {
     private static final Map<LocalDate, AtomicInteger> resourceSequences = new ConcurrentHashMap<>();
 
     @Autowired
-    private net.microfalx.bootstrap.jdbc.support.DatabaseService databaseService;
-
-    @Autowired
     private DatabaseProperties properties;
 
     @Autowired
@@ -102,10 +99,6 @@ public class DatabaseService implements InitializingBean {
 
     DatabaseProperties getProperties() {
         return properties;
-    }
-
-    net.microfalx.bootstrap.jdbc.support.DatabaseService getDatabaseService() {
-        return databaseService;
     }
 
     public Resource getSnapshotsResource() {
@@ -155,7 +148,7 @@ public class DatabaseService implements InitializingBean {
         String databaseId = schemaIdCache.get(schema.getId());
         if (databaseId != null) {
             try {
-                return databaseService.getDatabase(databaseId);
+                return net.microfalx.database.DatabaseService.getInstance().getDatabase(databaseId);
             } catch (DatabaseNotFoundException e) {
                 // in such cases, just report "I do not know"
             }
@@ -222,7 +215,7 @@ public class DatabaseService implements InitializingBean {
      * @param statement the statement
      * @return the statement primary key
      */
-    int persistStatement(Schema schema, net.microfalx.bootstrap.jdbc.support.Statement statement) {
+    int persistStatement(Schema schema, net.microfalx.database.Statement statement) {
         requireNonNull(statement);
         Integer key = persistedStatements.get(statement.getId());
         if (key != null) return key;
@@ -269,7 +262,7 @@ public class DatabaseService implements InitializingBean {
      * @return the resource where the statement was stored
      * @throws IOException I/O exception if statement cannot be stored
      */
-    Resource writeStatement(net.microfalx.bootstrap.jdbc.support.Statement statement) throws IOException {
+    Resource writeStatement(net.microfalx.database.Statement statement) throws IOException {
         Resource directory = statementsResource.resolve(DIRECTORY_DATE_FORMATTER.format(LocalDateTime.now()), Resource.Type.DIRECTORY);
         Resource target = directory.resolve(String.format(FILE_NAME_FORMAT, getNextSequence()));
         if (!directory.exists()) directory.create();
@@ -295,7 +288,7 @@ public class DatabaseService implements InitializingBean {
             dataSource = dataSource.withProperties(loadProperties(schema))
                     .withZoneId(ZoneId.of(schema.getTimeZone()))
                     .withDescription(schema.getDescription());
-            databaseService.registerDataSource(dataSource);
+            net.microfalx.database.DatabaseService.getInstance().registerDataSource(dataSource);
         } catch (Exception e) {
             LOGGER.error("Failed to register data source for database " + schema.getName(), e);
         }
